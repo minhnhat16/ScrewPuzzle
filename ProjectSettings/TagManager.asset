@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - UI
   layers:
   - Default
   - TransparentFX
@@ -14,17 +15,17 @@ TagManager:
   - 
   - 
   - 
+  - Screw
+  - Layer1
+  - Layer2
+  - Layer3
+  - Layer4
   - 
   - 
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Queue
   - 
   - 
   - 
@@ -40,4 +41,16 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Hold
+    uniqueID: 4261854767
+    locked: 0
+  - name: Screw
+    uniqueID: 2427076819
+    locked: 0
+  - name: Layer 1
+    uniqueID: 1834814665
+    locked: 0
+  - name: Layer 2
+    uniqueID: 2308788771
     locked: 0
