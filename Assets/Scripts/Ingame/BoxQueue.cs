@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ namespace Ingame
                 initialPositions[i] = screwBoxes[i].transform.position;
 
                 // Set trạng thái active cho 2 box đầu tiên, các box sau thì tắt
-                if (i < activeBoxCount)
+                if (i > activeBoxCount -1 )
                 {
                     screwBoxes[i].gameObject.SetActive(true);
                 }
@@ -37,21 +38,16 @@ namespace Ingame
             }
         }
 
-        // Hàm kiểm tra xem box có đầy hay không
-        private void Update()
-        {
-            for (int i = 0; i < screwBoxes.Length; i++)
-            {
-                if (screwBoxes[i].AreAllHolesFilled())
-                {
-                    DeactivateAndMoveQueue(i);
-                }
-            }
-        }
-
         // Hàm tắt box tại index và dịch chuyển hàng đợi
-        private void DeactivateAndMoveQueue(int filledBoxIndex)
+        internal void DeactivateAndMoveQueue(ScrewBox box)
         {
+            int filledBoxIndex = Array.IndexOf(screwBoxes, box);
+            if (filledBoxIndex == -1)
+            {
+                Debug.Log(" screw boxes not  contained "+ box.name);
+                return;
+            }
+            Debug.Log(" screw boxes contained "+ box.name);
             // Tắt box đã đầy
             screwBoxes[filledBoxIndex].gameObject.SetActive(false);
 
@@ -86,7 +82,7 @@ namespace Ingame
             return null; // Không có box nào active
         }
         // Hàm kiểm tra xem có box nào cùng màu với screw không
-        public ScrewBox HasBoxWithSameColor(Screw screw)
+        public void HasBoxWithSameColor(Screw screw)
         {
             Debug.Log("Tìm box cungf màu với screw");
             foreach (var box in screwBoxes)
@@ -95,11 +91,11 @@ namespace Ingame
                 {
                     box.AddScrew(screw);
                     Debug.Log("Tìm box cungf màu với screw");
-                    return box; // Trả về true nếu có box cùng màu
+                    return;
                 }
+                
             }
-
-            return null; // Không có box nào cùng màu
+            ArrayScrew.instance.AddScrew(screw);
         }
     }
     }

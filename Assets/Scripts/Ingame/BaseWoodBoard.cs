@@ -6,10 +6,15 @@ public class BaseWoodBoard : FSMSystem
     [SerializeField] protected SpriteRenderer render;  // Renderer cho sprite của bảng gỗ
     [SerializeField] protected ScrewManager screwManager; // Quản lý các screw trên bảng gỗ
     [SerializeField] protected bool isDropped = false;  // Trạng thái thả của bảng gỗ
-    [SerializeField] protected Collider2D collider;     // Collider của bảng gỗ
+    [SerializeField] protected Collider2D _collider;     // Collider của bảng gỗ
     [SerializeField] protected LayerMask layerMask;     // Layer mà bảng gỗ tương tác
     
     protected Vector3 initialPosition; // Lưu vị trí ban đầu của bảng gỗ
+    public Collider2D _Collider2D
+    {
+        get => _collider;
+        set => _collider = value;
+    }
 
     // Hàm Awake ảo để có thể override từ lớp con
     public virtual void Awake()
@@ -25,8 +30,8 @@ public class BaseWoodBoard : FSMSystem
         if (render == null)
             render = GetComponent<SpriteRenderer>();
 
-        if (collider == null)
-            collider = GetComponent<Collider2D>();
+        if (_collider == null)
+            _collider = GetComponent<Collider2D>();
     }
 
     // Hàm Update ảo

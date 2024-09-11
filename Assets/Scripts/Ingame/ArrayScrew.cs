@@ -7,9 +7,10 @@ namespace Ingame
    public class ArrayScrew : MonoBehaviour
    {
       public static ArrayScrew instance;
+      [SerializeField]   private SpriteRenderer spriteRenderer;
       public HoldScrew[] holdScrews; // Mảng các HoldScrew (ô chứa screw)
       public UnityEvent onHoldScrewsFull; // Sự kiện khi holdScrews đầy
-
+      
       public void Awake()
       {
          if (instance == null)
@@ -24,8 +25,25 @@ namespace Ingame
       {
          if (onHoldScrewsFull == null)
             onHoldScrewsFull = new UnityEvent();  // Khởi tạo sự kiện nếu chưa có
+         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            HoldAlignment();
       }
 
+      private void HoldAlignment()
+      {
+         if (holdScrews.Length == 0) return;
+    
+         // Calculate the total width and spacing between screws
+         float spacing = spriteRenderer.bounds.size.x / (holdScrews.Length + 1);
+         float startX = spriteRenderer.bounds.min.x;
+
+         for (int i = 0; i < holdScrews.Length; i++)
+         {
+            // Each screw is placed at (startX + spacing * (i + 1)) along the x-axis
+            Vector3 newPosition = new Vector3(startX + spacing * (i + 1), holdScrews[i].transform.localPosition.y, holdScrews[i].transform.localPosition.z);
+            holdScrews[i].transform.localPosition = newPosition;
+         }
+      }
       // Hàm thêm Screw vào một ô trống trong holdScrew
       public bool AddScrew(Screw screw)
       {

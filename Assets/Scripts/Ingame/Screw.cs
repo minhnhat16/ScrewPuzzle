@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using Enum;
@@ -6,29 +7,64 @@ using IEnumerator = System.Collections.IEnumerator;
 
 namespace Ingame
 {
-    public class Screw : MonoBehaviour
-    {
+    public  class Screw : MonoBehaviour
+    {   
         [SerializeField]  private ColorEnum color;
         [SerializeField] private bool isPartiallyVisible;
+        [SerializeField] private bool isClicked;
         [SerializeField] private int layerMask;
-        [SerializeField]  private Transform transform { get; set; }
-        [SerializeField]  private Vector3 position;
-        [SerializeField]  private HingeJoint2D _hingeJoint2D;
-        [SerializeField]  private CircleCollider2D _circleCollider2D;
+
+        
+
+        [SerializeField] private bool isMultipleJoint;
+        [SerializeField] private HingeJoint2D _hingeJoint2D;
+        [SerializeField] private CircleCollider2D _circleCollider2D;
         [SerializeField] private SpriteRenderer render ;
+
+        protected Transform _transform { get; set; }
+        protected Vector3 position
+        {
+            get => transform.position;
+            set => transform.position = value;
+            
+        }
+
+        protected HingeJoint2D HingeJoint2D
+        {
+            get => _hingeJoint2D;
+            set => _hingeJoint2D = value;
+        }
+
+        protected CircleCollider2D CircleCollider2D
+        {
+            get => _circleCollider2D;
+            set => _circleCollider2D = value;
+        }
+
+        protected SpriteRenderer Renderer
+        {
+            get => render;
+            set => render = value;
+        }
         public ColorEnum Color {get{return color;}set{color = value;}}
 
         public bool IsActionComplete { get; set; }
         // Start is called before the first frame update
-        private Screw()
+        private void Start (){
+            isClicked  =false;    
+        }
+        public Screw()
         {
             IsActionComplete = false;
         }
-
-
-        private void Awake(){
+        public int LayerMask
+        {
+            get => layerMask;
+            set => layerMask = value;
+        }
+        public virtual void Awake(){
             // _color = (ColorEnum)System.Enum.Parse(typeof(ColorEnum),"Color");
-            transform = GetComponent<Transform>();
+            _transform = GetComponent<Transform>();
             position = GetComponent<Transform>().position;
             _hingeJoint2D = GetComponent<HingeJoint2D>();
             _circleCollider2D = GetComponent<CircleCollider2D>();
@@ -71,38 +107,46 @@ namespace Ingame
         // To visualize raycasts in the editor
         private void OnDrawGizmos()
         {
-            /*if (_circleCollider2D == null) return;
-            Vector2 colliderPosition = _circleCollider2D.bounds.center;
-            float radius = _circleCollider2D.radius;
-            int raycastCount = 5;
-            float angleStep = 180f / (raycastCount - 1);
-
-            for (int i = 0; i < raycastCount; i++)
-            {
-                float angle = -90f + i * angleStep;
-                Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-                Vector2 raycastOrigin = (Vector2)colliderPosition + direction * radius;
-
-                Gizmos.color = UnityEngine.Color.blue;
-                Gizmos.DrawLine(raycastOrigin, raycastOrigin + Vector2.up * 10f); // Adjust length for visualization
-            }*/
+          
+        }
+        private void DrawCircle(){
+          /*if (_circleCollider2D == null) return;
+                    Vector2 colliderPosition = _circleCollider2D.bounds.center;
+                    float radius = _circleCollider2D.radius;
+                    int raycastCount = 5;
+                    float angleStep = 180f / (raycastCount - 1);
+        
+                    for (int i = 0; i < raycastCount; i++)
+                    {
+                        float angle = -90f + i * angleStep;
+                        Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+                        Vector2 raycastOrigin = (Vector2)colliderPosition + direction * radius;
+        
+                        Gizmos.color = UnityEngine.Color.blue;
+                        Gizmos.DrawLine(raycastOrigin, raycastOrigin + Vector2.up * 10f); // Adjust length for visualization
+                    }*/    
         }
         // Hàm thuc thi khi screww duoc click;
         public void OnScrewClicked()
         {
             isPartiallyVisible  = IsPartiallyVisible();
             StartCoroutine(CompleteAction());
-            if (isPartiallyVisible)
+            if (isPartiallyVisible && !isClicked)
             {
-              var box=  BoxQueue.instance.HasBoxWithSameColor(this);
-              if (box) box.AddScrew(this);
-              else ArrayScrew.instance.AddScrew(this);
+                isClicked = false; 
+                BoxQueue.instance.HasBoxWithSameColor(this);
+                 
             }
-            else
+            else if(!isPartiallyVisible)
             {
                 
                 Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
+                isClicked = false;
                 ShakeScrew();
+            }
+            else{
+                isClicked = false;
+                Debug.LogWarning("Screw không thể click nữa");
             }
         }
 
@@ -128,28 +172,49 @@ namespace Ingame
         }
 
         //further add move with DOTween
-        public void DoMoveToHold(HoldScrew holdScrew)
+        public virtual void DoMoveToHold(HoldScrew holdScrew)
+        {
+            DoMoveScrewUp(() =>
+            {
+                JumpScrewToHold(holdScrew);
+            });
+        }
+
+        public void JumpScrewToHold(HoldScrew holdScrew)
         {
             Vector3 toPos = holdScrew.Transf.position;
             Debug.Log("DO move to hold " + toPos);
 
             // Lưu lại vị trí offset giữa render và cha trước khi di chuyển
-            Vector3 offset = toPos - transform.position;
+            Vector3 offset = toPos - _transform.position + new Vector3(0,0.25f);
 
             // Di chuyển render trước, đồng thời di chuyển cha
             var renderMove = render.transform.DOMove(toPos, 0.5f);
-            var parentMove = transform.DOMove(toPos - offset, 0.5f); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
+            var parentMove = _transform.DOMove(toPos - offset, 0.5f); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
 
             // Khi cả hai di chuyển xong
-            renderMove.OnComplete(() =>
-            {
-                FreeHinge();
-            });
+            renderMove.OnComplete(FreeHinge);
         }
-        private void FreeHinge()
+        public void DoMoveScrewUp(Action callback)
         {
-            _hingeJoint2D.connectedBody = null;
+            var targetPos = render.transform.position;
+            targetPos+= new Vector3(0, 0.25f,0);
+            render.transform.DORotate(new Vector3(0, 0, 360), 1f, RotateMode.FastBeyond360);
+            render.transform.DOMove(targetPos, 0.5f).OnComplete(()=>callback?.Invoke());
+        }
+        public virtual void FreeHinge()
+        {
             _circleCollider2D.isTrigger = true;
+            if (isMultipleJoint)
+            {
+                var connectedBody = _hingeJoint2D.connectedBody;
+                connectedBody.AddForce(Vector2.down);
+            }
+            _hingeJoint2D.connectedBody = null;
+            var targetPos = render.transform.position;
+            targetPos-= new Vector3(0, 0.25f,0);
+            render.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
+            render.transform.DOMove(targetPos, 0.5f);
         }
     }
 }
