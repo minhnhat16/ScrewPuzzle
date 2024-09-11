@@ -32,7 +32,6 @@ public class GamePlayView : BaseView
     [SerializeField] bool onMagnet;
     [SerializeField] bool onBomb;
     [SerializeField] bool isNewPlayer;
-    [SerializeField] private DealButton dealBtn;
     [SerializeField] ExperienceBar expBar;
 
     [HideInInspector]
@@ -49,7 +48,6 @@ public class GamePlayView : BaseView
     public List<RectTransform> AnchorTutorials { get => _anchorTutorials; set => _anchorTutorials = value; }
     public Button Magnet_btn { get => magnet_btn; set => magnet_btn = value; }
     public Button Bomb_Btn { get => bomb_Btn; set => bomb_Btn = value; }
-    public DealButton DealBtn { get => dealBtn; set => dealBtn = value; }
 
     public UnityEvent<bool> onNewPlayer = new();
 
@@ -113,11 +111,9 @@ public class GamePlayView : BaseView
     {
         base.OnStartShowView();
         expBar = GetComponentInChildren<ExperienceBar>();
-        DealBtn = GetComponentInChildren<DealButton>();
         expBar.Init();
         StartCoroutine(GetItemFormData());
         StartCoroutine(BreakCouroutine());
-        Player.Instance.isDealBtnActive = false;
     }
     public string CheckTotalItem(int total)
     {
@@ -128,7 +124,6 @@ public class GamePlayView : BaseView
     {
         base.OnStartHideView();
         //IngameController.instance.SaveCardListToSLots();
-        SlotPool.Instance.pool.DeSpawnAll();
     }
     public override void Setup(ViewParam viewParam)
     {
@@ -137,7 +132,6 @@ public class GamePlayView : BaseView
         isNewPlayer = param.isNewPlayer;
         int gold = DataAPIController.instance.GetGold();
         int gem = DataAPIController.instance.GetGem();
-        StartCoroutine(dealBtn.Init());
         this.gold = gold;
         this.gem = gem;
 
@@ -145,7 +139,6 @@ public class GamePlayView : BaseView
         gem_lb.text = GameManager.instance.DevideCurrency(gem);
         if (isNewPlayer) onNewPlayer?.Invoke(isNewPlayer);
 
-        dealBtn.TapBtn.interactable = true;
         bomb_Btn.interactable = true;
         magnet_btn.interactable = true;
     }
@@ -161,7 +154,6 @@ public class GamePlayView : BaseView
         while (true)
         {
             yield return new WaitForSeconds(breakCounter);
-            yield return new WaitUntil(() => dealBtn.TapBtn.interactable);
             if (!isShowingBreak)
             {
                 ShowBreak();
@@ -170,21 +162,8 @@ public class GamePlayView : BaseView
     }
     public void OnNewPlayer(bool newPlayer)
     {
-        bomb_Btn.gameObject.SetActive(!newPlayer);
-        magnet_btn.gameObject.SetActive(!newPlayer);
-        dealBtn.SetOnNewPlayer(newPlayer);
-        StartCoroutine(ShowItemCouroutine());
     }
-    IEnumerator ShowItemCouroutine()
-    {
-        Debug.Log("Show item couroutine");
-        yield return new WaitUntil(() => GameManager.instance.IsNewPlayer == false);
-        bool isNewPlayer = GameManager.instance.IsNewPlayer;
-        Debug.Log("Show item couroutine DONE");
-        dealBtn.SetOnNewPlayer(isNewPlayer);
-        bomb_Btn.gameObject.SetActive(!isNewPlayer);
-        magnet_btn.gameObject.SetActive(!isNewPlayer);
-    }
+   
     IEnumerator GetItemFormData()
     {
         yield return new WaitUntil(() => DataAPIController.instance.GetItemData(ItemType.Bomb) is not null);
@@ -213,11 +192,7 @@ public class GamePlayView : BaseView
     }
     public void MagnetItemClick()
     {
-        if ( Player.Instance.isDealBtnActive || Player.Instance.isAnimPlaying)
-        {
-            magnet_btn.interactable = true;
-            return;
-        }
+      
         magnet_btn.interactable = false;
         var magnetData = DataAPIController.instance.GetItemData(ItemType.Magnet);
         if (magnetData.total <= 0)
@@ -235,11 +210,7 @@ public class GamePlayView : BaseView
     }
     public void BomItemClick()
     {
-        if (Player.Instance.isAnimPlaying || Player.Instance.isDealBtnActive)
-        {
-            magnet_btn.interactable = true;
-            return;
-        }
+      
         bomb_Btn.interactable = false;
         var bombData = DataAPIController.instance.GetItemData(ItemType.Bomb);
         if (bombData.total <= 0)

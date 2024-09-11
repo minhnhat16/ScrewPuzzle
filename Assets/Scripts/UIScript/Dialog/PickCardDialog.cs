@@ -29,12 +29,10 @@ public class PickCardDialog : BaseDialog
     public override void OnStartShowDialog()
     {
         base.OnStartShowDialog();
-        Player.Instance.isAnimPlaying = true;
     }
     public override void OnEndHideDialog()
     {
         base.OnEndHideDialog();
-        Player.Instance.isAnimPlaying = false;
 
     }
     private void FreeChosen(int arg0)
@@ -47,8 +45,6 @@ public class PickCardDialog : BaseDialog
             Debug.Log("PlayClaimAnim INVOKED");
             DialogManager.Instance.HideDialog(DialogIndex.PickCardDialog, () =>
             {
-                Player.Instance.isAnimPlaying = false;
-                Player.Instance.isDealBtnActive = false;
             });
         });
     }
@@ -62,8 +58,6 @@ public class PickCardDialog : BaseDialog
             Debug.Log("PlayClaimAnim INVOKED");
             DialogManager.Instance.HideDialog(DialogIndex.PickCardDialog, () =>
             {
-                Player.Instance.isAnimPlaying = false;
-                Player.Instance.isDealBtnActive = false;
             });
         });
     }

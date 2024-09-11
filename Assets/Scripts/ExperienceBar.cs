@@ -22,7 +22,7 @@ public class ExperienceBar : MonoBehaviour
 
     private void OnEnable()
     {
-        onExpChanged = IngameController.instance.onExpChange ?? null;
+        // onExpChanged = IngameController.instance.onExpChange ?? null;
         onExpChanged.AddListener(ExpChanged);
     }
     private void OnDisable()
@@ -41,12 +41,12 @@ public class ExperienceBar : MonoBehaviour
                return lv_lb != null;
             });
         yield return new WaitUntil(()=>DataAPIController.instance != null);
-        currentLevel = IngameController.instance.GetPlayerLevel();
+        // currentLevel = IngameController.instance.GetPlayerLevel();
         SetLevelLable(currentLevel);
         currentExp = GetCurrentExp();
         yield return new WaitUntil(() => ConfigFileManager.Instance != null);
         record = ConfigFileManager.Instance.LevelConfig.GetAllRecord(); // change with config file 
-        yield return new WaitUntil(predicate: () => IngameController.instance.gameObject.activeInHierarchy);
+        // yield return new WaitUntil(predicate: () => IngameController.instance.gameObject.activeInHierarchy);
         int index = currentLevel - 1;
         targetExp = record[index].Experience;
         fill.fillAmount = currentExp / targetExp;
@@ -69,27 +69,21 @@ public class ExperienceBar : MonoBehaviour
     {
         DataAPIController.instance.SetCurrentExp(currentExp, () =>
         {
-            IngameController.instance.Exp_Current = currentExp;
+            // IngameController.instance.Exp_Current = currentExp;
         });
     }
-    private bool CheckMaxLevel()
-    {
-        int crLever = IngameController.instance.GetPlayerLevel();
-        int maxLevel = record.Count() -1;
-        return crLever > maxLevel;
-    }
+    
+    
     IEnumerator FillOverTime(float target, float duration)
     {
-        bool isMaxLevel = CheckMaxLevel();
 
         if (currentExp >= targetExp)
         {
             ResetFill();
-            LevelUp();
             yield break; // Stop the coroutine after leveling up
         }
 
-        if (isMaxLevel)
+        if (true)
         {
             fill.fillAmount = 1;
             FillAmountToPercent(fill.fillAmount);
@@ -135,39 +129,9 @@ public class ExperienceBar : MonoBehaviour
         return level;
     }
     //HACK: (DONE) CHECK CONDITIONAL FOR LEVEL UP BETWEEN THIS AND INGAMECONTROLLER
-    private void LevelUp()
-    {
-        isLevelUp = true;
-        int level = LevelRecordCheck(IngameController.instance.CurrentCardType) -1;
-        int index = currentLevel-1 ;
-        LevelConfigRecord newLevel = record[index];
-        LevelConfigRecord newColor = record[level];
-        currentLevel = newLevel.Id;
-
-        Debug.LogError($"Level up!!!! {currentLevel }");    
-        SetLevelLable(currentLevel);
-        IngameController.instance.SetPlayerLevel(currentLevel);
-        targetExp = newLevel.Experience;
-
-        IngameController.instance.Exp_Current = fill.fillAmount = currentExp = 0;
-        // TODO: MAKE NEW DIALOG FOR CHOOSE CARD & CLAIMING COIN + COIN ANIM
-        PickCardParam param = new();
-
-
-        param.premium = newColor.PremiumColor;
-        param.free = newColor.FreeColor;
-
-        DialogManager.Instance.ShowDialog(DialogIndex.PickCardDialog, param, () =>
-        {
-            ResetFill();
-            Player.Instance.isAnimPlaying = true;
-        });
-
-
-    }
     private void ResetFill()
     {
-        IngameController.instance.Exp_Current = fill.fillAmount = currentExp = 0;
+        // IngameController.instance.Exp_Current = fill.fillAmount = currentExp = 0;
         FillAmountToPercent(fill.fillAmount);
         //Debug.Log("Reset Fill" + fill.fillAmount + " pecent" + percent.text);
     }

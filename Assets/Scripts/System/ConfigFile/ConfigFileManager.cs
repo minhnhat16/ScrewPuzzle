@@ -38,6 +38,11 @@ public class ConfigFileManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        Init(null);
+    }
+
     public void Init(Action callback)
     {
         Debug.Log("(BOOT) // INIT CONFIG");
@@ -50,9 +55,10 @@ public class ConfigFileManager : MonoBehaviour
         /*levelConfig = Resources.Load("Config/LevelConfig", typeof(ScriptableObject)) as LevelConfig;
         yield return new WaitUntil(() => levelConfig != null);
         slotConfig = Resources.Load("Config/SlotConfig", typeof(ScriptableObject)) as SlotConfig;
-        yield return new WaitUntil(() => slotConfig != null);
+        yield return new WaitUntil(() => slotConfig != null);*/
         colorConfig = Resources.Load("Config/ColorConfig", typeof(ScriptableObject)) as ColorConfig;
         yield return new WaitUntil(() => colorConfig != null);
+        /*
         dealerPriceConfig = Resources.Load("Config/DealerPriceConfig", typeof(ScriptableObject)) as DealerPriceConfig;
         yield return new WaitUntil(() => dealerPriceConfig != null);
         dailyConfig = Resources.Load("Config/DailyRewardConfig", typeof(ScriptableObject)) as DailyRewardConfig;
@@ -61,7 +67,7 @@ public class ConfigFileManager : MonoBehaviour
         yield return new WaitUntil(() => spinConfig != null);*/
         
         soundFactory = Resources.Load("Factory/SoundFactory", typeof(ScriptableObject)) as SoundFactory;
-        SoundManager.instance.Init();
+       // SoundManager.instance.Init();
         Debug.Log("(BOOT) // INIT CONFIG DONE");
         yield return new WaitUntil(() => soundFactory != null);
         yield return null;

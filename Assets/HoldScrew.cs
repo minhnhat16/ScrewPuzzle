@@ -15,6 +15,9 @@ public class HoldScrew : MonoBehaviour
     [SerializeField] private Screw screw;
     public Transform Transf {get { return transf; } set { transf = value; } }
     public int Index { get { return index; } set { index = value; } }
+    public Screw Screw { get => screw;
+        set => screw = value;
+    }
 
     public void Start()
     {

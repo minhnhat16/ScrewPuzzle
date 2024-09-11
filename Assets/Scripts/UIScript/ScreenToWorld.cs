@@ -122,7 +122,6 @@ public class ScreenToWorld : MonoBehaviour
     }
     public Vector3 PreverseConvertPosition(Vector3 position)
     {
-        m_WCamera = SlotCamera.Instance.S_Camera;
         // Convert the position from Canvas 1 to world position using Main Camera
         Vector3 viewportPosition = m_UICamera.WorldToViewportPoint(position);
 

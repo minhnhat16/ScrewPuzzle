@@ -49,7 +49,7 @@ namespace Ingame
             }
             Debug.Log(" screw boxes contained "+ box.name);
             // Tắt box đã đầy
-            screwBoxes[filledBoxIndex].gameObject.SetActive(false);
+            screwBoxes[filledBoxIndex].CloseBox();
 
             // Dịch chuyển các box tiếp theo vào vị trí box đã đầy
             for (int i = filledBoxIndex + 1; i < screwBoxes.Length; i++)

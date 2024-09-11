@@ -17,9 +17,11 @@ namespace Ingame
         
 
         [SerializeField] private bool isMultipleJoint;
-        [SerializeField] private HingeJoint2D _hingeJoint2D;
         [SerializeField] private CircleCollider2D _circleCollider2D;
         [SerializeField] private SpriteRenderer render ;
+
+        [SerializeField] private SpriteRenderer cross ;
+        [SerializeField] private HingeJoint2D _hingeJoint2D;
 
         protected Transform _transform { get; set; }
         protected Vector3 position
@@ -50,8 +52,10 @@ namespace Ingame
 
         public bool IsActionComplete { get; set; }
         // Start is called before the first frame update
-        private void Start (){
+        public virtual void Start(){
             isClicked  =false;    
+            SetScrewColor();
+
         }
         public Screw()
         {
@@ -71,6 +75,7 @@ namespace Ingame
             render = GetComponentInChildren<SpriteRenderer>();
             layerMask = gameObject.layer;
         }
+
         public bool IsPartiallyVisible()
         {
             // Get the collider's position and radius
@@ -125,6 +130,13 @@ namespace Ingame
                         Gizmos.color = UnityEngine.Color.blue;
                         Gizmos.DrawLine(raycastOrigin, raycastOrigin + Vector2.up * 10f); // Adjust length for visualization
                     }*/    
+        }   
+
+        private void SetScrewColor()
+        {
+            if (color == ColorEnum.Clear) return;
+            var targetColor = ConfigFileManager.Instance.ColorConfig.GetRecordByKeySearch(color).Color;
+            render.color = targetColor;
         }
         // Hàm thuc thi khi screww duoc click;
         public void OnScrewClicked()
@@ -133,19 +145,17 @@ namespace Ingame
             StartCoroutine(CompleteAction());
             if (isPartiallyVisible && !isClicked)
             {
-                isClicked = false; 
+                isClicked = true; 
                 BoxQueue.instance.HasBoxWithSameColor(this);
                  
             }
             else if(!isPartiallyVisible)
             {
-                
                 Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
                 isClicked = false;
                 ShakeScrew();
             }
             else{
-                isClicked = false;
                 Debug.LogWarning("Screw không thể click nữa");
             }
         }
@@ -182,24 +192,29 @@ namespace Ingame
 
         public void JumpScrewToHold(HoldScrew holdScrew)
         {
-            Vector3 toPos = holdScrew.Transf.position;
+            Vector3 toPos = holdScrew.Transf.position + new Vector3(0,0.25f);
             Debug.Log("DO move to hold " + toPos);
 
             // Lưu lại vị trí offset giữa render và cha trước khi di chuyển
-            Vector3 offset = toPos - _transform.position + new Vector3(0,0.25f);
+            Vector3 offset = toPos - _transform.position ;
 
             // Di chuyển render trước, đồng thời di chuyển cha
-            var renderMove = render.transform.DOMove(toPos, 0.5f);
+            var renderMove = render.transform.DOJump(toPos, 2,1,0.5f,false);
             var parentMove = _transform.DOMove(toPos - offset, 0.5f); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
 
             // Khi cả hai di chuyển xong
-            renderMove.OnComplete(FreeHinge);
+            renderMove.OnComplete(()=>
+            {
+                _transform.SetParent(holdScrew.Transf);
+                FreeHinge();
+                
+            });
         }
         public void DoMoveScrewUp(Action callback)
         {
             var targetPos = render.transform.position;
             targetPos+= new Vector3(0, 0.25f,0);
-            render.transform.DORotate(new Vector3(0, 0, 360), 1f, RotateMode.FastBeyond360);
+            cross.transform.DORotate(new Vector3(0, 0, 360), 1f, RotateMode.FastBeyond360);
             render.transform.DOMove(targetPos, 0.5f).OnComplete(()=>callback?.Invoke());
         }
         public virtual void FreeHinge()
@@ -213,7 +228,7 @@ namespace Ingame
             _hingeJoint2D.connectedBody = null;
             var targetPos = render.transform.position;
             targetPos-= new Vector3(0, 0.25f,0);
-            render.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
+            cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
             render.transform.DOMove(targetPos, 0.5f);
         }
     }

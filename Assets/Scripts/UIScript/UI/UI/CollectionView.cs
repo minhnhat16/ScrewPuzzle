@@ -19,8 +19,6 @@ public class CollectionView : BaseView
         base.Setup(viewParam);
         if (viewParam == null) return;
         CollectionParam newParam = viewParam as CollectionParam;
-        collection.Init();
-        collection.FillCount(newParam.ownedCard, newParam.totalCard);
     }
  
 }

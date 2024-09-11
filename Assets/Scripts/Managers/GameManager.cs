@@ -10,7 +10,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DayTimeController dayTimeController;
     public List<CardColorPallet> listCurrentCardColor;
     public UIRootControlScale UIRoot;
-    [SerializeField] private TutorialsScript tutorial;
     [SerializeField] private int languageID;
     [SerializeField] private int totalLevel;
     [SerializeField] private int trackLevelStart;
@@ -68,7 +67,6 @@ public class GameManager : MonoBehaviour
     {
         //ingameController.enabled = true;
         ingameController.gameObject.SetActive(true);
-        ingameController.Init(callback);
 
         //CameraMain.instance.main.gameObject.SetActive(true);
     }
@@ -82,9 +80,7 @@ public class GameManager : MonoBehaviour
     {
         if (IsNewPlayer)
         {
-            string path = "Prefabs/Tutorial";
-            tutorial = Instantiate(Resources.Load<TutorialsScript>(path), transform);
-            tutorial.gameObject.SetActive(true);
+          
         }
     }
    

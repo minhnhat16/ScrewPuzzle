@@ -46,8 +46,6 @@ public class OutOffCardDialog : BaseDialog
     public override void OnEndHideDialog()
     {
         base.OnEndHideDialog();
-        Player.Instance.isAnimPlaying = false;
-        Player.Instance.isDealBtnActive = false;
         ZenSDK.instance.ShowFullScreen();
     }
     private void TotalAddCard(Text lb)
@@ -65,8 +63,6 @@ public class OutOffCardDialog : BaseDialog
         DialogManager.Instance.HideDialog(this.dialogIndex);
         Debug.Log("Exit button done");
         GamePlayView gameplay = ViewManager.Instance.currentView as GamePlayView;
-        gameplay.DealBtn.TapBtn.interactable = true;
-        Player.Instance.isAnimPlaying = false;
     }
     private void AccpetedWatch()
     {
@@ -76,11 +72,8 @@ public class OutOffCardDialog : BaseDialog
         if (onWatched) DataAPIController.instance.SetCurrrentCardPool(bonusCard, () =>
         {
             GamePlayView view = ViewManager.Instance.currentView as GamePlayView;
-            view.DealBtn.CurrentCardCounter = bonusCard;
-            view.DealBtn.TapBtn.interactable = true;
             DialogManager.Instance.HideDialog(dialogIndex, () =>
             {
-                Player.Instance.isDealBtnActive = true;
             });
         });
         else return;

@@ -44,7 +44,6 @@ public class ItemConfirmDialog : BaseDialog
         price = ZenSDK.instance.GetConfigInt($"price+{type}", 3000);
         price = Mathf.RoundToInt(price * IngameController.instance.GetPlayerLevel() / 2);
         price_lb.text = price.ToString();
-        Player.Instance.isAnimPlaying = true;
 
     }
     public override void OnEndHideDialog()
@@ -52,8 +51,6 @@ public class ItemConfirmDialog : BaseDialog
         base.OnEndHideDialog();
         bomb.SetActive(false);
         magnet.SetActive(false);
-        Player.Instance.isAnimPlaying = false;
-
     }
     // Start is called before the first frame update
     public void PlayAds()
