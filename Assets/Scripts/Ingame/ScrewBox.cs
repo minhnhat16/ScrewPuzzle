@@ -6,6 +6,7 @@ using DG.Tweening;
 using Enum;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Jobs;
 using UnityEngine.Serialization;
 
 namespace Ingame
@@ -22,6 +23,11 @@ namespace Ingame
         [SerializeField] public HoldScrew[] holdScrews; // Mảng các lỗ Screw
         [SerializeField] public UnityEvent<bool> onScrewBoxFull;
         [SerializeField] private ColorEnum color;
+
+        public Animator animator;
+        public float moveDuration = 1f;  // Thời gian di chuyển nắp
+        public float squashAmount = 0.9f;  // Độ co giãn
+        public float squashDuration = 0.2f;
         public bool IsBoxFull
         {
             get => isBoxFull;
@@ -36,15 +42,13 @@ namespace Ingame
         private void OnEnable()
         {
         }
-        void Start()
+       public virtual void Start()
         {
-            // Khởi tạo số lượng lỗ dựa trên config
-            // holdScrews = new Screw[config.numberOfScrewHoles];
-            var renderObj = transform.GetChild(0);
-            render = renderObj.GetComponent<SpriteRenderer>();
+           // / render = GetComponentIN<SpriteRenderer>();
             transform = transform.GetComponent<Transform>(); 
             position = transform.position;
             SetBoxColor(UnityEngine.Color.white);
+            animator = GetComponent<Animator>();
             // Debug.Log("Initialized CrewBox with " + config.numberOfScrewHoles + " screw holes.");
         }
 
@@ -60,8 +64,6 @@ namespace Ingame
 
             if (isFull)
             {
-                //Do Star anim at screw holder
-                // closing box 
                 // set box active fasle
                 Debug.Log("Box full invoker " + gameObject.name );
                 StartCoroutine(DeactiveBoxCouroutine());
@@ -73,23 +75,20 @@ namespace Ingame
            
             yield return new WaitForSeconds(2f);
             BoxQueue.instance.DeactivateAndMoveQueue(this);
-            yield return new WaitForSeconds(3f);
-            gameObject.SetActive(false);
-
         }
 
         public void CloseBox()
         {
-            DoUpperBoxMove((isBoxFull)=>
+            DoUpperBoxMove((boxFull)=>
             {
-                if (!isBoxFull) return;
-                TunOffScrews();
-                PlayStarAnimation(null);
+                if (!boxFull) return;
             });
         }
 
         private void TunOffScrews()
         {
+            
+            Debug.Log("Turn off Screww");
             foreach (var t in holdScrews)
             {
                 t.Screw.gameObject.SetActive(false);
@@ -97,14 +96,19 @@ namespace Ingame
         }
         private void DoUpperBoxMove(Action<bool> callback)
         {
-            renderUpper.gameObject.SetActive(true);
-            var upper =   renderUpper.transform;
-            var targetPos = position - Vector3.up *0.5f;
-            upper.localPosition =  position + Vector3.up * 10;
-            var t = upper.transform.DOLocalMove(position, 1f, true);
-                t.OnComplete(()=>callback?.Invoke(t.IsComplete()));
+            animator.Play("BoxPunch");
+            OnAnimStop(callback);
         }
-        
+
+        public virtual void  SetBoxInActive()
+        {
+            gameObject.SetActive(false);
+        }
+    private void OnAnimStop(Action<bool> callback = null)
+    {
+        callback?.Invoke(true);
+    }
+   
         public void PlayStarAnimation(Action<bool> callback)
         {
             foreach (var hold in holdScrews)
@@ -178,7 +182,6 @@ namespace Ingame
         // Hàm để thay đổi màu của CrewBox
         private void SetBoxColor(Color newColor)
         {
-            
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
             render.material.color = newColor;
         }

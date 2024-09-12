@@ -76,7 +76,7 @@ namespace Ingame
 
          // Nếu tất cả các ô đều đầy, thực hiện invoke
          Debug.Log("All holdScrews are full!");
-         onHoldScrewsFull.Invoke(); // Gọi sự kiện thua hoặc một hành động khác
+         onHoldScrewsFull?.Invoke(); // Gọi sự kiện thua hoặc một hành động khác
       }
    }
 }

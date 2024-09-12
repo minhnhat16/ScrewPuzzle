@@ -53,9 +53,13 @@ namespace Ingame
         public bool IsActionComplete { get; set; }
         // Start is called before the first frame update
         public virtual void Start(){
-            isClicked  =false;    
+            isClicked  =false;
+            StartCoroutine(Init());
+        }
+        public IEnumerator Init()
+        {
+            yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();
-
         }
         public Screw()
         {
@@ -71,7 +75,7 @@ namespace Ingame
             _transform = GetComponent<Transform>();
             position = GetComponent<Transform>().position;
             _hingeJoint2D = GetComponent<HingeJoint2D>();
-            _circleCollider2D = GetComponent<CircleCollider2D>();
+            _circleCollider2D = GetComponentInChildren<CircleCollider2D>();
             render = GetComponentInChildren<SpriteRenderer>();
             layerMask = gameObject.layer;
         }
@@ -201,31 +205,32 @@ namespace Ingame
             // Di chuyển render trước, đồng thời di chuyển cha
             var renderMove = render.transform.DOJump(toPos, 2,1,0.5f,false);
             var parentMove = _transform.DOMove(toPos - offset, 0.5f); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
+            
+            //free joint to releas wood and joint
+            FreeHinge();
 
             // Khi cả hai di chuyển xong
             renderMove.OnComplete(()=>
             {
                 _transform.SetParent(holdScrew.Transf);
-                FreeHinge();
-                
+                MoveScrewDown();
             });
         }
         public void DoMoveScrewUp(Action callback)
         {
             var targetPos = render.transform.position;
             targetPos+= new Vector3(0, 0.25f,0);
-            cross.transform.DORotate(new Vector3(0, 0, 360), 1f, RotateMode.FastBeyond360);
+            cross.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
             render.transform.DOMove(targetPos, 0.5f).OnComplete(()=>callback?.Invoke());
         }
         public virtual void FreeHinge()
         {
             _circleCollider2D.isTrigger = true;
-            if (isMultipleJoint)
-            {
-                var connectedBody = _hingeJoint2D.connectedBody;
-                connectedBody.AddForce(Vector2.down);
-            }
             _hingeJoint2D.connectedBody = null;
+        }
+
+        public virtual void MoveScrewDown()
+        {
             var targetPos = render.transform.position;
             targetPos-= new Vector3(0, 0.25f,0);
             cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);

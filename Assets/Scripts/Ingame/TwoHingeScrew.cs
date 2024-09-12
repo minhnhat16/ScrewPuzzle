@@ -14,7 +14,7 @@ public class TwoHingeScrew : Screw
         _transform = GetComponent<Transform>();
         position = GetComponent<Transform>().position;
         // HingeJoint2D = GetComponent<HingeJoint2D>();
-        CircleCollider2D = GetComponent<CircleCollider2D>();
+        CircleCollider2D = GetComponentInChildren<CircleCollider2D>();
         Renderer = GetComponentInChildren<SpriteRenderer>();
         LayerMask = gameObject.layer;
         // _2ndhingeJoint2D = GetComponent<HingeJoint2D>();
