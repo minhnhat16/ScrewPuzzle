@@ -45,7 +45,7 @@ namespace Ingame
          }
       }
       // Hàm thêm Screw vào một ô trống trong holdScrew
-      public bool AddScrew(Screw screw)
+      public bool AddScrew(Screw.Screw screw)
       {
          for (int i = 0; i < holdScrews.Length; i++)
          {

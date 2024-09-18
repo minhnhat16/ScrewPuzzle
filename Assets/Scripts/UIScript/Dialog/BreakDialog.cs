@@ -15,7 +15,7 @@ public class BreakDialog : BaseDialog
     {
         base.OnStartShowDialog();
         reward = ZenSDK.instance.GetConfigInt("coffeeReward", 1500);
-        reward *= IngameController.instance.GetPlayerLevel();
+        //reward *= IngameController.instance.GetPlayerLevel();
         lb_reward.text = reward.ToString();
         ZenSDK.instance.ShowVideoReward((isWatch) =>
         {

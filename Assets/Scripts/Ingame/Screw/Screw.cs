@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using Enum;
 using UnityEngine;
 using IEnumerator = System.Collections.IEnumerator;
 
-namespace Ingame
+namespace Ingame.Screw
 {
     public  class Screw : MonoBehaviour
     {   
@@ -13,16 +12,14 @@ namespace Ingame
         [SerializeField] private bool isPartiallyVisible;
         [SerializeField] private bool isClicked;
         [SerializeField] private int layerMask;
-
-        
-
+        [SerializeField] private int sortingOrder;
         [SerializeField] private bool isMultipleJoint;
         [SerializeField] private CircleCollider2D _circleCollider2D;
         [SerializeField] private SpriteRenderer render ;
 
         [SerializeField] private SpriteRenderer cross ;
-        [SerializeField] private HingeJoint2D _hingeJoint2D;
-
+        [SerializeField] private LayerMask _layerMask;
+        [SerializeField] protected HingeController _hingeController;
         protected Transform _transform { get; set; }
         protected Vector3 position
         {
@@ -31,11 +28,7 @@ namespace Ingame
             
         }
 
-        protected HingeJoint2D HingeJoint2D
-        {
-            get => _hingeJoint2D;
-            set => _hingeJoint2D = value;
-        }
+       
 
         protected CircleCollider2D CircleCollider2D
         {
@@ -56,10 +49,18 @@ namespace Ingame
             isClicked  =false;
             StartCoroutine(Init());
         }
+
+        private void OnEnable()
+        { 
+            string bodyLayer = _hingeController.GetConnectedBodyRenderLayer(0);
+            SetSortingOrderAndLayer(sortingOrder, bodyLayer);
+        }
+
         public IEnumerator Init()
         {
             yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();
+           
         }
         public Screw()
         {
@@ -74,67 +75,19 @@ namespace Ingame
             // _color = (ColorEnum)System.Enum.Parse(typeof(ColorEnum),"Color");
             _transform = GetComponent<Transform>();
             position = GetComponent<Transform>().position;
-            _hingeJoint2D = GetComponent<HingeJoint2D>();
             _circleCollider2D = GetComponentInChildren<CircleCollider2D>();
             render = GetComponentInChildren<SpriteRenderer>();
             layerMask = gameObject.layer;
         }
 
-        public bool IsPartiallyVisible()
+        private void SetSortingOrderAndLayer(int order, string layer)
         {
-            // Get the collider's position and radius
-            Vector2 colliderPosition = _circleCollider2D.bounds.center;
-            float radius = _circleCollider2D.radius;
-
-            // The number of raycasts we'll shoot along the top of the collider
-            int raycastCount = 5;
-            float angleStep = 180f / (raycastCount - 1); // Angle between raycasts
-
-            for (int i = 0; i < raycastCount; i++)
-            {
-                // Calculate the angle and position on the top of the circle
-                float angle = -90f + i * angleStep; // Raycasts along the top of the collider
-                Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-                Vector2 raycastOrigin = (Vector2)colliderPosition + direction * radius;
-
-                // Raycast upwards (Vector2.up) from the calculated position
-                RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, Vector2.up, Mathf.Infinity, layerMask);
-
-                // If no object is detected or the hit object is not fully covering the collider
-                if (hit.collider == null)
-                {
-                    Debug.LogWarning("Colider không bị chặn bởi cái gì cả");
-                    return true; // The object is partially visible
-                }
-            }
-
-            // If all raycasts detect objects, the collider is fully covered
-            Debug.LogWarning("Colider  bị chặn bởi cái gì đó đ biết");
-            return false;
+            // Debug.LogError("Setting sorting order and layer");
+            render.sortingLayerName =layer;
+            cross.sortingLayerName = layer;
+            render.sortingOrder = order + 1;
+            cross.sortingOrder = order + 2;
         }
-
-        // To visualize raycasts in the editor
-        private void OnDrawGizmos()
-        {
-          
-        }
-        private void DrawCircle(){
-          /*if (_circleCollider2D == null) return;
-                    Vector2 colliderPosition = _circleCollider2D.bounds.center;
-                    float radius = _circleCollider2D.radius;
-                    int raycastCount = 5;
-                    float angleStep = 180f / (raycastCount - 1);
-        
-                    for (int i = 0; i < raycastCount; i++)
-                    {
-                        float angle = -90f + i * angleStep;
-                        Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-                        Vector2 raycastOrigin = (Vector2)colliderPosition + direction * radius;
-        
-                        Gizmos.color = UnityEngine.Color.blue;
-                        Gizmos.DrawLine(raycastOrigin, raycastOrigin + Vector2.up * 10f); // Adjust length for visualization
-                    }*/    
-        }   
 
         private void SetScrewColor()
         {
@@ -142,31 +95,55 @@ namespace Ingame
             var targetColor = ConfigFileManager.Instance.ColorConfig.GetRecordByKeySearch(color).Color;
             render.color = targetColor;
         }
-        // Hàm thuc thi khi screww duoc click;
+        public Collider2D[] GetOverlappingColliders(CircleCollider2D circleCollider, float radius, LayerMask mask)
+        {
+            // Lấy vị trí của CircleCollider2D
+            Vector2 colliderPosition = circleCollider.transform.position;
+
+            // Lấy Layer của GameObject chứa CircleCollider2D
+            int colliderLayer = _hingeController.GetIntBodyLayer(0);
+
+            // Tạo LayerMask chứa tất cả layer từ 10-26
+            LayerMask layersInRange = IngameController.instance.GetLayerMaskForRange(10, colliderLayer - 1 );
+
+            // Thực hiện phép kiểm tra va chạm
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(colliderPosition, radius, layersInRange);
+
+            return colliders;
+        }
+
         public void OnScrewClicked()
         {
-            isPartiallyVisible  = IsPartiallyVisible();
+            // Ensure you have a reference to the correct CircleCollider2D
+            CircleCollider2D myCollider = GetComponent<CircleCollider2D>();
+            
+            LayerMask = _hingeController.GetIntBodyLayer(0);
+            // Get all overlapping colliders
+            var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius,LayerMask );
+
+            // Start the coroutine for completing the action
             StartCoroutine(CompleteAction());
-            if (isPartiallyVisible && !isClicked)
-            {
-                isClicked = true; 
-                BoxQueue.instance.HasBoxWithSameColor(this);
-                 
-            }
-            else if(!isPartiallyVisible)
+
+            if (overlappingColliders.Length > 0)
             {
                 Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
                 isClicked = false;
                 ShakeScrew();
             }
-            else{
+            else if (!isClicked)
+            {
+                isClicked = true;
+                BoxQueue.Instance.HasBoxWithSameColor(this);
+            }
+            else
+            {
                 Debug.LogWarning("Screw không thể click nữa");
             }
         }
 
         private void ShakeScrew()
         {
-            Tween t = render.transform.DOShakePosition(1f, new Vector3(0.25f, 0, 0));
+            Tween t = render.transform.DOShakePosition(1f, new Vector3(0.15f, 0, 0)).SetEase(Ease.OutBounce);
         }
 
         private IEnumerator CompleteAction()
@@ -226,7 +203,7 @@ namespace Ingame
         public virtual void FreeHinge()
         {
             _circleCollider2D.isTrigger = true;
-            _hingeJoint2D.connectedBody = null;
+            _hingeController.FreeHinges();
         }
 
         public virtual void MoveScrewDown()

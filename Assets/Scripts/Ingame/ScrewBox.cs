@@ -16,8 +16,11 @@ namespace Ingame
         public BoxConfig config; // ScriptableObject chứa cấu hình cho CrewBox
         [SerializeField] private SpriteRenderer render;
         [SerializeField] private SpriteRenderer renderUpper;
-        [SerializeField] private Transform transform;
+        [SerializeField] private Transform _transform;
+        [SerializeField] private Transform _anchor;
         [SerializeField] private Vector3 position;
+        [SerializeField] private Collider2D _collider;
+
         [SerializeField] private bool isBoxFull;
         [SerializeField] private int nextEmptyIndex = -1;
         [SerializeField] public HoldScrew[] holdScrews; // Mảng các lỗ Screw
@@ -28,10 +31,17 @@ namespace Ingame
         public float moveDuration = 1f;  // Thời gian di chuyển nắp
         public float squashAmount = 0.9f;  // Độ co giãn
         public float squashDuration = 0.2f;
+        public Vector3 initialPosition;
+
         public bool IsBoxFull
         {
             get => isBoxFull;
             set => isBoxFull = value;
+        }
+        public Transform Transform
+        {
+            get => _transform;
+            set => _transform = value;
         }
         public ColorEnum Color {get => color;
             set => color=value;
@@ -39,17 +49,47 @@ namespace Ingame
         public SpriteRenderer Render {get => render;
             set => render = value;
         }
+        
+        public Vector3 Position
+        {
+            get => _anchor.transform.position;
+            set => transform.position = value;
+        }
+        
         private void OnEnable()
         {
         }
+
+        /*public ScrewBox(Vector3 position, BoxConfigRecord config,bool isBoxFull)
+        {
+            this.color= config.boxColor;
+            this.position = position;
+            this.isBoxFull = isBoxFull;
+        }*/
+        public void OnInit(Vector3 position, BoxConfigRecord config, bool isBoxFull)
+        {
+            this.color= config.boxColor;
+            this.Position = position;
+            this.isBoxFull = isBoxFull;
+        }
        public virtual void Start()
         {
-           // / render = GetComponentIN<SpriteRenderer>();
-            transform = transform.GetComponent<Transform>(); 
-            position = transform.position;
-            SetBoxColor(UnityEngine.Color.white);
-            animator = GetComponent<Animator>();
-            // Debug.Log("Initialized CrewBox with " + config.numberOfScrewHoles + " screw holes.");
+            _transform = transform.GetComponent<Transform>(); 
+           
+           // SetBoxColor(UnityEngine.Color.white);
+        }
+
+        public void Reset()
+        {
+            _transform.localScale = Vector3.one;
+            color = ColorEnum.Empty;
+            var upperGameObj = render.gameObject;
+            upperGameObj.transform.localPosition = 10 * Vector3.up;
+            upperGameObj.SetActive(false);
+            foreach (var h in holdScrews)
+            {
+                h.Screw = null; // should put reset here
+            };
         }
 
         // Hàm kiểm tra xem các lỗ trong CrewBox có đầy đủ Screw không
@@ -57,31 +97,38 @@ namespace Ingame
         {
             return holdScrews.All(screw => !screw.IsEmpty());
         }
+        public void SetIsLocked(bool isLocked)
+        {
+            renderUpper.transform.position = gameObject.transform.position + new Vector3(0, 5f, 0);
+            // _collider = new BoxCollider();
+        }
+
+        public void OnClickCollider()
+        {
+            //OpenAds dialog;
+            Debug.Log("Open ads dialog");
+        }
         // khi box đầy thuc hien ham sau 
         protected virtual void BoxFullInvoker(bool isFull)
         {
             Debug.Log("Box full invoker " + gameObject.name  + "\t" + isBoxFull);
-
-            if (isFull)
-            {
-                // set box active fasle
-                Debug.Log("Box full invoker " + gameObject.name );
-                StartCoroutine(DeactiveBoxCouroutine());
-            }
+            if (!isFull) return;
+            // set box active fasle
+            Debug.Log("Box full invoker " + gameObject.name );
+            StartCoroutine(DeactiveBoxCouroutine());
         }
 
         IEnumerator DeactiveBoxCouroutine()
         {
-           
-            yield return new WaitForSeconds(2f);
-            BoxQueue.instance.DeactivateAndMoveQueue(this);
+            yield return new WaitForSeconds(1f);
+            BoxQueue.Instance.DeactivateAndMoveQueue(this);
         }
 
-        public void CloseBox()
+        public void CloseBox(Action<bool> callback)
         {
             DoUpperBoxMove((boxFull)=>
             {
-                if (!boxFull) return;
+                callback?.Invoke(boxFull);
             });
         }
 
@@ -96,26 +143,25 @@ namespace Ingame
         }
         private void DoUpperBoxMove(Action<bool> callback)
         {
-            animator.Play("BoxPunch");
-            OnAnimStop(callback);
+            Sequence mySequence = DOTween.Sequence();
+            renderUpper.gameObject.SetActive(true);
+            // Thêm các hành động di chuyển vào Sequence
+            mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f) // Di chuyển theo trục Y
+                    .SetEase(Ease.InCirc).OnComplete(TunOffScrews))
+                .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f), 0.5f, 1) // Punch scale
+                    .SetEase(Ease.InBack).OnComplete(()=>callback.Invoke(true)))
+                .Append(transform.DOMove(new Vector3(10, 10, 0), 2f, false) // Di chuyển đến vị trí mới
+                    .SetEase(Ease.OutBounce)).OnComplete(()=>
+                        {
+                            Reset();
+                            gameObject.SetActive(false);
+
+                        });
         }
 
-        public virtual void  SetBoxInActive()
+        public virtual void  SetBoxActive(bool isActive)
         {
-            gameObject.SetActive(false);
-        }
-    private void OnAnimStop(Action<bool> callback = null)
-    {
-        callback?.Invoke(true);
-    }
-   
-        public void PlayStarAnimation(Action<bool> callback)
-        {
-            foreach (var hold in holdScrews)
-            {
-                SpawningStar(hold.Index);
-            }
-            callback?.Invoke(true);
+            gameObject.SetActive(isActive);
         }
 
         public void SpawningStar(int index)
@@ -125,7 +171,7 @@ namespace Ingame
             //particle shiny play
         }
         // Hàm di chuyển Screw vào một lỗ trống trong CrewBox
-        public void AddScrew(Screw screw)
+        public void AddScrew(Screw.Screw screw)
         {
             // Nếu màu screw không khớp, kết thúc ngay
             if (screw.Color != color)
@@ -180,10 +226,18 @@ namespace Ingame
         }
         
         // Hàm để thay đổi màu của CrewBox
-        private void SetBoxColor(Color newColor)
+        public void SetBoxColor(Color newColor)
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
             render.material.color = newColor;
         }
+
+    
+
+        public void Initialize(Vector3 initialPosition, bool isLocked)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

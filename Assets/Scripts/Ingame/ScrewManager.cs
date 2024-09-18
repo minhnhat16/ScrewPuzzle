@@ -5,7 +5,6 @@ namespace Ingame
 {
     public class ScrewManager : MonoBehaviour
     {
-        public static ScrewManager instance;
        [SerializeField] private LayerMask layerMask;
         public LayerMask LayerMask
         {
@@ -14,10 +13,7 @@ namespace Ingame
         }
         private void Awake()
         {
-            if (instance == null)
-            {
-                instance = this;
-            };
+           
         }
 
         private void Start()
@@ -31,7 +27,7 @@ namespace Ingame
             
         }
 
-        public void AddScrew(Screw screw)
+        public void AddScrew(Screw.Screw screw)
         {
         }
     }

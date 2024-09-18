@@ -7,11 +7,11 @@ namespace Ingame
     public class Player : MonoBehaviour
     {
         public static Player instance;
-        public UnityEvent<Screw> onScrewClicked = new();
+        public UnityEvent<Screw.Screw> onScrewClicked = new();
         [SerializeField] private float lastClickTime = 0.5f;
         [SerializeField] private float clickCooldown;
         [SerializeField] private bool canClick;
-        [SerializeField] private Screw CurrentScrew;
+        [SerializeField] private Screw.Screw CurrentScrew;
         [SerializeField] Camera mainCam;
         
         public bool CanClick {get => canClick; set => canClick = value;}
@@ -42,7 +42,7 @@ namespace Ingame
                 var hit = GetScrewByRaycastHit2D(mainCam);
                 if (hit.collider != null)
                 {
-                    CurrentScrew = hit.collider.GetComponent<Screw>();
+                    CurrentScrew = hit.collider.GetComponent<Screw.Screw>();
                     if (CurrentScrew != null)
                     {
                         Debug.LogWarning("Screw found!");
@@ -66,8 +66,8 @@ namespace Ingame
             var ray = cam.ScreenPointToRay(Input.mousePosition);
             Debug.Log("Ray Origin: " + ray.origin + " Ray Direction: " + ray.direction);
 
-            var screwLayerMask = ScrewManager.instance.LayerMask; // Ensure LayerMask is properly assigned
-            Debug.Log("Using LayerMask: " + screwLayerMask.value);
+            var screwLayerMask = LayerMask.GetMask("Screw"); // Ensure LayerMask is properly assigned
+          //  Debug.Log("Using LayerMask: " + screwLayerMask.value);
 
             var hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, screwLayerMask);
             return hit;

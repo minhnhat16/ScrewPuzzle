@@ -70,8 +70,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1867890477
+  m_SortingLayer: 17
   m_SortingOrder: 11
   m_Sprite: {fileID: 21300000, guid: e5f699f185402324b901171b12e4052c, type: 3}
   m_Color: {r: 0, g: 0.6784314, b: 0.67058825, a: 1}
@@ -155,8 +155,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1867890477
+  m_SortingLayer: 17
   m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: 473fe3a836397c34da07a4bb8bd5d47b, type: 3}
   m_Color: {r: 0, g: 1, b: 0.9893215, a: 1}
@@ -178,10 +178,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7455194392694617072}
+  - component: {fileID: 7455194392694617038}
   - component: {fileID: 7455194392694617075}
   - component: {fileID: 7455194392694617073}
-  - component: {fileID: 7455194392694617038}
   - component: {fileID: 5884226729302126253}
+  - component: {fileID: 5271949845176647228}
   m_Layer: 9
   m_Name: Screw
   m_TagString: Untagged
@@ -206,6 +207,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7455194392694617038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7455194392694617076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37bae65a89228c84c990bb32688eb231, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: 3
+  isPartiallyVisible: 0
+  isClicked: 0
+  layerMask: 0
+  sortingOrder: 0
+  isMultipleJoint: 0
+  _circleCollider2D: {fileID: 0}
+  render: {fileID: 516593389017136271}
+  cross: {fileID: 4724987932062570836}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _hingeController: {fileID: 5271949845176647228}
 --- !u!50 &7455194392694617075
 Rigidbody2D:
   serializedVersion: 4
@@ -242,7 +268,7 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: 7.6499996, y: 1.59}
+  m_ConnectedAnchor: {x: -0.049099684, y: 0.6451999}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0
@@ -251,27 +277,6 @@ HingeJoint2D:
   m_AngleLimits:
     m_LowerAngle: -89.24609
     m_UpperAngle: 271.13437
---- !u!114 &7455194392694617038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7455194392694617076}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37bae65a89228c84c990bb32688eb231, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: 3
-  isPartiallyVisible: 0
-  isClicked: 0
-  layerMask: 0
-  isMultipleJoint: 0
-  _circleCollider2D: {fileID: 0}
-  render: {fileID: 516593389017136271}
-  cross: {fileID: 4724987932062570836}
-  _hingeJoint2D: {fileID: 0}
 --- !u!58 &5884226729302126253
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -282,12 +287,31 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.27
+--- !u!114 &5271949845176647228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7455194392694617076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769db6d90e828774c91990fa142c0f88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layer:
+    serializedVersion: 2
+    m_Bits: 0
+  bodyConnect:
+  - {fileID: 0}
+  hingeJoint2D:
+  - {fileID: 7455194392694617073}
 --- !u!1 &7955007202074875586
 GameObject:
   m_ObjectHideFlags: 0

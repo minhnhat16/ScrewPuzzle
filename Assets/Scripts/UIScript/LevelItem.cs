@@ -56,7 +56,7 @@ public class LevelItem : MonoBehaviour
     }
     public bool CheckUnlock()
     {
-        int playerLevel = IngameController.instance.GetPlayerLevel();
+        int playerLevel =  1 /*IngameController.instance.GetPlayerLevel()*/;
 
         if ((int)CardType == 0) return true;
 

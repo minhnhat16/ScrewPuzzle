@@ -9,7 +9,6 @@ using UnityEngine.Events;
 public class IngameController : MonoBehaviour
 {
     public static IngameController instance;
-    [SerializeField] private int playerLevel;
     [SerializeField] public bool isOnMagnet;
     [SerializeField] public bool isOnBomb;
 
@@ -25,7 +24,7 @@ public class IngameController : MonoBehaviour
     [HideInInspector] public UnityEvent<float> onExpChange;
     [HideInInspector] public UnityEvent<bool> onBombEvent;
     [HideInInspector] public UnityEvent<bool> onMagnetEvent;
-
+  
     public float Exp_Current
     {
         get { return exp_Current; }
@@ -38,25 +37,7 @@ public class IngameController : MonoBehaviour
         set => _currentCardType = value;
     }
 
-    public int GetPlayerLevel()
-    {
-        //Debug.Log($"Player level {playerLevel}"); 
-        playerLevel = DataAPIController.instance.GetPlayerLevel();
-        return playerLevel;
-    }
-
-    public void SetPlayerLevel(int level)
-    {
-        if (level <= playerLevel) return;
-        //Debug.Log($"Player level up to {level}");
-        playerLevel = level;
-        // note: Set data to player through DataApiController
-        DataAPIController.instance.SetLevel(level, () =>
-        {
-            //Debug.Log($"Save level up to data {level}");
-
-        });
-    }
+ 
 
     private void OnEnable()
     {
@@ -84,6 +65,17 @@ public class IngameController : MonoBehaviour
 
         // Callback when initialization is done
         callback?.Invoke();
+    }
+   public LayerMask GetLayerMaskForRange(int startLayer, int endLayer)
+    {
+        LayerMask mask = 0;
+    
+        for (int i = startLayer; i <= endLayer; i++)
+        {
+            mask |= (1 << i); // Set the bit for each layer in the range
+        }
+    
+        return mask;
     }
 }
  

@@ -1,7 +1,16 @@
+using ConfigFile;
+using UnityEngine;
+
 namespace Ingame
 {
     public class BoxThreeHold : ScrewBox
     {
+
+        public override void Start()
+        {
+            Transform = transform.GetComponent<Transform>(); 
+            // SetBoxColor(UnityEngine.Color.white);
+        }
         private void OnEnable()
         {
             onScrewBoxFull.AddListener(BoxFullInvoker);
@@ -12,21 +21,6 @@ namespace Ingame
             onScrewBoxFull.RemoveListener(BoxFullInvoker);
 
         }
-        // Start is called before the first frame update
-        void Start()
-        {
-            /*if (onScrewBoxFull == null)
-            {
-                onScrewBoxFull = new();
-                onScrewBoxFull.AddListener(BoxFullInvoker);
-            }*/
-
-        }
-
-        // Update is called once per frame
-        void Update()   
-        {
-        
-        }
+       
     }
 }

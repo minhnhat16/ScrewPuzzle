@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4189039326116962761}
   - component: {fileID: 4189039326116962760}
-  - component: {fileID: 4254961325991680183}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -42,8 +41,8 @@ Camera:
   m_GameObject: {fileID: 4189039326116962762}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
-  m_BackGroundColor: {r: 0.6320754, g: 0.6320754, b: 0.6320754, a: 1}
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0, g: 0.38142803, b: 0.5566038, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 1
@@ -60,11 +59,11 @@ Camera:
   far clip plane: 1000
   field of view: 60.622093
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -76,33 +75,3 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &4254961325991680183
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4189039326116962762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e03b43249fe8fc844a623e6c229315c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isScalingCamera: 0
-  height: 0
-  width: 0
-  _obj: {fileID: 4189039326116962762}
-  rate: 0
-  mul_Time: 0.5
-  timer: 0
-  initialOrthographicSize: 0
-  targetOrthorgraphicSize: 0
-  addSize: 3
-  targetPoint: {x: 0, y: 1, z: 0}
-  mulCount: 0
-  scaleValue:
-  - 100
-  - 80
-  - 60
-  - 60
-  - 60

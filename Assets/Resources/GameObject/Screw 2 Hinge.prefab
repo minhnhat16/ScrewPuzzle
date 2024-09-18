@@ -71,8 +71,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1867890477
-  m_SortingLayer: 4
-  m_SortingOrder: 2
+  m_SortingLayer: 17
+  m_SortingOrder: 12
   m_Sprite: {fileID: 21300000, guid: e5f699f185402324b901171b12e4052c, type: 3}
   m_Color: {r: 0, g: 0.6784314, b: 0.67058825, a: 1}
   m_FlipX: 0
@@ -95,6 +95,8 @@ GameObject:
   - component: {fileID: 4241144412972584126}
   - component: {fileID: 4241144412972584099}
   - component: {fileID: 4241144412972584125}
+  - component: {fileID: 6748274948914760515}
+  - component: {fileID: 5930561060451138023}
   m_Layer: 9
   m_Name: Screw 2 Hinge
   m_TagString: Untagged
@@ -158,12 +160,50 @@ MonoBehaviour:
   isPartiallyVisible: 0
   isClicked: 0
   layerMask: 0
+  sortingOrder: 0
   isMultipleJoint: 0
   _circleCollider2D: {fileID: 0}
   render: {fileID: 4241144413796154031}
   cross: {fileID: 2071290369814785538}
-  _hingeJoint2D: {fileID: 4241144413226267077}
-  _2ndhingeJoint2D: {fileID: 4241144413977349198}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _hingeController: {fileID: 0}
+--- !u!58 &6748274948914760515
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.27
+--- !u!114 &5930561060451138023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e6bd2e9a0c7e9b43a5b4d928821a1c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layer:
+    serializedVersion: 2
+    m_Bits: 0
+  bodyConnect: []
+  hingeJoint2D:
+  - {fileID: 4241144413226267077}
+  - {fileID: 4241144413977349198}
 --- !u!1 &4241144413095337718
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,7 +345,7 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: -0.52, y: 4.72}
+  m_ConnectedAnchor: {x: 7.3599997, y: -1.5300001}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0
@@ -324,7 +364,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4241144413796154024}
   - component: {fileID: 4241144413796154031}
-  - component: {fileID: 5575980232902370097}
   m_Layer: 9
   m_Name: Render
   m_TagString: Untagged
@@ -386,9 +425,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingLayerID: -1867890477
+  m_SortingLayer: 17
+  m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: 473fe3a836397c34da07a4bb8bd5d47b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -400,22 +439,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!58 &5575980232902370097
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4241144413796154025}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 1.085
 --- !u!1 &4241144413977349192
 GameObject:
   m_ObjectHideFlags: 0
@@ -485,7 +508,7 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: -0.52, y: 4.72}
+  m_ConnectedAnchor: {x: 7.3599997, y: -1.5300001}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0

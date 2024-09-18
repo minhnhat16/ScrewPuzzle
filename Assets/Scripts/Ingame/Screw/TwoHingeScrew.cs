@@ -1,14 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using Ingame;
 using UnityEngine;
 
-namespace Ingame
+namespace Ingame.Screw
 {
 public class TwoHingeScrew : Screw
 {
-    [SerializeField]  private HingeJoint2D _2ndhingeJoint2D;
-
     public override void Awake()
     {
         _transform = GetComponent<Transform>();
@@ -24,8 +19,7 @@ public class TwoHingeScrew : Screw
     {
         Debug.Log("FreeHinge in two hinge screw");
         CircleCollider2D.isTrigger = true;
-        HingeJoint2D.connectedBody = null;
-        _2ndhingeJoint2D.connectedBody = null;
+        _hingeController.FreeHinges();
     }
 }
 }
