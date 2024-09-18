@@ -86,7 +86,6 @@ namespace Ingame
             configRecords = finalList;
             ConfigStack = new Stack(configRecords);
         }
-
         private void InitBoxes()
         {
             for (int i = 0; i < boxSlots.Count; i++)
