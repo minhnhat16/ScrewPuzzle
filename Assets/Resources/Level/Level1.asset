@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
+  m_Name: Level1
+  m_EditorClassIdentifier: 
+  hingesPosition: []
+  totalColorInLevel: 4
+  connectors:
+  - idConnector: 0
+    screwName: 
+    partName: 
+  screws:
+  - idScrew: 0
+    idColor: 0
+    screwName: Screw
+    screwPosition: {x: 0, y: 0, z: 0}
+  - idScrew: 1
+    idColor: 0
+    screwName: Screw 2 Hinge
+    screwPosition: {x: 0, y: 0, z: 0}
+  bodyParts:
+  - idBodyPart: 0
+    partName: 
+    partPosition: {x: 0, y: 0, z: 0}
+    layer: 
