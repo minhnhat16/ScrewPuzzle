@@ -301,18 +301,13 @@ public class DataAPIController : MonoBehaviour
     }
     public ItemData GetItemData(ItemType type)
     {
-        //Debug.Log("DATA === ITEM DATA");
-        if (type == ItemType.Bomb)
+        string subPath = SubPathForItem(type);
+        if(subPath !=null)
         {
-            ItemData itemData = dataModel.ReadData<ItemData>(DataPath.BOMB);
+            ItemData itemData = dataModel.ReadData<ItemData>(subPath);
             return itemData;
         }
-        else if (type == ItemType.Magnet)
-        {
-            ItemData itemData = dataModel.ReadData<ItemData>(DataPath.MAGNET);
-            return itemData;
-        }
-        else return null;
+        return null;
     }
     public int GetItemTotal(ItemType type)
     {
@@ -338,23 +333,17 @@ public class DataAPIController : MonoBehaviour
             total = inTotal,
         };
         //Debug.Log("DATA === SAVE ITEMDATA");
-
-        if (type == ItemType.Bomb)
+        string subPath = SubPathForItem(type);
+        dataModel.UpdateData(subPath, itemData, () =>
         {
-            dataModel.UpdateData(DataPath.BOMB, itemData, () =>
-            {
-                return;
-            });
-        }
+            return;
+        }); 
+  
+    }
 
-        else if (type == ItemType.Magnet)
-        {
-            dataModel.UpdateData(DataPath.MAGNET, itemData, () =>
-            {
-                return;
-            });
-        }
-        else return;
+    private static string SubPathForItem(ItemType type)
+    {
+       return DataPath.ITEM + $"/{char.ToLower(type.ToString()[0]) + type.ToString().Substring(1)}";
     }
 
     public bool GetSpinData()

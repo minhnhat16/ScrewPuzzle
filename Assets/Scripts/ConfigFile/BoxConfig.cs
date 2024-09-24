@@ -1,6 +1,6 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using Enum;
-using UnityEngine;
 
 namespace ConfigFile
 {
@@ -12,13 +12,17 @@ namespace ConfigFile
         [SerializeField]
         public ColorEnum boxColor;
     }
-    public class BoxConfig: BYDataTable<BoxConfigRecord>
+
+    [CreateAssetMenu(fileName = "NewBoxConfig", menuName = "Config/BoxConfig")]
+    public class BoxConfig : ScriptableObject
     {
-        public override ConfigCompare<BoxConfigRecord> DefineConfigCompare()
+        public BoxConfigRecord[] boxConfigRecords;
+
+        // Custom method for comparing config, can be adjusted
+        public ConfigCompare<BoxConfigRecord> DefineConfigCompare()
         {
-            configCompare = new ConfigCompare<BoxConfigRecord>("name");
+            var configCompare = new ConfigCompare<BoxConfigRecord>("level");
             return configCompare;
         }
     }
 }
-

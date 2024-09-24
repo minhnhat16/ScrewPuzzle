@@ -1,6 +1,7 @@
 using System;
 using DG.Tweening;
 using Enum;
+using Managers;
 using UnityEngine;
 using IEnumerator = System.Collections.IEnumerator;
 
@@ -104,7 +105,7 @@ namespace Ingame.Screw
             int colliderLayer = _hingeController.GetIntBodyLayer(0);
 
             // Tạo LayerMask chứa tất cả layer từ 10-26
-            LayerMask layersInRange = IngameController.instance.GetLayerMaskForRange(10, colliderLayer - 1 );
+            LayerMask layersInRange = IngameController.Instance.GetLayerMaskForRange(10, colliderLayer - 1 );
 
             // Thực hiện phép kiểm tra va chạm
             Collider2D[] colliders = Physics2D.OverlapCircleAll(colliderPosition, radius, layersInRange);

@@ -22,16 +22,19 @@ namespace Ingame
         [SerializeField] private Collider2D _collider;
 
         [SerializeField] private bool isBoxFull;
+
         [SerializeField] private int nextEmptyIndex = -1;
         [SerializeField] public HoldScrew[] holdScrews; // Mảng các lỗ Screw
         [SerializeField] public UnityEvent<bool> onScrewBoxFull;
         [SerializeField] private ColorEnum color;
+        [SerializeField] public BoxSlot boxSlot;
 
         public Animator animator;
         public float moveDuration = 1f;  // Thời gian di chuyển nắp
         public float squashAmount = 0.9f;  // Độ co giãn
         public float squashDuration = 0.2f;
         public Vector3 initialPosition;
+        public bool isMoving;
 
         public bool IsBoxFull
         {
@@ -55,17 +58,11 @@ namespace Ingame
             get => _anchor.transform.position;
             set => transform.position = value;
         }
-        
+    
         private void OnEnable()
         {
         }
 
-        /*public ScrewBox(Vector3 position, BoxConfigRecord config,bool isBoxFull)
-        {
-            this.color= config.boxColor;
-            this.position = position;
-            this.isBoxFull = isBoxFull;
-        }*/
         public void OnInit(Vector3 position, BoxConfigRecord config, bool isBoxFull)
         {
             this.color= config.boxColor;
@@ -128,6 +125,7 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull)=>
             {
+                isBoxFull = boxFull;
                 callback?.Invoke(boxFull);
             });
         }
@@ -149,13 +147,15 @@ namespace Ingame
             mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f) // Di chuyển theo trục Y
                     .SetEase(Ease.InCirc).OnComplete(TunOffScrews))
                 .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f), 0.5f, 1) // Punch scale
-                    .SetEase(Ease.InBack).OnComplete(()=>callback.Invoke(true)))
+                    .SetEase(Ease.InBack).OnComplete(()=>
+                    {
+                        callback.Invoke(true);
+                    }))
                 .Append(transform.DOMove(new Vector3(10, 10, 0), 2f, false) // Di chuyển đến vị trí mới
                     .SetEase(Ease.OutBounce)).OnComplete(()=>
                         {
                             Reset();
                             gameObject.SetActive(false);
-
                         });
         }
 
@@ -171,15 +171,14 @@ namespace Ingame
             //particle shiny play
         }
         // Hàm di chuyển Screw vào một lỗ trống trong CrewBox
-        public void AddScrew(Screw.Screw screw)
+        public virtual void AddScrew(Screw.Screw screw)
         {
             // Nếu màu screw không khớp, kết thúc ngay
             if (screw.Color != color)
             {
                 Debug.LogWarning("Screw color mismatch!");
-                return;
+               return;
             }
-
             // Nếu đã biết vị trí trống
             if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Length)
             {
@@ -188,6 +187,7 @@ namespace Ingame
                     holdScrews[nextEmptyIndex].AddScrew(screw);
                     UpdateNextEmptyIndex(); // Tìm vị trí trống mới
                     return;
+
                 }
             }
 
@@ -230,13 +230,7 @@ namespace Ingame
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
             render.material.color = newColor;
-        }
-
-    
-
-        public void Initialize(Vector3 initialPosition, bool isLocked)
-        {
-            throw new NotImplementedException();
+                
         }
 
     }

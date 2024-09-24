@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
+using Managers;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour

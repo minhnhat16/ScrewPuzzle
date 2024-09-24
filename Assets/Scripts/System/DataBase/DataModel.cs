@@ -243,18 +243,26 @@ public class DataModel : MonoBehaviour
         inf.isNewPlayer = true;
         userData.userInfo = inf;
 
+        
+        ///item
         userData.itemInventory = new();
-        ItemData newBombInvent = new();
-        newBombInvent.type = ItemType.Bomb;
-        newBombInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Bomb.ToString(), 5);
-        ItemData newMagnetInvent = new();
-        newMagnetInvent.type = ItemType.Magnet;
-        newMagnetInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 5);
-        userData.itemInventory.bombItem = newBombInvent;
-        userData.itemInventory.magnetItem = newMagnetInvent;
-        LevelInfo levelInf = new();
-        levelInf.level = 1;
-        levelInf.expLevel = 0.0f;
+        ItemData newAddHoldInvent = new();
+        newAddHoldInvent.type = ItemType.AddHold;
+        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
+        ItemData newAddBoxInvent = new();
+        newAddBoxInvent.type = ItemType.AddBox;
+        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
+        ItemData newClearOnScrewInvent = new();
+
+        newClearOnScrewInvent.type = ItemType.AddBox;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
+        userData.itemInventory.magnetItem = newClearOnScrewInvent;
+       //leve
+        LevelInfo levelInf = new()
+        {
+            level = 1,
+            expLevel = 0.0f
+        };
         userData.levelInfo = levelInf;
 
         ListCardColor defaultColor = new();
@@ -429,15 +437,19 @@ public class DataModel : MonoBehaviour
         inf.isNewPlayer = true;
         userData.userInfo = inf;
 
+        ///item
         userData.itemInventory = new();
-        ItemData newBombInvent = new();
-        newBombInvent.type = ItemType.Bomb;
-        newBombInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Bomb.ToString(), 5);
-        ItemData newMagnetInvent = new();
-        newMagnetInvent.type = ItemType.Magnet;
-        newMagnetInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 5);
-        userData.itemInventory.bombItem = newBombInvent;
-        userData.itemInventory.magnetItem = newMagnetInvent;
+        ItemData newAddHoldInvent = new();
+        newAddHoldInvent.type = ItemType.AddHold;
+        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
+        ItemData newAddBoxInvent = new();
+        newAddBoxInvent.type = ItemType.AddBox;
+        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
+        ItemData newClearOnScrewInvent = new();
+
+        newClearOnScrewInvent.type = ItemType.AddBox;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
+        userData.itemInventory.magnetItem = newClearOnScrewInvent;
         LevelInfo levelInf = new();
         levelInf.level = 1;
         levelInf.expLevel = 0.0f    ;

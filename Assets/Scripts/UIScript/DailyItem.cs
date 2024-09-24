@@ -120,21 +120,21 @@ public class DailyItem : MonoBehaviour
 
         switch (item)
         {
-            case DailyReward.Gold_S:
+            case DailyReward.GoldS:
                 DataAPIController.instance.AddGold(intAmount, null);
                 break;
-            case DailyReward.Gold_M:
+            case DailyReward.GoldM:
                 // Add logic for medium gold reward
                 //Debug.Log("Reward: Medium Gold");
                 DataAPIController.instance.AddGold(intAmount, null);
                 break;
-            case DailyReward.Bomb:
+            case DailyReward.AddHold:
                 //Debug.Log("Reward: Bomb");
                 // Add logic for bomb reward
-                DataAPIController.instance.AddItemTotal(ItemType.Bomb, intAmount);
+                DataAPIController.instance.AddItemTotal(ItemType.AddHold, intAmount);
 
                 break;
-            case DailyReward.Gold_L:
+            case DailyReward.GoldL:
                 //Debug.Log("Reward: Large Gold");
                 // Add logic for large gold reward
                 DataAPIController.instance.AddGold(intAmount, null);
@@ -144,16 +144,17 @@ public class DailyItem : MonoBehaviour
                 // Add logic for gem reward
                 DataAPIController.instance.AddGem(intAmount);
                 break;
-            case DailyReward.Magnet:
+            case DailyReward.AddBox:
                 //Debug.Log("Reward: Magnet");
                 // Add logic for magnet reward
-                DataAPIController.instance.AddItemTotal(ItemType.Magnet, intAmount);
+                DataAPIController.instance.AddItemTotal(ItemType.AddBox, intAmount);
                 break;
             case DailyReward.Bonus:
                 //Debug.Log("Reward: Bonus");
                 // Add logic for bonus reward
-                DataAPIController.instance.AddItemTotal(ItemType.Magnet, 10);
-                DataAPIController.instance.AddItemTotal(ItemType.Magnet, 10);
+                DataAPIController.instance.AddItemTotal(ItemType.AddHold, 10);
+                DataAPIController.instance.AddItemTotal(ItemType.AddBox, 10);
+                DataAPIController.instance.AddItemTotal(ItemType.ClearOneScrew, 10);
                 DataAPIController.instance.AddGold(1500, null);
                 DataAPIController.instance.AddGem(20);
                 break;

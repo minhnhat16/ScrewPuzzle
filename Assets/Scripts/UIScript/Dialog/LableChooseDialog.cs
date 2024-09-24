@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Managers;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -117,7 +118,6 @@ public class LableChooseDialog : BaseDialog
         if (lable != Lable.Collection) return;
         SwitchButtonChose(lable);
         CollectionParam param = new();
-        param.ownedCard = DataAPIController.instance.GetCardDataCount(IngameController.instance.CurrentCardType);
         param.totalCard = ConfigFileManager.Instance.ColorConfig.GetAllRecord().Count;
         if (ViewManager.Instance.currentView.viewIndex != ViewIndex.CollectionView)
         {

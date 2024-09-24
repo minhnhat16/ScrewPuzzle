@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Enum;
+using Managers;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,10 +11,16 @@ namespace Ingame
    public class ArrayScrew : MonoBehaviour
    {
       public static ArrayScrew instance;
+      [SerializeField] private int coutHoldActive;
       [SerializeField]   private SpriteRenderer spriteRenderer;
       public HoldScrew[] holdScrews; // Mảng các HoldScrew (ô chứa screw)
-      public UnityEvent onHoldScrewsFull; // Sự kiện khi holdScrews đầy
-      
+      public UnityEvent onHoldScrewsFull = new (); // Sự kiện khi holdScrews đầy
+
+      private void OnEnable()
+      {
+         onHoldScrewsFull.AddListener(ScrewFullEvent) ;
+      }
+
       public void Awake()
       {
          if (instance == null)
@@ -23,26 +33,40 @@ namespace Ingame
 
       private void Start()
       {
-         if (onHoldScrewsFull == null)
-            onHoldScrewsFull = new UnityEvent();  // Khởi tạo sự kiện nếu chưa có
+     
          spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-            HoldAlignment();
+         coutHoldActive = 5;
+         HoldAlignment();
       }
 
+      public void SpawnNewHold()
+      {
+         coutHoldActive++;
+         holdScrews[coutHoldActive - 1].gameObject.SetActive(true);
+         var spacing = spriteRenderer.bounds.size.x / (holdScrews.Length + 1);
+         var startX = spriteRenderer.bounds.min.x;
+         for (var i = 0; i < coutHoldActive; i++)
+         {
+            // Each screw is placed at (startX + spacing * (i + 1)) along the x-axis
+            var newPosition = new Vector3(startX + spacing * (i + 1), holdScrews[i].transform.localPosition.y, holdScrews[i].transform.localPosition.z);
+            holdScrews[i].transform.localPosition = newPosition;
+         }
+      }
       private void HoldAlignment()
       {
          if (holdScrews.Length == 0) return;
     
          // Calculate the total width and spacing between screws
-         float spacing = spriteRenderer.bounds.size.x / (holdScrews.Length + 1);
-         float startX = spriteRenderer.bounds.min.x;
-
-         for (int i = 0; i < holdScrews.Length; i++)
+         var spacing = spriteRenderer.bounds.size.x / (holdScrews.Length + 1);
+         var startX = spriteRenderer.bounds.min.x;
+         for (var i = 0; i < coutHoldActive; i++)
          {
             // Each screw is placed at (startX + spacing * (i + 1)) along the x-axis
-            Vector3 newPosition = new Vector3(startX + spacing * (i + 1), holdScrews[i].transform.localPosition.y, holdScrews[i].transform.localPosition.z);
+            var newPosition = new Vector3(startX + spacing * (i + 1), holdScrews[i].transform.localPosition.y, holdScrews[i].transform.localPosition.z);
             holdScrews[i].transform.localPosition = newPosition;
+            holdScrews[i].gameObject.SetActive(true);
          }
+     
       }
       // Hàm thêm Screw vào một ô trống trong holdScrew
       public bool AddScrew(Screw.Screw screw)
@@ -62,6 +86,26 @@ namespace Ingame
          return false; // Trả về false nếu không có ô trống
       }
 
+      public List<Screw.Screw> ListScrewSameColor(ColorEnum color)
+      {
+         List<Screw.Screw> newList = new();
+         int count = 0;
+         for (int i = 0; i < holdScrews.Length; i++)
+         {
+            var hold = holdScrews[i];
+            if (hold.Screw == null || hold.Screw.Color != color) continue;
+            newList.Add(hold.Screw);
+            count++;
+            hold.ClearScrewOnHold();
+            if (count >= 2) break;
+         }
+         return newList;
+      }
+
+      private void ScrewFullEvent()
+      {
+         IngameController.Instance.Reset();
+      }
       // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
       private void CheckIfHoldScrewsFull()
       {

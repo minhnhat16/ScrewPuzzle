@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,12 +18,15 @@ public class CameraMain : MonoBehaviour
     public virtual  void Awake()
     {
         instance = this;
+        GetCamera();
     }
+
+
     public virtual void Start()
     {
         rate = baseAspect;
-        GetCamera();
         GetCameraAspect();
+
     }
     public void GetCamera()
     {

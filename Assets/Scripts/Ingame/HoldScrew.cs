@@ -27,6 +27,10 @@ public class HoldScrew : MonoBehaviour
         _render = GetComponentInChildren<SpriteRenderer>();
     }
 
+    public void ClearScrewOnHold()
+    {
+        screw = null;
+    }
     public void AddScrew(Screw newScrew)
     {
         if (!screw)
@@ -42,7 +46,6 @@ public class HoldScrew : MonoBehaviour
 
     public bool IsEmpty()
     {
-        if (screw != null) return false;
-        return true;
+        return screw == null;
     }
 }   

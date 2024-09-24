@@ -16,8 +16,9 @@ public enum Direction
 }
 public enum ItemType
 {
-   Magnet = 0,
-   Bomb = 1,
+   AddHold = 0,
+   AddBox = 1,
+   ClearOneScrew =2,
 }
 public enum Currency
 {
@@ -26,12 +27,13 @@ public enum Currency
 }
 public enum DailyReward
 {
-    Gold_S,
-    Gold_M,
-    Bomb,
-    Gold_L,
+    GoldS,
+    GoldM,
+    GoldL,
     Gem,
-    Magnet,
+    AddHold,
+    AddBox,
+    ClearOneScrew,
     Bonus,
 }
 public enum SpinEnum

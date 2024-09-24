@@ -72,26 +72,49 @@ public class ItemConfirmDialog : BaseDialog
     }
     public void PurchaseItem()
     {
+        // Get the current gold in the wallet
         int wallet = DataAPIController.instance.GetGold();
+
+        // Check if the user has enough gold to purchase the item
         if (wallet >= price)
         {
-            //Play successfully buy sound
-            //Debug.LogWarning("Puchasing item");
+            // Play successfully purchased sound (add sound logic here)
+
+            // Remove any previously added listeners for ads and purchase buttons
             ads.onClick.RemoveListener(PlayAds);
             buy.onClick.RemoveListener(PurchaseItem);
+
+            // Deduct the price from the wallet
             DataAPIController.instance.MinusGoldWallet(price, (isDone) =>
             {
+                if (isDone)
+                {
+                    // Successfully deducted gold; proceed with adding the item
+                    DataAPIController.instance.AddItemTotal(type, 1);
+                
+                    // Get the current gameplay view and trigger the respective item event
+                    GamePlayView view = ViewManager.Instance.currentView as GamePlayView;
+                    if (view != null)
+                    {
+                        // Check the item type and invoke the corresponding event
+                        if (type == ItemType.AddBox)
+                            view.magnetItemEvent?.Invoke(true);
+                        else if (type == ItemType.AddHold)
+                            view.bombItemEvent?.Invoke(true);
+                        else if (type == ItemType.ClearOneScrew)
+                            view.bombItemEvent?.Invoke(true);
+                    }
+
+                    // After purchase, cancel any item usage
+                    CancelUsingItem();
+                }
             });
-            //Debug.LogWarning("Puchasing item done");
-            DataAPIController.instance.AddItemTotal(type, 1);
-            GamePlayView view = ViewManager.Instance.currentView as GamePlayView;
-            if (type == ItemType.Magnet) view.magnetItemEvent.Invoke(true);
-            else if (type == ItemType.Bomb) view.bombItemEvent.Invoke(true);
-            CancelUsingItem();
         }
         else
         {
-            //play unsuccessfull sound;
+            // Play unsuccessful sound (add sound logic here)
+
+            // Not enough gold, cancel the purchase process
             CancelUsingItem();
         }
     }
@@ -101,21 +124,28 @@ public class ItemConfirmDialog : BaseDialog
         {
             var currentView = ViewManager.Instance.currentView as GamePlayView;
             if (currentView == null) return;
-            if (type == ItemType.Bomb) currentView.Bomb_Btn.interactable = true;
-            else if (type == ItemType.Magnet) currentView.Magnet_btn.interactable = true;
+            if (type == ItemType.AddBox) currentView.Bomb_Btn.interactable = true;
+            else if (type == ItemType.AddHold) currentView.Magnet_btn.interactable = true;
+            else if (type == ItemType.ClearOneScrew) currentView.Magnet_btn.interactable = true;
+
         });
     }
     void ItemCase(ItemType type)
     {
         switch (type)
         {
-            case ItemType.Bomb:
-                tutorial_lb.text = "RANDOMLY CLEAR ALL CARD IN ONE SLOT";
+            case ItemType.AddBox:
+                tutorial_lb.text = "ADD ON BOX TO THE BOX LIST";
                 bomb.SetActive(true);
                 magnet.SetActive(false);
                 break;
-            case ItemType.Magnet:
-                tutorial_lb.text = "RAMDOMLY CHOOSE ONE COLOR TO CLEAR PER SLOT";
+            case ItemType.AddHold:
+                tutorial_lb.text = "ADD ONE MORE HOLD TO YOU";
+                magnet.SetActive(true);
+                bomb.SetActive(false);
+                break;
+            case ItemType.ClearOneScrew:
+                tutorial_lb.text = "ADD ONE MORE HOLD TO YOU";
                 magnet.SetActive(true);
                 bomb.SetActive(false);
                 break;
