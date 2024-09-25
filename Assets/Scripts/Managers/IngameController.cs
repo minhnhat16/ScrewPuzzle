@@ -109,6 +109,7 @@ namespace Managers
         private IEnumerator ItemCoroutine(ItemType itemType)
         {
             yield return new WaitUntil(() => itemJustInvoke);
+            Debug.Log("Item couroutine " + itemType);
             switch (itemType)
             {
                 case ItemType.AddHold:
@@ -159,7 +160,7 @@ namespace Managers
         }
         protected IEnumerator LoadArrayScrew(Action callback)
         {
-            var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager.prefab"), transform.parent);
+            var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrew.prefab"), transform.parent);
             yield return new WaitUntil(() => arrayScrew != null);
             if (arrayScrewObj != null) this.arrayScrew = arrayScrewObj.GetComponent<ArrayScrew>();
             callback?.Invoke();

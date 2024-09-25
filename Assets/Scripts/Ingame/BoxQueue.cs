@@ -205,8 +205,6 @@ namespace Ingame
                     newBox.AddScrew(screw);
                 }
             }));
-
-
         }
 
         private void OnLastBoxClearScrew()

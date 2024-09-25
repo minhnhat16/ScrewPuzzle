@@ -1,34 +1,37 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class SpriteLibControl : MonoBehaviour
+namespace System
 {
-    public static SpriteLibControl Instance;
+    public class SpriteLibControl : MonoBehaviour
+    {
+        public static SpriteLibControl Instance;
 
-    [SerializeField]
-    private List<Sprite> _sprite;
+        private List<Sprite> sprites;
     
 
-    readonly private Dictionary<string, Sprite> spriteDict = new();
+        readonly private Dictionary<string, Sprite> spriteDict = new();
 
-    private void Awake()
-    {
-        Instance = this;
-    }
-    private void Start()
-    {
-        foreach (var sprite in _sprite)
+        private void Awake()
         {
-            spriteDict.Add(sprite.name, sprite);
+            Instance = this;
         }
-    }
+        private void Start()
+        {
+            /*foreach (var sprite in sprites)
+            {
+                spriteDict.Add(sprite.name, sprite);
+            }*/
+        }
 
-    public Sprite GetSpriteByName(string name)
-    {
-        //Debug.Log($"GetSpriteByName{name}");
-        if (spriteDict.ContainsKey(name)) return spriteDict[name];
-        else return null;
-    }
+        public Sprite GetSpriteByName(string name)
+        {
+            //Debug.Log($"GetSpriteByName{name}");
+            if (spriteDict.ContainsKey(name)) return spriteDict[name];
+            else return null;
+        }
    
     
+    }
 }

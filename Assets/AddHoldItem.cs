@@ -1,27 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using Managers;
+using UIScript;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AddHoldItem : Button
+public class AddHoldItem : ItemButton
 {
-    private Button _button;
-    private ItemType _itemType;
-    protected override void Awake()
+    public override void OnEnable()
     {
-        base.Awake();
-        _button = GetComponent<Button>();
+    }
+    public override void OnClick()
+    {
+        Debug.Log("on button click");
+        IngameController.Instance.onItemInvoke?.Invoke(Type);
     }
 
-    protected override void OnEnable()
+    public void OnButtonClicked()
     {
-        base.OnEnable();
-        _button.onClick.AddListener(OnItemClicked);
-    }
+        Debug.Log("on button click OnButtonClicked");
 
-    private void OnItemClicked()
-    {
-        IngameController.Instance.onItemInvoke.Invoke(_itemType);
     }
-}
+}   
