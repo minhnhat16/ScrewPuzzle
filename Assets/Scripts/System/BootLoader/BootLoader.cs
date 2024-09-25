@@ -46,24 +46,23 @@ public class BootLoader : MonoBehaviour
             MainScreenViewParam param = new MainScreenViewParam();
             param.totalGold = 0;
             //Debug.Log("LoadSenceCallback");
-            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
+            ViewManager.Instance.SwitchView(ViewIndex.GamePlayView, param, () =>
             {
-                DayTimeController.instance.CheckNewDay();
+                //DayTimeController.instance.CheckNewDay();
                 ZenSDK.instance.ShowAppOpen((isDone) =>
                 {
-                    DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
-                    SoundManager.instance.PlayMusic(SoundManager.Music.GamplayMusic);
-                    //Debug.LogWarning("SHOW APP OPEN ON END LOADING");
-                    if (DayTimeController.instance.isNewDay)
-                    {
-                        //Debug.Log("isnewday now go to claim spin reward");
-                        DataAPIController.instance.SetSpinData(false);
-                    }
-                    else
-                    {
-                        //Debug.Log("still in last day can't claim spin reward");
-                        //DialogManager.Instance.ShowDialog(DialogIndex.LabelChooseDialog);
-                    }
+                    //SoundManager.instance.PlayMusic(SoundManager.Music.GamplayMusic);
+                    ////Debug.LogWarning("SHOW APP OPEN ON END LOADING");
+                    //if (DayTimeController.instance.isNewDay)
+                    //{
+                    //    //Debug.Log("isnewday now go to claim spin reward");
+                    //    DataAPIController.instance.SetSpinData(false);
+                    //}
+                    //else
+                    //{
+                    //    //Debug.Log("still in last day can't claim spin reward");
+                    //    //DialogManager.Instance.ShowDialog(DialogIndex.LabelChooseDialog);
+                    //}
                 });
             });
            

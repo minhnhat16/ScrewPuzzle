@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Enum;
-using UnityEngine;
 using Ingame.Screw;
 using UnityEngine.Serialization;
 

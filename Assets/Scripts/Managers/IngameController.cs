@@ -1,7 +1,6 @@
+using Ingame;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Ingame;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -14,8 +13,9 @@ namespace Managers
         public string playerLevel;
         [SerializeField] public bool isOnMagnet;
         [SerializeField] public bool isOnBomb;
-        
+
         [SerializeField] private float exp_Current;
+        [SerializeField] private Player player;
         [SerializeField] private BoxQueue boxManager;
         [SerializeField] private ArrayScrew arrayScrew;
 
@@ -39,8 +39,8 @@ namespace Managers
             set { exp_Current = value; }
         }
 
-      
- 
+
+
 
         private void OnEnable()
         {
@@ -48,7 +48,7 @@ namespace Managers
             onItemInvoke.AddListener(ItemIvoked);
         }
 
-      
+
         private void OnDisable()
         {
             onCompleteLevel.RemoveListener(CompleteLevel);
@@ -58,7 +58,7 @@ namespace Managers
             Debug.Log("Level complete");
         }
 
-  
+
 
         private void Awake()
         {
@@ -80,7 +80,7 @@ namespace Managers
 
         public void Init(Action callback)
         {
-           LoadIngameAsset(callback);
+            LoadIngameAsset(callback);
         }
 
         public IEnumerator InitIngameCoroutine(Action callback)
@@ -93,12 +93,12 @@ namespace Managers
         public LayerMask GetLayerMaskForRange(int startLayer, int endLayer)
         {
             LayerMask mask = 0;
-    
+
             for (var i = startLayer; i <= endLayer; i++)
             {
                 mask |= (1 << i); // Set the bit for each layer in the range
             }
-    
+
             return mask;
         }
 
@@ -134,33 +134,47 @@ namespace Managers
 
         private void AddBox(Action callback)
         {
-            
+
             callback?.Invoke();
         }
         public void LoadIngameAsset(Action callback)
         {
             StartCoroutine(LoadIngameAssetCoroutine(callback));
         }
-        public IEnumerator LoadIngameAssetCoroutine(Action callback)
+        public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
             bool arrayScrewInitDone = false;
             bool boxQueueInitDone = false;
-            StartCoroutine(LoadArrayScrew(() => arrayScrewInitDone = true));
+            bool playerInitDone = false;
             StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));
-            yield return new WaitUntil(() => arrayScrewInitDone && boxQueueInitDone);
+            StartCoroutine(LoadPlayer(() => playerInitDone = true));
+            StartCoroutine(LevelManager.Instance.LoadLevel(Convert.ToInt32(playerLevel), () =>
+            {
+                Debug.Log("Load Level Done");
+            }));
+            StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
+            yield return new WaitUntil(() => arrayScrewInitDone && boxQueueInitDone && playerInitDone);
+            callback?.Invoke();
+        }
+        protected IEnumerator LoadPlayer(Action callback)
+        {
+
+            var playerGameObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Player"), transform);
+            yield return new WaitUntil(() => playerGameObject != null);
+            if (playerGameObject != null) this.player = playerGameObject.GetComponent<Player>();
             callback?.Invoke();
         }
         protected IEnumerator LoadBoxManager(Action callback)
         {
-            
-            var boxManagerGameobject =  Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager.prefab") , transform.parent);
+
+            var boxManagerGameobject = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager"), transform);
             yield return new WaitUntil(() => boxManagerGameobject != null);
             if (boxManagerGameobject != null) this.boxManager = boxManagerGameobject.GetComponent<BoxQueue>();
             callback?.Invoke();
         }
         protected IEnumerator LoadArrayScrew(Action callback)
         {
-            var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrew.prefab"), transform.parent);
+            var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrews"), transform);
             yield return new WaitUntil(() => arrayScrew != null);
             if (arrayScrewObj != null) this.arrayScrew = arrayScrewObj.GetComponent<ArrayScrew>();
             callback?.Invoke();
@@ -173,9 +187,9 @@ namespace Managers
         {
             SceneManager.LoadScene("SampleScene");
         }
-   
+
     }
 }
- 
-  
+
+
 

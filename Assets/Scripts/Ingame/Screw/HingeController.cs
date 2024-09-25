@@ -18,16 +18,15 @@ namespace Ingame.Screw
             InitHingeJoints();
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
 
         public virtual void InitHingeJoints()
         {
             for (int i  = 0; i < hingeJoint2D.Count; i++)
             {
+                if (bodyConnect.Count == 1)
+                {
+                    hingeJoint2D[i].connectedBody = bodyConnect[0];
+                }
                 hingeJoint2D[i].connectedBody = bodyConnect[i];
             }
         }
@@ -50,7 +49,7 @@ namespace Ingame.Screw
 
         public virtual void FreeHinges()
         {
-            for (int i = 0; i < bodyConnect.Count; i++)
+            for (int i = 0; i < hingeJoint2D.Count; i++)
             {
                 hingeJoint2D[i].connectedBody = null;   
             }

@@ -54,67 +54,67 @@ public class GamePlayView : BaseView
 
     private void OnEnable()
     {
-        DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, (data) =>
-        {
-            if (data == null) return;
-            CurrencyWallet newData = data as CurrencyWallet;
-            gold = newData.amount;
-            gold_lb.text = GameManager.instance.DevideCurrency(gold);
-        });
-        DataTrigger.RegisterValueChange(DataPath.GEMINVENT, (data) =>
-        {
-            if (data == null) return;
-            CurrencyWallet newData = data as CurrencyWallet;
-            gem = newData.amount;
-            gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        });
-        DataTrigger.RegisterValueChange(DataPath.MAGNET, (data) =>
-        {
-            if (data == null) return;
-            ItemData newData = data as ItemData;
-            if (newData.total > 0) magnet_lb.text = $"{newData.total}";
-            else magnet_lb.text = "0";
-        });
-        DataTrigger.RegisterValueChange(DataPath.BOMB, (data) =>
-         {
-             if (data == null) return;
-             ItemData newData = data as ItemData;
-             if (newData.total > 0) bomb_lb.text = $"{newData.total}";
-             else bomb_lb.text = "0";
+        //DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, (data) =>
+        //{
+        //    if (data == null) return;
+        //    CurrencyWallet newData = data as CurrencyWallet;
+        //    gold = newData.amount;
+        //    gold_lb.text = GameManager.instance.DevideCurrency(gold);
+        //});
+        //DataTrigger.RegisterValueChange(DataPath.GEMINVENT, (data) =>
+        //{
+        //    if (data == null) return;
+        //    CurrencyWallet newData = data as CurrencyWallet;
+        //    gem = newData.amount;
+        //    gem_lb.text = GameManager.instance.DevideCurrency(gem);
+        //});
+        //DataTrigger.RegisterValueChange(DataPath.MAGNET, (data) =>
+        //{
+        //    if (data == null) return;
+        //    ItemData newData = data as ItemData;
+        //    if (newData.total > 0) magnet_lb.text = $"{newData.total}";
+        //    else magnet_lb.text = "0";
+        //});
+        //DataTrigger.RegisterValueChange(DataPath.BOMB, (data) =>
+        // {
+        //     if (data == null) return;
+        //     ItemData newData = data as ItemData;
+        //     if (newData.total > 0) bomb_lb.text = $"{newData.total}";
+        //     else bomb_lb.text = "0";
 
-         });
-        DataTrigger.RegisterValueChange(DataPath.LASTSAVETIME, (data) =>
-        {
-            if (data == null) return;
-            string newData = data as string;
+        // });
+        //DataTrigger.RegisterValueChange(DataPath.LASTSAVETIME, (data) =>
+        //{
+        //    if (data == null) return;
+        //    string newData = data as string;
 
-        });
-        DataTrigger.RegisterValueChange(DataPath.MAXCARDPOOL, (data) =>
-        {
-            if (data == null) return;
-            int newData = (int)data;
+        //});
+        //DataTrigger.RegisterValueChange(DataPath.MAXCARDPOOL, (data) =>
+        //{
+        //    if (data == null) return;
+        //    int newData = (int)data;
 
-        });
+        //});
 
-        addHoldBtn.onClick.AddListener(AddHoldItemClick);
-        addBoxBtn.onClick.AddListener(AddBoxItemClick);
-        settingBtn.onClick.AddListener(SettingButton);
-        onNewPlayer.AddListener(OnNewPlayer);
+        //addHoldBtn.onClick.AddListener(AddHoldItemClick);
+        //addBoxBtn.onClick.AddListener(AddBoxItemClick);
+        //settingBtn.onClick.AddListener(SettingButton);
+        //onNewPlayer.AddListener(OnNewPlayer);
     }
     private void OnDisable()
     {
-        addHoldBtn.onClick.RemoveListener(AddHoldItemClick);
-        addBoxBtn.onClick.RemoveListener(AddBoxItemClick);
-        settingBtn.onClick.RemoveListener(SettingButton);
-        onNewPlayer.RemoveListener(OnNewPlayer);
+        //addHoldBtn.onClick.RemoveListener(AddHoldItemClick);
+        //addBoxBtn.onClick.RemoveListener(AddBoxItemClick);
+        //settingBtn.onClick.RemoveListener(SettingButton);
+        //onNewPlayer.RemoveListener(OnNewPlayer);
     }
     public override void OnStartShowView()
     {
         base.OnStartShowView();
-        expBar = GetComponentInChildren<ExperienceBar>();
-        expBar.Init();
-        StartCoroutine(GetItemFormData());
-        StartCoroutine(BreakCouroutine());
+        //expBar = GetComponentInChildren<ExperienceBar>();
+        //expBar.Init();
+        //StartCoroutine(GetItemFormData());
+        //StartCoroutine(BreakCouroutine());
     }
     public string CheckTotalItem(int total)
     {
@@ -129,19 +129,19 @@ public class GamePlayView : BaseView
     public override void Setup(ViewParam viewParam)
     {
         base.Setup(viewParam);
-        GamePlayViewParam param = viewParam as GamePlayViewParam;
-        isNewPlayer = param.isNewPlayer;
-        int gold = DataAPIController.instance.GetGold();
-        int gem = DataAPIController.instance.GetGem();
-        this.gold = gold;
-        this.gem = gem;
+        //GamePlayViewParam param = viewParam as GamePlayViewParam;
+        //isNewPlayer = param.isNewPlayer;
+        //int gold = DataAPIController.instance.GetGold();
+        //int gem = DataAPIController.instance.GetGem();
+        //this.gold = gold;
+        //this.gem = gem;
 
-        gold_lb.text = GameManager.instance.DevideCurrency(gold);
-        gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        if (isNewPlayer) onNewPlayer?.Invoke(isNewPlayer);
+        //gold_lb.text = GameManager.instance.DevideCurrency(gold);
+        //gem_lb.text = GameManager.instance.DevideCurrency(gem);
+        //if (isNewPlayer) onNewPlayer?.Invoke(isNewPlayer);
 
-        addHoldBtn.interactable = true;
-        addBoxBtn.interactable = true;
+        //addHoldBtn.interactable = true;
+        //addBoxBtn.interactable = true;
     }
     public void SetTimeCounter(DateTime time)
     {

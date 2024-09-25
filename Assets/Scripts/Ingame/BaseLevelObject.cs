@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,6 +9,11 @@ namespace Ingame
     {
         public void Awake()
         {
+        }
+
+        public void Init()
+        {
+            Debug.Log("base leve object init");   
         }
 
         // Start is called before the first frame update

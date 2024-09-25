@@ -168,7 +168,7 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
-  _hingeController: {fileID: 0}
+  _hingeController: {fileID: 5930561060451138023}
 --- !u!58 &6748274948914760515
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -345,7 +345,7 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: 0.9961004, y: -3.0264}
+  m_ConnectedAnchor: {x: -2.3500001, y: -3.4899998}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0
@@ -508,7 +508,7 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: 0.9961004, y: -3.0264}
+  m_ConnectedAnchor: {x: -2.3500001, y: -3.4899998}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0
