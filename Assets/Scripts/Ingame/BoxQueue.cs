@@ -22,6 +22,7 @@ namespace Ingame
         public float xLeftCam;
         public int activeBoxCount = 2; // Số box mặc định mở
         public Stack ConfigStack = new Stack();
+        public BoxConfig boxConfig;
         public List<BoxConfigRecord> configRecords = new List<BoxConfigRecord>();
         public List<ScrewBox> screwBoxes;
         public Stack<ScrewBox> boxesStack;
@@ -69,12 +70,15 @@ namespace Ingame
 
         private void InitAndShuffleColor()
         {
+            configRecords = boxConfig.GetAllRecord().ToList();
+
             if (configRecords == null) return;
 
             // Separate items based on the number of screw holes
-            List<BoxConfigRecord> threeHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.numberOfScrewHoles == 3).ToList();
-            List<BoxConfigRecord> twoHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.numberOfScrewHoles == 2).ToList();
-            List<BoxConfigRecord> oneHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.numberOfScrewHoles == 1).ToList();
+            List<BoxConfigRecord> threeHoldList = configRecords
+                .Where(record => record.NumberOfScrewHoles == 3).ToList();
+            List<BoxConfigRecord> twoHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.NumberOfScrewHoles == 2).ToList();
+            List<BoxConfigRecord> oneHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.NumberOfScrewHoles== 1).ToList();
 
             // Shuffle the list of items with 3 screw holes
             threeHoldList = threeHoldList.OrderBy(x => Guid.NewGuid()).ToList();
@@ -82,11 +86,11 @@ namespace Ingame
             // Ensure no adjacent items in threeHoldList have the same color
             for (int i = 1; i < threeHoldList.Count; i++)
             {
-                if (threeHoldList[i].boxColor == threeHoldList[i - 1].boxColor)
+                if (threeHoldList[i].BoxColor == threeHoldList[i - 1].BoxColor)
                 {
                     // If two adjacent items have the same color, find a different color to swap
                     int swapIndex = i + 1;
-                    while (swapIndex < threeHoldList.Count && threeHoldList[swapIndex].boxColor == threeHoldList[i].boxColor)
+                    while (swapIndex < threeHoldList.Count && threeHoldList[swapIndex].BoxColor == threeHoldList[i].BoxColor)
                     {
                         swapIndex++;
                     }
@@ -150,7 +154,10 @@ namespace Ingame
                 var slot = slots[i];
                 var pos = CalculateInitialPosition(i);
                 slot.Initialize(pos,false,box);
-                StartCoroutine(MoveNewBoxToLastBox(box, slot));
+                StartCoroutine(MoveNewBoxToLastBox(box, slot, (complete) =>
+                {
+                    FindBoxActiveHaveSameColorWithArray(box);
+                }));
             }
         }
         private Vector3 CalculateInitialPosition(int index)
@@ -198,21 +205,39 @@ namespace Ingame
             if (newBox == null) return;
             StartCoroutine(MoveNewBoxToLastBox(newBox, currentSlot, (onCompleteClearBoxes) =>
             {
-                var screwSameColor = ArrayScrew.instance.ListScrewSameColor(newBox.Color);
-                if (screwSameColor == null) return;
-                foreach (var screw in screwSameColor)
+                List<ScrewBox> listActive = screwBoxes.Where(box => box.isActiveAndEnabled).ToList();
+                listActive.Reverse();
+                if (listActive.Count > 0)
                 {
-                    newBox.AddScrew(screw);
+                    foreach (var box in listActive)
+                    {
+                        FindBoxActiveHaveSameColorWithArray(box);
+                    }
+                }
+                else
+                {
+                    FindBoxActiveHaveSameColorWithArray(newBox);
                 }
             }));
         }
 
+        private void FindBoxActiveHaveSameColorWithArray(ScrewBox box)
+        {
+            var screwSameColor = ArrayScrew.instance.ListScrewSameColor(box.Color,++box.NextEmptyIndex);
+            if (screwSameColor == null) return;
+            foreach (var screw in screwSameColor)
+            {
+                box.AddScrew(screw);
+            }
+        }
+
+     
         private void OnLastBoxClearScrew()
         {
             Debug.LogError(onCompleteClearBoxes != null
                 ? "OnCompleteClearBoxes is not null and can ivoke"
                 : "OnCompleteClearBoxes is null");
-            onCompleteClearBoxes.Invoke(onCompleteClearBoxes != null);
+            if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(onCompleteClearBoxes != null);
         }
         // ReSharper restore Unity.ExpensiveCode
         private IEnumerator MoveNewBoxToLastBox(ScrewBox newBox, BoxSlot slot, Action<bool> callback = null)

@@ -8,7 +8,7 @@ namespace System
     {
         public static SpriteLibControl Instance;
 
-        private List<Sprite> sprites;
+        [SerializeField]  private List<Sprite> sprites;
     
 
         readonly private Dictionary<string, Sprite> spriteDict = new();
@@ -25,11 +25,10 @@ namespace System
             }*/
         }
 
-        public Sprite GetSpriteByName(string name)
+        public Sprite GetSpriteByName(string spriteName)
         {
             //Debug.Log($"GetSpriteByName{name}");
-            if (spriteDict.ContainsKey(name)) return spriteDict[name];
-            else return null;
+            return spriteDict.GetValueOrDefault(spriteName);
         }
    
     

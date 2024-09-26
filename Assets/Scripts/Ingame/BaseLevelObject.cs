@@ -27,8 +27,11 @@ namespace Ingame
 
         }
 
-    
-        
+
+        public void SaveIvoke()
+        {
+            
+        }
         
     }
 }

@@ -8,7 +8,26 @@ namespace Ingame.Screw
     {
         [FormerlySerializedAs("_layer")] [SerializeField] private LayerMask layer;
         [SerializeField] private List<Rigidbody2D> bodyConnect;
-        [FormerlySerializedAs("_hingeJoint2D")] [SerializeField] private List<HingeJoint2D> hingeJoint2D;
+
+        public LayerMask Layer
+        {
+            get => layer;
+            set => layer = value;
+        }
+
+        public List<Rigidbody2D> BodyConnect
+        {
+            get => bodyConnect;
+            set => bodyConnect = value;
+        }
+
+        public List<HingeJoint2D> HingeJoint2D
+        {
+            get => hingeJoint2D;
+            set => hingeJoint2D = value;
+        }
+
+        [SerializeField] private List<HingeJoint2D> hingeJoint2D;
 
         
        

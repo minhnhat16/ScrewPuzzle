@@ -137,7 +137,7 @@ Transform:
   m_GameObject: {fileID: 153449302129994269}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7379008511356133610}
@@ -179,10 +179,13 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   color: 0
+  boxSlot: {fileID: 0}
   animator: {fileID: 0}
   moveDuration: 1
   squashAmount: 0.9
   squashDuration: 0.2
+  initialPosition: {x: 0, y: 0, z: 0}
+  isMoving: 0
 --- !u!1 &1188878866561535970
 GameObject:
   m_ObjectHideFlags: 0

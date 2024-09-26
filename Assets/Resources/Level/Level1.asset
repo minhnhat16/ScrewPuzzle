@@ -14,21 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hingesPosition: []
   totalColorInLevel: 4
-  connectors:
-  - idConnector: 0
-    screwName: 
-    partName: 
+  layer: 0
+  connectors: {fileID: 0}
   screws:
   - idScrew: 0
     idColor: 0
     screwName: Screw
     screwPosition: {x: 0, y: 0, z: 0}
+    listRigidBodyConnections:
+    - {fileID: 0}
+    listHingeJoint:
+    - {fileID: 0}
   - idScrew: 1
     idColor: 0
     screwName: Screw 2 Hinge
     screwPosition: {x: 0, y: 0, z: 0}
+    listRigidBodyConnections: []
+    listHingeJoint: []
   bodyParts:
   - idBodyPart: 0
     partName: 
     partPosition: {x: 0, y: 0, z: 0}
-    layer: 
+    layer: 0

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.ConfigFile;
 using UnityEngine;
 
 public class ConfigFileManager : MonoBehaviour

@@ -7,7 +7,7 @@ public class TwoHingeScrew : Screw
     public override void Awake()
     {
         _transform = GetComponent<Transform>();
-        position = GetComponent<Transform>().position;
+        Position = GetComponent<Transform>().position;
         // HingeJoint2D = GetComponent<HingeJoint2D>();
         CircleCollider2D = GetComponentInChildren<CircleCollider2D>();
         Renderer = GetComponentInChildren<SpriteRenderer>();
@@ -19,7 +19,7 @@ public class TwoHingeScrew : Screw
     {
         Debug.Log("FreeHinge in two hinge screw");
         CircleCollider2D.isTrigger = true;
-        _hingeController.FreeHinges();
+        hingeController.FreeHinges();
     }
 }
 }

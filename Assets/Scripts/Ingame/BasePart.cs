@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Security.Cryptography;
+using UnityEditor.U2D.Path;
 using UnityEngine;
 
 namespace Ingame
@@ -19,7 +20,7 @@ namespace Ingame
             set => renderer = value;
         }
 
-        public virtual Collider2D Collider
+        public virtual PolygonCollider2D Collider
         {
             get => collider;
             set => collider = value;
@@ -29,7 +30,7 @@ namespace Ingame
         [SerializeField] private Rigidbody2D body;
         [SerializeField] private SpriteRenderer renderer;
         [SerializeField] private SpriteRenderer outLine;
-        [SerializeField] private Collider2D collider;
+        [SerializeField] private PolygonCollider2D collider;
         private Coroutine checkFallingRoutine;
         public bool IsFalling
         {
@@ -40,7 +41,7 @@ namespace Ingame
         public SpriteRenderer OutLine => outLine;
 
         public Action OnStateChanged;
-        public BasePart(Rigidbody2D body, SpriteRenderer renderer, Collider2D collider)
+        public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
         {
             this.body = body;
             this.renderer = renderer;
@@ -51,7 +52,6 @@ namespace Ingame
             body = GetComponent<Rigidbody2D>();
             renderer = GetComponent<SpriteRenderer>();
             outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
-            collider = GetComponent<Collider2D>();
         }
 
         // Start is called before the first frame update
@@ -60,13 +60,23 @@ namespace Ingame
             StartFallingCheck(); 
         }
 
-    
+        public IEnumerator Init(SpriteRenderer render, Action callBack = null)
+        {
+            yield return new WaitForSeconds(0.125f);
+            collider = GetComponent<PolygonCollider2D>();
+            collider.pathCount = 0;
+            this.renderer = render;
+            collider.SetPath(0,renderer.sprite.vertices);
+        }
+
+
+        private void SetUpCollider()
+        {
+            
+        }
         public void StartFallingCheck()
         {
-            if (checkFallingRoutine == null)
-            {
-                checkFallingRoutine = StartCoroutine(CheckFalling());
-            }
+            checkFallingRoutine ??= StartCoroutine(CheckFalling());
         }
 
         // Coroutine để kiểm tra trạng thái rơi

@@ -24,6 +24,13 @@ namespace Ingame
         [SerializeField] private bool isBoxFull;
 
         [SerializeField] private int nextEmptyIndex = -1;
+
+        public int NextEmptyIndex
+        {
+            get => nextEmptyIndex;
+            set => nextEmptyIndex = value;
+        }
+
         [SerializeField] public HoldScrew[] holdScrews; // Mảng các lỗ Screw
         [SerializeField] public UnityEvent<bool> onScrewBoxFull;
         [SerializeField] private ColorEnum color;
@@ -65,7 +72,7 @@ namespace Ingame
 
         public void OnInit(Vector3 position, BoxConfigRecord config, bool isBoxFull)
         {
-            this.color= config.boxColor;
+            this.color= config.BoxColor;
             this.Position = position;
             this.isBoxFull = isBoxFull;
         }

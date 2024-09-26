@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.ConfigFile;
 using Enum;
 
 namespace ConfigFile
@@ -8,18 +9,16 @@ namespace ConfigFile
     public class BoxConfigRecord
     {
         [SerializeField]
-        public int numberOfScrewHoles;
+        public int NumberOfScrewHoles;
         [SerializeField]
-        public ColorEnum boxColor;
+        public ColorEnum BoxColor;
     }
-
     [CreateAssetMenu(fileName = "NewBoxConfig", menuName = "Config/BoxConfig")]
-    public class BoxConfig : ScriptableObject
+    public class BoxConfig : BYDataTable<BoxConfigRecord>
     {
-        public BoxConfigRecord[] boxConfigRecords;
-
+        
         // Custom method for comparing config, can be adjusted
-        public ConfigCompare<BoxConfigRecord> DefineConfigCompare()
+        public override ConfigCompare<BoxConfigRecord> DefineConfigCompare()
         {
             var configCompare = new ConfigCompare<BoxConfigRecord>("level");
             return configCompare;

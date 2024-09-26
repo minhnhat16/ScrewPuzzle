@@ -86,18 +86,17 @@ namespace Ingame
          return false; // Trả về false nếu không có ô trống
       }
 
-      public List<Screw.Screw> ListScrewSameColor(ColorEnum color)
+      public List<Screw.Screw> ListScrewSameColor(ColorEnum color, int numberScrewCanTake)
       {
          List<Screw.Screw> newList = new();
-         int count = 0;
-         for (int i = 0; i < holdScrews.Length; i++)
+         var count = numberScrewCanTake;
+         foreach (var hold in holdScrews)
          {
-            var hold = holdScrews[i];
             if (hold.Screw == null || hold.Screw.Color != color) continue;
             newList.Add(hold.Screw);
-            count++;
+            count--;
             hold.ClearScrewOnHold();
-            if (count >= 2) break;
+            if (count > 2) break;
          }
          return newList;
       }

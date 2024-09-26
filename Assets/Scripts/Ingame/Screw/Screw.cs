@@ -3,6 +3,7 @@ using DG.Tweening;
 using Enum;
 using Managers;
 using UnityEngine;
+using UnityEngine.Serialization;
 using IEnumerator = System.Collections.IEnumerator;
 
 namespace Ingame.Screw
@@ -20,9 +21,17 @@ namespace Ingame.Screw
 
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
-        [SerializeField] protected HingeController _hingeController;
+         [SerializeField] protected HingeController hingeController;
+
+        public HingeController HingeController
+        {
+            get => hingeController;
+            set => hingeController = value;
+        }
+
+        [SerializeField] private bool isShaking;
         protected Transform _transform { get; set; }
-        protected Vector3 position
+        public Vector3 Position
         {
             get => transform.position;
             set => transform.position = value;
@@ -53,12 +62,13 @@ namespace Ingame.Screw
 
         private void OnEnable()
         { 
-            string bodyLayer = _hingeController.GetConnectedBodyRenderLayer(0);
-            SetSortingOrderAndLayer(sortingOrder, bodyLayer);
+           
         }
 
         public IEnumerator Init()
         {
+            string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
+            SetSortingOrderAndLayer(sortingOrder, bodyLayer);
             yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();
            
@@ -75,7 +85,7 @@ namespace Ingame.Screw
         public virtual void Awake(){
             // _color = (ColorEnum)System.Enum.Parse(typeof(ColorEnum),"Color");
             _transform = GetComponent<Transform>();
-            position = GetComponent<Transform>().position;
+            Position = GetComponent<Transform>().position;
             _circleCollider2D = GetComponentInChildren<CircleCollider2D>();
             render = GetComponentInChildren<SpriteRenderer>();
             layerMask = gameObject.layer;
@@ -88,6 +98,8 @@ namespace Ingame.Screw
             cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
             cross.sortingOrder = order + 2;
+
+            Position = new Vector3(Position.x, Position.y, Position.z + 1);
         }
 
         private void SetScrewColor()
@@ -102,7 +114,7 @@ namespace Ingame.Screw
             Vector2 colliderPosition = circleCollider.transform.position;
 
             // Lấy Layer của GameObject chứa CircleCollider2D
-            int colliderLayer = _hingeController.GetIntBodyLayer(0);
+            int colliderLayer = hingeController.GetIntBodyLayer(0);
 
             // Tạo LayerMask chứa tất cả layer từ 10-26
             LayerMask layersInRange = IngameController.Instance.GetLayerMaskForRange(10, colliderLayer - 1 );
@@ -118,7 +130,7 @@ namespace Ingame.Screw
             // Ensure you have a reference to the correct CircleCollider2D
             CircleCollider2D myCollider = GetComponent<CircleCollider2D>();
             
-            LayerMask = _hingeController.GetIntBodyLayer(0);
+            LayerMask = hingeController.GetIntBodyLayer(0);
             // Get all overlapping colliders
             var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius,LayerMask );
 
@@ -139,12 +151,21 @@ namespace Ingame.Screw
             else
             {
                 Debug.LogWarning("Screw không thể click nữa");
+                isClicked = false;
             }
         }
 
         private void ShakeScrew()
         {
+            if (isShaking) return;
             Tween t = render.transform.DOShakePosition(1f, new Vector3(0.15f, 0, 0)).SetEase(Ease.OutBounce);
+            t.OnPlay(() => isClicked = isShaking= true);
+            t.OnComplete(() =>
+            {
+                render.transform.localPosition = Vector3.zero;
+                isClicked = isShaking = false;
+            });
+            
         }
 
         private IEnumerator CompleteAction()
@@ -172,6 +193,11 @@ namespace Ingame.Screw
             });
         }
 
+        public bool IsMoving()
+        {
+            // Check if the screw's velocity is not zero, implying movement
+            return body != null && rb.velocity.magnitude > 0.1f; // Adjust threshold as necessary
+        }
         public void JumpScrewToHold(HoldScrew holdScrew)
         {
             Vector3 toPos = holdScrew.Transf.position + new Vector3(0,0.25f);
@@ -204,7 +230,7 @@ namespace Ingame.Screw
         public virtual void FreeHinge()
         {
             _circleCollider2D.isTrigger = true;
-            _hingeController.FreeHinges();
+            hingeController.FreeHinges();
         }
 
         public virtual void MoveScrewDown()

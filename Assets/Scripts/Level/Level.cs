@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using ConfigFile;
 using Enum;
 using Ingame.Screw;
 using UnityEngine.Serialization;
@@ -11,9 +12,11 @@ namespace Level
     {
         public Vector3[] hingesPosition;  // Vị trí của các điểm hinges
         public int totalColorInLevel;
-        public List<ConnectorScriptable> connectors ;  
+        public LayerEnum layer;
+        public BoxConfig connectors ;  
         public List<ScrewScriptable> screws;        // Danh sách các Screw
         public List<BodyPartScriptable> bodyParts;  // Danh sách các Body Part
+        
     }
     // Dummy class cho Screw, bạn có thể thay đổi nội dung tùy theo dự án
     [System.Serializable]
@@ -23,13 +26,9 @@ namespace Level
         public int  idColor;
         public string screwName;
         public Vector3 screwPosition;
-    }
-    [System.Serializable]
-    public class ConnectorScriptable
-    {
-        public int idConnector;
-        public string screwName;
-        public string partName;
+        public List<Rigidbody2D> listRigidBodyConnections;
+        public List<HingeJoint2D> listHingeJoint;
+        
     }
     // Dummy class cho Body Part, bạn có thể thay đổi nội dung tùy theo dự án
     [System.Serializable]
