@@ -74,7 +74,7 @@ namespace Ingame
          for (int i = 0; i < holdScrews.Length; i++)
          {
             // Tìm ô trống trong mảng holdScrews
-            if (holdScrews[i] == null || holdScrews[i].IsEmpty())
+            if (holdScrews[i].Screw == null || holdScrews[i].IsEmpty())
             {
                holdScrews[i].AddScrew(screw); // Thêm screw vào ô trống
                CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa

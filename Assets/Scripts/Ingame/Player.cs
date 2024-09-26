@@ -43,7 +43,7 @@ namespace Ingame
                 if (hit.collider != null)
                 {
                     CurrentScrew = hit.collider.GetComponent<Screw.Screw>();
-                    if (CurrentScrew != null)
+                    if (CurrentScrew != null && !CurrentScrew.IsMoving())
                     {
                         Debug.LogWarning("Screw found!");
                        CurrentScrew.OnScrewClicked();

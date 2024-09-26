@@ -184,8 +184,35 @@ namespace Ingame
             if (screw.Color != color)
             {
                 Debug.LogWarning("Screw color mismatch!");
-               return;
+                return;
             }
+
+            // Check if the screw is moving
+            if (screw.IsMoving())
+            {
+                // Start a coroutine to wait for the movement to finish
+                StartCoroutine(WaitForScrewToStop(screw));
+                return;
+            }
+
+            // Continue with the usual logic if the screw is not moving
+            AddScrewToSlot(screw);
+        }
+
+        private IEnumerator WaitForScrewToStop(Screw.Screw screw)
+        {
+            // Wait until the screw is no longer moving
+            while (screw.IsMoving())
+            {
+                yield return null; // Wait for the next frame
+            }
+
+            // Now that the screw has stopped moving, add it
+            AddScrewToSlot(screw);
+        }
+
+        private void AddScrewToSlot(Screw.Screw screw)
+        {
             // Nếu đã biết vị trí trống
             if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Length)
             {
@@ -194,7 +221,6 @@ namespace Ingame
                     holdScrews[nextEmptyIndex].AddScrew(screw);
                     UpdateNextEmptyIndex(); // Tìm vị trí trống mới
                     return;
-
                 }
             }
 
@@ -211,8 +237,9 @@ namespace Ingame
             }
 
             // Nếu không có lỗ trống nào
-            Debug.LogWarning("All screw holes are filled!" + gameObject.name + " at hold ");
+            Debug.LogWarning("All screw holes are filled! " + gameObject.name + " at hold ");
         }
+
 
         private void UpdateNextEmptyIndex()
         {

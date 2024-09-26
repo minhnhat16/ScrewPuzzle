@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using ConfigFile;
 using DG.Tweening;
 using Enum;
@@ -81,7 +82,7 @@ namespace Ingame
             List<BoxConfigRecord> oneHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.NumberOfScrewHoles== 1).ToList();
 
             // Shuffle the list of items with 3 screw holes
-            threeHoldList = threeHoldList.OrderBy(x => Guid.NewGuid()).ToList();
+            //threeHoldList = threeHoldList.OrderBy(x => Guid.NewGuid()).ToList();
 
             // Ensure no adjacent items in threeHoldList have the same color
             for (int i = 1; i < threeHoldList.Count; i++)
@@ -256,19 +257,18 @@ namespace Ingame
             });
         }
         // Hàm kiểm tra xem có box nào cùng màu với screw không
-        public void HasBoxWithSameColor(Screw.Screw screw)
+        public ScrewBox HasBoxWithSameColor(Screw.Screw screw)
         {
             Debug.Log("Tìm box cùng màu với screw");
             foreach (var box in screwBoxes.Where(box => box.gameObject.activeSelf && box.Color == screw.Color && !box.isMoving))
             {
-                box.AddScrew(screw);
+               
                 Debug.Log("Đã tìm thấy box cùng màu với screw");
-                return;
+                return box;
             }
-
+            return null;
             // Nếu không tìm thấy box nào cùng màu, thêm screw vào ArrayScrew
-            ArrayScrew.instance.AddScrew(screw);
         }
-       
+
     }
 }

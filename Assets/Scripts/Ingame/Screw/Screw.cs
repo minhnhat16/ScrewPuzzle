@@ -4,6 +4,7 @@ using Enum;
 using Managers;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UIElements;
 using IEnumerator = System.Collections.IEnumerator;
 
 namespace Ingame.Screw
@@ -17,6 +18,7 @@ namespace Ingame.Screw
         [SerializeField] private int sortingOrder;
         [SerializeField] private bool isMultipleJoint;
         [SerializeField] private CircleCollider2D _circleCollider2D;
+        [SerializeField] private Rigidbody2D rb;
         [SerializeField] private SpriteRenderer render ;
 
         [SerializeField] private SpriteRenderer cross ;
@@ -30,6 +32,9 @@ namespace Ingame.Screw
         }
 
         [SerializeField] private bool isShaking;
+
+        [SerializeField] private bool isMoving;
+
         protected Transform _transform { get; set; }
         public Vector3 Position
         {
@@ -37,8 +42,6 @@ namespace Ingame.Screw
             set => transform.position = value;
             
         }
-
-       
 
         protected CircleCollider2D CircleCollider2D
         {
@@ -127,33 +130,59 @@ namespace Ingame.Screw
 
         public void OnScrewClicked()
         {
+            // Prevent multiple clicks using the flag
+            if (isClicked) return;
+
+            // Set the flag to true right at the start to prevent any more clicks during processing
+            isClicked = true;
+
             // Ensure you have a reference to the correct CircleCollider2D
             CircleCollider2D myCollider = GetComponent<CircleCollider2D>();
-            
-            LayerMask = hingeController.GetIntBodyLayer(0);
-            // Get all overlapping colliders
-            var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius,LayerMask );
 
-            // Start the coroutine for completing the action
+            // Get the LayerMask and overlapping colliders
+            LayerMask layerMask = hingeController.GetIntBodyLayer(0);
+            var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius, layerMask);
+
+            // Start the coroutine for completing the action (assuming it's part of the logic)
             StartCoroutine(CompleteAction());
 
+            // If the screw is blocked by overlapping colliders, perform some action
             if (overlappingColliders.Length > 0)
             {
                 Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
-                isClicked = false;
                 ShakeScrew();
-            }
-            else if (!isClicked)
-            {
-                isClicked = true;
-                BoxQueue.Instance.HasBoxWithSameColor(this);
+
+                // Reset the flag after handling the overlap situation
+                isClicked = false;
             }
             else
             {
-                Debug.LogWarning("Screw không thể click nữa");
-                isClicked = false;
+                // Try to proceed if no overlap
+                var BoxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(this);
+
+                // Reset the flag if the action didn't complete successfully
+                if (BoxWithSameColor == false)
+                {
+                    Debug.LogWarning("Action was not completed, resetting the flag.");
+                    isClicked = false;
+
+                    ArrayScrew.instance.AddScrew(this);
+                }
+                // If the action is successful, keep `isClicked` true to prevent further clicks
+                else
+                {
+                    BoxWithSameColor.AddScrew(this);
+                    Debug.Log("Action completed successfully, flag remains true.");
+                }
             }
         }
+
+        private IEnumerator ResetClickFlagAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);  // Wait for the specified delay
+            isClicked = false;                       // Reset the flag
+        }
+
 
         private void ShakeScrew()
         {
@@ -165,7 +194,6 @@ namespace Ingame.Screw
                 render.transform.localPosition = Vector3.zero;
                 isClicked = isShaking = false;
             });
-            
         }
 
         private IEnumerator CompleteAction()
@@ -196,30 +224,34 @@ namespace Ingame.Screw
         public bool IsMoving()
         {
             // Check if the screw's velocity is not zero, implying movement
-            return body != null && rb.velocity.magnitude > 0.1f; // Adjust threshold as necessary
+            return isMoving;// Adjust threshold as necessary
         }
         public void JumpScrewToHold(HoldScrew holdScrew)
         {
-            Vector3 toPos = holdScrew.Transf.position + new Vector3(0,0.25f);
+            Vector3 toPos = holdScrew.Transf.position + new Vector3(0, 0.25f);
             Debug.Log("DO move to hold " + toPos);
 
             // Lưu lại vị trí offset giữa render và cha trước khi di chuyển
-            Vector3 offset = toPos - _transform.position ;
+            Vector3 offset = toPos - _transform.position;
+
+            // Tạo một Sequence để sắp xếp các tweens
+            Sequence sequence = DOTween.Sequence();
 
             // Di chuyển render trước, đồng thời di chuyển cha
-            var renderMove = render.transform.DOJump(toPos, 2,1,0.5f,false);
-            var parentMove = _transform.DOMove(toPos - offset, 0.5f); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
-            
-            //free joint to releas wood and joint
+            sequence.Append(render.transform.DOJump(toPos, 2, 1, 0.5f, false));
+            sequence.Join(_transform.DOMove(toPos - offset, 0.5f)); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
+            sequence.OnPlay(() => isMoving = true);
+            // free joint to release wood and joint
             FreeHinge();
 
             // Khi cả hai di chuyển xong
-            renderMove.OnComplete(()=>
+            sequence.OnComplete(() =>
             {
                 _transform.SetParent(holdScrew.Transf);
                 MoveScrewDown();
             });
         }
+
         public void DoMoveScrewUp(Action callback)
         {
             var targetPos = render.transform.position;
@@ -238,7 +270,9 @@ namespace Ingame.Screw
             var targetPos = render.transform.position;
             targetPos-= new Vector3(0, 0.25f,0);
             cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
-            render.transform.DOMove(targetPos, 0.5f);
+             
+            render.transform.DOMove(targetPos, 0.5f).OnComplete(()=> { isMoving = false; });
+            
         }
     }
 }
