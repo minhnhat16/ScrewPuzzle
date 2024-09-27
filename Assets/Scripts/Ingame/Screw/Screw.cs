@@ -24,7 +24,6 @@ namespace Ingame.Screw
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
          [SerializeField] protected HingeController hingeController;
-
         public HingeController HingeController
         {
             get => hingeController;
@@ -71,6 +70,7 @@ namespace Ingame.Screw
         public IEnumerator Init()
         {
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
+            yield return new WaitUntil(()=>bodyLayer !=null );
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
             yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();
@@ -102,7 +102,9 @@ namespace Ingame.Screw
             render.sortingOrder = order + 1;
             cross.sortingOrder = order + 2;
 
-            Position = new Vector3(Position.x, Position.y, Position.z + 1);
+            int layerIndex = SortingLayer.GetLayerValueFromName(layer);
+            Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
+            Position = new Vector3(Position.x, Position.y, -layerIndex  +10);
         }
 
         private void SetScrewColor()
@@ -134,46 +136,44 @@ namespace Ingame.Screw
             if (isClicked) return;
 
             // Set the flag to true right at the start to prevent any more clicks during processing
-            isClicked = true;
+            // isClicked = true;
 
             // Ensure you have a reference to the correct CircleCollider2D
             CircleCollider2D myCollider = GetComponent<CircleCollider2D>();
 
             // Get the LayerMask and overlapping colliders
-            LayerMask layerMask = hingeController.GetIntBodyLayer(0);
-            var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius, layerMask);
+            LayerMask mask = hingeController.GetIntBodyLayer(0);
+            var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius, mask);
 
             // Start the coroutine for completing the action (assuming it's part of the logic)
-            StartCoroutine(CompleteAction());
+            // StartCoroutine(CompleteAction());
 
             // If the screw is blocked by overlapping colliders, perform some action
             if (overlappingColliders.Length > 0)
             {
                 Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
                 ShakeScrew();
-
                 // Reset the flag after handling the overlap situation
                 isClicked = false;
             }
             else
             {
+                isClicked = true;
+
                 // Try to proceed if no overlap
-                var BoxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(this);
+                var boxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(this);
 
                 // Reset the flag if the action didn't complete successfully
-                if (BoxWithSameColor == false)
+                if (boxWithSameColor != null && !boxWithSameColor.IsBoxFull)
                 {
-                    Debug.LogWarning("Action was not completed, resetting the flag.");
-                    isClicked = false;
-
-                    ArrayScrew.instance.AddScrew(this);
+                    boxWithSameColor.AddScrew(this);
+                    Debug.Log("Action completed successfully, flag remains true.");
+                    return;
                 }
                 // If the action is successful, keep `isClicked` true to prevent further clicks
-                else
-                {
-                    BoxWithSameColor.AddScrew(this);
-                    Debug.Log("Action completed successfully, flag remains true.");
-                }
+            
+                Debug.LogWarning("Action was not completed, resetting the flag.");
+                ArrayScrew.instance.AddScrew(this);
             }
         }
 
@@ -196,13 +196,13 @@ namespace Ingame.Screw
             });
         }
 
-        private IEnumerator CompleteAction()
-        {
-            // Giả sử có một hành động nào đó
-            yield return new WaitForSeconds(1f);
-            IsActionComplete = true; // Hành động hoàn tất
-            Player.instance.CanClick = IsActionComplete;
-        }
+        // private IEnumerator CompleteAction()
+        // {
+        //     // Giả sử có một hành động nào đó
+        //     yield return new WaitForSeconds(1f);
+        //     IsActionComplete = true; // Hành động hoàn tất
+        //     Player.instance. = IsActionComplete;
+        // }
 
 
         private bool CheckTrueColorBox()
@@ -217,6 +217,7 @@ namespace Ingame.Screw
         {
             DoMoveScrewUp(() =>
             {
+                _circleCollider2D.enabled = false;
                 JumpScrewToHold(holdScrew);
             });
         }
@@ -247,7 +248,7 @@ namespace Ingame.Screw
             // Khi cả hai di chuyển xong
             sequence.OnComplete(() =>
             {
-                _transform.SetParent(holdScrew.Transf);
+                // _transform.SetParent(holdScrew.Transf);
                 MoveScrewDown();
             });
         }

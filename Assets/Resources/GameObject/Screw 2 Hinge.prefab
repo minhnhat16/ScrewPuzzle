@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 5930561060451138023}
   m_Layer: 9
   m_Name: Screw 2 Hinge
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 1206586993520771344, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -163,6 +163,7 @@ MonoBehaviour:
   sortingOrder: 0
   isMultipleJoint: 0
   _circleCollider2D: {fileID: 0}
+  rb: {fileID: 0}
   render: {fileID: 4241144413796154031}
   cross: {fileID: 2071290369814785538}
   _layerMask:
@@ -170,6 +171,7 @@ MonoBehaviour:
     m_Bits: 0
   hingeController: {fileID: 5930561060451138023}
   isShaking: 0
+  isMoving: 0
 --- !u!58 &6748274948914760515
 CircleCollider2D:
   m_ObjectHideFlags: 0

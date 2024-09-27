@@ -71,12 +71,12 @@ namespace Ingame
       // Hàm thêm Screw vào một ô trống trong holdScrew
       public bool AddScrew(Screw.Screw screw)
       {
-         for (int i = 0; i < holdScrews.Length; i++)
+         foreach (var t in holdScrews)
          {
             // Tìm ô trống trong mảng holdScrews
-            if (holdScrews[i].Screw == null || holdScrews[i].IsEmpty())
+            if (t.Screw == null || t.IsEmpty())
             {
-               holdScrews[i].AddScrew(screw); // Thêm screw vào ô trống
+               t.AddScrew(screw); // Thêm screw vào ô trống
                CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
                return true; // Trả về true nếu thêm thành công
             }

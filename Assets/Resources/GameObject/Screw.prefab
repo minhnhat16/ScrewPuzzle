@@ -185,7 +185,7 @@ GameObject:
   - component: {fileID: 5271949845176647228}
   m_Layer: 9
   m_Name: Screw
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: -5487077368411116049, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -225,6 +225,7 @@ MonoBehaviour:
   sortingOrder: 0
   isMultipleJoint: 0
   _circleCollider2D: {fileID: 0}
+  rb: {fileID: 0}
   render: {fileID: 516593389017136271}
   cross: {fileID: 4724987932062570836}
   _layerMask:
@@ -232,6 +233,7 @@ MonoBehaviour:
     m_Bits: 0
   hingeController: {fileID: 5271949845176647228}
   isShaking: 0
+  isMoving: 0
 --- !u!50 &7455194392694617075
 Rigidbody2D:
   serializedVersion: 4
@@ -268,7 +270,7 @@ HingeJoint2D:
   m_BreakTorque: Infinity
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: -2.25, y: 0.31000018}
+  m_ConnectedAnchor: {x: -1.03, y: -4.59}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0

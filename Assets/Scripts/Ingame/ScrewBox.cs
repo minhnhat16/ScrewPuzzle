@@ -194,25 +194,40 @@ namespace Ingame
                 StartCoroutine(WaitForScrewToStop(screw));
                 return;
             }
-
+    
             // Continue with the usual logic if the screw is not moving
             AddScrewToSlot(screw);
         }
-
+        
         private IEnumerator WaitForScrewToStop(Screw.Screw screw)
         {
             // Wait until the screw is no longer moving
-            while (screw.IsMoving())
+            while (screw.IsMoving() || isMoving)
             {
                 yield return null; // Wait for the next frame
             }
 
+            yield return new WaitUntil(() => !screw.IsMoving());
             // Now that the screw has stopped moving, add it
             AddScrewToSlot(screw);
         }
-
+        public int TotalHoldEmty()
+        {
+            return holdScrews.Count(hold => hold.IsEmpty());
+        }
         private void AddScrewToSlot(Screw.Screw screw)
         {
+            // // Tìm lỗ trống lần đầu hoặc khi trạng thái thay đổi
+            // for (int i = 0; i < holdScrews.Length; i++)
+            // {
+            //     if (holdScrews[i].IsEmpty())
+            //     {
+            //         holdScrews[i].AddScrew(screw);
+            //         nextEmptyIndex = i;
+            //         // UpdateNextEmptyIndex(); // Tìm lỗ trống tiếp theo
+            //         return;
+            //     }
+            // }
             // Nếu đã biết vị trí trống
             if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Length)
             {
@@ -220,18 +235,6 @@ namespace Ingame
                 {
                     holdScrews[nextEmptyIndex].AddScrew(screw);
                     UpdateNextEmptyIndex(); // Tìm vị trí trống mới
-                    return;
-                }
-            }
-
-            // Tìm lỗ trống lần đầu hoặc khi trạng thái thay đổi
-            for (int i = 0; i < holdScrews.Length; i++)
-            {
-                if (holdScrews[i].IsEmpty())
-                {
-                    holdScrews[i].AddScrew(screw);
-                    nextEmptyIndex = i;
-                    UpdateNextEmptyIndex(); // Tìm lỗ trống tiếp theo
                     return;
                 }
             }
@@ -252,13 +255,11 @@ namespace Ingame
                     break;
                 }
             }
-            if (nextEmptyIndex == -1)
-            {
-                Debug.Log("All screw holes are now filled!");
-                onScrewBoxFull.Invoke(true); // Gọi sự kiện khi tất cả lỗ đã đầy
-            }
+
+            if (nextEmptyIndex != -1) return;
+            Debug.Log("All screw holes are now filled!");
+            onScrewBoxFull.Invoke(true); // Gọi sự kiện khi tất cả lỗ đã đầy
         }
-        
         // Hàm để thay đổi màu của CrewBox
         public void SetBoxColor(Color newColor)
         {

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,14 +9,43 @@ namespace Ingame
     public class Player : MonoBehaviour
     {
         public static Player instance;
-        public UnityEvent<Screw.Screw> onScrewClicked = new();
-        [SerializeField] private float lastClickTime = 0.5f;
-        [SerializeField] private float clickCooldown;
-        [SerializeField] private bool canClick;
+        [SerializeField] private float clickCooldown = 0.5f; // Cooldown time between clicks
+        [SerializeField] private bool canClick = true;        // Flag to check if the player can click
         [SerializeField] private Screw.Screw CurrentScrew;
-        [SerializeField] Camera mainCam;
-        
-        public bool CanClick {get => canClick; set => canClick = value;}
+        [SerializeField] private Camera mainCam;
+        [HideInInspector] public UnityEvent onPlayerClick = new();  // Custom event for player clicks
+        [HideInInspector] public UnityEvent<Screw.Screw> onScrewClicked;
+        private Coroutine inputCoroutine;
+        private void OnEnable()
+        {
+            // Only add the listener if it hasn't been added before
+            if (onScrewClicked != null)
+            {
+                onScrewClicked.RemoveListener(ScrewClicked); // Ensuring no duplicate listeners
+                onScrewClicked.AddListener(ScrewClicked);
+            }
+
+            if (inputCoroutine == null)
+            {
+                inputCoroutine = StartCoroutine(WaitForInput());
+            }
+
+        }
+
+        private void OnDisable()
+        {
+            // Remove the listener when the object is disabled to avoid multiple calls
+            if (onScrewClicked != null)
+            {
+                onScrewClicked.RemoveListener(ScrewClicked);
+            }
+            if (inputCoroutine != null)
+            {
+                StopCoroutine(inputCoroutine);
+                inputCoroutine = null;
+            }
+        }
+
         private void Awake()
         {
             instance = this;
@@ -25,100 +56,60 @@ namespace Ingame
         private void Start()
         {
             mainCam = Camera.main;
-            
         }
-
-        private void Update()
+        private IEnumerator WaitForInput()
         {
-            canClick = true;
-            if (Input.GetMouseButtonDown(0) && canClick)
+            while (true)
             {
-                Debug.LogWarning("On mouse down button");
-
-                // Đặt flag về false để ngăn chặn việc click liên tiếp
-                canClick = false;
-
-                // Raycast to find the screw
-                var hit = GetScrewByRaycastHit2D(mainCam);
-                if (hit.collider != null)
+                // Handle only one type of input based on the platform
+            #if UNITY_EDITOR || UNITY_STANDALONE    
+                if (Input.GetMouseButtonDown(0))
                 {
-                    CurrentScrew = hit.collider.GetComponent<Screw.Screw>();
-                    if (CurrentScrew != null && !CurrentScrew.IsMoving())
-                    {
-                        Debug.LogWarning("Screw found!");
-                       CurrentScrew.OnScrewClicked();
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No screw found at the clicked location.");
-                    }
+                    HandleInput(Input.mousePosition);
                 }
-                else
-                {
-                    Debug.LogWarning("Raycast did not hit any object.");
-                }
+            #elif UNITY_ANDROID || UNITY_IOS
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+            {
+                HandleInput(Input.GetTouch(0).position);
             }
+            #endif
 
+                yield return null; // Wait for the next frame to check input again
+            }
         }
 
-        RaycastHit2D GetScrewByRaycastHit2D(Camera cam)
+
+        private void HandleInput(Vector3 screenPosition)
         {
-            var ray = cam.ScreenPointToRay(Input.mousePosition);
-            Debug.Log("Ray Origin: " + ray.origin + " Ray Direction: " + ray.direction);
+            // Convert screen position to world position
+            Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
 
-            var screwLayerMask = LayerMask.GetMask("Screw");
-
-            // Perform a raycast and return only the first hit object
-            var hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, screwLayerMask);
+            // Cast a 2D ray (actually a point in 2D space) from the world position
+            RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero,Mathf.NegativeInfinity);
 
             if (hit.collider != null)
             {
-                // Check if the hit object has a Screw component
-                var screwComponent = hit.collider.GetComponent<Screw.Screw>();
+                var clickedObject = hit.collider.gameObject;
 
-                if (screwComponent != null)
+                // Example: Handle interaction with a Screw
+                if (clickedObject.CompareTag("Player"))
                 {
-                    // Return the first hit screw object
-                    return hit;
+                    onScrewClicked?.Invoke(clickedObject.GetComponent<Screw.Screw>());
                 }
-            }
 
-            return new RaycastHit2D(); // Return an empty hit if no screw is found
+                Debug.Log("2D Game object clicked: " + hit.collider.name);
+            }
+            else
+            {
+                Debug.LogWarning("No 2D object was hit by the raycast.");
+            }
         }
 
-        // RaycastHit2D GetScrewByRaycastHit2D(Camera cam)
-        // {
-        //     var ray = cam.ScreenPointToRay(Input.mousePosition);
-        //     Debug.Log("Ray Origin: " + ray.origin + " Ray Direction: " + ray.direction);
-        //
-        //     var screwLayerMask = LayerMask.GetMask("Screw");
-        //
-        //     // Get all the objects hit by the raycast
-        //     var hits = Physics2D.RaycastAll(ray.origin, ray.direction, Mathf.Infinity, screwLayerMask);
-        //
-        //     RaycastHit2D selectedHit = new RaycastHit2D();
-        //     int highestLayerValue = int.MinValue; // Initialize to minimum value to find the highest
-        //
-        //     foreach (var hit in hits)
-        //     {
-        //         // Assume the Screw component contains the enum 'ScrewLayer'
-        //         var screwComponent = hit.collider.GetComponent<Screw.Screw>(); // Assuming 'Screw' is the script that contains the enum layer
-        //
-        //         if (screwComponent != null)
-        //         {
-        //             int screwLayerValue = (int)screwComponent.LayerMask; // Convert enum to int for comparison
-        //
-        //             // Compare and keep the one with the highest enum layer value
-        //             if (screwLayerValue > highestLayerValue)
-        //             {
-        //                 highestLayerValue = screwLayerValue;
-        //                 selectedHit = hit; // Keep the RaycastHit2D of the highest layer screw
-        //             }
-        //         }
-        //     }
-        //
-        //     return selectedHit;
-        // }
-
+        private void ScrewClicked(Screw.Screw screw)
+        {
+            Debug.LogWarning("Screw Clicked");
+            screw.OnScrewClicked();
+        }
+        
     }
 }
