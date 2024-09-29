@@ -16,7 +16,9 @@ namespace Ingame
       public HoldScrew[] holdScrews; // Mảng các HoldScrew (ô chứa screw)
       public UnityEvent onHoldScrewsFull = new (); // Sự kiện khi holdScrews đầy
 
-      private void OnEnable()
+        public bool IsUpdating { get; internal set; }
+
+        private void OnEnable()
       {
          onHoldScrewsFull.AddListener(ScrewFullEvent) ;
       }
@@ -69,7 +71,7 @@ namespace Ingame
      
       }
       // Hàm thêm Screw vào một ô trống trong holdScrew
-      public bool AddScrew(Screw.Screw screw)
+      public void AddScrew(Screw.Screw screw)
       {
          foreach (var t in holdScrews)
          {
@@ -78,12 +80,12 @@ namespace Ingame
             {
                t.AddScrew(screw); // Thêm screw vào ô trống
                CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
-               return true; // Trả về true nếu thêm thành công
+               return ; // Trả về true nếu thêm thành công
             }
          }
 
          Debug.LogWarning("All holdScrews are full!");
-         return false; // Trả về false nếu không có ô trống
+         return ; // Trả về false nếu không có ô trống
       }
 
       public List<Screw.Screw> ListScrewSameColor(ColorEnum color, int numberScrewCanTake)

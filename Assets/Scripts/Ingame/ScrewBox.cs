@@ -217,18 +217,18 @@ namespace Ingame
         }
         private void AddScrewToSlot(Screw.Screw screw)
         {
-            // // Tìm lỗ trống lần đầu hoặc khi trạng thái thay đổi
-            // for (int i = 0; i < holdScrews.Length; i++)
-            // {
-            //     if (holdScrews[i].IsEmpty())
-            //     {
-            //         holdScrews[i].AddScrew(screw);
-            //         nextEmptyIndex = i;
-            //         // UpdateNextEmptyIndex(); // Tìm lỗ trống tiếp theo
-            //         return;
-            //     }
-            // }
-            // Nếu đã biết vị trí trống
+            // Tìm lỗ trống lần đầu hoặc khi trạng thái thay đổi
+            for (int i = 0; i < holdScrews.Length; i++)
+            {
+                if (holdScrews[i].IsEmpty())
+                {
+                    holdScrews[i].AddScrew(screw);
+                    nextEmptyIndex = i;
+                    // UpdateNextEmptyIndex(); // Tìm lỗ trống tiếp theo
+                    return;
+                }
+            }
+            //Nếu đã biết vị trí trống
             if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Length)
             {
                 if (holdScrews[nextEmptyIndex].IsEmpty())

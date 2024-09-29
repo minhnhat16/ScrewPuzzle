@@ -31,12 +31,12 @@ public class HoldScrew : MonoBehaviour
     {
         screw = null;
     }
-    public void AddScrew(Screw newScrew)
+    public void AddScrew(Screw newScrew, Action callback = null)
     {
         if (!screw)
         {
             screw = newScrew;
-            screw.DoMoveToHold(this);
+            screw.DoMoveToHold(this, callback);
         }
         else
         {
