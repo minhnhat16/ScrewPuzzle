@@ -2,17 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using ConfigFile;
 using DG.Tweening;
-using Enum;
 using Ingame.Pools;
 using Managers;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
-using Random = UnityEngine.Random;
 
 namespace Ingame
 {
@@ -144,6 +139,7 @@ namespace Ingame
         private ScrewBox SpawnBox()
         {
             if (boxesStack.Count == 0) return null;
+            Debug.Log("SpawBox");
             var box = boxesStack.Pop();
             return  box;
         }
@@ -166,7 +162,7 @@ namespace Ingame
             // Logic to calculate initial position
             if (CameraMain.instance.GetCam() != null)
             {
-                float leftBoundary = CameraMain.instance.GetLeft();
+                float leftBoundary  = CameraMain.instance.GetLeft();
                 float rightBoundary = CameraMain.instance.GetRight();
                 float topBoundary = CameraMain.instance.GetTop() - topAlignSpacing;
                 float spacing = (rightBoundary - leftBoundary ) / (spacingBox);
@@ -176,59 +172,68 @@ namespace Ingame
             Debug.Log("Camera null  ");
             return Vector3.zero;
         }
-       
-        public void DeactivateAndMoveQueue(ScrewBox screwBox)
+        private void CloseAndRemoveBox(ScrewBox screwBox, Action onComplete)
         {
-            var currentSlot = boxSlots.Find((boxSlot) => boxSlot.CheckIsContainingThisBox(screwBox)) as BoxSlot;
-
-            // Close the screwBox and remove it
             screwBox.CloseBox((complete) =>
             {
                 screwBoxes.Remove(screwBox);
                 if (screwBoxes.Count == 0)
                 {
                     OnLastBoxClearScrew();
-
                 }
-                // Check if it's the last box after removal
-                // if (screwBoxes.Count == 0)
-                // {
-                //     // No more boxes, so handle last box logic
-                //     StartCoroutine(OnLastBoxClearScrew(screwBox));
-                // }
+                onComplete?.Invoke();
             });
-
-            // Spawn new box if necessary
+        }
+        private ScrewBox TrySpawnNewBox(BoxSlot currentSlot)
+        {
             var newBox = SpawnBox();
+            if (newBox == null || currentSlot == null)
+            {
+                Debug.LogError("Error: new box or slot is null" + newBox + " or "+currentSlot);
+                return null;
+            }
+            return newBox;
+        }
+        public void DeactivateAndMoveQueue(ScrewBox screwBox)
+        {
+            var currentSlot = boxSlots.Find((boxSlot) => boxSlot.CheckIsContainingThisBox(screwBox)) as BoxSlot;
 
-            if (currentSlot == null) return;
+            CloseAndRemoveBox(screwBox, () =>
+            {
+                var newBox = TrySpawnNewBox(currentSlot);
+                if (newBox != null)
+                {
+                    StartCoroutine(MoveAndHandleBox(newBox, currentSlot));
+                }
+            });
+        }
 
-            if (newBox == null) return;
-            StartCoroutine(MoveNewBoxToLastBox(newBox, currentSlot, (onCompleteClearBoxes) =>
+        private IEnumerator MoveAndHandleBox(ScrewBox newBox, BoxSlot currentSlot)
+        {
+            yield return StartCoroutine(MoveNewBoxToLastBox(newBox, currentSlot, (onCompleteClearBoxes) =>
             {
                 List<ScrewBox> listActive = screwBoxes.Where(box => box.isActiveAndEnabled).ToList();
                 listActive.Reverse();
-                if (listActive.Count > 0)
-                {
-                    foreach (var box in listActive)
-                    {
-                        FindBoxActiveHaveSameColorWithArray(box);
-                    }
-                }
-                else
-                {
-                    FindBoxActiveHaveSameColorWithArray(newBox);
-                }
+
+                var targetBox = listActive.Count > 0 ? listActive.First() : newBox;
+                FindBoxActiveHaveSameColorWithArray(targetBox);
             }));
         }
 
         private void FindBoxActiveHaveSameColorWithArray(ScrewBox box)
         {
-            var screwSameColor = ArrayScrew.instance.ListScrewSameColor(box.Color,++box.NextEmptyIndex);
-            if (screwSameColor == null) return;
+            // Tính số đinh vít có thể thêm vào box
+            var totalScrewCanTake = box.holdScrews.Count(hold => hold.IsEmpty());
+            // Lấy danh sách các đinh vít có cùng màu với box
+            var screwSameColor = ArrayScrew.instance.ListScrewSameColor(box.Color, totalScrewCanTake);
+                
+            // Kiểm tra danh sách null hoặc rỗng
+            if (screwSameColor == null || !screwSameColor.Any()) return;
+            // Thêm các đinh vít vào box
             foreach (var screw in screwSameColor)
             {
                 box.AddScrew(screw);
+                
             }
         }
 
@@ -246,6 +251,7 @@ namespace Ingame
             var toPos = slot.initialPosition;
             yield return new WaitForSeconds(1f);
             newBox.isMoving = true;
+            slot.AddBox(newBox); 
             // Dịch chuyển box mới tới vị trí của box cuối cùng
             newBox.gameObject.SetActive(true);
             var t = newBox.transform.DOMove(toPos, 1f).SetEase(Ease.OutCirc);
@@ -253,21 +259,16 @@ namespace Ingame
             {
                 newBox.isMoving = false;
                 callback?.Invoke(true);
-                slot.AddBox(newBox); 
             });
         }
         // Hàm kiểm tra xem có box nào cùng màu với screw không
         public ScrewBox HasBoxWithSameColor(Screw.Screw screw)
         {
             Debug.Log("Tìm box cùng màu với screw");
-            foreach (var box in screwBoxes.Where(box => box.gameObject.activeSelf && box.Color == screw.Color && !box.isMoving))
-            {
-               
-                Debug.Log("Đã tìm thấy box cùng màu với screw");
-                return box;
-            }
-            return null;
-            // Nếu không tìm thấy box nào cùng màu, thêm screw vào ArrayScrew
+            var boxArray =
+                screwBoxes.Where(box => box.gameObject.activeSelf && box.Color == screw.Color && !box.isMoving)
+                .ToList();
+            return boxArray.Count() != 0 ? boxArray.First() : null;
         }
 
     }

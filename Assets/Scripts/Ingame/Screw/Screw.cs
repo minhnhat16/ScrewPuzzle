@@ -158,22 +158,7 @@ namespace Ingame.Screw
             }
             else
             {
-                isClicked = true;
-
-                // Try to proceed if no overlap
-                var boxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(this);
-
-                // Reset the flag if the action didn't complete successfully
-                if (boxWithSameColor != null && !boxWithSameColor.IsBoxFull)
-                {
-                    boxWithSameColor.AddScrew(this);
-                    Debug.Log("Action completed successfully, flag remains true.");
-                    return;
-                }
-                // If the action is successful, keep `isClicked` true to prevent further clicks
-            
-                Debug.LogWarning("Action was not completed, resetting the flag.");
-                ArrayScrew.instance.AddScrew(this);
+                isClicked = ArrayScrew.instance.AddScrew(this);;
             }
         }
 
@@ -215,6 +200,7 @@ namespace Ingame.Screw
         //further add move with DOTween
         public virtual void DoMoveToHold(HoldScrew holdScrew)
         {
+            isClicked = isMoving = true;
             DoMoveScrewUp(() =>
             {
                 _circleCollider2D.enabled = false;

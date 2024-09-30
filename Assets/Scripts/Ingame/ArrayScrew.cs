@@ -71,15 +71,27 @@ namespace Ingame
       // Hàm thêm Screw vào một ô trống trong holdScrew
       public bool AddScrew(Screw.Screw screw)
       {
+         // Try to proceed if no overlap
+         var boxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(screw);
+         
+         // Reset the flag if the action didn't complete successfully
+         if (boxWithSameColor != null && !boxWithSameColor.IsBoxFull)
+         {
+             boxWithSameColor.AddScrew(screw);
+             Debug.Log("Action completed successfully, flag remains true.");
+             return true;
+         }
+         // If the action is successful, keep `isClicked` true to prevent further clicks
+         
+         Debug.LogWarning("Action was not completed, resetting the flag.");
+         
          foreach (var t in holdScrews)
          {
             // Tìm ô trống trong mảng holdScrews
-            if (t.Screw == null || t.IsEmpty())
-            {
-               t.AddScrew(screw); // Thêm screw vào ô trống
-               CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
-               return true; // Trả về true nếu thêm thành công
-            }
+            if (t.Screw != null && !t.IsEmpty()) continue;
+            t.AddScrew(screw); // Thêm screw vào ô trống
+            CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
+            return true; // Trả về true nếu thêm thành công
          }
 
          Debug.LogWarning("All holdScrews are full!");
@@ -88,15 +100,16 @@ namespace Ingame
 
       public List<Screw.Screw> ListScrewSameColor(ColorEnum color, int numberScrewCanTake)
       {
-         List<Screw.Screw> newList = new();
-         var count = numberScrewCanTake;
-         foreach (var hold in holdScrews)
+         List<Screw.Screw> newList = new(numberScrewCanTake);
+         for (var i = 0; i < holdScrews.Count(); i++)
          {
-            if (hold.Screw == null || hold.Screw.Color != color) continue;
-            newList.Add(hold.Screw);
-            count--;
-            hold.ClearScrewOnHold();
-            if (count > 2) break;
+            var hold = holdScrews[i];
+            if (hold.Screw.Color == color)
+            {
+               newList.Add(hold.Screw);
+               hold.ClearScrewOnHold();
+               if(newList.Count == newList.Capacity)  return newList;
+            }
          }
          return newList;
       }
