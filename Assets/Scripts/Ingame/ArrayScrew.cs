@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using Enum;
 using Managers;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Ingame
 {
    public class ArrayScrew : MonoBehaviour
    {
-      public static ArrayScrew instance;
+      public static ArrayScrew Instance;
       [SerializeField] private int coutHoldActive;
       [SerializeField]   private SpriteRenderer spriteRenderer;
-      public HoldScrew[] holdScrews; // Mảng các HoldScrew (ô chứa screw)
-      public UnityEvent onHoldScrewsFull = new (); // Sự kiện khi holdScrews đầy
+     [SerializeField] private  List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
+     [SerializeField] private  List<Screw.Screw> screws; // Mảng các HoldScrew (ô chứa screw)
+
+       public List<Screw.Screw> Screws => screws;
+
+       public UnityEvent onHoldScrewsFull = new (); // Sự kiện khi holdScrews đầy
 
       private void OnEnable()
       {
@@ -23,12 +29,12 @@ namespace Ingame
 
       public void Awake()
       {
-         if (instance == null)
+         if (Instance == null)
          {
-            instance = this;
+            Instance = this;
          }
 
-         instance = this;
+         Instance = this;
       }
 
       private void Start()
@@ -43,7 +49,7 @@ namespace Ingame
       {
          coutHoldActive++;
          holdScrews[coutHoldActive - 1].gameObject.SetActive(true);
-         var spacing = spriteRenderer.bounds.size.x / (holdScrews.Length + 1);
+         var spacing = spriteRenderer.bounds.size.x / (holdScrews.Count + 1);
          var startX = spriteRenderer.bounds.min.x;
          for (var i = 0; i < coutHoldActive; i++)
          {
@@ -54,10 +60,10 @@ namespace Ingame
       }
       private void HoldAlignment()
       {
-         if (holdScrews.Length == 0) return;
+         if (holdScrews.Count == 0) return;
     
          // Calculate the total width and spacing between screws
-         var spacing = spriteRenderer.bounds.size.x / (holdScrews.Length + 1);
+         var spacing = spriteRenderer.bounds.size.x / (holdScrews.Count + 1);
          var startX = spriteRenderer.bounds.min.x;
          for (var i = 0; i < coutHoldActive; i++)
          {
@@ -73,46 +79,32 @@ namespace Ingame
       {
          // Try to proceed if no overlap
          var boxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(screw);
-         
          // Reset the flag if the action didn't complete successfully
-         if (boxWithSameColor != null && !boxWithSameColor.IsBoxFull)
+         if (boxWithSameColor != null  && !boxWithSameColor.IsBoxFull)
          {
-             boxWithSameColor.AddScrew(screw);
-             Debug.Log("Action completed successfully, flag remains true.");
-             return true;
+            boxWithSameColor.AddScrew(screw);
+            Debug.Log("Action completed successfully, flag remains true.");
+            return true;
          }
-         // If the action is successful, keep `isClicked` true to prevent further clicks
-         
-         Debug.LogWarning("Action was not completed, resetting the flag.");
-         
-         foreach (var t in holdScrews)
+         else
          {
-            // Tìm ô trống trong mảng holdScrews
-            if (t.Screw != null && !t.IsEmpty()) continue;
-            t.AddScrew(screw); // Thêm screw vào ô trống
-            CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
-            return true; // Trả về true nếu thêm thành công
-         }
+            foreach (var t in holdScrews)
+            {
+               // Tìm ô trống trong mảng holdScrews
+               if (t.Screw != null && !t.IsEmpty()) continue;
+               t.AddScrew(screw); // Thêm screw vào ô trống
+               screws.Add(screw);
+               CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
+               return true; // Trả về true nếu thêm thành công
+            }
 
+         }
+        
          Debug.LogWarning("All holdScrews are full!");
+         StartCoroutine(screw.ResetClickFlagAfterDelay(0.5f));
          return false; // Trả về false nếu không có ô trống
       }
-
-      public List<Screw.Screw> ListScrewSameColor(ColorEnum color, int numberScrewCanTake)
-      {
-         List<Screw.Screw> newList = new(numberScrewCanTake);
-         for (var i = 0; i < holdScrews.Count(); i++)
-         {
-            var hold = holdScrews[i];
-            if (hold.Screw.Color == color)
-            {
-               newList.Add(hold.Screw);
-               hold.ClearScrewOnHold();
-               if(newList.Count == newList.Capacity)  return newList;
-            }
-         }
-         return newList;
-      }
+    
 
       private void ScrewFullEvent()
       {

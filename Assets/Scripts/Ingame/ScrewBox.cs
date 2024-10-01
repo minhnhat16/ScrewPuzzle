@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using ConfigFile;
 using DG.Tweening;
@@ -31,7 +32,7 @@ namespace Ingame
             set => nextEmptyIndex = value;
         }
 
-        [SerializeField] public HoldScrew[] holdScrews; // Mảng các lỗ Screw
+        [SerializeField] public List<HoldScrew> holdScrews; // Mảng các lỗ Screw
         [SerializeField] public UnityEvent<bool> onScrewBoxFull;
         [SerializeField] private ColorEnum color;
         [SerializeField] public BoxSlot boxSlot;
@@ -117,12 +118,13 @@ namespace Ingame
         {
             Debug.Log("Box full invoker " + gameObject.name  + "\t" + isBoxFull);
             if (!isFull) return;
+            isBoxFull = true;
             // set box active fasle
             Debug.Log("Box full invoker " + gameObject.name );
-            StartCoroutine(DeactiveBoxCouroutine());
+            StartCoroutine(InactiveBoxCoroutine());
         }
 
-        IEnumerator DeactiveBoxCouroutine()
+        IEnumerator InactiveBoxCoroutine()
         {
             yield return new WaitForSeconds(1f);
             BoxQueue.Instance.DeactivateAndMoveQueue(this);
@@ -132,11 +134,10 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull)=>
             {
-                isBoxFull = boxFull;
                 callback?.Invoke(boxFull);
             });
         }
-
+            
         private void TunOffScrews()
         {
             
@@ -180,45 +181,26 @@ namespace Ingame
         // Hàm di chuyển Screw vào một lỗ trống trong CrewBox
         public virtual void AddScrew(Screw.Screw screw)
         {
+            
             // Nếu màu screw không khớp, kết thúc ngay
             if (screw.Color != color)
             {
                 Debug.LogWarning("Screw color mismatch!");
                 return;
             }
-
-            // Check if the screw is moving
-            if (screw.IsMoving())
-            {
-                // Start a coroutine to wait for the movement to finish
-                StartCoroutine(WaitForScrewToStop(screw));
-                return;
-            }
-    
-            // Continue with the usual logic if the screw is not moving
-            AddScrewToSlot(screw);
+            StartCoroutine(WaitForBoxStopAndAddScrew(()=>AddScrewToSlot(screw)));
         }
         
-        private IEnumerator WaitForScrewToStop(Screw.Screw screw)
+        private IEnumerator WaitForBoxStopAndAddScrew(Action callback)
         {
-            // Wait until the screw is no longer moving
-            while (screw.IsMoving() || isMoving)
-            {
-                yield return null; // Wait for the next frame
-            }
-
-            yield return new WaitUntil(() => !screw.IsMoving());
+            yield return new WaitUntil(() => !isMoving);
+            callback?.Invoke();
             // Now that the screw has stopped moving, add it
-            AddScrewToSlot(screw);
-        }
-        public int TotalHoldEmty()
-        {
-            return holdScrews.Count(hold => hold.IsEmpty());
         }
         private void AddScrewToSlot(Screw.Screw screw)
         {
             // Nếu đã biết vị trí lỗ trống
-            if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Length)
+            if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Count)
             {
                 // Kiểm tra xem vị trí này có thực sự trống không
                 if (holdScrews[nextEmptyIndex].IsEmpty())
@@ -231,7 +213,7 @@ namespace Ingame
 
             // Nếu không có vị trí trống hoặc chỉ số bị sai
             // Tìm lỗ trống theo cách thủ công từ đầu
-            for (int i = 0; i < holdScrews.Length; i++)
+            for (int i = 0; i < holdScrews.Count; i++)
             {
                 if (holdScrews[i].IsEmpty())
                 {
@@ -250,7 +232,7 @@ namespace Ingame
         private void UpdateNextEmptyIndex()
         {
             nextEmptyIndex = -1; // Đặt mặc định không có lỗ trống
-            for (int i = 0; i < holdScrews.Length; i++)
+            for (int i = 0; i < holdScrews.Count; i++)
             {
                 if (holdScrews[i].IsEmpty())
                 {

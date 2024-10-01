@@ -31,6 +31,7 @@ namespace Ingame
             if (!screw)
             {
                 screw = newScrew;
+                Debug.Log("Dont  have screw" + index);
                 screw.DoMoveToHold(this);
             }
             else
