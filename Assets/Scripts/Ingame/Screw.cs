@@ -155,10 +155,7 @@ namespace Ingame.Screw
                 // Reset the flag after handling the overlap situation
                 isClicked = false;
             }
-            else
-            {
-                ArrayScrew.Instance.AddScrew(this);
-            }
+            
         }
 
         public IEnumerator ResetClickFlagAfterDelay(float delay)

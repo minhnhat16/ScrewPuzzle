@@ -194,20 +194,7 @@ namespace Ingame
                 isMoveBoxDone = boxDone;
             }));
             yield return new WaitUntil(() => isMoveBoxDone == true);
-            foreach (var box in screwBoxes)
-            {
-                FindScrewHadSameColor(box);
-            }
-        }
-
-        private void FindScrewHadSameColor(ScrewBox box)
-        {
-            var screws = ArrayScrew.Instance.Screws.Where(s => s.Color ==box.Color);
-            foreach (var s in screws)
-            {
-                ArrayScrew.Instance.Screws.Remove(s);
-                box.AddScrew(s);
-            }
+            
         }
 
         private void OnLastBoxClearScrew()
@@ -232,16 +219,7 @@ namespace Ingame
                 callback?.Invoke(true);
             });
         }
-
-        // Hàm kiểm tra xem có box nào cùng màu với screw không
-        public ScrewBox HasBoxWithSameColor(Screw.Screw screw)
-        {
-            Debug.Log("Tìm box cùng màu với screw");
-            var boxArray =
-                screwBoxes.Where(box => box.gameObject.activeSelf && box.Color == screw.Color && !box.isMoving)
-                .ToList();
-            return boxArray.Count() != 0 ? boxArray.LastOrDefault() : null;
-        }
+        
 
     }
 }

@@ -40,6 +40,10 @@ namespace Ingame
             }
         }
 
+        public Screw.Screw GetScrew()
+        {
+            return screw == null ? null : screw;
+        }
         public bool IsEmpty()
         {
             return screw == null;

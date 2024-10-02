@@ -23,7 +23,7 @@ namespace Ingame
         [SerializeField] private Collider2D _collider;
 
         [SerializeField] private bool isBoxFull;
-
+        [SerializeField] private bool isAddingScrew = false;
         [SerializeField] private int nextEmptyIndex = -1;
 
         public int NextEmptyIndex
@@ -181,16 +181,35 @@ namespace Ingame
         // Hàm di chuyển Screw vào một lỗ trống trong CrewBox
         public virtual void AddScrew(Screw.Screw screw)
         {
-            
+            isAddingScrew = true;
             // Nếu màu screw không khớp, kết thúc ngay
             if (screw.Color != color)
             {
                 Debug.LogWarning("Screw color mismatch!");
+                isAddingScrew = !isAddingScrew;
                 return;
             }
-            StartCoroutine(WaitForBoxStopAndAddScrew(()=>AddScrewToSlot(screw)));
+            StartCoroutine(WaitForBoxStopAndAddScrew(()=>
+            {
+                AddScrewToSlot(screw);
+                isAddingScrew = false;
+                
+            }));
         }
-        
+
+        public virtual void AddScrew(List<Screw.Screw> screws)
+        {
+            
+            StartCoroutine(WaitForBoxStopAndAddScrew(() =>
+            {
+                int i = screws.Count;
+                foreach (var screw in  screws)
+                {
+                    holdScrews[2-i].AddScrew(screw);
+                    i--;
+                }
+            }));
+        }        
         private IEnumerator WaitForBoxStopAndAddScrew(Action callback)
         {
             yield return new WaitUntil(() => !isMoving);
@@ -223,7 +242,6 @@ namespace Ingame
                     return;
                 }
             }
-
             // Nếu không có lỗ trống nào
             Debug.LogWarning("All screw holes are filled! " + gameObject.name + " at hold ");
         }
@@ -250,7 +268,6 @@ namespace Ingame
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
             render.material.color = newColor;
-                
         }
 
     }

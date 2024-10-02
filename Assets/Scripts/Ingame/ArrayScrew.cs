@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Enum;
 using Managers;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
-
 namespace Ingame
 {
    public class ArrayScrew : MonoBehaviour
@@ -15,10 +12,8 @@ namespace Ingame
       public static ArrayScrew Instance;
       [SerializeField] private int coutHoldActive;
       [SerializeField]   private SpriteRenderer spriteRenderer;
-     [SerializeField] private  List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
-     [SerializeField] private  List<Screw.Screw> screws; // Mảng các HoldScrew (ô chứa screw)
+      [SerializeField] private  List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
 
-       public List<Screw.Screw> Screws => screws;
 
        public UnityEvent onHoldScrewsFull = new (); // Sự kiện khi holdScrews đầy
 
@@ -75,37 +70,7 @@ namespace Ingame
      
       }
       // Hàm thêm Screw vào một ô trống trong holdScrew
-      public bool AddScrew(Screw.Screw screw)
-      {
-         // Try to proceed if no overlap
-         var boxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(screw);
-         // Reset the flag if the action didn't complete successfully
-         if (boxWithSameColor != null  && !boxWithSameColor.IsBoxFull)
-         {
-            boxWithSameColor.AddScrew(screw);
-            Debug.Log("Action completed successfully, flag remains true.");
-            return true;
-         }
-         else
-         {
-            foreach (var t in holdScrews)
-            {
-               // Tìm ô trống trong mảng holdScrews
-               if (t.Screw != null && !t.IsEmpty()) continue;
-               t.AddScrew(screw); // Thêm screw vào ô trống
-               screws.Add(screw);
-               CheckIfHoldScrewsFull(); // Kiểm tra xem đã đầy hết chưa
-               return true; // Trả về true nếu thêm thành công
-            }
-
-         }
-        
-         Debug.LogWarning("All holdScrews are full!");
-         StartCoroutine(screw.ResetClickFlagAfterDelay(0.5f));
-         return false; // Trả về false nếu không có ô trống
-      }
-    
-
+   
       private void ScrewFullEvent()
       {
          IngameController.Instance.Reset();
@@ -125,6 +90,37 @@ namespace Ingame
          // Nếu tất cả các ô đều đầy, thực hiện invoke
          Debug.Log("All holdScrews are full!");
          onHoldScrewsFull?.Invoke(); // Gọi sự kiện thua hoặc một hành động khác
+      }
+
+      public List<Screw.Screw> GetAllScrewInHold()
+      {
+         return (from holdScrew in holdScrews where !holdScrew.IsEmpty() select holdScrew.Screw).ToList();
+      } 
+      public void AddScrew(Screw.Screw screw)
+      {
+         var holdScrew = holdScrews.First(hold => hold.IsEmpty());
+         holdScrew.AddScrew(screw);
+         MatchScrewsToBoxes();  
+      }
+      private void MatchScrewsToBoxes()
+      {
+         var listBoxActive = BoxQueue.Instance.screwBoxes;
+         // Iterate over each box
+         foreach (var box in listBoxActive)
+         {
+            // Create a list to store screws that match the box color
+
+            var holdsHadScrew = holdScrews.Where(h => h.GetScrew() != null).ToList();
+            
+            // Iterate over each screw
+            var matchedScrews = holdsHadScrew.Select(hold => hold.GetScrew()).Where(screw => screw.Color == box.Color).ToList();
+
+            // Assign the matched screws to the box
+            box.AddScrew(matchedScrews);
+
+            // Log the result
+           // Debug.Log($"Box with color {box.color} has {box.screws.Count} screws.");
+         }
       }
    }
 }
