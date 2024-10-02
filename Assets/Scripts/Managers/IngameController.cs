@@ -129,7 +129,7 @@ namespace Managers
         private void AddHold(Action callback)
         {
             itemPerforming = true;
-            ArrayScrew.instance.SpawnNewHold();
+            ArrayScrew.Instance.SpawnNewHold();
             callback?.Invoke();
         }
 

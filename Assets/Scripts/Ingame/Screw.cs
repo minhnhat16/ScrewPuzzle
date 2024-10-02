@@ -24,8 +24,6 @@ namespace Ingame.Screw
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
          [SerializeField] protected HingeController hingeController;
-
-        private static bool isUpdatingBox = false;
         public HingeController HingeController
         {
             get => hingeController;
@@ -136,7 +134,9 @@ namespace Ingame.Screw
         {
             // Prevent multiple clicks using the flag
             if (isClicked) return;
-
+            // Set the flag to true right at the start to prevent any more clicks during processing
+            // isClicked = true;
+            isClicked = true;
             // Ensure you have a reference to the correct CircleCollider2D
             CircleCollider2D myCollider = GetComponent<CircleCollider2D>();
 
@@ -144,57 +144,26 @@ namespace Ingame.Screw
             LayerMask mask = hingeController.GetIntBodyLayer(0);
             var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius, mask);
 
+            // Start the coroutine for completing the action (assuming it's part of the logic)
+            // StartCoroutine(CompleteAction());
+
             // If the screw is blocked by overlapping colliders, perform some action
             if (overlappingColliders.Length > 0)
             {
                 Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
                 ShakeScrew();
+                // Reset the flag after handling the overlap situation
                 isClicked = false;
-                return;  // Stop the process if blocked
             }
-
-            // Start the process with `isClicked` true to prevent further clicks
-           
-
-            // Start the coroutine to handle the screw and box update timing
-            StartCoroutine(HandleScrewPlacement());
+            
         }
 
-        private IEnumerator HandleScrewPlacement()
+        public IEnumerator ResetClickFlagAfterDelay(float delay)
         {
-            isClicked = true;
-            // Wait for the ArrayScrew update to complete (replace this with your actual update logic)
-            while (ArrayScrew.instance.IsUpdating || isUpdatingBox)
-            {
-                Debug.Log("Waiting for ArrayScrew or box update to complete...");
-                yield return null; // Wait for the next frame
-            }
-
-            // Lock the box update process
-            isUpdatingBox = true;
-
-            // After ArrayScrew update completes, try to place the screw in a box
-            var boxWithSameColor = BoxQueue.Instance.HasBoxWithSameColor(this);
-
-            if (boxWithSameColor != null && !boxWithSameColor.IsBoxFull)
-            {
-                boxWithSameColor.AddScrew(this);
-                Debug.Log("Action completed successfully, flag remains true.");
-            }
-            else
-            {
-                Debug.LogWarning("Action was not completed, adding screw to ArrayScrew.");
-                ArrayScrew.instance.AddScrew(this);
-            }
-
-            // Reset the flag and unlock the box update after the process completes
-           
-        }
-
-        private IEnumerator ResetClickFlagAfterDelay(float delay)
-        {
+            Debug.Log("Screw: Reset Click Flag After Delay after" + delay);
             yield return new WaitForSeconds(delay);  // Wait for the specified delay
             isClicked = false;                       // Reset the flag
+            Debug.Log("Screw: Reset Click Flag After Delay Done" + isClicked);
         }
 
 
@@ -227,8 +196,9 @@ namespace Ingame.Screw
         }
 
         //further add move with DOTween
-        public virtual void DoMoveToHold(HoldScrew holdScrew, Action callback = null)
+        public virtual void DoMoveToHold(HoldScrew holdScrew)
         {
+            isClicked = isMoving = true;
             DoMoveScrewUp(() =>
             {
                 _circleCollider2D.enabled = false;
@@ -241,7 +211,7 @@ namespace Ingame.Screw
             // Check if the screw's velocity is not zero, implying movement
             return isMoving;// Adjust threshold as necessary
         }
-        public void JumpScrewToHold(HoldScrew holdScrew, Action callback = null)
+        public void JumpScrewToHold(HoldScrew holdScrew)
         {
             Vector3 toPos = holdScrew.Transf.position + new Vector3(0, 0.25f);
             Debug.Log("DO move to hold " + toPos);
@@ -263,8 +233,7 @@ namespace Ingame.Screw
             sequence.OnComplete(() =>
             {
                 // _transform.SetParent(holdScrew.Transf);
-                MoveScrewDown(callback);
-
+                MoveScrewDown();
             });
         }
 
@@ -281,18 +250,13 @@ namespace Ingame.Screw
             hingeController.FreeHinges();
         }
 
-        public virtual void MoveScrewDown(Action callback = null)
+        public virtual void MoveScrewDown()
         {
             var targetPos = render.transform.position;
             targetPos-= new Vector3(0, 0.25f,0);
             cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
              
-            render.transform.DOMove(targetPos, 0.5f)
-                .OnComplete(()=> 
-                { 
-                    isMoving = false;
-                    callback?.Invoke();
-                });
+            render.transform.DOMove(targetPos, 0.5f).OnComplete(()=> { isMoving = false; });
             
         }
     }

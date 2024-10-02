@@ -50,6 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e50b005d2d930fe43a94f6996b287821, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  coutHoldActive: 0
   spriteRenderer: {fileID: 0}
   holdScrews:
   - {fileID: 1128199034769752011}
@@ -57,6 +58,8 @@ MonoBehaviour:
   - {fileID: 1128199033590829147}
   - {fileID: 1128199033767188088}
   - {fileID: 1128199034987855907}
+  - {fileID: 0}
+  screws: []
   onHoldScrewsFull:
     m_PersistentCalls:
       m_Calls: []

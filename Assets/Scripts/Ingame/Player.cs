@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,15 +15,17 @@ namespace Ingame
         [SerializeField] private bool canClick = true;        // Flag to check if the player can click
         [SerializeField] private Screw.Screw CurrentScrew;
         [SerializeField] private Camera mainCam;
+        [SerializeField] private Queue<Screw.Screw> screwQueue;
         [HideInInspector] public UnityEvent onPlayerClick = new();  // Custom event for player clicks
         [HideInInspector] public UnityEvent<Screw.Screw> onScrewClicked;
         private Coroutine inputCoroutine;
+        private Coroutine processCoroutine;
+
         private void OnEnable()
         {
-            // Only add the listener if it hasn't been added before
             if (onScrewClicked != null)
             {
-                onScrewClicked.RemoveListener(ScrewClicked); // Ensuring no duplicate listeners
+                onScrewClicked.RemoveListener(ScrewClicked);
                 onScrewClicked.AddListener(ScrewClicked);
             }
 
@@ -29,12 +33,10 @@ namespace Ingame
             {
                 inputCoroutine = StartCoroutine(WaitForInput());
             }
-
         }
 
         private void OnDisable()
         {
-            // Remove the listener when the object is disabled to avoid multiple calls
             if (onScrewClicked != null)
             {
                 onScrewClicked.RemoveListener(ScrewClicked);
@@ -43,6 +45,12 @@ namespace Ingame
             {
                 StopCoroutine(inputCoroutine);
                 inputCoroutine = null;
+            }
+
+            if (processCoroutine != null)
+            {
+                StopCoroutine(processCoroutine);
+                processCoroutine = null;
             }
         }
 
@@ -56,42 +64,39 @@ namespace Ingame
         private void Start()
         {
             mainCam = Camera.main;
+            screwQueue = new Queue<Screw.Screw>();
         }
+
         private IEnumerator WaitForInput()
         {
             while (true)
             {
-                // Handle only one type of input based on the platform
-            #if UNITY_EDITOR || UNITY_STANDALONE    
+                #if UNITY_EDITOR || UNITY_STANDALONE    
                 if (Input.GetMouseButtonDown(0))
                 {
                     HandleInput(Input.mousePosition);
                 }
-            #elif UNITY_ANDROID || UNITY_IOS
-            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-            {
-                HandleInput(Input.GetTouch(0).position);
-            }
-            #endif
+                #elif UNITY_ANDROID || UNITY_IOS
+                if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+                {
+                    HandleInput(Input.GetTouch(0).position);
+                }
+                #endif
 
-                yield return null; // Wait for the next frame to check input again
+                yield return null;
             }
         }
 
-
         private void HandleInput(Vector3 screenPosition)
         {
-            // Convert screen position to world position
             Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
 
-            // Cast a 2D ray (actually a point in 2D space) from the world position
-            RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero,Mathf.NegativeInfinity);
+            RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero, Mathf.NegativeInfinity);
 
             if (hit.collider != null)
             {
                 var clickedObject = hit.collider.gameObject;
 
-                // Example: Handle interaction with a Screw
                 if (clickedObject.CompareTag("Player"))
                 {
                     onScrewClicked?.Invoke(clickedObject.GetComponent<Screw.Screw>());
@@ -108,8 +113,15 @@ namespace Ingame
         private void ScrewClicked(Screw.Screw screw)
         {
             Debug.LogWarning("Screw Clicked");
-            screw.OnScrewClicked();
+            screwQueue.Enqueue(screw);
+
+            // Start processing the queue if it's not already processing
+            if (processCoroutine == null)
+            {
+                ArrayScrew.Instance.AddScrew(screw);
+            }
         }
+
         
     }
 }
