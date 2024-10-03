@@ -26,6 +26,7 @@ namespace Managers
         [HideInInspector] public UnityEvent<ItemType> onItemInvoke;
         [SerializeField] private bool itemJustInvoke;
         [SerializeField] private bool itemPerforming;
+        public bool isPause;
 
         public bool ItemPerforming
         {
@@ -41,17 +42,26 @@ namespace Managers
 
 
 
-
+        private Coroutine inputCoroutine;
         private void OnEnable()
         {
             onCompleteLevel.AddListener(CompleteLevel);
             onItemInvoke.AddListener(ItemIvoked);
+            if (inputCoroutine == null)
+            {
+                inputCoroutine = StartCoroutine(ListenForResetInput());
+            }
         }
 
 
         private void OnDisable()
         {
             onCompleteLevel.RemoveListener(CompleteLevel);
+            if (inputCoroutine != null)
+            {
+                StopCoroutine(inputCoroutine);
+                inputCoroutine = null;
+            }
         }
         private static void CompleteLevel(bool onComplete)
         {
@@ -110,6 +120,8 @@ namespace Managers
         {
             yield return new WaitUntil(() => itemJustInvoke);
             Debug.Log("Item couroutine " + itemType);
+            itemJustInvoke = false;
+
             switch (itemType)
             {
                 case ItemType.AddHold:
@@ -188,7 +200,39 @@ namespace Managers
         {
             SceneManager.LoadScene("SampleScene");
         }
+        private IEnumerator ListenForResetInput()
+        {
+            while (true)
+            {
+                // Kiểm tra tổ hợp phím Ctrl + R
+                if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftControl))
+                {
+                    Reset(); // Gọi phương thức Reset khi tổ hợp phím được nhấn
+                }
+                else if (Input.GetKey(KeyCode.Alpha1))
+                {
+                    Debug.LogWarning("Key 1 pressed");
+                    itemJustInvoke = true;
+                    onItemInvoke.Invoke(ItemType.AddBox);
+                }
+                else if (Input.GetKey(KeyCode.Alpha2))
+                {
+                    Debug.LogWarning("Key 2 pressed");
+                    itemJustInvoke = true;
 
+                    onItemInvoke.Invoke(ItemType.AddHold);
+                }
+                else if (Input.GetKey(KeyCode.Alpha3) )
+                {
+                    Debug.LogWarning("Key 3 pressed");
+                    itemJustInvoke = true;
+
+                    onItemInvoke.Invoke(ItemType.ClearOneScrew);
+                }
+                // Chờ một khung hình trước khi kiểm tra tiếp
+                yield return null;
+            }
+        }
     }
 }
 

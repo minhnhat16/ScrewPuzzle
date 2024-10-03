@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Ingame
@@ -26,17 +27,19 @@ namespace Ingame
         {
             screw = null;
         }
-        public void AddScrew(Screw.Screw newScrew)
+        public void AddScrew(Screw.Screw newScrew,Action<bool> callback = null)
         {
             if (!screw)
             {
                 screw = newScrew;
                 Debug.Log("Dont  have screw" + index);
                 screw.DoMoveToHold(this);
+                callback?.Invoke(true);
             }
             else
             {
                 Debug.Log("All ready have screw" + index);
+                callback?.Invoke(true);
             }
         }
 
@@ -47,6 +50,12 @@ namespace Ingame
         public bool IsEmpty()
         {
             return screw == null;
+        }
+
+        public bool IsContain(Screw.Screw screw)
+        {
+            if (this.screw == null) return false;
+            return this.screw == screw;
         }
     }
 }   

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using Managers;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -71,17 +72,21 @@ namespace Ingame
         {
             while (true)
             {
-                #if UNITY_EDITOR || UNITY_STANDALONE    
-                if (Input.GetMouseButtonDown(0))
+                if (!IngameController.Instance.isPause)
                 {
-                    HandleInput(Input.mousePosition);
-                }
-                #elif UNITY_ANDROID || UNITY_IOS
+#if UNITY_EDITOR || UNITY_STANDALONE    
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        HandleInput(Input.mousePosition);
+                    }
+#elif UNITY_ANDROID || UNITY_IOS
                 if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
                 {
                     HandleInput(Input.GetTouch(0).position);
                 }
-                #endif
+#endif
+                }
+                
 
                 yield return null;
             }
@@ -89,6 +94,7 @@ namespace Ingame
 
         private void HandleInput(Vector3 screenPosition)
         {
+            
             Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
 
             RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero, Mathf.NegativeInfinity);

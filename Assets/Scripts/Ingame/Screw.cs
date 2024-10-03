@@ -130,19 +130,18 @@ namespace Ingame.Screw
             return colliders;
         }
 
-        public void OnScrewClicked()
+        public bool OnScrewClicked()
         {
             // Prevent multiple clicks using the flag
-            if (isClicked) return;
+            if (isClicked) return true;
             // Set the flag to true right at the start to prevent any more clicks during processing
             // isClicked = true;
             isClicked = true;
             // Ensure you have a reference to the correct CircleCollider2D
-            CircleCollider2D myCollider = GetComponent<CircleCollider2D>();
-
+            CircleCollider2D.enabled = !isClicked;
             // Get the LayerMask and overlapping colliders
             LayerMask mask = hingeController.GetIntBodyLayer(0);
-            var overlappingColliders = GetOverlappingColliders(myCollider, myCollider.radius, mask);
+            var overlappingColliders = GetOverlappingColliders(CircleCollider2D, CircleCollider2D.radius, mask);
 
             // Start the coroutine for completing the action (assuming it's part of the logic)
             // StartCoroutine(CompleteAction());
@@ -154,15 +153,24 @@ namespace Ingame.Screw
                 ShakeScrew();
                 // Reset the flag after handling the overlap situation
                 isClicked = false;
+                ResetClickedFlag();
+                return true;
             }
-            
+            return false;
         }
 
+        public void ResetClickedFlag()
+        {
+            StartCoroutine(ResetClickFlagAfterDelay(0.5f));
+
+        }
         public IEnumerator ResetClickFlagAfterDelay(float delay)
         {
             Debug.Log("Screw: Reset Click Flag After Delay after" + delay);
             yield return new WaitForSeconds(delay);  // Wait for the specified delay
-            isClicked = false;                       // Reset the flag
+            isClicked = false;   
+            CircleCollider2D.enabled = !isClicked;
+            // Reset the flag
             Debug.Log("Screw: Reset Click Flag After Delay Done" + isClicked);
         }
 

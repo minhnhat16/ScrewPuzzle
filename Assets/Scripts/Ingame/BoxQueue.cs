@@ -6,6 +6,7 @@ using ConfigFile;
 using DG.Tweening;
 using Ingame.Pools;
 using Managers;
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -27,7 +28,7 @@ namespace Ingame
         [SerializeField] private float topAlignSpacing;
 
         public UnityEvent<bool> onCompleteClearBoxes = new();
-
+        private Coroutine alignCoroutine;
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -123,31 +124,53 @@ namespace Ingame
 
         private void InitBoxSlots(List<BoxSlot> slots)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
-                var box = SpawnBox();
                 var slot = slots[i];
-                var pos = CalculateInitialPosition(i);
-                slot.Initialize(pos, false, box);
-                StartCoroutine(MoveNewBoxToLastBox(box, slot));
+                var pos = CalculateInitialPosition(i, 4); // Tính vị trí ban đầu dựa trên số slot
+
+                if (i < 2)
+                {
+                    var box = SpawnBox();
+                    slot.Initialize(pos, false, box);
+                    StartCoroutine(MoveNewBoxToLastBox(box, slot));
+                }
+                else
+                {
+                    slot.Initialize(pos, false, null);
+                    slot.gameObject.SetActive(false);
+                }
+            }
+
+            // Bắt đầu coroutine để căn chỉnh slot
+            if (alignCoroutine == null)
+            {
+                alignCoroutine = StartCoroutine(AlignSlots(slots));
             }
         }
 
-        private Vector3 CalculateInitialPosition(int index)
+
+        private Vector3 CalculateInitialPosition(int index, int totalActiveSlots)
         {
             if (CameraMain.instance.GetCam() != null)
             {
                 float leftBoundary = CameraMain.instance.GetLeft();
                 float rightBoundary = CameraMain.instance.GetRight();
                 float topBoundary = CameraMain.instance.GetTop() - topAlignSpacing;
-                float spacing = (rightBoundary - leftBoundary) / (spacingBox);
-                Debug.Log($"Left Boundary: {leftBoundary}, Right Boundary: {rightBoundary}, Spacing: {spacing}");
-                return new Vector3(-(index * spacing), topBoundary, 0);
+
+                // Tính khoảng cách giữa left và right
+                float center = (leftBoundary + rightBoundary);
+                float width = (rightBoundary - leftBoundary); // Độ rộng giữa left và right
+                float spacing = width / totalActiveSlots; // Tính khoảng cách giữa các slot
+
+                // Tính vị trí x
+                float xPosition = center + (index * spacing) - (width / totalActiveSlots ); // Trừ đi nửa độ rộng để căn giữa
+
+                return new Vector3(xPosition, topBoundary, 0);
             }
             Debug.Log("Camera null");
             return Vector3.zero;
         }
-
         private void CloseAndRemoveBox(ScrewBox screwBox, Action onComplete)
         {
             screwBox.CloseBox((complete) =>
@@ -212,14 +235,36 @@ namespace Ingame
             newBox.isMoving = true;
             slot.AddBox(newBox);
             newBox.gameObject.SetActive(true);
-            var t = newBox.transform.DOMove(toPos, 1f).SetEase(Ease.OutCirc);
+            var t = newBox.transform.DOMove(toPos, 0.25f).SetEase(Ease.OutCirc);
             t.OnComplete(() =>
             {
                 newBox.isMoving = false;
+                newBox.FindScrew();
                 callback?.Invoke(true);
             });
         }
-        
+        private IEnumerator AlignSlots(List<BoxSlot> slots)
+        {
+            while (true)
+            {
+                // Lọc các slot đang active
+                var activeSlots = slots.Where(slot => slot.gameObject.activeSelf).ToList();
 
+                if (activeSlots.Count > 0)
+                {
+                    // Cập nhật lại vị trí cho tất cả các slot đang active
+                    for (int i = 0; i < activeSlots.Count; i++)
+                    {
+                        var slot = activeSlots[i];
+                        var newPosition = CalculateInitialPosition(i, activeSlots.Count);
+                        var pos =slot.transform.position = Vector3.Lerp(slot.transform.position, newPosition, 0.1f); // Di chuyển mượt mà
+                        if (slot.screwBox != null && !slot.screwBox.IsBoxFull) slot.screwBox.Position = pos;
+
+                    }
+                }
+
+                yield return null; // Chờ một khung hình trước khi kiểm tra lại
+            }
+        }
     }
 }
