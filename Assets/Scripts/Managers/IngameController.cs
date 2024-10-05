@@ -1,6 +1,7 @@
 using Ingame;
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -143,11 +144,11 @@ namespace Managers
             itemPerforming = true;
             ArrayScrew.Instance.SpawnNewHold();
             callback?.Invoke();
-        }
+        }   
 
         private void AddBox(Action callback)
         {
-
+            BoxQueue.Instance.AddNewBoxSlot();
             callback?.Invoke();
         }
         public void LoadIngameAsset(Action callback)
@@ -190,6 +191,11 @@ namespace Managers
             var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrews"), transform);
             yield return new WaitUntil(() => arrayScrew != null);
             if (arrayScrewObj != null) this.arrayScrew = arrayScrewObj.GetComponent<ArrayScrew>();
+            callback?.Invoke();
+        }
+        private void ClearAllScrewOnArray(Action callback)
+        {
+            ArrayScrew.Instance.ClearAllScrewsOnArray();
             callback?.Invoke();
         }
         private void ClearOneScrew(Action callback)
