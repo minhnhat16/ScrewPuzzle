@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
+  m_Name: Level_3
+  m_EditorClassIdentifier: 
+  levelId: 3
+  totalColorInLevel: 0
+  layer: 0
+  connectors: {fileID: 0}
+  screws:
+  - idScrew: -1436
+    idColor: 0
+    screwPosition: {x: -2.2, y: 0.949, z: 0}
+    hingeConnections:
+    - hingePosition: {x: 4.77, y: -2.821, z: 0}
+      bodyPartName: Part
+      bodyPartHingePosition: {x: -1.3700001, y: -1.35, z: -0.65999997}
+    - hingePosition: {x: 4.77, y: -2.821, z: 0}
+      bodyPartName: Part
+      bodyPartHingePosition: {x: -1.3700001, y: -1.35, z: -0.65999997}
+  layers:
+  - layerId: 25120
+    parts:
+    - idBodyPart: 0
+      partName: Part (1)
+      spriteName: 
+      partPosition: {x: -1.3700001, y: -1.35, z: -0.65999997}
+      layer: Layer 3
+      colorString: RGBA(0.972, 0.392, 0.000, 0.659)
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}

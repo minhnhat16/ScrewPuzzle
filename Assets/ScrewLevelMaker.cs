@@ -17,14 +17,14 @@ public class ScrewLevelMaker : Screw
         render = GetComponentInChildren<SpriteRenderer>();
         layerMask = gameObject.layer;
         OnClickOnEditMode.AddListener(ClickScrewEdit);
-        
     }
-
     private void ClickScrewEdit()
     {
+        Debug.Log("Click screw editor");
         // Detect Mouse Click
         if (Input.GetMouseButtonDown(0))
         {
+            
             OnMouseClick();
         }
 
