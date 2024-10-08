@@ -12,6 +12,8 @@ namespace Ingame.Board
         [SerializeField] private GameObject _gameObject;
         public List<BasePart> parts;
         [SerializeField] private int activePartCount = 0;
+        [SerializeField] private string layer;
+
         public Transform Transform
         {
             get => _transform;
@@ -52,6 +54,8 @@ namespace Ingame.Board
             foreach (var part in parts)
             {
                 part.OnStateChanged += CheckAllPartActive;
+                layer =  LayerMask.LayerToName(gameObject.layer);
+                part.SetSortingLayer(layer);
             }
         }
 

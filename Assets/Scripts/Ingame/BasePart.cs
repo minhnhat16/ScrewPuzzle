@@ -31,6 +31,7 @@ namespace Ingame
         [SerializeField] private SpriteRenderer renderer;
         [SerializeField] private SpriteRenderer outLine;
         [SerializeField] private PolygonCollider2D collider;
+        
         private Coroutine checkFallingRoutine;
         public bool IsFalling
         {
@@ -106,6 +107,26 @@ namespace Ingame
                 StopCoroutine(checkFallingRoutine);
                 checkFallingRoutine = null;
             }
+        }
+
+        public void SetSortingLayer(string layerName)
+        {
+            Debug.Log("sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
+
+            if (renderer != null)
+            {
+                renderer.sortingLayerName = layerName;
+            }
+
+            if (outLine != null)
+            {
+                outLine.sortingLayerName = layerName; // Both sprites use the same sorting layer
+            }
+            
+            Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
+
+            renderer.sortingOrder = 0;
+            outLine.sortingOrder = renderer.sortingOrder+1; 
         }
     }
 }

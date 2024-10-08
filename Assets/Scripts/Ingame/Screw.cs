@@ -14,12 +14,12 @@ namespace Ingame.Screw
         [SerializeField]  private ColorEnum color;
         [SerializeField] private bool isPartiallyVisible;
         [SerializeField] private bool isClicked;
-        [SerializeField] private int layerMask;
+        [SerializeField] protected int layerMask;
         [SerializeField] private int sortingOrder;
         [SerializeField] private bool isMultipleJoint;
-        [SerializeField] private CircleCollider2D _circleCollider2D;
+        [SerializeField] protected CircleCollider2D _circleCollider2D;
         [SerializeField] private Rigidbody2D rb;
-        [SerializeField] private SpriteRenderer render ;
+        [SerializeField] protected SpriteRenderer render ;
 
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
@@ -59,7 +59,7 @@ namespace Ingame.Screw
         // Start is called before the first frame update
         public virtual void Start(){
             isClicked  =false;
-            StartCoroutine(Init());
+          StartCoroutine(InitOnLevelMaker());
         }
 
         private void OnEnable()
@@ -74,7 +74,14 @@ namespace Ingame.Screw
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
             yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();
-           
+        }
+        public IEnumerator InitOnLevelMaker()
+        {
+            string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
+            yield return new WaitUntil(()=>bodyLayer !=null );
+            SetSortingOrderAndLayer(sortingOrder, bodyLayer);
+            // yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
+            // SetScrewColor();
         }
         public Screw()
         {

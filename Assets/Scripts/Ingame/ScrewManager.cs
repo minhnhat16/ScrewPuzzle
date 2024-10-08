@@ -53,28 +53,26 @@ namespace Ingame
                 return;
             }
 
-            foreach (var s in screwList)
-            {
-                // Save the screw configuration
-                var screwConfig = SaveScrewToConfig(s);
-
-                // Add the config to the provided list
-                screwScriptable.Add(screwConfig);
-            }
+            // foreach (var s in screwList)
+            // {
+            //     // Save the screw configuration
+            //     var screwConfig = SaveScrewToConfig(s);
+            //
+            //     // Add the config to the provided list
+            //     screwScriptable.Add(screwConfig);
+            // }
 
             Debug.Log("Screw configurations successfully added to the list.");
         }
 
-        public ScrewScriptable SaveScrewToConfig(Screw.Screw screw)
-        {
-            ScrewScriptable newScrewScriptable = new ScrewScriptable();
-            newScrewScriptable.idScrew = screw.GetInstanceID();
-            newScrewScriptable.screwName = screw.gameObject.name;
-            newScrewScriptable.screwPosition = screw.Position;
-            newScrewScriptable.idColor = Convert.ToInt32(screw.Color);
-            newScrewScriptable.listHingeJoint = screw.HingeController.HingeJoint2D;
-            newScrewScriptable.listRigidBodyConnections = screw.HingeController.BodyConnect;
-            return newScrewScriptable;
-        }
+        // public ScrewScriptable SaveScrewToConfig(Screw.Screw screw)
+        // {
+        //     ScrewScriptable newScrewScriptable = new ScrewScriptable();
+        //     newScrewScriptable.idScrew = screw.GetInstanceID();
+        //     newScrewScriptable.screwPosition = screw.Position;
+        //     newScrewScriptable.idColor = Convert.ToInt32(screw.Color);
+        //     newScrewScriptable.listRigidBodyConnections = screw.HingeController.BodyConnect;
+        //     return newScrewScriptable;
+        // }
     }
 }

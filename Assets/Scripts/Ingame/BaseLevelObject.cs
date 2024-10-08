@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Ingame
-{
+{   
     public class BaseLevelObject : MonoBehaviour
     {
         public void Awake()
