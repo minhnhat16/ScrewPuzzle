@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -10,9 +11,7 @@ namespace Ingame.Board
     {
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
-        
-        
-        
+        [SerializeField] List<BasePart> parts = new List<BasePart>();
         public List<BaseLayer> Layers
         {
             get => layers;
@@ -176,12 +175,28 @@ namespace Ingame.Board
 
         public void AddPart(BasePart part)
         {
-            if (part != null)
+            if (part == null) return;
+
+            // Check if the dictionary already contains the part with the same uniqueID
+            if (partDict.ContainsKey(part.uniqueID))
             {
-                partDict.TryAdd(part.uniqueID, part);
+                Debug.Log("Part with ID " + part.uniqueID + " already exists. Skipping add.");
+                return; // Exit the method if part already exists
             }
+
+            // Add the part to the dictionary if it doesn't exist
+            partDict.TryAdd(part.uniqueID, part);
+            Debug.Log("Part with ID " + part.uniqueID + " added.");
         }
 
+
+        public void CoverDictToList()
+        {
+            foreach (var part in partDict)
+            {
+                parts.Add(part.Value);
+            }
+        }
         public BasePart GetPartByKey(string uniqueId)
         {
             return partDict.TryGetValue(uniqueId, out BasePart part) ? part : null;
@@ -191,6 +206,12 @@ namespace Ingame.Board
         {
             if (!partDict.ContainsKey(uniqueId)) return;
             partDict.Remove(uniqueId);
+        }
+
+        public void ClearPartDict()
+        {
+            parts.Clear();
+            partDict.Clear();
         }
     }   
 }

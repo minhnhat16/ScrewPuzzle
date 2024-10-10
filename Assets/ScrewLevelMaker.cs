@@ -83,6 +83,7 @@ public class ScrewLevelMaker : Screw
 
     public void CreateHinge(Rigidbody2D targetScrew)
     {
+        Debug.Log("try to add new hinge " + targetScrew == null);
         GameObject newHingeChild = new()
         {
             transform =

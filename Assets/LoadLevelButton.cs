@@ -15,11 +15,6 @@ public class LoadLevelButton : MonoBehaviour
         userInputField.text = "";
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void GetInputValue()
     {
         // Access the text entered in the input field
@@ -32,7 +27,7 @@ public class LoadLevelButton : MonoBehaviour
         {
             displayText.text = "Entered integer value: " + parsedInt;
             Debug.Log("User Input (int): " + parsedInt);
-            converter.LoadGameObjectFromLevel(parsedInt);
+            converter.LoadLevel(parsedInt);
         }
         else
         {

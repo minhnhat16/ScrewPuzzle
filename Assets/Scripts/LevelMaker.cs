@@ -3,13 +3,22 @@ using Ingame;
 using Ingame.Screw;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class LevelMaker : MonoBehaviour
 {
     [SerializeField] private GameObjectToLevelConverter converter;
     public UnityEvent onScrewClicked;
-    public static LevelMaker instance;// Thay Event thành UnityEvent
-    [System.Serializable]
+    public static LevelMaker instance;
+    public bool isInputData;
+
+    [SerializeField] InputField levelInputField;
+    [SerializeField] InputField layerInputField;
+    [SerializeField] Dropdown saveOptionDropDown;
+    
+    
+    [System.Serializable]   
     public class KeyEvent : UnityEvent { }
 
     #region: EventKey
@@ -47,6 +56,8 @@ public class LevelMaker : MonoBehaviour
         // Đăng ký sự kiện nếu chưa có
         if (onKey0Pressed == null) onKey0Pressed = new KeyEvent();
         if (onKey1Pressed == null) onKey1Pressed = new KeyEvent();
+        if (onKey2Pressed == null) onKey2Pressed = new KeyEvent();
+
         if (onKeyAPressed == null) onKeyAPressed = new KeyEvent();
         // ... Tương tự cho tất cả các phím khác
     }
@@ -56,15 +67,20 @@ public class LevelMaker : MonoBehaviour
         // Đăng ký sự kiện với InputManager
         InputManager.onKey0 += onKey0Pressed.Invoke;
         InputManager.onKey1 += onKey1Pressed.Invoke;
+        InputManager.onKey2 += onKey2Pressed.Invoke;
         InputManager.onKeyA += onKeyAPressed.Invoke;
+        saveOptionDropDown.onValueChanged.AddListener(delegate { DropdownValueChanged(saveOptionDropDown); });
         // ... Đăng ký các phím còn lại
     }
+
+   
 
     private void OnDisable()
     {
         // Hủy đăng ký sự kiện khi không cần thiết
         InputManager.onKey0 -= onKey0Pressed.Invoke;
         InputManager.onKey1 -= onKey1Pressed.Invoke;
+        InputManager.onKey2 -= onKey2Pressed.Invoke;
         InputManager.onKeyA -= onKeyAPressed.Invoke;
         // ... Hủy đăng ký các phím còn lại
     }
@@ -73,6 +89,7 @@ public class LevelMaker : MonoBehaviour
     public void OnScrewClicked()
     {
         Debug.Log("Screw clicked. Entering selection mode.");
+        if (isInputData) return;
         // Logic để xử lý khi nhấn vào screw
         // Có thể gọi sự kiện hay logic khác ở đây
         onScrewClicked.Invoke();
@@ -116,4 +133,59 @@ public class LevelMaker : MonoBehaviour
         return null; 
     }
 
+
+    public int GetLayerInputField()
+    {
+        string inputValue = layerInputField.text;
+        int parsedInt;
+        // Display the input value in another UI Text component
+        layerInputField.text = "Entered value: " + inputValue;
+
+        if (int.TryParse(inputValue, out parsedInt))
+        {
+            layerInputField.text = "Entered integer value: " + parsedInt;
+            Debug.Log("User Input (int): " + parsedInt);
+            return parsedInt;
+        }
+        else
+        {
+            // If the input is not a valid integer, display an error message
+            layerInputField.text = "0";
+            Debug.LogWarning("Invalid input. Please enter a valid integer.");
+            return 0;
+        }
+    }
+
+    public void SaveLevel()
+    {
+        GetCurrentDropdownOption();
+    }
+    void DropdownValueChanged(Dropdown change)
+    {
+        // Get the index of the selected option
+        int index = change.value;
+
+        // Get the selected option's text
+        string selectedOption = change.options[index].text;
+
+        Debug.Log("Selected option: " + selectedOption + "current index" + index);
+    }
+    public void GetCurrentDropdownOption()
+    {
+        if (saveOptionDropDown != null)
+        {
+            // Get the current index
+            int currentIndex = saveOptionDropDown.value;
+            string currentOption = saveOptionDropDown.options[currentIndex].text;
+            Debug.Log("Currently selected option: " + currentOption  + "current index" + currentIndex);
+            if (currentIndex == 0)
+            {
+                converter.SaveGameObjectToLevel(false,converter.currentLoadedLevel);
+                return;
+            }
+            converter.SaveGameObjectToLevel(true);
+            // Get the current option's text
+          
+        }
+    }
 }
