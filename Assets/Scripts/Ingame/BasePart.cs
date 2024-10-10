@@ -1,13 +1,19 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEditor.U2D.Path;
 using UnityEngine;
+using Random = Unity.Mathematics.Random;
 
 namespace Ingame
 {
     public class BasePart : MonoBehaviour
     {
+        public string uniqueID; 
+        private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
+        
+        
         public virtual Rigidbody2D Body
         {
             get => body;
@@ -53,6 +59,11 @@ namespace Ingame
             body = GetComponent<Rigidbody2D>();
             renderer = GetComponent<SpriteRenderer>();
             outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
+            // Assign a GUID if not already set
+            if (string.IsNullOrEmpty(uniqueID))
+            {
+                uniqueID = GenerateUniqueID();
+            }
         }
 
         // Start is called before the first frame update
@@ -127,6 +138,16 @@ namespace Ingame
 
             renderer.sortingOrder = 0;
             outLine.sortingOrder = renderer.sortingOrder+1; 
+        }
+        private string GenerateUniqueID()
+        {
+            string newID;
+            do
+            {
+                newID = UnityEngine.Random.Range(1000, 9999).ToString(); // Generate a random 4-digit number
+            } while (usedIDs.Contains(newID)); // Ensure the ID is unique
+            usedIDs.Add(newID); // Mark the ID as used
+            return newID;
         }
     }
 }

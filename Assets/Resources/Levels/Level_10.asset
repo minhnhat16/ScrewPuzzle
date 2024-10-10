@@ -1,0 +1,424 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
+  m_Name: Level_10
+  m_EditorClassIdentifier: 
+  levelId: 10
+  totalColorInLevel: 0
+  layer: 0
+  connectors: {fileID: 0}
+  screws:
+  - idScrew: -91932
+    idColor: 0
+    screwPosition: {x: -27.695526, y: 5.442432, z: 0}
+    hingeConnections: []
+  - idScrew: -91958
+    idColor: 0
+    screwPosition: {x: -15.691774, y: 1.8499321, z: 0}
+    hingeConnections: []
+  layers:
+  - layerId: 0
+    parts:
+    - idBodyPart: 0
+      partName: 8567
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.9194784, y: -3.8236845, z: 0.70606744}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 8567
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.9194784, y: -3.8236845, z: 0.70606744}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 9815
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.9194784, y: -3.8236845, z: 0.70606744}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 9815
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.9194784, y: -3.8236845, z: 0.70606744}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 5911
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.12, y: -2.11, z: 1.34}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 5
+      partName: 5911
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.12, y: -2.11, z: 1.34}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 6
+      partName: 8275
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.12, y: -2.11, z: 1.34}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 7
+      partName: 8275
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.12, y: -2.11, z: 1.34}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+  - layerId: 1
+    parts:
+    - idBodyPart: 0
+      partName: 5527
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.6758413, y: -5.821662, z: 0.7851851}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 5527
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.6758413, y: -5.821662, z: 0.7851851}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 3434
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.6758413, y: -5.821662, z: 0.7851851}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 3434
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -4.6758413, y: -5.821662, z: 0.7851851}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 7004
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.269382, y: -5.0481305, z: 0.41930586}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 5
+      partName: 7004
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.269382, y: -5.0481305, z: 0.41930586}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 6
+      partName: 6475
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.269382, y: -5.0481305, z: 0.41930586}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 7
+      partName: 6475
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -2.269382, y: -5.0481305, z: 0.41930586}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+  - layerId: 2
+    parts:
+    - idBodyPart: 0
+      partName: 9538
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.0231056, y: -0.64448524, z: 0.67526484}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 9538
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.0231056, y: -0.64448524, z: 0.67526484}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 7786
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.0231056, y: -0.64448524, z: 0.67526484}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 7786
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.0231056, y: -0.64448524, z: 0.67526484}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 2884
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.8592725, y: 0.29361296, z: 0.7559061}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 5
+      partName: 2884
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.8592725, y: 0.29361296, z: 0.7559061}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 6
+      partName: 4289
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.8592725, y: 0.29361296, z: 0.7559061}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 7
+      partName: 4289
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.8592725, y: 0.29361296, z: 0.7559061}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+  - layerId: 3
+    parts:
+    - idBodyPart: 0
+      partName: 8475
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -3.7157974, y: -1.3484093, z: 0.115047805}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 8475
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -3.7157974, y: -1.3484093, z: 0.115047805}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 5246
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -3.7157974, y: -1.3484093, z: 0.115047805}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 5246
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -3.7157974, y: -1.3484093, z: 0.115047805}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 7607
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.9915786, y: -0.05918193, z: 0.78586847}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 5
+      partName: 7607
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.9915786, y: -0.05918193, z: 0.78586847}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 6
+      partName: 1208
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.9915786, y: -0.05918193, z: 0.78586847}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 7
+      partName: 1208
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.9915786, y: -0.05918193, z: 0.78586847}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+  - layerId: 4
+    parts:
+    - idBodyPart: 0
+      partName: 8202
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.7733631, y: -5.9628315, z: 0.39687258}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 8202
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.7733631, y: -5.9628315, z: 0.39687258}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 5435
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.7733631, y: -5.9628315, z: 0.39687258}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 5435
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.7733631, y: -5.9628315, z: 0.39687258}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 9043
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.09185219, y: -3.8846836, z: 0.0000061393207}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 5
+      partName: 9043
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.09185219, y: -3.8846836, z: 0.0000061393207}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 6
+      partName: 3621
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.09185219, y: -3.8846836, z: 0.0000061393207}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 7
+      partName: 3621
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.09185219, y: -3.8846836, z: 0.0000061393207}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+  - layerId: 5
+    parts:
+    - idBodyPart: 0
+      partName: 1565
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.1781654, y: -3.1926153, z: 0.0000074624872}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 1565
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.1781654, y: -3.1926153, z: 0.0000074624872}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 1048
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.1781654, y: -3.1926153, z: 0.0000074624872}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 1048
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 2.1781654, y: -3.1926153, z: 0.0000074624872}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 1197
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -0.3920269, y: -1.7085147, z: 0.38123432}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 5
+      partName: 1197
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -0.3920269, y: -1.7085147, z: 0.38123432}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 6
+      partName: 1680
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -0.3920269, y: -1.7085147, z: 0.38123432}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 7
+      partName: 1680
+      spriteName: 
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -0.3920269, y: -1.7085147, z: 0.38123432}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}

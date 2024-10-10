@@ -93,7 +93,7 @@ public class LevelManager : MonoBehaviour
         var leveObject = Instantiate(levelPrefab[level],transform);
         yield return new WaitUntil(()=> leveObject != null);
         var levelScript = leveObject.GetComponent<BaseLevelObject>();
-        levelScript.Init();
+       // levelScript.Init();
         callback?.Invoke();
     }
 }

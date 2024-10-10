@@ -77,7 +77,7 @@ namespace Level
     public class HingeConnection
     {
         public Vector3 hingePosition;
-        public string bodyPartName;
+        public string bodyPartUniqueID;
         public Vector3 bodyPartHingePosition;
     }
 
@@ -87,9 +87,9 @@ namespace Level
         public int idBodyPart;
         public string partName;
         public string spriteName;
-        public Vector3 partPosition;
         public string layer;
         public string colorString;
+        public Vector3 partPosition;
         public Vector3 partLocalScale;
         public Quaternion partRotation;
 

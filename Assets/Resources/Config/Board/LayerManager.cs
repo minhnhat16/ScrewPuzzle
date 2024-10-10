@@ -9,6 +9,16 @@ namespace Ingame.Board
     public class LayerManager : MonoBehaviour
     {
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
+        [SerializeField] private Dictionary<string, BasePart> partDict = new();
+        
+        
+        
+        public List<BaseLayer> Layers
+        {
+            get => layers;
+            set => layers = value;
+        }
+
         [SerializeField]private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
 
         public ApplyParentLayer applyParentLayer;
@@ -163,5 +173,24 @@ namespace Ingame.Board
             // Đảm bảo spriteRenderer có màu xám đầy đủ sau khi hoàn tất
             spriteRenderer.color = endColor;
         }
-    }
+
+        public void AddPart(BasePart part)
+        {
+            if (part != null)
+            {
+                partDict.TryAdd(part.uniqueID, part);
+            }
+        }
+
+        public BasePart GetPartByKey(string uniqueId)
+        {
+            return partDict.TryGetValue(uniqueId, out BasePart part) ? part : null;
+        }
+
+        public void RemovePart(string uniqueId)
+        {
+            if (!partDict.ContainsKey(uniqueId)) return;
+            partDict.Remove(uniqueId);
+        }
+    }   
 }

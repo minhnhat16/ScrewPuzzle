@@ -4,20 +4,20 @@ public class InputManager : MonoBehaviour
 {
     // Tạo delegate để lắng nghe các sự kiện phím nhấn
     public delegate void KeyAction();
-    public static event KeyAction onSpaceKey;
-    public static event KeyAction onEscapeKey;
+    public static event KeyAction onKey0;
+    public static event KeyAction onKey1;
+    public static event KeyAction onKeyA;
+    // ... Tương tự cho tất cả các phím số và ký tự khác
 
     private void Update()
     {
-        // Kiểm tra sự kiện nhấn phím và phát ra sự kiện tương ứng
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            onSpaceKey?.Invoke(); // Kích hoạt sự kiện khi nhấn phím Space
-        }
+        // Kiểm tra từng phím số từ 0 đến 9
+        if (Input.GetKeyDown(KeyCode.Alpha0)) onKey0?.Invoke();
+        if (Input.GetKeyDown(KeyCode.Alpha1)) onKey1?.Invoke();
+        // ... Tương tự cho tất cả các phím số
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            onEscapeKey?.Invoke(); // Kích hoạt sự kiện khi nhấn phím Escape
-        }
+        // Kiểm tra các phím ký tự từ A đến Z
+        if (Input.GetKeyDown(KeyCode.A)) onKeyA?.Invoke();
+        // ... Tương tự cho tất cả các phím ký tự
     }
 }

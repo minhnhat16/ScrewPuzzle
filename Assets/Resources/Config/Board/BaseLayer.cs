@@ -13,7 +13,7 @@ namespace Ingame.Board
         public List<BasePart> parts;
         [SerializeField] private int activePartCount = 0;
         [SerializeField] private string layer;
-
+        public Rigidbody2D ridBody;
         public Transform Transform
         {
             get => _transform;

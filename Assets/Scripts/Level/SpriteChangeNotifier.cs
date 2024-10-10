@@ -1,30 +1,33 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class SpriteChangeNotifier : MonoBehaviour
+namespace Level
 {
-    public UnityEvent<Sprite> OnSpriteChanged = new UnityEvent<Sprite>(); // Event to notify when sprite changes
-    private SpriteRenderer _spriteRenderer;
-    private Sprite _lastSprite; // Track the previous sprite
-
-    private void Awake()
+    public class SpriteChangeNotifier : MonoBehaviour
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        if (_spriteRenderer == null)
+        public UnityEvent<Sprite> OnSpriteChanged = new UnityEvent<Sprite>(); // Event to notify when sprite changes
+       [SerializeField] private SpriteRenderer _spriteRenderer;
+        private Sprite _lastSprite; // Track the previous sprite
+
+        private void Awake()
         {
-            Debug.LogError("SpriteRenderer not found on the object.");
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            if (_spriteRenderer == null)
+            {
+                Debug.LogError("SpriteRenderer not found on the object.");
+            }
         }
-    }
 
-    private void Update()
-    {
-        // Check if the sprite has changed
-        if (_spriteRenderer.sprite != _lastSprite)
+        private void Update()
         {
-            _lastSprite = _spriteRenderer.sprite; // Update the last known sprite
+            // Check if the sprite has changed
+            if (_spriteRenderer.sprite != _lastSprite)
+            {
+                _lastSprite = _spriteRenderer.sprite; // Update the last known sprite
 
-            // Trigger the event and pass the new sprite
-            OnSpriteChanged.Invoke(_spriteRenderer.sprite);
+                // Trigger the event and pass the new sprite
+                OnSpriteChanged.Invoke(_spriteRenderer.sprite);
+            }
         }
     }
 }

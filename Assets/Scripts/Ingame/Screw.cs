@@ -59,7 +59,7 @@ namespace Ingame.Screw
         // Start is called before the first frame update
         public virtual void Start(){
             isClicked  =false;
-          StartCoroutine(InitOnLevelMaker());
+            StartCoroutine(Init());
         }
 
         private void OnEnable()
@@ -72,8 +72,8 @@ namespace Ingame.Screw
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
             yield return new WaitUntil(()=>bodyLayer !=null );
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
-            yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
-            SetScrewColor();
+            /*yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
+            SetScrewColor();*/
         }
         public IEnumerator InitOnLevelMaker()
         {
