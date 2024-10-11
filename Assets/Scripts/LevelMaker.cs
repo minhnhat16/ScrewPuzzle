@@ -180,10 +180,10 @@ public class LevelMaker : MonoBehaviour
             Debug.Log("Currently selected option: " + currentOption  + "current index" + currentIndex);
             if (currentIndex == 0)
             {
-                converter.SaveGameObjectToLevel(false,converter.currentLoadedLevel);
+                converter.SaveGameObjectToLevel();
                 return;
             }
-            converter.SaveGameObjectToLevel(true);
+            converter.SaveGameObjectToLevel();
             // Get the current option's text
           
         }

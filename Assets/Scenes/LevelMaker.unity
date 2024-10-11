@@ -1005,7 +1005,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Save As New Level
+  m_Text: 'Save '
 --- !u!222 &557997789
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2499,9 +2499,9 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Save As New Level
+    - m_Text: 'Save '
       m_Image: {fileID: 0}
-    - m_Text: Save As Current
+    - m_Text: Save As
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3640,14 +3640,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6550a9a5457b36445bb4d871073f8e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  converter: {fileID: 0}
+  converter: {fileID: 1524306278}
   onScrewClicked:
     m_PersistentCalls:
       m_Calls: []
   isInputData: 0
   levelInputField: {fileID: 478730501}
   layerInputField: {fileID: 173011006}
-  saveOptionDropDown: {fileID: 0}
+  saveOptionDropDown: {fileID: 1188462965}
   onKey0Pressed:
     m_PersistentCalls:
       m_Calls:
@@ -3750,6 +3750,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9612b756b02e537478917836f466a4e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentLoadedLevel: 0
   nextLevelId: 0
   levelData: {fileID: 11400000, guid: 34e80dd11e4eca64cb1cfeae90b49ce6, type: 2}
   levelObject: {fileID: 948347081}
@@ -3851,9 +3852,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1524306278}
-        m_TargetAssemblyTypeName: GameObjectToLevelConverter, Assembly-CSharp
-        m_MethodName: SaveGameObjectToLevel
+      - m_Target: {fileID: 1524306276}
+        m_TargetAssemblyTypeName: LevelMaker, Assembly-CSharp
+        m_MethodName: SaveLevel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
