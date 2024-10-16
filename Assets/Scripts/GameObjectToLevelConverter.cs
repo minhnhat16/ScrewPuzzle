@@ -19,7 +19,8 @@ public class GameObjectToLevelConverter : MonoBehaviour
     public GameObject levelObject; // The parent GameObject that holds all the parts, layers, screws
     public List<Level.Level> allLevels; // List of all available levels
     public GameObject layerBase;
-
+    public GameObject basePart;
+    public GameObject screwLevelPrefab;
 
     private void Start()
     {
@@ -31,26 +32,27 @@ public class GameObjectToLevelConverter : MonoBehaviour
     {
         allLevels = new List<Level.Level>(Resources.LoadAll<Level.Level>("Levels"));
         allLevels = allLevels.OrderBy(level => level.levelId).ToList();
-        // Ensure allLevels is not empty
-        if (allLevels != null && allLevels.Count > 0)
+
+        if (allLevels is { Count: > 0 })
         {
-            // Find the highest level ID in the list of levels
-            nextLevelId = 0;
-            var firstLevel = allLevels.First(level => level.levelId == 1);
-            if (firstLevel != null)
+            // Initialize nextLevelId
+            nextLevelId = 2;
+
+            // Check for gaps in the consecutive sequence of level IDs
+            for (int i = 1; i < allLevels.Count; i++)
             {
-                nextLevelId = 1;
-                return;
+                if (allLevels[i].levelId != allLevels[i - 1].levelId + 1)
+                {
+                    // If we find a gap in the sequence, return the missing levelId
+                    nextLevelId = allLevels[i].levelId - 1;
+                    return;
+                }
+
+                nextLevelId = allLevels[i].levelId + 1; // Move to the next consecutive levelId
             }
-            foreach (var level in allLevels.Where(level => level.levelId >= nextLevelId))
-            {
-                nextLevelId = level.levelId + 1;
-            }
-        }
-        else
-        {
-            // If no levels are present, start with the first ID
-            nextLevelId = 1;
+
+            // If no gaps are found, nextLevelId will be set to one higher than the largest existing levelId
+            return;
         }
     }
 
@@ -75,7 +77,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
     {
         // Create a new Level ScriptableObject instance+
         Level.Level newLevelData = ScriptableObject.CreateInstance<Level.Level>();
-        
+        CreateLevelData(newLevelData);
 
         string directoryPath = "Assets/Resources/Levels"; // Set the directory path
         if (!Directory.Exists(directoryPath)) // Check if the directory exists
@@ -88,20 +90,24 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 $"Level_{newLevelData.levelId}.asset"); // Set the path where you want to save the asset
         var currentLoadedLevel = AssetDatabase.LoadAssetAtPath<Level.Level>(assetPath);
         // Check if the asset already exists
-        if ( currentLoadedLevel!= null)
+        if (currentLoadedLevel != null)
         {
             // If it exists, you can choose to either overwrite it or handle it differently
             Debug.LogWarning($"Asset already exists at {assetPath}. Overwriting the existing asset.");
             AssetDatabase.DeleteAsset(assetPath); // Remove the existing asset if you want to overwrite it
-            
         }
+
+        allLevels.Add(currentLoadedLevel);
+        allLevels[newLevelData.levelId] = newLevelData;
         AssetDatabase.CreateAsset(newLevelData, assetPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh(); // Refresh the AssetDatabase to see the changes
-
+        LoadLevel();
         Debug.Log("Level data saved as ScriptableObject: " + assetPath);
     }
-    public Level.Level CreateLevelData(Level.Level newLevelData){
+
+    public Level.Level CreateLevelData(Level.Level newLevelData)
+    {
         newLevelData.levelId = nextLevelId++;
 
         newLevelData.layers = new List<LayerData>();
@@ -307,7 +313,6 @@ public class GameObjectToLevelConverter : MonoBehaviour
     // ReSharper disable Unity.PerformanceAnalysis
     public IEnumerator LoadGameObjectFromLevel(int levelId)
     {
-
         currentLoadedLevel = levelId;
         // Clear existing GameObjects in levelObject to prepare for new loading
         var layerManager = levelObject.GetComponent<LayerManager>();
@@ -408,13 +413,17 @@ public class GameObjectToLevelConverter : MonoBehaviour
     {
         if (LevelMaker.instance.isInputData) return;
         var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
-        var screw = Instantiate(Resources.Load("GameObject/ScrewLevelMaker"),
-            screwManager.transform) as ScrewLevelMaker;
+        var screw = Instantiate(screwLevelPrefab,
+            screwManager.transform);
+        var screwComp = screw.GetComponent<ScrewLevelMaker>();
+        screwComp.Color =(ColorEnum)LevelMaker.instance.currentScrewColorID;
+        screwComp.ChangeScrewColor(screwComp.Color);
         //Debug.Assert(screw != null, nameof(screw) + " != null");
         bool isMouseOnScreen = IsMouseOnScreen();
         if (isMouseOnScreen)
         {
-            screw.Position = Input.mousePosition;
+            var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            screwComp.Position = new Vector3(mousePos.x, mousePos.y, 0);
             return;
         }
 
@@ -427,14 +436,19 @@ public class GameObjectToLevelConverter : MonoBehaviour
         Debug.Log("Spawn part");
         var layerToSpawn = GetLayerToSpawn();
         var parent = layerToSpawn == null ? levelObject.transform : layerToSpawn.transform;
-        var part = Instantiate(Resources.Load("Prefabs/PartLevelMaker"), parent) as BasePart;
-        if (part == null) return;
 
-        Debug.Assert(part != null, nameof(part) + " != null");
+
+        var part = Instantiate(basePart.gameObject, parent);
+        if (part == null) return;
+        //Debug.Assert(part != null, nameof(part) + " != null"  );
+
+        part.layer = layerToSpawn.gameObject.layer;
+        Debug.Log("PartLayer :" + part.gameObject.layer);
         bool isMouseOnScreen = IsMouseOnScreen();
         if (isMouseOnScreen)
         {
-            part.transform.position = Input.mousePosition;
+            var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            part.transform.position = new Vector3(mousePos.x, mousePos.y, 0);
             return;
         }
 
@@ -446,11 +460,12 @@ public class GameObjectToLevelConverter : MonoBehaviour
         var layerID = LevelMaker.instance.GetLayerInputField();
         var layerManagerComponent = levelObject.GetComponent<LayerManager>();
         var listLayer = layerManagerComponent.Layers;
-        if (layerID >= listLayer.Count || layerID <= 0)
+        if (layerID > listLayer.Count || layerID < 0)
         {
             Debug.LogWarning($"Layer {layerID} not valid, try to getlayer <= {listLayer.Count}");
             var newLayer = SpawnNewLayer(listLayer.Count);
             var newLayerComponent = newLayer.GetComponent<BaseLayer>();
+
             listLayer.Add(newLayerComponent);
             return newLayerComponent;
         }
@@ -461,8 +476,9 @@ public class GameObjectToLevelConverter : MonoBehaviour
     private GameObject SpawnNewLayer(int nextID)
     {
         GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero, Quaternion.identity);
-        layerGameObject.name = $"Layer{++nextID}";
+        layerGameObject.name = $"Layer {++nextID}";
         layerGameObject.transform.SetParent(levelObject.transform);
+        layerGameObject.layer = LayerMask.NameToLayer($"{layerGameObject.name}");
         return layerGameObject;
     }
 

@@ -31,7 +31,7 @@ namespace Ingame
         // Detect click to start dragging
         private void OnMouseDown()
         {
-            if (canMove)
+            if (canMove  && LevelMaker.instance.isEditPartPosition)
             {
                 isDragging = true; // Start dragging when the mouse button is pressed
                 Debug.Log("Object clicked and started dragging");

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Ingame;
 using Ingame.Screw;
@@ -12,9 +13,13 @@ public class LevelMaker : MonoBehaviour
     public UnityEvent onScrewClicked;
     public static LevelMaker instance;
     public bool isInputData;
-
+    public bool isEditPartPosition;
+    public bool isEditScrewPosition;
+    public bool isSelectColorForScrew;
+    public int currentScrewColorID = 2;
     [SerializeField] InputField levelInputField;
     [SerializeField] InputField layerInputField;
+    [SerializeField] InputField levelSaveInput;
     [SerializeField] Dropdown saveOptionDropDown;
     
     
@@ -38,6 +43,10 @@ public class LevelMaker : MonoBehaviour
     public KeyEvent onKeyAPressed;
     public KeyEvent onKeyBPressed;
     public KeyEvent onKeyCPressed;
+
+    public bool isEditHinge;
+
+    public bool isEditScrewColor;
     // ... tương tự cho các phím khác
     #endregion
 
@@ -167,7 +176,9 @@ public class LevelMaker : MonoBehaviour
 
         // Get the selected option's text
         string selectedOption = change.options[index].text;
-
+        
+        levelSaveInput.gameObject.SetActive(index == 2); 
+        
         Debug.Log("Selected option: " + selectedOption + "current index" + index);
     }
     public void GetCurrentDropdownOption()
@@ -178,14 +189,61 @@ public class LevelMaker : MonoBehaviour
             int currentIndex = saveOptionDropDown.value;
             string currentOption = saveOptionDropDown.options[currentIndex].text;
             Debug.Log("Currently selected option: " + currentOption  + "current index" + currentIndex);
-            if (currentIndex == 0)
+            switch (currentIndex)
             {
-                converter.SaveGameObjectToLevel();
-                return;
+                case 0:
+                    converter.SaveGameObjectToLevel();
+                    break;
+                case 1 :
+                    converter.nextLevelId = converter.currentLoadedLevel;
+                    converter.SaveGameObjectToLevel();
+                    break;
+                case 2 :
+                    converter.nextLevelId = Convert.ToInt32(levelSaveInput.text);
+                    converter.SaveGameObjectToLevel();
+                    break;
+                default:
+                    break;
             }
-            converter.SaveGameObjectToLevel();
+          
             // Get the current option's text
           
         }
     }
+
+    public void SetEditMode(EditMode mode)
+    {
+        isEditScrewPosition = (mode == EditMode.ScrewPosition);
+        isEditScrewColor = (mode == EditMode.ScrewColor);
+        isEditHinge = (mode == EditMode.Hinge);
+        isEditPartPosition = (mode == EditMode.PartPosition);
+    }
+    public void ClickOnEditScrewPos()
+    {
+        SetEditMode(EditMode.ScrewPosition);
+    }
+
+    public void ClickOnEditScrewColor()
+    {
+        SetEditMode(EditMode.ScrewColor);
+    }
+
+    public void ClickOnEditScrewHinge()
+    {
+        SetEditMode(EditMode.Hinge);
+    }
+
+    public void ClickOnEditPartPosition()
+    {
+        SetEditMode(EditMode.PartPosition);
+    }
+
+}
+
+public enum EditMode
+{
+    ScrewPosition,
+    ScrewColor,
+    Hinge,
+    PartPosition
 }

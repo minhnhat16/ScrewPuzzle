@@ -9,13 +9,14 @@ namespace Enum
         Red,           
         Blue,
         Yellow,  
+        Gray,
+        Black,
+        Magenta,
+        White,
         Green,
         Orange,
         Pink,
         Purple,
         Cyan,
-        Gray,          
-               
-        
     }
 }
