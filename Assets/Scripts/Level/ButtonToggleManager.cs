@@ -8,7 +8,7 @@ namespace Level
     {
         public List<Button> buttons;
         private Dictionary<Button, bool> _buttonStates; // Dictionary to track button states
-
+    
         void Start()
         {
             InitButtons();
@@ -31,17 +31,19 @@ namespace Level
 
         void OnButtonClicked(Button btn)
         {
-            bool isClicked = _buttonStates[btn];
+            bool isClicked = _buttonStates[btn];    
 
             if (!isClicked)
             {
                 // First click action (button was not clicked before)
+                LevelMaker.instance.SetEditMode(btn.GetComponent<EditLevelBtn>().editModeOnBtn);
                 Debug.Log($"{btn.name} clicked for the first time.");
                 // Add your activation logic here (e.g., change color, enable edit mode, etc.)
             }
             else
             {
                 // Second click action (button was clicked before, so toggle off)
+                LevelMaker.instance.TurnAllEditModeOff();
                 Debug.Log($"{btn.name} clicked again. Toggling off.");
                 // Add your deactivation logic here
             }

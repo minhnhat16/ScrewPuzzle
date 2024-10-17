@@ -16,6 +16,8 @@ public class LevelMaker : MonoBehaviour
     public bool isEditPartPosition;
     public bool isEditScrewPosition;
     public bool isSelectColorForScrew;
+    public bool isEditHinge;
+    public bool isEditScrewColor;
     public int currentScrewColorID = 2;
     [SerializeField] InputField levelInputField;
     [SerializeField] InputField layerInputField;
@@ -44,9 +46,7 @@ public class LevelMaker : MonoBehaviour
     public KeyEvent onKeyBPressed;
     public KeyEvent onKeyCPressed;
 
-    public bool isEditHinge;
-
-    public bool isEditScrewColor;
+   
     // ... tương tự cho các phím khác
     #endregion
 
@@ -217,6 +217,13 @@ public class LevelMaker : MonoBehaviour
         isEditScrewColor = (mode == EditMode.ScrewColor);
         isEditHinge = (mode == EditMode.Hinge);
         isEditPartPosition = (mode == EditMode.PartPosition);
+    }
+    public void TurnAllEditModeOff()
+    {
+        isEditScrewPosition = 
+            isEditScrewColor = 
+                isEditHinge = 
+                    isEditPartPosition = false;
     }
     public void ClickOnEditScrewPos()
     {

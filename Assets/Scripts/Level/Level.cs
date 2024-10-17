@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using ConfigFile;
 using Enum;
+using UnityEngine.Serialization;
 
 namespace Level
 {
@@ -11,8 +12,8 @@ namespace Level
     {
         public int levelId;
         public int totalColorInLevel;
-        public LayerEnum layer;
-        public BoxConfig connectors;
+        public LayerEnum layer; 
+        public BoxConfig boxConfig;
         public List<ScrewScriptable> screws;    
         public List<LayerData> layers;
         
@@ -59,7 +60,7 @@ namespace Level
         {
             totalColorInLevel = data.totalColorInLevel;
             layer = data.layer;
-            connectors = data.connectors;
+            boxConfig = data.connectors;
             screws = data.screws;
         }
     }
@@ -141,7 +142,7 @@ namespace Level
         {
             totalColorInLevel = level.totalColorInLevel;
             layer = level.layer;
-            connectors = level.connectors;
+            connectors = level.boxConfig;
             screws = level.screws;
         }
     }

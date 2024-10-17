@@ -16,7 +16,6 @@ namespace ConfigFile
     [CreateAssetMenu(fileName = "NewBoxConfig", menuName = "Config/BoxConfig")]
     public class BoxConfig : BYDataTable<BoxConfigRecord>
     {
-        
         // Custom method for comparing config, can be adjusted
         public override ConfigCompare<BoxConfigRecord> DefineConfigCompare()
         {

@@ -15,6 +15,7 @@ public class ScrewLevelMaker : Screw
     public override void Start()
     {
     }
+
     public override void Awake()
     {
         base.Awake();
@@ -29,13 +30,16 @@ public class ScrewLevelMaker : Screw
     private void ClickScrewEdit()
     {
         // Detect Mouse Click when the mouse is over the screw
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) &&
+            (LevelMaker.instance.isEditScrewPosition 
+             ||LevelMaker.instance.isEditScrewColor 
+             || LevelMaker.instance.isEditHinge))
         {
             RaycastHit2D hit = Physics2D.Raycast(_mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
             if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
-                OnMouseClick();  // Trigger click only when mouse is over the screw object
+                OnMouseClick(); // Trigger click only when mouse is over the screw object
             }
         }
 
@@ -45,7 +49,7 @@ public class ScrewLevelMaker : Screw
             OnMouseHold();
         }
 
-        // Detect Mouse Release
+        //Detect Mouse Release
         if (Input.GetMouseButtonUp(0) && isHeld)
         {
             OnMouseRelease();
@@ -54,12 +58,17 @@ public class ScrewLevelMaker : Screw
 
     private void OnMouseClick()
     {
-        if (!LevelMaker.instance.isEditScrewPosition) return;
-        ScrewChangeColorOnClick(isSelecting);
         if (!isSelecting)
         {
+            if (LevelMaker.instance.isEditScrewPosition)
+            {
+                isHeld = LevelMaker.instance.isEditScrewPosition;
+                return;
+            }
+    
             if (LevelMaker.instance.isEditHinge)
             {
+                ScrewChangeColorOnClick(isSelecting);
                 isHeld = true; // Đánh dấu screw là đang được giữ
                 LevelMaker.instance.OnScrewClicked(); // Gọi phương thức từ LevelMaker
                 isSelecting = true; // Bật chế độ chọn
@@ -71,51 +80,21 @@ public class ScrewLevelMaker : Screw
             if (LevelMaker.instance.isEditScrewColor)
             {
                 Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
+                ChangeScrewColorByEnum(Color);
             }
-            
         }
         else
         {
             Debug.Log("Clicked object is not a valid part.");
-           
         }
     }
 
     public void ScrewChangeColorOnClick(bool isSelected)
     {
-        ChangeScrewColor(isSelected ? UnityEngine.Color.cyan : UnityEngine.Color.green);
+        ChangeScrewColorByEnum(isSelected ? Color: ColorEnum.Green);
     }
-    public void ChangeScrewColor(Color color)
-    {
-        render.color = color; 
-    }
-    public void ChangeScrewColor(ColorEnum color)
-    {
-        switch (color)
-        {
-            case ColorEnum.Red:
-                ChangeScrewColor(UnityEngine.Color.red);
-                break;
-            case ColorEnum.Blue:
-                ChangeScrewColor(UnityEngine.Color.blue);
-                break;
-            case ColorEnum.Yellow:
-                ChangeScrewColor(UnityEngine.Color.yellow);
-                break;
-            case ColorEnum.Black:
-                ChangeScrewColor(UnityEngine.Color.black);
-                break;
-            case ColorEnum.Magenta:
-                ChangeScrewColor(UnityEngine.Color.magenta);
-                break;
-            case ColorEnum.White:
-                ChangeScrewColor(UnityEngine.Color.white);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(color), color, null);
-        }
-    }
-    public void CreateHinge(Rigidbody2D targetScrew)
+
+    public override void CreateHinge(Rigidbody2D targetScrew)
     {
         Debug.Log("try to add new hinge " + targetScrew == null);
         GameObject newHingeChild = new()
@@ -126,7 +105,7 @@ public class ScrewLevelMaker : Screw
                 localPosition = Vector3.zero,
                 position = targetScrew.transform.position
             },
-            name = "connectW" + targetScrew.name, 
+            name = "connectW" + targetScrew.name,
         };
         // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
         HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
@@ -138,11 +117,12 @@ public class ScrewLevelMaker : Screw
         hingeJoint.autoConfigureConnectedAnchor = true;
         Debug.Log("Created hinge joint with: " + targetScrew.name);
         isSelecting = false;
-        ScrewChangeColorOnClick(isSelecting);
+        ScrewChangeColorOnClick(true);
     }
 
     private void OnMouseHold()
     {
+        if (!LevelMaker.instance.isEditScrewPosition) return;
         // Get the mouse position in world space
         Vector3 mousePosition = Input.mousePosition;
         mousePosition.z = _mainCamera.WorldToScreenPoint(transform.position).z; // Maintain the object's z position
@@ -150,7 +130,7 @@ public class ScrewLevelMaker : Screw
 
         // Set the game object's position to follow the mouse position
         transform.position = worldPosition;
-        
+
         Debug.Log("Mouse is holding and dragging the Screw.");
     }
 

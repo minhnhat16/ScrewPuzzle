@@ -61,7 +61,7 @@ public abstract class BYDataTable<T> : BYDataBase where T : class, new()
 {
     protected ConfigCompare<T> configCompare;
     [SerializeField]
-    protected List<T> records = new List<T>();
+    protected internal List<T> records = new List<T>();
     public abstract ConfigCompare<T> DefineConfigCompare();
 
     private void OnEnable()

@@ -162,10 +162,10 @@ namespace Managers
             bool playerInitDone = false;
             StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));
             StartCoroutine(LoadPlayer(() => playerInitDone = true));
-            StartCoroutine(LevelManager.Instance.LoadLevel(Convert.ToInt32(playerLevel), () =>
+            /*StartCoroutine(LevelManager.Instance.LoadLevel(Convert.ToInt32(playerLevel), () =>
             {
                 Debug.Log("Load Level Done");
-            }));
+            }));*/
             StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
             yield return new WaitUntil(() => arrayScrewInitDone && boxQueueInitDone && playerInitDone);
             callback?.Invoke();

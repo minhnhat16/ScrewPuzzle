@@ -19,18 +19,18 @@ namespace System
         }
         private void Start()
         {
-            /*foreach (var sprite in sprites)
+            foreach (var sprite in sprites)
             {
-                spriteDict.Add(sprite.name, sprite);
-            }*/
+                spriteDict.TryAdd(sprite.name, sprite);
+            }
         }
 
         public Sprite GetSpriteByName(string spriteName)
         {
-            //Debug.Log($"GetSpriteByName{name}");
+            Debug.Log($"GetSpriteByName{name}");
+            if(spriteName == null) return null;
             return spriteDict.GetValueOrDefault(spriteName);
         }
-   
     
     }
 }

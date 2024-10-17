@@ -52,7 +52,7 @@ namespace Ingame.Screw
 
         public string GetConnectedBodyRenderLayer(int index)
         {
-            if (bodyConnect[index] == null) return " ";
+            if (bodyConnect[index] == null) return null;
             var body = bodyConnect[index];
             return body.gameObject.GetComponent<SpriteRenderer>().sortingLayerName;
         }

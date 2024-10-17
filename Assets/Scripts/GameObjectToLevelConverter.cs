@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ConfigFile;
 using Enum;
 using Ingame;
 using Ingame.Board;
@@ -10,6 +12,7 @@ using Ingame.Screw;
 using Level;
 using Unity.VisualScripting;
 using UnityEditor;
+using BoxConfig = ConfigFile.BoxConfig;
 
 public class GameObjectToLevelConverter : MonoBehaviour
 {
@@ -21,7 +24,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
     public GameObject layerBase;
     public GameObject basePart;
     public GameObject screwLevelPrefab;
-
+    public Vector3 adjustedVector = new Vector3(5, 0, 0);
     private void Start()
     {
         // Load all Level assets from the Resources/Levels folder
@@ -99,6 +102,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
 
         allLevels.Add(currentLoadedLevel);
         allLevels[newLevelData.levelId] = newLevelData;
+        CreateBoxConfig(newLevelData.levelId,newLevelData);
         AssetDatabase.CreateAsset(newLevelData, assetPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh(); // Refresh the AssetDatabase to see the changes
@@ -131,14 +135,16 @@ public class GameObjectToLevelConverter : MonoBehaviour
             foreach (BasePart partTransform in parts)
             {
                 if (partTransform == null) continue; // Ensure partTransform is not null
-
+                var parComponent = partTransform.GetComponent<BasePart>();
                 BodyPartScriptable partData = new BodyPartScriptable
                 {
+                    
                     idBodyPart = partIndex++,
-                    partName = partTransform.GetComponent<BasePart>().uniqueID,
-                    partPosition = partTransform.transform.localPosition,
+                    partName = parComponent.uniqueID,
+                    partPosition = partTransform.transform.localPosition + adjustedVector,
                     partRotation = partTransform.transform.localRotation,
                     partLocalScale = partTransform.transform.localScale,
+                    spriteName = parComponent.Renderer.sprite.name,
                     layer = baseLayerName,
                     colorString = partTransform.Renderer.color.ToString(),
                 };
@@ -155,7 +161,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         {
             ScrewScriptable screwData = new ScrewScriptable()
             {
-                screwPosition = screw.Position,
+                screwPosition = screw.Position  +adjustedVector,
                 idScrew = screw.GetInstanceID(),
                 idColor = (int)screw.Color,
                 hingeConnections = new List<HingeConnection>()
@@ -163,14 +169,12 @@ public class GameObjectToLevelConverter : MonoBehaviour
 
             var hinges = screw.HingeController.HingeJoint2D;
             var listHingeObject = new List<HingeConnection>();
-            int i = 0;
-            /*var bodyConnected = screw.HingeController.BodyConnect[i];
-            var bodyId = bodyConnected.GetComponent<BasePart>().uniqueID;*/
+            var i = 0;
             foreach (var hinge in hinges)
             {
                 HingeConnection hingeConnection = new HingeConnection()
                 {
-                    hingePosition = hinge.transform.localPosition,
+                    hingePosition = hinge.transform.localPosition + adjustedVector,
                     bodyPartUniqueID = $"{screw.HingeController.BodyConnect[i].GetComponent<BasePart>().uniqueID}",
                     bodyPartHingePosition = hinge.connectedBody.transform.localPosition,
                 };
@@ -181,129 +185,113 @@ public class GameObjectToLevelConverter : MonoBehaviour
             screwData.hingeConnections = listHingeObject;
             newLevelData.screws.Add(screwData);
         }
-
         // Save the new level data as a ScriptableObject in the Resources folder
         return newLevelData;
     }
-    /*
-    public void SaveGameObjectToLevel(bool isSaveAs, int? currentLevelId = null)
+
+    public Dictionary<int, int> GetScrewCountByColor(Level.Level level)
     {
-        Level.Level newLevelData;
+        Dictionary<int, int> screwColorDict = new Dictionary<int, int>();
 
-        // Check if we are saving as a new level or updating the current level
-        if (!isSaveAs && currentLevelId.HasValue)
+        // Iterate through each screw and count by color
+        foreach (var screw in level.screws)
         {
-            string path = $"Assets/Resources/Levels/Level_{currentLevelId}.asset";
-            Debug.Log($"Loading asset from path: {path}");
-            levelData = newLevelData = AssetDatabase.LoadAssetAtPath<Level.Level>(path);
-
-            if (newLevelData == null)
+            if (screwColorDict.ContainsKey(screw.idColor))
             {
-                Debug.LogWarning($"No level data found at {path}, creating a new one.");
-                newLevelData = ScriptableObject.CreateInstance<Level.Level>();
-                newLevelData.levelId = nextLevelId++;
+                screwColorDict[screw.idColor]++;
+            }
+            else
+            {
+                screwColorDict[screw.idColor] = 1; // First occurrence of this color
             }
         }
-        else
+
+        return screwColorDict;
+    }
+
+    public List<BoxConfigRecord> CalculateScrewsDivisibleBy3AndSpawnBoxes(Level.Level level)
+    {
+        var screwColorDict = GetScrewCountByColor(level);
+        List<BoxConfigRecord> boxRecords = new();
+        foreach (var kvp in screwColorDict)
         {
-            newLevelData = this.levelData;
-        }
+            int colorId = kvp.Key;
+            int totalScrews = kvp.Value;
 
+            int screwsDivisibleBy3 = totalScrews / 3; // Full boxes
+            int remainderScrews = totalScrews % 3; // Leftover screws
 
-        // Reset layer and screw data
-        newLevelData.layers = new List<LayerData>();
-        newLevelData.screws = new List<ScrewScriptable>();
+            Debug.Log(
+                $"Color ID: {colorId}, Total Screws: {totalScrews}, Divisible by 3: {screwsDivisibleBy3}, Remainder: {remainderScrews}");
 
-        // Save layer data (same logic as before)
-        var layers = levelObject.GetComponentsInChildren<BaseLayer>();
-        int idLayer = 0;
-        foreach (var layerTransform in layers)
-        {
-            LayerData layerData = new LayerData
+            // Spawn full boxes with 3 screws each
+            for (int i = 0; i < screwsDivisibleBy3; i++)
             {
-                layerId = idLayer++,
-                parts = new List<BodyPartScriptable>()
-            };
-
-            var parts = layerTransform.GetComponentsInChildren<BasePart>();
-            int partIndex = 0;
-            string baseLayerName = LayerMask.LayerToName(layerTransform.gameObject.layer);
-
-            foreach (BasePart partTransform in parts)
-            {
-                if (partTransform == null) continue;
-
-                BodyPartScriptable partData = new BodyPartScriptable
-                {
-                    idBodyPart = partIndex++,
-                    partName = partTransform.GetComponent<BasePart>().uniqueID,
-                    partPosition = partTransform.transform.localPosition,
-                    partRotation = partTransform.transform.localRotation,
-                    partLocalScale = partTransform.transform.localScale,
-                    layer = baseLayerName,
-                    colorString = partTransform.Renderer.color.ToString(),
-                };
-
-                layerData.parts.Add(partData);
+                BoxConfigRecord newRecord = new BoxConfigRecord();
+                newRecord.NumberOfScrewHoles = 3;
+                newRecord.BoxColor = (ColorEnum)colorId;
+                boxRecords.Add(newRecord);
             }
 
-            newLevelData.layers.Add(layerData);
-        }
-
-        // Save screw data (same logic as before)
-        var screws = levelObject.GetComponentsInChildren<Screw>();
-        foreach (var screw in screws)
-        {
-            ScrewScriptable screwData = new ScrewScriptable()
+            // Spawn a remainder box with 1 screw if there's a remainder
+            if (remainderScrews == 2)
             {
-                screwPosition = screw.Position,
-                idScrew = screw.GetInstanceID(),
-                idColor = (int)screw.Color,
-                hingeConnections = new List<HingeConnection>()
-            };
-
-            var hinges = screw.HingeController.HingeJoint2D;
-            var listHingeObject = new List<HingeConnection>();
-            int i = 0;
-
-            foreach (var hinge in hinges)
-            {
-                HingeConnection hingeConnection = new HingeConnection()
-                {
-                    hingePosition = hinge.transform.localPosition,
-                    bodyPartUniqueID = $"{screw.HingeController.BodyConnect[i].GetComponent<BasePart>().uniqueID}",
-                    bodyPartHingePosition = hinge.connectedBody.transform.localPosition,
-                };
-
-                listHingeObject.Add(hingeConnection);
+                BoxConfigRecord newRecord = new BoxConfigRecord();
+                newRecord.NumberOfScrewHoles =remainderScrews ;
+                newRecord.BoxColor = (ColorEnum)colorId;
+                boxRecords.Add(newRecord);
             }
-
-            screwData.hingeConnections = listHingeObject;
-            newLevelData.screws.Add(screwData);
+            else if (remainderScrews == 1)
+            {
+                BoxConfigRecord newRecord = new BoxConfigRecord();
+                newRecord.NumberOfScrewHoles = remainderScrews;
+                newRecord.BoxColor = (ColorEnum)colorId;
+                boxRecords.Add(newRecord);
+            }
         }
 
-        // Save the new level data as a ScriptableObject in the Resources folder
-        string directoryPath = "Assets/Resources/Levels/";
-        if (!Directory.Exists(directoryPath))
+        return boxRecords;
+    }
+
+    public void CreateBoxConfig(int idLevel, Level.Level level)
+    {
+        // Create a new instance of the BoxConfig asset
+        BoxConfig newConfig = ScriptableObject.CreateInstance<BoxConfig>();
+
+        // Call the method to get records based on screw distribution
+        var records = CalculateScrewsDivisibleBy3AndSpawnBoxes(level);
+
+        // Define the path and generate the name with the counter (idLevel)
+        string path = "Assets/Resources/Config/boxConfigLevel" + idLevel + ".asset";
+
+        // Check if a BoxConfig asset already exists at the path
+        BoxConfig existingConfig = AssetDatabase.LoadAssetAtPath<BoxConfig>(path);
+        if (existingConfig != null)
         {
-            Directory.CreateDirectory(directoryPath);
+            // Delete the existing asset if it exists
+            AssetDatabase.DeleteAsset(path);
+            Debug.Log("Deleted existing BoxConfig at path: " + path);
         }
 
-        string assetPath = directoryPath + $"Level_{newLevelData.levelId}.asset";
-
-        // If we are not doing "Save As", delete the existing asset (if it exists)
-        if (!isSaveAs && currentLevelId.HasValue && AssetDatabase.LoadAssetAtPath<Level.Level>(assetPath) != null)
+        // Add the records to the new config
+        foreach (var record in records)
         {
-            AssetDatabase.DeleteAsset(assetPath);
-            Debug.Log($"Existing level {currentLevelId} is being overwritten.");
+            newConfig.records.Add(record);
         }
-        AssetDatabase.CreateAsset(newLevelData, assetPath);
+
+        // Create the asset at the specified path
+        AssetDatabase.CreateAsset(newConfig, path);
+
+        // Save the asset and refresh the AssetDatabase
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"Level data saved: {assetPath}");
+        // Focus the Project window and highlight the new asset
+        EditorUtility.FocusProjectWindow();
+        Selection.activeObject = newConfig;
+
+        Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
     }
-    */
 
     public void LoadLevel(int levelID)
     {
@@ -332,7 +320,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
             yield break;
         }
 
-        int layerID = 0;
+        int layerID = 1;
 
         List<BaseLayer> listBaseLayer = new();
         // Loop through all layers in the level data
@@ -340,8 +328,10 @@ public class GameObjectToLevelConverter : MonoBehaviour
         {
             // Create a new GameObject for the layer
             GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero, Quaternion.identity);
-            layerGameObject.name = $"Layer{layerID++}";
+            var layerName = $"Layer {layerID++}";
+            layerGameObject.name = layerName;
             layerGameObject.transform.SetParent(levelObject.transform);
+            layerGameObject.layer = LayerMask.NameToLayer(layerName);
             var layerComponent = layerGameObject.GetComponent<BaseLayer>();
             // Loop through all parts in the current layer
             foreach (var partData in layerData.parts)
@@ -354,9 +344,13 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 {
                     partGameObject.transform.SetParent(layerGameObject.transform);
                     partGameObject.transform.localPosition = partData.partPosition;
+                    var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
+                    partComponent.Renderer.sprite = sprite;
                     layerManager.AddPart(partComponent);
+                    var partLayer = LayerMask.LayerToName(layerGameObject.layer);
+                    partComponent.SetSortingLayer(partLayer);
                 }
 
                 // Add a delay to visually see the progress or avoid blocking
@@ -382,8 +376,8 @@ public class GameObjectToLevelConverter : MonoBehaviour
             screwGameObject.transform.localPosition = screwData.screwPosition;
 
             ScrewLevelMaker screwComponent = screwGameObject.GetComponent<ScrewLevelMaker>();
-            screwComponent.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
-
+            var color = screwComponent.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
+            screwComponent.ChangeScrewColorByEnum(color);
             // Handle hinge connections
             foreach (var hingeConnection in screwData.hingeConnections)
             {
@@ -393,8 +387,11 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
             }
 
+
             // Add a delay after each screw is loaded
-            yield return null; // Wait for one frame before loading the next screw
+            yield return null; // Wait for one frame before loading the next screw.
+            StartCoroutine(screwComponent.InitOnLevelMaker());
+
         }
 
         this.levelData = levelData;
@@ -416,8 +413,9 @@ public class GameObjectToLevelConverter : MonoBehaviour
         var screw = Instantiate(screwLevelPrefab,
             screwManager.transform);
         var screwComp = screw.GetComponent<ScrewLevelMaker>();
-        screwComp.Color =(ColorEnum)LevelMaker.instance.currentScrewColorID;
-        screwComp.ChangeScrewColor(screwComp.Color);
+        screwComp.Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
+        screwComp.ChangeScrewColorByEnum(screwComp.Color);
+        StartCoroutine(screwComp.InitOnLevelMaker());
         //Debug.Assert(screw != null, nameof(screw) + " != null");
         bool isMouseOnScreen = IsMouseOnScreen();
         if (isMouseOnScreen)

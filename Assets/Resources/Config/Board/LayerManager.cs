@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using PoolManager;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -38,11 +39,6 @@ namespace Ingame.Board
             }
             //ApplyLayerVisibility(); // Thiết lập hiển thị layer ban đầu
         }
-
-        private void Reset()
-        {
-        }
-
         private void GetChildrenInRange()
         {
             layers.Clear();
@@ -71,6 +67,15 @@ namespace Ingame.Board
             }
             // Kiểm tra và cập nhật hiển thị các layer còn lại
             //ApplyLayerVisibility();
+        }
+
+        public IEnumerator ChangePartState()
+        {
+            foreach (var part in parts)
+            {
+                part.Body.bodyType = RigidbodyType2D.Dynamic;
+                yield return null;
+            }
         }
 
        void ApplyLayerVisibility()
@@ -212,6 +217,31 @@ namespace Ingame.Board
         {
             parts.Clear();
             partDict.Clear();
+        }
+
+        public void Reset()
+        {
+            ResetAllParts();
+            ResetAllLayer();
+            
+        }
+
+        private void ResetAllLayer()
+        {
+            foreach (var layer in layers)
+            {
+                layer.Reset();
+                LayerPool.Instance.pool.ReturnToPool(layer);
+            }
+        }
+
+        private void ResetAllParts()
+        {
+            foreach (var part in parts)
+            {
+                part.Reset();
+                PartPool.Instance.pool.ReturnToPool(part);
+            }
         }
     }   
 }

@@ -149,5 +149,12 @@ namespace Ingame
             usedIDs.Add(newID); // Mark the ID as used
             return newID;
         }
+
+        public void Reset()
+        {
+            isFalling = false;
+            renderer.sprite = null;
+            
+        }
     }
 }

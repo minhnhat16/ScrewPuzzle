@@ -113,5 +113,14 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         activeList.Clear();
         index = -1;
     }
+
+    public void ReturnToPool(T trans)
+    {
+        if (trans.transform.parent != parent)
+        {
+            trans.transform.SetParent(parent);
+        }
+        DeSpawnNonGravity(trans);
+    }
 }
 

@@ -97,5 +97,12 @@ namespace Ingame.Board
                 parts.Add(child);
             }
         }
+
+        public void Reset()
+        {
+            parts.Clear();
+            activePartCount = 0;
+            layer = "Layer 1";
+        }
     }
 }

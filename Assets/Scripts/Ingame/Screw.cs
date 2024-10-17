@@ -265,6 +265,44 @@ namespace Ingame.Screw
             hingeController.FreeHinges();
         }
 
+        public void ChangeScrewColor(Color color)
+        {
+            render.color = color;
+        }
+
+        public void ChangeScrewColorByEnum(ColorEnum color)
+        {
+            switch (color)
+            {
+                case ColorEnum.Red:
+                    ChangeScrewColor(UnityEngine.Color.red);
+                    break;
+                case ColorEnum.Blue:
+                    ChangeScrewColor(UnityEngine.Color.blue);
+                    break;
+                case ColorEnum.Yellow:
+                    ChangeScrewColor(UnityEngine.Color.yellow);
+                    break;
+                case ColorEnum.Black:
+                    ChangeScrewColor(UnityEngine.Color.black);
+                    break;
+                case ColorEnum.Magenta:
+                    ChangeScrewColor(UnityEngine.Color.magenta);
+                    break;
+                case ColorEnum.White:
+                    ChangeScrewColor(UnityEngine.Color.white);
+                    break;
+                case ColorEnum.Gray:
+                    ChangeScrewColor(UnityEngine.Color.gray);
+                    break;
+                case ColorEnum.Green:
+                    ChangeScrewColor(UnityEngine.Color.green);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(color), color, null);
+            }
+        }
+
         public virtual void MoveScrewDown()
         {
             var targetPos = render.transform.position;
@@ -273,6 +311,24 @@ namespace Ingame.Screw
              
             render.transform.DOMove(targetPos, 0.5f).OnComplete(()=> { isMoving = false; });
             
+        }
+        public virtual void CreateHinge(Rigidbody2D targetScrew)
+        {
+            HingeObject hinge = HingePool.Instance.pool.SpawnNonGravity();
+            GameObject newHingeChild = hinge.gameObject;
+            newHingeChild.transform.SetParent(transform);
+            newHingeChild.transform.localPosition = Vector3.zero;
+            newHingeChild.transform.position = targetScrew.transform.position;
+
+            // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
+            HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
+            newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+            hingeJoint.connectedBody = targetScrew; // Kết nối hinge với đối tượng screw mục tiêu
+            // Lưu HingeJoint2D vào danh sách nếu cần
+            hingeController.HingeJoint2D.Add(hingeJoint);
+            hingeController.BodyConnect.Add(targetScrew); // Thêm Rigidbody2D vào danh sách bodyConnect
+            hingeJoint.autoConfigureConnectedAnchor = true;
+        
         }
     }
 }
