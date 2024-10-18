@@ -13,6 +13,13 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
+
+        public List<BasePart> Parts
+        {
+            get => parts;
+            set => parts = value;
+        }
+
         public List<BaseLayer> Layers
         {
             get => layers;

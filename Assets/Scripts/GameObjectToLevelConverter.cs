@@ -24,7 +24,6 @@ public class GameObjectToLevelConverter : MonoBehaviour
     public GameObject layerBase;
     public GameObject basePart;
     public GameObject screwLevelPrefab;
-    public Vector3 adjustedVector = new Vector3(5, 0, 0);
     private void Start()
     {
         // Load all Level assets from the Resources/Levels folder
@@ -101,7 +100,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         }
 
         allLevels.Add(currentLoadedLevel);
-        allLevels[newLevelData.levelId] = newLevelData;
+        allLevels[this.currentLoadedLevel] = newLevelData;
         CreateBoxConfig(newLevelData.levelId,newLevelData);
         AssetDatabase.CreateAsset(newLevelData, assetPath);
         AssetDatabase.SaveAssets();
@@ -141,7 +140,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     
                     idBodyPart = partIndex++,
                     partName = parComponent.uniqueID,
-                    partPosition = partTransform.transform.localPosition + adjustedVector,
+                    partPosition = partTransform.transform.localPosition,
                     partRotation = partTransform.transform.localRotation,
                     partLocalScale = partTransform.transform.localScale,
                     spriteName = parComponent.Renderer.sprite.name,
@@ -161,7 +160,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         {
             ScrewScriptable screwData = new ScrewScriptable()
             {
-                screwPosition = screw.Position  +adjustedVector,
+                screwPosition = screw.Position  ,
                 idScrew = screw.GetInstanceID(),
                 idColor = (int)screw.Color,
                 hingeConnections = new List<HingeConnection>()
@@ -174,7 +173,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
             {
                 HingeConnection hingeConnection = new HingeConnection()
                 {
-                    hingePosition = hinge.transform.localPosition + adjustedVector,
+                    hingePosition = hinge.transform.localPosition ,
                     bodyPartUniqueID = $"{screw.HingeController.BodyConnect[i].GetComponent<BasePart>().uniqueID}",
                     bodyPartHingePosition = hinge.connectedBody.transform.localPosition,
                 };
@@ -262,7 +261,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         var records = CalculateScrewsDivisibleBy3AndSpawnBoxes(level);
 
         // Define the path and generate the name with the counter (idLevel)
-        string path = "Assets/Resources/Config/boxConfigLevel" + idLevel + ".asset";
+        string path = "Assets/Resources/Config/BoxLevel" + idLevel + ".asset";
 
         // Check if a BoxConfig asset already exists at the path
         BoxConfig existingConfig = AssetDatabase.LoadAssetAtPath<BoxConfig>(path);
@@ -321,13 +320,13 @@ public class GameObjectToLevelConverter : MonoBehaviour
         }
 
         int layerID = 1;
-
+        BoxQueue.Instance.boxConfig = levelData.boxConfig;
         List<BaseLayer> listBaseLayer = new();
         // Loop through all layers in the level data
         foreach (var layerData in levelData.layers)
         {
             // Create a new GameObject for the layer
-            GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero, Quaternion.identity);
+            GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero , Quaternion.identity);
             var layerName = $"Layer {layerID++}";
             layerGameObject.name = layerName;
             layerGameObject.transform.SetParent(levelObject.transform);
@@ -343,7 +342,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 if (partGameObject != null)
                 {
                     partGameObject.transform.SetParent(layerGameObject.transform);
-                    partGameObject.transform.localPosition = partData.partPosition;
+                    partGameObject.transform.SetPositionAndRotation(partData.partPosition ,Quaternion.identity);
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;

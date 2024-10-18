@@ -59,6 +59,7 @@ namespace Ingame
             body = GetComponent<Rigidbody2D>();
             renderer = GetComponent<SpriteRenderer>();
             outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
+            collider = GetComponent<PolygonCollider2D>();
             // Assign a GUID if not already set
             if (string.IsNullOrEmpty(uniqueID))
             {
@@ -149,7 +150,27 @@ namespace Ingame
             usedIDs.Add(newID); // Mark the ID as used
             return newID;
         }
+        public virtual void ResetAndReapplyPolygonCollider()
+        {
+            // Reset the collider by clearing all paths
+            collider.pathCount = 0;
 
+            // Generate a new shape for the polygon collider from the sprite
+            GenerateColliderFromSprite();
+        }
+
+        public  virtual void GenerateColliderFromSprite()
+        {
+            // Use the sprite's texture to define the polygon's points
+            // This method is for auto-generating a polygon collider based on the sprite's shape
+            collider.enabled = false; // Disable the collider temporarily to prevent issues
+            Destroy(collider);        // Destroy the old collider
+
+            // Add and create a new PolygonCollider2D
+            collider = gameObject.AddComponent<PolygonCollider2D>();
+            collider.enabled = true;
+
+        }
         public void Reset()
         {
             isFalling = false;

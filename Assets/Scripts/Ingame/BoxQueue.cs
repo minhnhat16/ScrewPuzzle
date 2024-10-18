@@ -42,26 +42,30 @@ namespace Ingame
         private void Start()
         {
             onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
-            Init();
         }
 
-        private void Init()
+        public void Init()
         {
             StartCoroutine(InitCoroutine());
         }
-
+    
         private IEnumerator InitCoroutine()
         {
             yield return new WaitUntil(() => CameraMain.instance.GetCam() != null);
+            yield return new WaitUntil(() => configRecords.Count != 0);
             InitAndShuffleColor();
             InitBoxes();
             InitBoxSlots(this.boxSlots);
             yield return new WaitForSeconds(0.1f);
         }
 
-        private void InitAndShuffleColor()
+        public void LoadBoxConfigRecord(BoxConfig boxConfig)
         {
-            configRecords = boxConfig.GetAllRecord().ToList();
+            var allRecord = boxConfig.GetAllRecord();
+            configRecords.AddRange(allRecord);
+        }
+        private void InitAndShuffleColor()
+        {   
             if (configRecords == null) return;
 
             List<BoxConfigRecord> threeHoldList = configRecords.Where(record => record.NumberOfScrewHoles == 3).ToList();
@@ -104,9 +108,25 @@ namespace Ingame
             {
                 var config = (BoxConfigRecord)ConfigStack.Pop();
                 var isLocked = i < activeBoxCount;
-                var box = ThreeHoldBoxPool.Instance.pool.list[i];
-                box.OnInit(Vector3.left * 10, config, false);
-                screwBoxes.Add(box);
+                ScrewBox box = new ();
+                switch (config.NumberOfScrewHoles)
+                {
+                    case 1:
+                        box = OneHoldBoxPool.Instance.pool.list[i];
+                        box.OnInit(Vector3.left * 10, config, false);
+                        screwBoxes.Add(box);
+                        break;
+                    case 2:
+                         box = TwoHoldBoxPool.Instance.pool.list[i];
+                         box.OnInit(Vector3.left * 10, config, false);
+                         screwBoxes.Add(box);
+                        break;
+                    case 3:
+                        box = ThreeHoldBoxPool.Instance.pool.list[i];
+                        box.OnInit(Vector3.left * 10, config, false);
+                        screwBoxes.Add(box);
+                        break;
+                }   
             }
 
             var reverse = screwBoxes;

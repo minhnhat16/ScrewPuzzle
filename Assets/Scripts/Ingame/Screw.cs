@@ -139,30 +139,36 @@ namespace Ingame.Screw
 
         public bool OnScrewClicked()
         {
-            // Prevent multiple clicks using the flag
+            // Ngăn chặn nhiều lần click bằng cờ `isClicked`
             if (isClicked) return true;
-            // Set the flag to true right at the start to prevent any more clicks during processing
-            // isClicked = true;
             isClicked = true;
-            // Ensure you have a reference to the correct CircleCollider2D
-            CircleCollider2D.enabled = !isClicked;
-            // Get the LayerMask and overlapping colliders
-            LayerMask mask = hingeController.GetIntBodyLayer(0);
-            var overlappingColliders = GetOverlappingColliders(CircleCollider2D, CircleCollider2D.radius, mask);
 
-            // Start the coroutine for completing the action (assuming it's part of the logic)
-            // StartCoroutine(CompleteAction());
+            // Giả sử `connectedBody` thuộc về một lớp cần bỏ qua
+            int connectedBodyLayer = hingeController.GetIntBodyLayer(0); // Lấy lớp của connectedBody
 
-            // If the screw is blocked by overlapping colliders, perform some action
+            // Tạo LayerMask để kiểm tra các lớp từ 0 đến 19, nhưng bỏ qua lớp của connectedBody
+            LayerMask mask = 0;
+            
+            for (int i = 10; i < connectedBodyLayer; i++) // Chỉ xét từ lớp 10 đến lớp 19
+            {
+                mask |= (1 << i); // Dùng phép OR bit để thêm từng lớp vào LayerMask
+            }
+
+
+            // Kiểm tra các Collider2D thuộc các lớp trong bán kính của CircleCollider2D
+            Collider2D[] overlappingColliders = Physics2D.OverlapCircleAll(CircleCollider2D.transform.position, CircleCollider2D.radius, mask);
+
+            // Nếu có đối tượng nào chặn, đưa ra cảnh báo và thực hiện hành động
             if (overlappingColliders.Length > 0)
             {
-                Debug.LogWarning("Screw bị chặn bởi cái gì đó rồi");
-                ShakeScrew();
-                // Reset the flag after handling the overlap situation
-                isClicked = false;
+                Debug.LogWarning("Screw bị chặn bởi một đối tượng, ngoại trừ connectedBody.");
+                ShakeScrew();  // Gọi hàm để tạo hiệu ứng rung (nếu có)
+                isClicked = false; // Reset flag để có thể click lần sau
                 ResetClickedFlag();
                 return true;
             }
+
+            // Không có va chạm, có thể tiếp tục logic khác
             return false;
         }
 

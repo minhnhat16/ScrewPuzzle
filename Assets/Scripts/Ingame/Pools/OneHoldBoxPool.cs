@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class OneHoldBoxPoold : MonoBehaviour
+namespace Ingame.Pools
 {
-    // Start is called before the first frame update
-    void Start()
+    public class OneHoldBoxPool : MonoBehaviour
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public static OneHoldBoxPool Instance;
+        public BY_Local_Pool<BoxOneHold> pool;
+        public BoxOneHold prefab;
+        public int total;
+        private void Awake()
+        {
+            Instance = this;
+            pool = new BY_Local_Pool<BoxOneHold>(prefab, total, transform);
+        }
     }
 }
