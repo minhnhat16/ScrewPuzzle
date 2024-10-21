@@ -13,7 +13,14 @@ namespace Ingame
     {
         public static Player instance;
         [SerializeField] private float clickCooldown = 0.5f; // Cooldown time between clicks
-        [SerializeField] private bool canClick = true;        // Flag to check if the player can click
+        [SerializeField] private bool canClick;        // Flag to check if the player can click
+
+        public bool CanClick
+        {
+            get => canClick;
+            set => canClick = value;
+        }
+
         [SerializeField] private Screw.Screw CurrentScrew;
         [SerializeField] private Camera mainCam;
         [SerializeField] private Queue<Screw.Screw> screwQueue;
@@ -21,6 +28,11 @@ namespace Ingame
         [HideInInspector] public UnityEvent<Screw.Screw> onScrewClicked;
         private Coroutine inputCoroutine;
         private Coroutine processCoroutine;
+
+        public Player()
+        {
+            canClick = true;
+        }
 
         private void OnEnable()
         {
@@ -30,10 +42,7 @@ namespace Ingame
                 onScrewClicked.AddListener(ScrewClicked);
             }
 
-            if (inputCoroutine == null)
-            {
-                inputCoroutine = StartCoroutine(WaitForInput());
-            }
+            inputCoroutine ??= StartCoroutine(WaitForInput());
         }
 
         private void OnDisable()
@@ -70,6 +79,7 @@ namespace Ingame
 
         private IEnumerator WaitForInput()
         {
+            yield return new WaitUntil( ()=>IngameController.Instance != null);
             while (true)
             {
                 if (!IngameController.Instance.isPause)

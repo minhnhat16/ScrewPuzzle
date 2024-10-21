@@ -1,79 +1,56 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class LevelItem : MonoBehaviour
 {
-    [SerializeField] private float percent;
-    [SerializeField] private bool isUnlocked;
-    [SerializeField] private CardType cardType;
-    [SerializeField] private Image cardImage;
-    [SerializeField] private Text lb_CardName;
-    [SerializeField] private Text lb_Percent;
-    [SerializeField] private Image percentSlider;
-    [SerializeField] private int cardCount;
-    [SerializeField] private int totalCard;
+    [SerializeField] private int idLevel;
+    [SerializeField] private bool isCompleted;
+    [SerializeField] private int levelStars;
 
-    public Image CardImage { get => cardImage; set => cardImage = value; }
-    public Text Lb_CardName { get => lb_CardName; set => lb_CardName = value; }
-    public Text Lb_Percent { get => lb_Percent; set => lb_Percent = value; }
-    public Image PercentSlider { get => percentSlider; set => percentSlider = value; }
-    public float Percent { get => percent; set => percent = value; }
-    public CardType CardType { get => cardType; set => cardType = value; }
-    public int CardCount { get => cardCount; set => cardCount = value; }
+    //UI COMPONENT
+    [SerializeField] private Image imageIcon;
+    [SerializeField] private Text textLevel;
+    [SerializeField] private Button button;
 
-    public LevelItem(CardType cardType, Image cardImage, Text lb_CardName, Text lb_Percent, Image percentSlider, float percent, int cardCount)
+    public int IDLevel
     {
-        this.CardType = cardType;
-        this.CardImage = cardImage;
-        this.Lb_CardName = lb_CardName;
-        this.Lb_Percent = lb_Percent;
-        this.PercentSlider = percentSlider;
-        this.Percent = percent;
-        this.CardCount = cardCount;
-    }
-    public void Init()
-    {
-        cardImage.sprite = SpriteLibControl.Instance.GetSpriteByName($"card_{cardType.ToString().ToLower()}");
-        lb_CardName.text = $"{(int)CardType + 1}. {CardType}";
-        isUnlocked = CheckUnlock();
-        percent = PercentCalculator();
-        if (isUnlocked)
-        {
-            percent = PercentCalculator();
-            percentSlider.fillAmount = percent / 100;
-
-            lb_Percent.text = $"{percent}%";
-        }
-        else
-        {
-            percent = 0;
-            percentSlider.fillAmount = percent / 100;
-            lb_Percent.text = $"{0}%";
-
-        }
-    
-    }
-    public bool CheckUnlock()
-    {
-        int playerLevel =  1 /*IngameController.instance.GetPlayerLevel()*/;
-
-        if ((int)CardType == 0) return true;
-
-        if (playerLevel > (int)CardType * 10) return true;
-        return false;
-
+        get => idLevel;
+        set => idLevel = value;
     }
 
-
-    public float PercentCalculator()
+    public bool IsCompleted
     {
+        get => isCompleted;
+        set => isCompleted = value;
+    }
 
-        if (CardCount <= 0) return 0;
-        int totalCardColor = 32;
-        float percent = Mathf.Round(((float)CardCount / (float)totalCardColor) * 100) ;
-        Debug.Log("percent" + percent + "card count"+ cardCount);
-        return percent;
+    public int LevelStart
+    {
+        get => levelStars;
+        set => levelStars = value;
+    }
+
+    public void Setup(int idLevel, bool isCompleted, int levelStars)
+    {
+        this.idLevel = idLevel;
+        this.isCompleted = isCompleted;
+        this.levelStars = levelStars;
+        
+        button.onClick.AddListener(() => OnLevelButtonClick(idLevel));
+    }
+    private void OnLevelButtonClick(int id)
+    {
+        Debug.Log("Level " + id + " clicked!");
+        HandleLevelClicked(id);
+    }
+
+    // Custom logic when level is clicked
+    private void HandleLevelClicked(int id)
+    {
+        // Perform actions when the level button is clicked (e.g., load the level)
+        Debug.Log("Handle logic for level: " + id);
     }
 }

@@ -11,14 +11,14 @@ public class MainScreenView : BaseView
     [SerializeField] private LevelPanel levelPanel;
     private void OnEnable()
     {
-        playBtn.onClick.AddListener(OnPlayButton);
-        dailyReward.onClick.AddListener(OnDailyReward);
+        /*playBtn.onClick.AddListener(OnPlayButton);
+        dailyReward.onClick.AddListener(OnDailyReward);*/
     }
 
    
     private void OnDisable()
     {
-        playBtn.onClick.RemoveListener(OnPlayButton);
+        /*playBtn.onClick.RemoveListener(OnPlayButton);*/
     }
     public override void OnStartShowView()
     {
@@ -74,7 +74,6 @@ public class MainScreenView : BaseView
    public void OnPanelCentered(int center, int selected)
     {
         LevelItem item = LevelItemPool.Instance.pool.list[center];
-        bool isUnlocked = item.CheckUnlock();
         //playBtn.interactable = isUnlocked;
     }
 }

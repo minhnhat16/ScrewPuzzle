@@ -10,8 +10,6 @@ public class ConfigFileManager : MonoBehaviour
     [Header("CSV configs")]
     [SerializeField] private LevelConfig levelConfig;
     [SerializeField] private PriceConfig priceConfig;
-    [SerializeField] private DealerConfig dealerConfig;
-    [SerializeField] private DealerPriceConfig dealerPriceConfig;
     [SerializeField] private ColorConfig colorConfig;
     [SerializeField] private SlotConfig slotConfig;
     [SerializeField] private ItemConfig itemConfig;
@@ -21,7 +19,6 @@ public class ConfigFileManager : MonoBehaviour
     [SerializeField] private SoundFactory soundFactory;
 
     public LevelConfig LevelConfig { get => levelConfig; }
-    public DealerPriceConfig DealerPriceConfig { get => dealerPriceConfig; }
 
     public PriceConfig PriceConfig { get => priceConfig; }
     //public PriceSlotConfig PriceSlotConfig { get => priceSlotConfig; }
@@ -32,7 +29,6 @@ public class ConfigFileManager : MonoBehaviour
     public DailyRewardConfig DailyRewardConfig { get => dailyConfig; }
     public SpinConfig SpinConfig { get => spinConfig; }
     public SoundFactory SoundFactory { get => soundFactory; }
-    public DealerConfig DealerConfig { get => dealerConfig; }
 
     private void Awake()
     {

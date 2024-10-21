@@ -2,28 +2,28 @@ using System;
 
 public enum DialogIndex
 {
-    PickCardDialog = 0,
-    LableChooseDialog = 1,
-    BuyConfirmDialog = 2,
-    ItemConfirmDialog = 3,
-    SettingDialog = 4,
-    DailyRewardDialog = 5,
-    RateDialog = 6,
-    OutOffCardDialog = 7,
-    SpinDialog = 8,
-    BreakDialog = 9,
+    LableChooseDialog,
+    BuyConfirmDialog,
+    ItemConfirmDialog,
+    SettingDialog,
+    DailyRewardDialog,
+    RateDialog,
+    SpinDialog,
+    ReviveDialog,
+    WinDialog,
+    LoseDialog,
+    BreakDialog,
+    LevelDialog,
 }
 
-public class DialogParam { }
+public class DialogParam
+{
+}
 
 public class SettingDialogParam : DialogParam
 {
     public bool musicSetting;
     public bool sfxSetting;
-}
-public class ReviveDialogParam : DialogParam
-{
-    public int levelNum;
 }
 
 public class OutOffCardParam : DialogParam
@@ -36,10 +36,12 @@ public class DailyDialogParam : DialogParam
     int totalDay;
     bool isClaimed;
 }
+
 public class SpinParam : DialogParam
 {
     int totalDay;
 }
+
 public class BuyConfirmDialogParam : DialogParam
 {
     public Action onConfirmAction;
@@ -68,27 +70,37 @@ public class DailyParam : DialogParam
     int currenReward;
     public DailyRewardConfig config;
 }
+
 public class RateParam : DialogParam
 {
-
 }
+
 public class PickCardParam : DialogParam
 {
     public CardColorPallet premium;
     public CardColorPallet free;
 }
+
+public class ReviveDialogParam : DialogParam
+{
+    public bool isRevive;
+    public bool isHasAds;
+}
+
 public class DialogConfig
 {
-    public static DialogIndex[] dialogArray = {
-       DialogIndex.PickCardDialog,
-       DialogIndex.LableChooseDialog,
-       DialogIndex.BuyConfirmDialog,
-       DialogIndex.ItemConfirmDialog,
-       DialogIndex.DailyRewardDialog,
-       DialogIndex.SettingDialog,
-       DialogIndex.RateDialog,
-       DialogIndex.OutOffCardDialog,
-       DialogIndex.SpinDialog,
-      DialogIndex.BreakDialog,
+    public static DialogIndex[] dialogArray =
+    {
+        DialogIndex.LableChooseDialog,
+        DialogIndex.BuyConfirmDialog,
+        DialogIndex.ItemConfirmDialog,
+        DialogIndex.DailyRewardDialog,
+        DialogIndex.SettingDialog,
+        DialogIndex.SpinDialog,
+        DialogIndex.ReviveDialog,
+        DialogIndex.WinDialog,
+        DialogIndex.LoseDialog,
+        DialogIndex.BreakDialog,
+        DialogIndex.LevelDialog,
     };
 }

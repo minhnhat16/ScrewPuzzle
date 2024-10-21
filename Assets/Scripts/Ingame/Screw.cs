@@ -120,23 +120,6 @@ namespace Ingame.Screw
             var targetColor = ConfigFileManager.Instance.ColorConfig.GetRecordByKeySearch(color).Color;
             render.color = targetColor;
         }
-        public Collider2D[] GetOverlappingColliders(CircleCollider2D circleCollider, float radius, LayerMask mask)
-        {
-            // Lấy vị trí của CircleCollider2D
-            Vector2 colliderPosition = circleCollider.transform.position;
-
-            // Lấy Layer của GameObject chứa CircleCollider2D
-            int colliderLayer = hingeController.GetIntBodyLayer(0);
-
-            // Tạo LayerMask chứa tất cả layer từ 10-26
-            LayerMask layersInRange = IngameController.Instance.GetLayerMaskForRange(10, colliderLayer - 1 );
-
-            // Thực hiện phép kiểm tra va chạm
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(colliderPosition, radius, layersInRange);
-
-            return colliders;
-        }
-
         public bool OnScrewClicked()
         {
             // Ngăn chặn nhiều lần click bằng cờ `isClicked`

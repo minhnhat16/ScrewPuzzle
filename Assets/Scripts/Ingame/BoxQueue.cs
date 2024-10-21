@@ -108,30 +108,32 @@ namespace Ingame
             {
                 var config = (BoxConfigRecord)ConfigStack.Pop();
                 var isLocked = i < activeBoxCount;
-                ScrewBox box = new ();
                 switch (config.NumberOfScrewHoles)
                 {
                     case 1:
-                        box = OneHoldBoxPool.Instance.pool.list[i];
-                        box.OnInit(Vector3.left * 10, config, false);
-                        screwBoxes.Add(box);
+                        var boxOneHold = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
+                        boxOneHold.OnInit(Vector3.left * 10, config, false);
+                        boxOneHold.gameObject.SetActive(false);
+                        screwBoxes.Add(boxOneHold);
                         break;
                     case 2:
-                         box = TwoHoldBoxPool.Instance.pool.list[i];
-                         box.OnInit(Vector3.left * 10, config, false);
-                         screwBoxes.Add(box);
+                        var  boxTwoHold = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
+                        boxTwoHold.OnInit(Vector3.left * 10, config, false);
+                        boxTwoHold.gameObject.SetActive(false);
+
+                         screwBoxes.Add(boxTwoHold);
                         break;
                     case 3:
-                        box = ThreeHoldBoxPool.Instance.pool.list[i];
-                        box.OnInit(Vector3.left * 10, config, false);
-                        screwBoxes.Add(box);
+                        var boxThreeHold = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
+                        boxThreeHold.OnInit(Vector3.left * 10, config, false);
+                        boxThreeHold.gameObject.SetActive(false);
+                        screwBoxes.Add(boxThreeHold);
                         break;
                 }   
             }
 
-            var reverse = screwBoxes;
-            reverse.Reverse();
-            boxesStack = new Stack<ScrewBox>(reverse);
+            var oderByHoldNumber = screwBoxes.OrderBy(box=> box.holdScrews.Count);
+            boxesStack = new Stack<ScrewBox>(oderByHoldNumber);
         }
 
         private ScrewBox SpawnBox()

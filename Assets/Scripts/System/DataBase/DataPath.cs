@@ -5,7 +5,7 @@ using UnityEngine;
 public class DataPath
 {
     public const string NAME = "userInfo/name";
-    public const string LEVEL = "levelInfo/level";
+    public const string ALLLEVEL = "levelInfo/levelData";
     public const string EXPCURRENT = "levelInfo/expLevel";
     public const string ITEM = "itemInventory";
     public const string MAGNET = "itemInventory/magnetItem";

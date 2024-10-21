@@ -42,8 +42,8 @@ namespace Managers
         }
 
 
-
         private Coroutine inputCoroutine;
+
         private void OnEnable()
         {
             onCompleteLevel.AddListener(CompleteLevel);
@@ -64,11 +64,11 @@ namespace Managers
                 inputCoroutine = null;
             }
         }
+
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
         }
-
 
 
         private void Awake()
@@ -81,12 +81,15 @@ namespace Managers
             itemJustInvoke = false;
             Init(() => Debug.Log("INGAME CONTROLLER INIT DONE"));
         }
+
         private void Update()
         {
             if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftControl))
             {
                 Reset();
-            };
+            }
+
+            ;
         }
 
         public void Init(Action callback)
@@ -101,6 +104,7 @@ namespace Managers
             // Callback when initialization is done
             callback?.Invoke();
         }
+
         public LayerMask GetLayerMaskForRange(int startLayer, int endLayer)
         {
             LayerMask mask = 0;
@@ -117,6 +121,7 @@ namespace Managers
         {
             StartCoroutine(ItemCoroutine(item));
         }
+
         private IEnumerator ItemCoroutine(ItemType itemType)
         {
             yield return new WaitUntil(() => itemJustInvoke);
@@ -144,17 +149,19 @@ namespace Managers
             itemPerforming = true;
             ArrayScrew.Instance.SpawnNewHold();
             callback?.Invoke();
-        }   
+        }
 
         private void AddBox(Action callback)
         {
             BoxQueue.Instance.AddNewBoxSlot();
             callback?.Invoke();
         }
+
         public void LoadIngameAsset(Action callback)
         {
             StartCoroutine(LoadIngameAssetCoroutine(callback));
         }
+
         public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
             bool arrayScrewInitDone = false;
@@ -170,22 +177,23 @@ namespace Managers
             yield return new WaitUntil(() => arrayScrewInitDone && boxQueueInitDone && playerInitDone);
             callback?.Invoke();
         }
+
         protected IEnumerator LoadPlayer(Action callback)
         {
-
             var playerGameObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Player"), transform);
             yield return new WaitUntil(() => playerGameObject != null);
             if (playerGameObject != null) this.player = playerGameObject.GetComponent<Player>();
             callback?.Invoke();
         }
+
         protected IEnumerator LoadBoxManager(Action callback)
         {
-
             var boxManagerGameobject = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager"), transform);
             yield return new WaitUntil(() => boxManagerGameobject != null);
             if (boxManagerGameobject != null) this.boxManager = boxManagerGameobject.GetComponent<BoxQueue>();
             callback?.Invoke();
         }
+
         protected IEnumerator LoadArrayScrew(Action callback)
         {
             var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrews"), transform);
@@ -193,19 +201,41 @@ namespace Managers
             if (arrayScrewObj != null) this.arrayScrew = arrayScrewObj.GetComponent<ArrayScrew>();
             callback?.Invoke();
         }
+
         private void ClearAllScrewOnArray(Action callback)
         {
             ArrayScrew.Instance.ClearAllScrewsOnArray();
             callback?.Invoke();
         }
+
         private void ClearOneScrew(Action callback)
         {
             callback?.Invoke();
         }
+
         public void Reset()
         {
-            SceneManager.LoadScene("SampleScene");
+            SceneManager.LoadScene("BootScene");
         }
+
+        public void GameEndInvoker(Action callback = null)
+        {
+            itemPerforming = false;
+            player.CanClick = false;
+            ReviveDialogParam param = new ReviveDialogParam();
+            param.isRevive = false;
+            param.isHasAds = true; // set defaul allway true cus has none ads
+            // ZenSDK.instance.IsVideoRewardReady();
+            Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
+
+            DialogManager.Instance.ShowDialog(DialogIndex.ReviveDialog, param, () =>
+            {
+                Debug.LogWarning("SHOW DIALOG REVIVE DIALOG");
+                //if accepted watch ads invoke no reset level
+                // else return and reset current level, -1 heart
+            });
+        }
+
         private IEnumerator ListenForResetInput()
         {
             while (true)
@@ -225,22 +255,27 @@ namespace Managers
                 {
                     Debug.LogWarning("Key 2 pressed");
                     itemJustInvoke = true;
-
                     onItemInvoke.Invoke(ItemType.AddHold);
                 }
-                else if (Input.GetKey(KeyCode.Alpha3) )
+                else if (Input.GetKey(KeyCode.Alpha3))
                 {
                     Debug.LogWarning("Key 3 pressed");
                     itemJustInvoke = true;
-
                     onItemInvoke.Invoke(ItemType.ClearOneScrew);
                 }
+
                 // Chờ một khung hình trước khi kiểm tra tiếp
                 yield return null;
             }
         }
+
+        public void OnRevive()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnGameOver()
+        {
+        }
     }
 }
-
-
-

@@ -12,19 +12,9 @@ public class UserData
     [SerializeField]
     public ItemInvent itemInventory;
     [SerializeField]
-    public CardInventory cardInvent;
-    [SerializeField]
     public Wallet wallet;
     [SerializeField]
     public DailyData dailyData;
-    [SerializeField]
-    public SlotDataDict allSlotData;
-    [SerializeField]
-    public Dictionary<string, DealerData> dealerDict;
-    [SerializeField]
-    public Dictionary<string, SlotCameraData> cameraData;
-    [SerializeField]
-    public CardCounter cardCounter;
     [SerializeField]
     public SpinData spinData;
 }
@@ -38,9 +28,9 @@ public class UserInfo
 [Serializable]
 public class LevelInfo
 {
-    public int level;
+    public int currentLevel;
     public float expLevel;
-
+    public List<LevelData> levelData;
 }
 [Serializable]
 public class ItemInvent
@@ -60,19 +50,7 @@ public class ItemData
     public ItemType type;
     public int total;
 }
-[Serializable]
-public class CardInventory
-{
-    public CardType currentCardType;
-    public CardType type;
-    public Dictionary<string, ListCardColor> listColorByType;
-}
-[Serializable]
-public class ListCardColor
-{
-    public List<CardColorPallet> color;
-    public SlotCameraData slotCamera;
-}
+
 [Serializable]
 public class Wallet
 {
@@ -93,45 +71,16 @@ public class CurrencyWallet
     public int amount;
 }
 [Serializable]
-public class SlotDataDict
-{
-    public Dictionary<string,List<SlotData>> slotDict;
-}
-public class SlotData
-{
-    public int id;
-    public SlotStatus status;
-    public Stack<CardColorPallet> stack;
-}
-[Serializable]
-
-public class DealerData
-{
-    public int id;
-    public SlotStatus status;
-    public int upgradeLevel;
-    public Stack<CardColorPallet> currentStack;
-}
-[Serializable]
-
-public class SlotCameraData
-{
-    public int scaleTime;
-    public float  positionX;
-    public float positionY;
-    public float OrthographicSize;
-}
-[Serializable]
-public class CardCounter
-{
-    public string lastSaveTime;
-    public string currentTime;
-    public int currentCardPool;
-    public int maxCardPool;
-}
-[Serializable]
 public class SpinData
 {
     public bool isSpin;
     public string timeSpin;
+}
+
+[Serializable]
+public class LevelData
+{
+    public int levelID;
+    public bool isCompleted;
+    public int levelStar;
 }

@@ -66,18 +66,6 @@ public class OutOffCardDialog : BaseDialog
     }
     private void AccpetedWatch()
     {
-        //ZenSDK.instance.ShowVideoReward((onWatched) =>
-        //{
-        bool onWatched = true;
-        if (onWatched) DataAPIController.instance.SetCurrrentCardPool(bonusCard, () =>
-        {
-            GamePlayView view = ViewManager.Instance.currentView as GamePlayView;
-            DialogManager.Instance.HideDialog(dialogIndex, () =>
-            {
-            });
-        });
-        else return;
-        //});
     }
     IEnumerator UpdateTime(DateTime targetTime, Text label)
     {

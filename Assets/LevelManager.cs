@@ -13,15 +13,24 @@ using UnityEngine;
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
+    [SerializeField] private bool isInitDone;
+
     public Dictionary<string, Level.Level> Levels = new Dictionary<string, Level.Level>();
     public List<BoxConfig> boxconfigsLevel = new List<BoxConfig>();
-    public List<GameObject> levelPrefab = new List<GameObject>();
+    public List<Level.Level> levelConfig = new List<Level.Level>();
     public Level.Level currentLevel;
     
     public int currentLevelID;
     [SerializeField] private BaseLevelObject currentLevelObject;
     [SerializeField] private GameObject screwManagerPrefb;
     [SerializeField] private ScrewManager ScrewManager;
+
+    public bool IsInitDone
+    {
+        get => isInitDone;
+        set => isInitDone = value;
+    }
+
     public void Awake()
     {
         if (Instance != null)
@@ -40,11 +49,12 @@ public class LevelManager : MonoBehaviour
     public void Init()
     {
         StartCoroutine(LoadLevelOnFile());
-        StartCoroutine(LoadConfigFromFile(() => { }));
+        StartCoroutine(LoadConfigFromFile(() => isInitDone = true));
     }
 
     public IEnumerator LoadConfigFromFile(Action callback = null)
     {
+        isInitDone = false;
         yield return new WaitForSeconds(1f);
 
         // Path should not include "Resources" or file extension
@@ -86,12 +96,14 @@ public class LevelManager : MonoBehaviour
                 string strIDLevel = level.levelId.ToString();
                 Levels.TryAdd(strIDLevel, level);
             }
+
+            levelConfig = new List<Level.Level>(Levels.Values);
         }
         else
         {
             Debug.LogError($"No GameObject assets found at path: {resourcePath}");
         }
-
+        
         // Call the callback if it's not null
         callback?.Invoke();
     }
@@ -101,18 +113,6 @@ public class LevelManager : MonoBehaviour
         Debug.LogWarning("Start loading level ");
         StartCoroutine(LoadGameObjectFromLevel(levelID));
     }
-
-    public IEnumerator LoadLevelCouroutine(int level, Action callback = null)
-    {
-        yield return new WaitUntil(() => levelPrefab.Count > 0);
-        yield return new WaitForSeconds(1f);
-        var leveObject = Instantiate(levelPrefab[level], transform);
-        yield return new WaitUntil(() => leveObject != null);
-        var levelScript = leveObject.GetComponent<BaseLevelObject>();
-        // levelScript.Init();
-        callback?.Invoke();
-    }
-
     public Dictionary<int, int> GetScrewCountByColor()
     {
         Dictionary<int, int> screwColorDict = new Dictionary<int, int>();

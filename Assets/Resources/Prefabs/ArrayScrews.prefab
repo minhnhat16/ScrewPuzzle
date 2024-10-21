@@ -59,7 +59,6 @@ MonoBehaviour:
   - {fileID: 1128199033590829147}
   - {fileID: 1128199033767188088}
   - {fileID: 1128199034987855907}
-  - {fileID: 6880139015909317238}
   screws: []
   onHoldScrewsFull:
     m_PersistentCalls:
@@ -217,17 +216,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 01877255c7453c34db353df71ef8d35e, type: 3}
---- !u!114 &6880139015909317238 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6603341003615549036, guid: 01877255c7453c34db353df71ef8d35e, type: 3}
-  m_PrefabInstance: {fileID: 349291014119369754}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5dab82e2d622d147977f8e303e36d8d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &8202621301772004088 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8434537104473458402, guid: 01877255c7453c34db353df71ef8d35e, type: 3}

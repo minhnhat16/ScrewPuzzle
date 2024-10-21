@@ -258,42 +258,9 @@ public class DataModel : MonoBehaviour
         newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
         userData.itemInventory.magnetItem = newClearOnScrewInvent;
        //leve
-        LevelInfo levelInf = new()
-        {
-            level = 1,
-            expLevel = 0.0f
-        };
-        userData.levelInfo = levelInf;
-
-        ListCardColor defaultColor = new();
-
-        CardInventory invent = new CardInventory();
-        invent.listColorByType = new Dictionary<string, ListCardColor>();
-
-        defaultColor.color = new List<CardColorPallet> { CardColorPallet.Red, CardColorPallet.Yellow/*, CardColorPallet.Blue*/ };
+      
        
-        ListCardColor newColorList = new();
-        newColorList.color = new List<CardColorPallet> { CardColorPallet.Red, CardColorPallet.Yellow, CardColorPallet.Blue };
-
-        for (int i = 0; i <9; i++)
-        {
-            CardType type = (CardType)i;
-            Debug.LogWarning("ADD data type " + type);
-            invent.currentCardType = type;
-            invent.type = CardType.Default;
-            if (type == CardType.Default)
-            {
-                invent.listColorByType.TryAdd(type.ToString(), defaultColor);
-            }
-            else
-            {
-                invent.currentCardType = type ;
-                invent.listColorByType.TryAdd(type.ToString(), newColorList);
-
-            }
-        }
         //WALLET 
-        userData.cardInvent = invent;
         userData.wallet = new();
         //Add gold 
         CurrencyWallet goldWallet = new();
@@ -322,106 +289,7 @@ public class DataModel : MonoBehaviour
         newDaily.dailyList = _dailyData;
         userData.dailyData = newDaily;
 
-        //slot data
-        List<SlotData> newSlotList = new();
-        int slotCount = 35;
-        for (int i = -4; i < slotCount; i++)
-        {
-            SlotData newSlotData = new SlotData();
-            newSlotData.id = i;
-            if (i < 0)
-            {
-                newSlotData.status = SlotStatus.Active;
-                //newSlotData.currentStack = new Stack<CardColorPallet>(new List<CardColorPallet>
-                //        {
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red
-                //        });
-                newSlotList.Add(newSlotData);
-            }
-            else if (i == 0 || i == 1)
-            {
-                newSlotData.status = SlotStatus.Active;
-                newSlotData.stack = new Stack<CardColorPallet>(new List<CardColorPallet>
-                            {
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow
-                            });
-                newSlotList.Add(newSlotData);
-
-            }
-            else if (i == 2)
-            {
-                newSlotData.status = SlotStatus.Active;
-                newSlotData.stack = new Stack<CardColorPallet>(new List<CardColorPallet>
-                            {
-                                CardColorPallet.Red,
-                                CardColorPallet.Red,
-                                CardColorPallet.Red,
-                                CardColorPallet.Red,
-                                CardColorPallet.Red
-                            });
-                newSlotList.Add(newSlotData);
-
-            }
-            else if (i == 3 || i == 4 || i == 7)
-            {
-                newSlotData.status = SlotStatus.Locked;
-                newSlotList.Add(newSlotData);
-            }
-            else
-            {
-                newSlotData.status = SlotStatus.InActive;
-                newSlotList.Add(newSlotData);
-            }
-        }
-        SlotDataDict newDictSlotData = new();
-        Dictionary<string, List<SlotData>> newDict = new();
-        for (int i = 0; i < 10; i++)
-        {
-            string typeString = Convert.ToString((CardType)i);
-            newDict.Add(typeString, newSlotList);
-            newDictSlotData.slotDict = newDict;
-        }
-        userData.allSlotData = newDictSlotData;
-
-        //dealer data
-        Dictionary<string, DealerData> newDealerDict = new Dictionary<string, DealerData>();
-        for (int i = 0; i < 4; i++)
-        {
-            DealerData newDealerData = new();
-            newDealerData.status = i == 0 ? SlotStatus.Active : SlotStatus.InActive;
-            newDealerData.id = i;
-            newDealerData.upgradeLevel = 1;
-            DataTrigger.ToKey(i);
-            newDealerDict.Add(DataTrigger.ToKey(i), newDealerData);
-        }
-        userData.dealerDict = newDealerDict;
-
-        SlotCameraData camData = new();
-        camData.positionX = 0f;
-        camData.positionY = -4.5f;
-        camData.scaleTime = 0;
-        camData.OrthographicSize = 10;
-        userData.cameraData = new();
-        for (int i = 0; i < 9; i++)
-        {     
-            string type = Convert.ToString((CardType)i);
-            userData.cameraData.TryAdd(type, camData);
-        }
-        CardCounter newCardCounter = new();
-        newCardCounter.lastSaveTime = DateTime.Now.ToString();
-        newCardCounter.currentTime = DateTime.Now.ToString();
-
-        newCardCounter.maxCardPool = ZenSDK.instance.GetConfigInt("cardPool", 500);
-        newCardCounter.currentCardPool = newCardCounter.maxCardPool;
-        userData.cardCounter = newCardCounter;
+;
 
         SpinData newSpinData = new();
         newSpinData.isSpin = false;
@@ -450,8 +318,9 @@ public class DataModel : MonoBehaviour
         newClearOnScrewInvent.type = ItemType.AddBox;
         newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
         userData.itemInventory.magnetItem = newClearOnScrewInvent;
+        
+        //player level
         LevelInfo levelInf = new();
-        levelInf.level = 1;
         levelInf.expLevel = 0.0f    ;
         userData.levelInfo = levelInf;
 
@@ -481,105 +350,6 @@ public class DataModel : MonoBehaviour
         }
         newDaily.dailyList = _dailyData;
         userData.dailyData = newDaily;
-        List<SlotData> newSlotList = new();
-        int slotCount = 35;
-        for (int i = -4; i < slotCount; i++)
-        {
-            SlotData newSlotData = new SlotData();
-            newSlotData.id = i;
-            if (i < 0)
-            {
-                newSlotData.status = SlotStatus.Active;
-                //newSlotData.currentStack = new Stack<CardColorPallet>(new List<CardColorPallet>
-                //        {
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red,
-                //            CardColorPallet.Red
-                //        });
-                newSlotList.Add(newSlotData);
-            }
-            else if (i == 0 || i == 1)
-            {
-                newSlotData.status = SlotStatus.Active;
-                newSlotData.stack = new Stack<CardColorPallet>(new List<CardColorPallet>
-                            {
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow,
-                                CardColorPallet.Yellow
-                            });
-                newSlotList.Add(newSlotData);
-
-            }
-            else if (i == 2)
-            {
-                newSlotData.status = SlotStatus.Active;
-                newSlotData.stack = new Stack<CardColorPallet>(new List<CardColorPallet>
-                            {
-                                CardColorPallet.Red,
-                                CardColorPallet.Red,
-                                CardColorPallet.Red,
-                                CardColorPallet.Red,
-                                CardColorPallet.Red
-                            });
-                newSlotList.Add(newSlotData);
-
-            }
-            else if (i == 3 || i == 4 || i == 7)
-            {
-                newSlotData.status = SlotStatus.Locked;
-                newSlotList.Add(newSlotData);
-            }
-            else
-            {
-                newSlotData.status = SlotStatus.InActive;
-                newSlotList.Add(newSlotData);
-            }
-        }
-        SlotDataDict newDictSlotData = new();
-        Dictionary<string, List<SlotData>> newDict = new();
-        for (int i = 0; i < 9; i++)
-        {
-            string t = ((CardType)i).ToString();
-            newDict.Add(t, newSlotList);
-        }
-        newDictSlotData.slotDict = newDict;
-        userData.allSlotData = newDictSlotData;
-        Dictionary<string, DealerData> newDealerDict = new Dictionary<string, DealerData>();
-        for (int i = 0; i < 4; i++)
-        {
-            DealerData newDealerData = new();
-            newDealerData.status = i == 0 ? SlotStatus.Active : SlotStatus.InActive;
-            newDealerData.id = i;
-            newDealerData.upgradeLevel = 1;
-            DataTrigger.ToKey(i);
-            newDealerDict.Add(DataTrigger.ToKey(i), newDealerData);
-        }
-        userData.dealerDict = newDealerDict;
-
-        SlotCameraData camData = new();
-        camData.positionX = 0f;
-        camData.positionY = -4.5f;
-        camData.scaleTime = 0;
-        camData.OrthographicSize = 10;
-
-        userData.cameraData = new Dictionary<string, SlotCameraData>();
-        for (int i = 0; i < 9; i++)
-        {
-            string type = Convert.ToString((CardType)i);
-            userData.cameraData.TryAdd(type, camData);
-        }
-        CardCounter newCardCounter = new();
-        newCardCounter.lastSaveTime = DateTime.Now.ToString();
-        newCardCounter.currentTime = DateTime.Now.ToString();
-
-        newCardCounter.maxCardPool = ZenSDK.instance.GetConfigInt("cardPool", 500);
-        newCardCounter.currentCardPool = newCardCounter.maxCardPool;
-        userData.cardCounter = newCardCounter;
-
         SpinData newSpinData = new();
         newSpinData.isSpin = false;
         newSpinData.timeSpin = DateTime.MinValue.ToString();
@@ -587,8 +357,3 @@ public class DataModel : MonoBehaviour
     }
 }
 
-public class GameInitData
-{
-    public int defaultSkinID = ZenSDK.instance.GetConfigInt("fruitSkin", 4);
-    public int defaultBoxSkinID = ZenSDK.instance.GetConfigInt("boxSkin", 12);
-}

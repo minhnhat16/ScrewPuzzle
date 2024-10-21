@@ -29,6 +29,12 @@ namespace Ingame
             onHoldScrewsFull.AddListener(ScrewFullEvent);
         }
 
+        private void OnDisable()
+        {
+            onHoldScrewsFull.RemoveListener(ScrewFullEvent);
+            
+        }
+
         public void Awake()
         {
             if (Instance == null)
@@ -122,16 +128,16 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()
         {
-            IngameController.Instance.Reset();
+            IngameController.Instance.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
         private IEnumerator CheckHoldCoroutine()
         {
             while (true)
             {
+
                 // Kiểm tra nếu tất cả các ô đều đầy
                 bool allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
-
                 if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
@@ -176,10 +182,6 @@ namespace Ingame
             {
                 RemoveScrewOutHold(screw);
             }
-        }
-        public List<Screw.Screw> GetAllScrewInHold()
-        {
-            return (from holdScrew in holdScrews where !holdScrew.IsEmpty() select holdScrew.Screw).ToList();
         }
         public void AddScrew(Screw.Screw screw)
         {
