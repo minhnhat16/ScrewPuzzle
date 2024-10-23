@@ -8,13 +8,20 @@ namespace UIScript
     public abstract class ItemButton : MonoBehaviour
     {
         [SerializeField] private Button button;
-
+        [SerializeField] private Button addQuantityBtn;
+        [SerializeField] private int quantity = 1;
+        [SerializeField] private Text text_lb;
+        [SerializeField] private ItemType type;
         public Button Button
         {
             get => button;
             set => button = value;
         }
-
+        public Button AddQuantityBtn
+        {
+            get => addQuantityBtn;
+            set => addQuantityBtn = value;
+        }
         public Text TextLB
         {
             get => text_lb;
@@ -33,8 +40,7 @@ namespace UIScript
             set => Event = value;
         }
 
-        [SerializeField] private Text text_lb;
-        [SerializeField] private ItemType type;
+       
         [HideInInspector]
         public UnityEvent<int> Event = new UnityEvent<int>();
 
@@ -46,6 +52,11 @@ namespace UIScript
         {
             Debug.Log("on button click");
             IngameController.Instance.onItemInvoke?.Invoke(type);
+        }
+
+        public virtual void OnAddQuantity()
+        {
+            
         }
     }
 }

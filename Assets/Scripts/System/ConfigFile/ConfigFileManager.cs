@@ -55,6 +55,8 @@ public class ConfigFileManager : MonoBehaviour
         yield return new WaitUntil(() => slotConfig != null);*/
         colorConfig = Resources.Load("Config/ColorConfig", typeof(ScriptableObject)) as ColorConfig;
         yield return new WaitUntil(() => colorConfig != null);
+        itemConfig = Resources.Load("Config/ItemConfig", typeof(ScriptableObject)) as ItemConfig;
+        yield return new WaitUntil(() => ItemConfig != null);
         /*
         dealerPriceConfig = Resources.Load("Config/DealerPriceConfig", typeof(ScriptableObject)) as DealerPriceConfig;
         yield return new WaitUntil(() => dealerPriceConfig != null);

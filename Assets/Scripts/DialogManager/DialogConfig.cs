@@ -4,7 +4,7 @@ public enum DialogIndex
 {
     LableChooseDialog,
     BuyConfirmDialog,
-    ItemConfirmDialog,
+    AddItemDialog,
     SettingDialog,
     DailyRewardDialog,
     RateDialog,
@@ -52,14 +52,6 @@ public class BuyConfirmDialogParam : DialogParam
     public int cost;
     public string plaintext;
 }
-
-public class ItemConfirmParam : DialogParam
-{
-    public bool isAds;
-    public ItemType type;
-    public string name;
-}
-
 public class SettingParam : DialogParam
 {
     public bool isMainScreen;
@@ -87,13 +79,20 @@ public class ReviveDialogParam : DialogParam
     public bool isHasAds;
 }
 
+public class AddItemDialogParam : DialogParam
+{
+    public ItemType ItemType;
+    public bool IsAdsAvailable;
+    public int ItemPrice;
+    public string detail;
+}
 public class DialogConfig
 {
     public static DialogIndex[] dialogArray =
     {
         DialogIndex.LableChooseDialog,
         DialogIndex.BuyConfirmDialog,
-        DialogIndex.ItemConfirmDialog,
+        DialogIndex.AddItemDialog,
         DialogIndex.DailyRewardDialog,
         DialogIndex.SettingDialog,
         DialogIndex.SpinDialog,

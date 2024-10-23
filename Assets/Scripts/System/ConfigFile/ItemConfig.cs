@@ -7,24 +7,29 @@ using UnityEngine;
 [Serializable]
 public class ItemConfigRecord
 {
-    [SerializeField]    
-    private int id;
-    [SerializeField]
-    private string spriteName;
-    [SerializeField]
-    private ItemType type;
-    [SerializeField]
-    private string skinType;
-    public int ID { get { return id; } }
-    public string SpriteName { get { return spriteName; } }
-    public ItemType Type { get { return type; } }
-    public string SkinType { get { return skinType; } }
+    [SerializeField] private int price;
+    [SerializeField] private ItemType type;
+    [SerializeField] private int quantity;
+    [SerializeField] private string detail;
+
+    public string Detail
+    {
+        get => detail;
+        set => detail = value;
+    }
+
+    public int Price => price;
+
+    public ItemType Type => type;
+
+    public int Quantity => quantity;
 }
+
 public class ItemConfig : BYDataTable<ItemConfigRecord>
 {
     public override ConfigCompare<ItemConfigRecord> DefineConfigCompare()
     {
-        configCompare = new ConfigCompare<ItemConfigRecord>("id");
+        configCompare = new ConfigCompare<ItemConfigRecord>("type");
         return configCompare;
     }
 }

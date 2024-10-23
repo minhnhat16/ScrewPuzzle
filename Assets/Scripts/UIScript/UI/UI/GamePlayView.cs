@@ -21,20 +21,13 @@ public class GamePlayView : BaseView
     [SerializeField] private RectTransform goldParent;
     [SerializeField] private RectTransform gemParent;
     [SerializeField] private Text gold_lb;
-    [SerializeField] private Text gem_lb;
-    [SerializeField] private Text magnet_lb;
-    [SerializeField] private Text bomb_lb;
-    [SerializeField] private Text curentCard_lb;
-    [SerializeField] private Text maxCard_lb;
     [SerializeField] private Text timeCouter;
      [SerializeField] private List<RectTransform> anchorTutorials;
-    [SerializeField] private Vector3 goldPos;
     [SerializeField]private Button settingBtn;
      [SerializeField] private Button addBoxBtn;
      [SerializeField] private Button addHoldBtn;
      [SerializeField] private Button clearOneScrewBtn;
     [SerializeField] bool isNewPlayer;
-    [SerializeField] ExperienceBar expBar;
 
     [HideInInspector]
     public UnityEvent<bool> magnetItemEvent = new();
@@ -42,14 +35,9 @@ public class GamePlayView : BaseView
     public UnityEvent<bool> bombItemEvent = new();
 
     public Text GoldLb { get { return gold_lb; } }
-    public Text GemLB { get { return gem_lb; } }
 
     public RectTransform Anchor { get => anchor; set => anchor = value; }
-    public RectTransform GoldParent { get => goldParent; set => goldParent = value; }
-    public RectTransform GemParent { get => gemParent; set => gemParent = value; }
     public List<RectTransform> AnchorTutorials { get => anchorTutorials; set => anchorTutorials = value; }
-    public Button Magnet_btn { get => addBoxBtn; set => addBoxBtn = value; }
-    public Button Bomb_Btn { get => addHoldBtn; set => addHoldBtn = value; }
 
     public UnityEvent<bool> onNewPlayer = new();
 
@@ -171,9 +159,9 @@ public class GamePlayView : BaseView
         yield return new WaitUntil(() => DataAPIController.instance.GetItemData(ItemType.AddHold) is not null);
         ItemData bombTotal = DataAPIController.instance.GetItemData(ItemType.AddHold);
         ItemData magnetTotal = DataAPIController.instance.GetItemData(ItemType.ClearOneScrew);
-        bomb_lb.text = $"{bombTotal.total}";
+        /*bomb_lb.text = $"{bombTotal.total}";
         magnet_lb.text = $"{magnetTotal.total}";
-        magnet_lb.text = $"{magnetTotal.total}";
+        magnet_lb.text = $"{magnetTotal.total}";*/
     }
     public void ShowGoldAnim(int gold)
     {
@@ -194,6 +182,7 @@ public class GamePlayView : BaseView
         button.interactable = true;
     }
  
+    /*
     public void AddHoldItemClick()
     {
         // Disable the button to avoid multiple clicks
@@ -211,7 +200,7 @@ public class GamePlayView : BaseView
             };
 
             // Show the item confirmation dialog
-            DialogManager.Instance.ShowDialog(DialogIndex.ItemConfirmDialog, param);
+            DialogManager.Instance.ShowDialog(DialogIndex.AddItemDialog, param);
 
             // Invoke bombItemEvent with false indicating no item available
             bombItemEvent?.Invoke(false);
@@ -225,7 +214,9 @@ public class GamePlayView : BaseView
             addHoldBtn.interactable = true;
         }
     }
+    */
 
+    /*
     public void AddBoxItemClick()
     {
         // Disable the button to avoid multiple clicks
@@ -237,13 +228,13 @@ public class GamePlayView : BaseView
         // If the total amount of the item is 0 or less, show confirmation dialog
         if (itemData.total <= 0)
         {
-            ItemConfirmParam param = new ItemConfirmParam
+            AddItemDialogParam param = new AddItemDialogParam()
             {
-                type = itemType
+                ItemType = itemType
             };
 
             // Show the item confirmation dialog
-            DialogManager.Instance.ShowDialog(DialogIndex.ItemConfirmDialog, param);
+            DialogManager.Instance.ShowDialog(DialogIndex.AddItemDialog, param);
 
             // Invoke bombItemEvent with false indicating no item available
             bombItemEvent?.Invoke(false);
@@ -274,7 +265,7 @@ public class GamePlayView : BaseView
             };
 
             // Show the item confirmation dialog
-            DialogManager.Instance.ShowDialog(DialogIndex.ItemConfirmDialog, param);
+            DialogManager.Instance.ShowDialog(DialogIndex.AddItemDialog, param);
 
             // Invoke bombItemEvent with false indicating no item available
             bombItemEvent?.Invoke(false);
@@ -288,6 +279,7 @@ public class GamePlayView : BaseView
             addHoldBtn.interactable = true;
         }
     }
+    */
 
     public void PauseButton()
     {

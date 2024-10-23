@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class MainScreenView : BaseView
 {
-    //public int totalGold;
-    //public TextMeshProUGUI gold_lb;
     [SerializeField] private Button playBtn;
     [SerializeField] private Button dailyReward;
     [SerializeField] private LevelPanel levelPanel;
