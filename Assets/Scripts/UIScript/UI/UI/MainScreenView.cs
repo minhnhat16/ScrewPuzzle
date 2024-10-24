@@ -6,11 +6,15 @@ public class MainScreenView : BaseView
 {
     [SerializeField] private Button playBtn;
     [SerializeField] private Button dailyReward;
+    [SerializeField] private Button shopButton;
     [SerializeField] private LevelPanel levelPanel;
+    [SerializeField] private int gold;
+
     private void OnEnable()
     {
         /*playBtn.onClick.AddListener(OnPlayButton);
         dailyReward.onClick.AddListener(OnDailyReward);*/
+        shopButton.onClick.AddListener(ShopButton);
     }
 
    
@@ -73,5 +77,12 @@ public class MainScreenView : BaseView
     {
         LevelItem item = LevelItemPool.Instance.pool.list[center];
         //playBtn.interactable = isUnlocked;
+    }
+
+    public void ShopButton()
+    {
+        var param = new  ShopViewParam();
+        param.gold = gold;
+        ViewManager.Instance.SwitchView(ViewIndex.ShopView,param);
     }
 }

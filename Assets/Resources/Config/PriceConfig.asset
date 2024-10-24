@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8971d69fb983944996a43c42c834f63, type: 3}
+  m_Name: PriceConfig
+  m_EditorClassIdentifier: 
+  records:
+  - id: 0
+    idShop: 1
+    idItem: 0
+    price: 2000
+    amount: 1000
+    available: 1
+    spriteName: Price_coin 1
+    moneyPaid: 0
+  - id: 1
+    idShop: 1
+    idItem: 1
+    price: 3000
+    amount: 1250
+    available: 1
+    spriteName: Price_coin 2
+    moneyPaid: 0
+  - id: 2
+    idShop: 1
+    idItem: 2
+    price: 4000
+    amount: 1563
+    available: 1
+    spriteName: Price_coin 3
+    moneyPaid: 0
+  - id: 3
+    idShop: 1
+    idItem: 3
+    price: 5000
+    amount: 1953
+    available: 1
+    spriteName: Price_chest 1
+    moneyPaid: 0
+  - id: 4
+    idShop: 1
+    idItem: 4
+    price: 6000
+    amount: 2441
+    available: 1
+    spriteName: Price_chest 2
+    moneyPaid: 0
+  - id: 5
+    idShop: 1
+    idItem: 5
+    price: 7000
+    amount: 3052
+    available: 1
+    spriteName: Price_chest 3
+    moneyPaid: 0
+  - id: 6
+    idShop: 1
+    idItem: 6
+    price: 8000
+    amount: 3815
+    available: 1
+    spriteName: Price_coin 1
+    moneyPaid: 0
+  - id: 7
+    idShop: 1
+    idItem: 7
+    price: 10000
+    amount: 4768
+    available: 1
+    spriteName: Price_coin 2
+    moneyPaid: 0
+  - id: 8
+    idShop: 1
+    idItem: 8
+    price: 12000
+    amount: 5960
+    available: 1
+    spriteName: Price_coin 3
+    moneyPaid: 0

@@ -9,6 +9,7 @@ public enum ViewIndex
     CollectionView =4,
     DailyView = 5,
     WardrobeView = 6,   
+    ShopView = 7,
 }
 
 public class ViewParam { }
@@ -23,6 +24,11 @@ public class GamePlayViewParam : ViewParam
     public int maxCardCount;
     public string currentTime;
     public string lastTime;
+}
+
+public class ShopViewParam : ViewParam
+{
+    public int gold;
 }
 public class MainScreenViewParam : ViewParam
 {
@@ -42,5 +48,6 @@ public class ViewConfig
         ViewIndex.GamePlayView,
         ViewIndex.DailyView,
         ViewIndex.CollectionView,
+        ViewIndex.ShopView,
     };
 }

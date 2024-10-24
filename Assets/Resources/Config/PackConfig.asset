@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97e260b1ad1fe2e47b41cc497003742d, type: 3}
+  m_Name: PackConfig
+  m_EditorClassIdentifier: 
+  records:
+  - id: 0
+    idItem: 1
+    price: 2000
+    ribbonText: ads pack
+    iconName: 09_ADS pack_icon
+    ribbonColorName: 01_Blue ribbon_pack
+    iconItem1: 07_No ads icon
+    quantityItem1: 1
+    iconItem2: Price_coin 3
+    quantityItem2: 100000
+    iconItem3: null
+    quantityItem3: 0
+  - id: 1
+    idItem: 1
+    price: 3000
+    ribbonText: big pack
+    iconName: 08_Super pack_icon
+    ribbonColorName: 01_Blue ribbon_pack
+    iconItem1: 04_unscrew icon
+    quantityItem1: 10
+    iconItem2: Price_coin 4
+    quantityItem2: 15000
+    iconItem3: null
+    quantityItem3: 0
+  - id: 2
+    idItem: 1
+    price: 4000
+    ribbonText: super pack
+    iconName: 08_Super pack_icon
+    ribbonColorName: 02_ Red ribbon_pack
+    iconItem1: 05_replay icon
+    quantityItem1: 10
+    iconItem2: Price_coin 5
+    quantityItem2: 15000
+    iconItem3: null
+    quantityItem3: 0
+  - id: 3
+    idItem: 1
+    price: 5000
+    ribbonText: mega pack
+    iconName: 10_Mega pack_icon
+    ribbonColorName: 02_ Red ribbon_pack
+    iconItem1: 06_undo icon
+    quantityItem1: 10
+    iconItem2: Price_coin 6
+    quantityItem2: 15000
+    iconItem3: null
+    quantityItem3: 0
+  - id: 4
+    idItem: 1
+    price: 6000
+    ribbonText: super mega pack
+    iconName: 10_Mega pack_icon
+    ribbonColorName: 03_ Purple ribbon_pack
+    iconItem1: 05_replay icon
+    quantityItem1: 10
+    iconItem2: 06_undo icon
+    quantityItem2: 10
+    iconItem3: Price_coin 3
+    quantityItem3: 500000

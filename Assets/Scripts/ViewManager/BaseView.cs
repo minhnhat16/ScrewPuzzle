@@ -17,6 +17,7 @@ public class BaseView : MonoBehaviour
     public void Init()
     {
         OnInit();
+        Debug.LogError($"on init {viewIndex}");
         gameObject.SetActive(false);
 
     }

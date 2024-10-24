@@ -48,9 +48,9 @@ public class BootLoader : MonoBehaviour
             MainScreenViewParam param = new MainScreenViewParam();
             param.totalGold = 0;
             //Debug.Log("LoadSenceCallback");
-            ViewManager.Instance.SwitchView(ViewIndex.GamePlayView, param, () =>
+            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
             {
-                //DayTimeController.instance.CheckNewDay();
+                DayTimeController.instance.CheckNewDay();
                 ZenSDK.instance.ShowAppOpen((isDone) =>
                 {
                     //SoundManager.instance.PlayMusic(SoundManager.Music.GamplayMusic);
