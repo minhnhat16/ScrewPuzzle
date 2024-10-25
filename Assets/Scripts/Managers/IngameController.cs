@@ -79,7 +79,7 @@ namespace Managers
         private void Start()
         {
             itemJustInvoke = false;
-            Init(() => Debug.Log("INGAME CONTROLLER INIT DONE"));
+            //Init(() => Debug.Log("INGAME CONTROLLER INIT DONE"));
         }
 
         private void Update()

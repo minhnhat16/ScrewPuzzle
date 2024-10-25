@@ -1,4 +1,4 @@
-
+using System.Collections.Generic;
 
 public enum ViewIndex
 {
@@ -10,6 +10,7 @@ public enum ViewIndex
     DailyView = 5,
     WardrobeView = 6,   
     ShopView = 7,
+    LevelView = 8,
 }
 
 public class ViewParam { }
@@ -39,6 +40,12 @@ public class CollectionParam : ViewParam
     public int ownedCard;
     public int totalCard;
 }
+
+public class LevelParam : ViewParam
+{
+    public int currentLevel;
+    public List<LevelItem> listLevelItems;
+}
 public class ViewConfig
 {
     public static ViewIndex[] viewArray = {
@@ -49,5 +56,6 @@ public class ViewConfig
         ViewIndex.DailyView,
         ViewIndex.CollectionView,
         ViewIndex.ShopView,
+        ViewIndex.LevelView,
     };
 }

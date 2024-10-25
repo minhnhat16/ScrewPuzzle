@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +9,7 @@ public class MainScreenView : BaseView
     [SerializeField] private Button playBtn;
     [SerializeField] private Button dailyReward;
     [SerializeField] private Button shopButton;
+    [SerializeField] private Button levelButton;
     [SerializeField] private LevelPanel levelPanel;
     [SerializeField] private int gold;
 
@@ -15,9 +18,12 @@ public class MainScreenView : BaseView
         /*playBtn.onClick.AddListener(OnPlayButton);
         dailyReward.onClick.AddListener(OnDailyReward);*/
         shopButton.onClick.AddListener(ShopButton);
+        levelButton.onClick.AddListener(LevelButton);
     }
 
    
+
+
     private void OnDisable()
     {
         /*playBtn.onClick.RemoveListener(OnPlayButton);*/
@@ -85,4 +91,29 @@ public class MainScreenView : BaseView
         param.gold = gold;
         ViewManager.Instance.SwitchView(ViewIndex.ShopView,param);
     }
+    private void LevelButton()
+    {
+        var levelsConfig = LevelManager.Instance.levelConfig;
+        var levelData = DataAPIController.instance.GetAllLevelData();
+        List<LevelItem> listLevel = new();
+
+        foreach (var levelConfig in levelsConfig)
+        {
+            int id = levelConfig.levelId;
+            var currentLevel= levelData.Find((data)=>data.levelID == id);
+            bool isComplete = currentLevel is { isCompleted: true };
+            // Create new LevelItem and add to the list
+            LevelItem newItem = new(id, isComplete, false);
+            listLevel.Add(newItem);
+        }
+
+        // Set parameters and switch view
+        LevelParam param = new()
+        {
+            currentLevel = 1,
+            listLevelItems = listLevel
+        };
+        ViewManager.Instance.SwitchView(ViewIndex.LevelView, param);
+    }
+
 }

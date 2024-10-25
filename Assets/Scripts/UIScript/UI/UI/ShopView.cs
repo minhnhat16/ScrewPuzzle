@@ -7,6 +7,9 @@ using ConfigFile;
 using Managers;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
+using Slider = UnityEngine.UI.Slider;
 
 namespace UIScript.UI.UI
 {
@@ -42,6 +45,8 @@ namespace UIScript.UI.UI
         public override void OnStartShowView()
         {
             switchSlider.value = 0;
+            ResetScrollPosition(priceRect);
+            ResetScrollPosition(packRect);
             SliderValueChange();
         }
         private void  LoadItemFromConfig(List<PriceConfigRecord>  shopItemConfigRecords)
@@ -108,6 +113,23 @@ namespace UIScript.UI.UI
             SwitchMiniView(valueBool); // hàm set mini view cho price và pack
         }
 
+        public void ResetScrollPosition(RectTransform scrollView)
+        {
+            ScrollRect scrollRect = scrollView.GetComponent<ScrollRect>();
+            if (scrollRect != null)
+            {
+                // To reset to the top
+                scrollRect.verticalNormalizedPosition = 1f;
+
+                // To reset to the bottom, set to 0f
+                // scrollRect.verticalNormalizedPosition = 0f;
+            }
+            else
+            {
+                Debug.LogWarning("ScrollRect component not found on lablePack.");
+            }
+
+        }
         public void SwitchMiniView(bool isActive =false)
         {
             //set hiển thij label trên switch, chỉ có 1 cái được active 

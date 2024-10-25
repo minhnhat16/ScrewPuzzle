@@ -258,7 +258,18 @@ public class DataModel : MonoBehaviour
         newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
         userData.itemInventory.magnetItem = newClearOnScrewInvent;
        //leve
-      
+       LevelInfo levelInf = new();
+       levelInf.expLevel = 0.0f;
+       LevelData dataLevelOne = new();
+       dataLevelOne.levelID = 1;
+       dataLevelOne.levelStar = 0;
+       dataLevelOne.isCompleted = false;
+       levelInf.currentLevel = 1;
+       levelInf.levelData = new();
+       levelInf.levelData.Add(dataLevelOne);
+        
+       userData.levelInfo = levelInf;
+       userData.wallet = new();
        
         //WALLET 
         userData.wallet = new();
@@ -321,9 +332,15 @@ public class DataModel : MonoBehaviour
         
         //player level
         LevelInfo levelInf = new();
-        levelInf.expLevel = 0.0f    ;
+        levelInf.expLevel = 0.0f;
+        LevelData dataLevelOne = new();
+        dataLevelOne.levelID = 1;
+        dataLevelOne.levelStar = 0;
+        dataLevelOne.isCompleted = false;
+        levelInf.currentLevel = 1;
+        levelInf.levelData.Add(dataLevelOne);
+        
         userData.levelInfo = levelInf;
-
         userData.wallet = new();
         //Add gold 
         CurrencyWallet goldWallet = new();

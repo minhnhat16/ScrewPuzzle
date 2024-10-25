@@ -135,3 +135,10 @@ public enum TutorialEnum
     StepUnlock = 6,
     Final = 7,
 }
+
+public enum LevelEnum
+{
+    Lock,
+    Complete,
+    Hard,
+}

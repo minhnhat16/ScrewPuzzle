@@ -38,11 +38,11 @@ namespace UIScript.Dialog
             //     newItem.Setup(level.levelId, false, 0);
             //     listLevelItem.Add(newItem);
             // }
-            for (int i = 0; i < 10; i++)
+            /*for (int i = 0; i < 10; i++)
             { 
                 LevelItem newItem = Instantiate(prefabLevelItem, grid.transform);
             
-            }
+            }*/
         }
     }
 }
