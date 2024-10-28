@@ -80,6 +80,8 @@ namespace Ingame
     
         public virtual void OnEnable()
         {
+            _transform = transform.GetComponent<Transform>(); 
+
         }
 
         public void OnInit(Vector3 position, BoxConfigRecord config, bool isBoxFull)
@@ -90,8 +92,6 @@ namespace Ingame
         }
        public virtual void Start()
         {
-            _transform = transform.GetComponent<Transform>(); 
-           
            // SetBoxColor(UnityEngine.Color.white);
         }
 
@@ -102,8 +102,9 @@ namespace Ingame
             var upperGameObj = render.gameObject;
             upperGameObj.transform.localPosition = 10 * Vector3.up;
             upperGameObj.SetActive(false);
-            foreach (var h in holdScrews)
+            foreach (var h in holdScrews)   
             {
+                
                 h.Screw = null; // should put reset here
             };
         }

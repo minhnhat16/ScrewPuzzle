@@ -46,7 +46,6 @@ namespace UIScript.UI.UI
                 levelOnPool.Init();
                 newItems.Add(levelOnPool);
             }
-
             levelItems = newItems;
         }
 

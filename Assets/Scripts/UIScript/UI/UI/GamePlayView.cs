@@ -87,7 +87,7 @@ public class GamePlayView : BaseView
 
         //addHoldBtn.onClick.AddListener(AddHoldItemClick);
         //addBoxBtn.onClick.AddListener(AddBoxItemClick);
-        //settingBtn.onClick.AddListener(SettingButton);
+        settingBtn.onClick.AddListener(SettingButton);
         //onNewPlayer.AddListener(OnNewPlayer);
     }
     private void OnDisable()

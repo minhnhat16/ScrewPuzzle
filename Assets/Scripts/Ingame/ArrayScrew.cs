@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using PoolManager;
 using UnityEngine;
 using UnityEngine.Events;
 namespace Ingame
@@ -226,7 +227,24 @@ namespace Ingame
 
         internal void ClearAllScrewsOnArray()
         {
+            StartCoroutine(SetScrewInActive());
+        }
 
+        private IEnumerator SetScrewInActive()
+        {
+            foreach (var screw in screws)
+            {
+                
+                ScrewPool.Instance.Pool.ReturnToPool(screw);
+                yield return null;
+            }
+
+            foreach (var hold in holdScrews)
+            {
+                hold.ClearScrewOnHold();
+                yield return null;
+
+            }
         }
     }
 }

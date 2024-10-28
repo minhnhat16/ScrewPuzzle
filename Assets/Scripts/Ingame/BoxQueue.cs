@@ -303,5 +303,13 @@ namespace Ingame
                 StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
             }
         }
+
+        public void Reset()
+        {
+            foreach (var box in screwBoxes)
+            {
+                box.Reset();
+            }
+        }
     }
 }

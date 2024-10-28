@@ -40,7 +40,7 @@ public class SettingDialog : BaseDialog
     {
         SettingParam param = dialogParam as SettingParam;
         isMainScreen = param.isMainScreen;
-        below.gameObject.SetActive(!param.isMainScreen);
+//        below.gameObject.SetActive(!param.isMainScreen);
     }
     public override void OnStartShowDialog()
     {
@@ -123,13 +123,12 @@ public class SettingDialog : BaseDialog
     }
     public void CloseBtn()
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+       // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         //Debug.Log("Close button on " + this.dialogIndex);
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
             
         });
-
     }
     private void OnDropdownValueChanged(int index)
     {

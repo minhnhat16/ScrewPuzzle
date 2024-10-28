@@ -182,20 +182,13 @@ MonoBehaviour:
   goldParent: {fileID: 0}
   gemParent: {fileID: 0}
   gold_lb: {fileID: 0}
-  gem_lb: {fileID: 0}
-  magnet_lb: {fileID: 0}
-  bomb_lb: {fileID: 0}
-  curentCard_lb: {fileID: 0}
-  maxCard_lb: {fileID: 0}
   timeCouter: {fileID: 0}
   anchorTutorials: []
-  goldPos: {x: 0, y: 0, z: 0}
-  settingBtn: {fileID: 0}
+  settingBtn: {fileID: 2356599892372868593}
   addBoxBtn: {fileID: 0}
   addHoldBtn: {fileID: 0}
   clearOneScrewBtn: {fileID: 0}
   isNewPlayer: 0
-  expBar: {fileID: 0}
   magnetItemEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -222,7 +215,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3130964284712879792
 RectTransform:
   m_ObjectHideFlags: 0

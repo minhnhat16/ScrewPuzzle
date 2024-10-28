@@ -8,11 +8,11 @@ namespace Ingame
 
         public override void Start()
         {
-            Transform = transform.GetComponent<Transform>(); 
             // SetBoxColor(UnityEngine.Color.white);
         }
-        private void OnEnable()
+        public override void OnEnable()
         {
+            Transform = transform; 
             onScrewBoxFull.AddListener(BoxFullInvoker);
         }
 

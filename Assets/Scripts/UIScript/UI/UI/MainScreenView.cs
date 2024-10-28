@@ -20,10 +20,6 @@ public class MainScreenView : BaseView
         shopButton.onClick.AddListener(ShopButton);
         levelButton.onClick.AddListener(LevelButton);
     }
-
-   
-
-
     private void OnDisable()
     {
         /*playBtn.onClick.RemoveListener(OnPlayButton);*/

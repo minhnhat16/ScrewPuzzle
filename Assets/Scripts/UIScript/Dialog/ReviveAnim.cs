@@ -12,7 +12,7 @@ public class ReviveAnim : BaseDialogAnimation
     {
         this.callback = callback;
         //Debug.Log("RateHideAnim");
-        animator.Play("ReviveHideAnim");
+        animator.Play("ReviveHIdeAnim");
     }
 
     public override void ShowDialogAnimation(Action callback)

@@ -10,7 +10,7 @@ public class LoadSceneManager : MonoBehaviour
     [SerializeField]private Action callback;
     [Range(0f, 1f)]
     public float sampleWait = 0.5f;
-    private float timeWait = 5f;
+   [SerializeField] private float timeWait = 5f;
     public float progress;
 
 

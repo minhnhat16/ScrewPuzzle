@@ -28,11 +28,17 @@ namespace UIScript.Dialog
         }
         private void DenyWatch()
         {
-            IngameController.Instance.OnGameOver();
+            DialogManager.Instance.HideDialog(dialogIndex, () =>
+            {
+                Debug.Log($"Hide this dialog {dialogIndex}");
+                IngameController.Instance.OnGameOver();
+            });
         }
 
         private void AcceptedWatch()
         {
+            DialogManager.Instance.HideDialog(dialogIndex);
+            
             ZenSDK.instance.ShowVideoReward(onWatch =>
             {
                 if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);

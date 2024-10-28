@@ -1,19 +1,20 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Ingame
 {
     public class BoxOneHold : ScrewBox
     {
-        public override void Start()
-        {
-            Transform = transform.GetComponent<Transform>(); 
-            // SetBoxColor(UnityEngine.Color.white);
-        }
-        private void OnEnable()
+        public override void OnEnable()
         {
             onScrewBoxFull.AddListener(BoxFullInvoker);
-        }
 
+            Transform = transform;
+        }
+        public override void Start()
+        {
+            // SetBoxColor(UnityEngine.Color.white);
+        }
         private void OnDisable()
         {
             onScrewBoxFull.RemoveListener(BoxFullInvoker);

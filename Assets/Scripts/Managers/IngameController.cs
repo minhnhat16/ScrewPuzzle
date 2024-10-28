@@ -19,7 +19,7 @@ namespace Managers
         [SerializeField] private Player player;
         [SerializeField] private BoxQueue boxManager;
         [SerializeField] private ArrayScrew arrayScrew;
-
+        [SerializeField] private SpriteRenderer bgRender;
         [HideInInspector] public UnityEvent<int> onGoldChanged;
         [HideInInspector] public UnityEvent<int> onGemChanged;
         [HideInInspector] public UnityEvent<float> onExpChange;
@@ -68,6 +68,7 @@ namespace Managers
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
+            DialogManager.Instance.ShowDialog(DialogIndex.WinDialog);
         }
 
 
@@ -90,6 +91,11 @@ namespace Managers
             }
 
             ;
+        }
+
+        public void ActivateBG(bool isActive)
+        {
+            bgRender.gameObject.SetActive(isActive);
         }
 
         public void Init(Action callback)
@@ -167,38 +173,38 @@ namespace Managers
             bool arrayScrewInitDone = false;
             bool boxQueueInitDone = false;
             bool playerInitDone = false;
-            StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));
+            /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
             StartCoroutine(LoadPlayer(() => playerInitDone = true));
-            /*StartCoroutine(LevelManager.Instance.LoadLevel(Convert.ToInt32(playerLevel), () =>
-            {
-                Debug.Log("Load Level Done");
-            }));*/
-            StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
-            yield return new WaitUntil(() => arrayScrewInitDone && boxQueueInitDone && playerInitDone);
+            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
+            yield return new WaitUntil(() => boxQueueInitDone && playerInitDone);
+            ActivateBG(playerInitDone);
             callback?.Invoke();
         }
 
         protected IEnumerator LoadPlayer(Action callback)
         {
+            if (player != null) yield break;
             var playerGameObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Player"), transform);
             yield return new WaitUntil(() => playerGameObject != null);
-            if (playerGameObject != null) this.player = playerGameObject.GetComponent<Player>();
+            playerGameObject.TryGetComponent<Player>(out player);
             callback?.Invoke();
         }
 
         protected IEnumerator LoadBoxManager(Action callback)
         {
-            var boxManagerGameobject = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager"), transform);
-            yield return new WaitUntil(() => boxManagerGameobject != null);
-            if (boxManagerGameobject != null) this.boxManager = boxManagerGameobject.GetComponent<BoxQueue>();
+            if (boxManager != null) yield return null;
+            var boxManagerGO = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager"), transform);
+            yield return new WaitUntil(() => boxManagerGO != null);
+            boxManagerGO.TryGetComponent(out boxManager);
             callback?.Invoke();
         }
 
         protected IEnumerator LoadArrayScrew(Action callback)
         {
+            if (arrayScrew != null) yield return null;
             var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrews"), transform);
             yield return new WaitUntil(() => arrayScrew != null);
-            if (arrayScrewObj != null) this.arrayScrew = arrayScrewObj.GetComponent<ArrayScrew>();
+            arrayScrewObj.TryGetComponent<ArrayScrew>(out arrayScrew);
             callback?.Invoke();
         }
 
@@ -215,7 +221,7 @@ namespace Managers
 
         public void Reset()
         {
-            SceneManager.LoadScene("BootScene");
+            //SceneManager.LoadScene("BootScene");
         }
 
         public void GameEndInvoker(Action callback = null)
@@ -276,6 +282,13 @@ namespace Managers
 
         public void OnGameOver()
         {
+            // minuss 1 life heart
+            int currentLevel = LevelManager.Instance.currentLevelID;
+            Player.instance.CanClick = false;
+            LevelManager.Instance.Reset();
+            LevelManager.Instance.LoadLevel(currentLevel);
+            ArrayScrew.Instance.ClearAllScrewsOnArray();
+            BoxQueue.Instance.Reset();
         }
     }
 }
