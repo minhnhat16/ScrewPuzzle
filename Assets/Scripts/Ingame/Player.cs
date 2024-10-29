@@ -122,13 +122,13 @@ namespace Ingame
             }
             else
             {
-                Debug.LogWarning("No 2D object was hit by the raycast.");
+               // Debug.LogWarning("No 2D object was hit by the raycast.");
             }
         }
 
         private void ScrewClicked(Screw.Screw screw)
         {
-            Debug.LogWarning("Screw Clicked");
+           // Debug.LogWarning("Screw Clicked");
             screwQueue.Enqueue(screw);
 
             // Start processing the queue if it's not already processing

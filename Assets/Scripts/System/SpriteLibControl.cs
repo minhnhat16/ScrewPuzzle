@@ -35,7 +35,7 @@ namespace System
 
                 if (!spriteDict.TryAdd(sprite.name, sprite))
                 {
-                    Debug.LogWarning($"Start: Failed to add sprite with name '{sprite.name}' to dictionary.");
+                    //Debug.LogWarning($"Start: Failed to add sprite with name '{sprite.name}' to dictionary.");
                 }
             }
         }

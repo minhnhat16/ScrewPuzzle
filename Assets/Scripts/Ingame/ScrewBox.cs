@@ -162,7 +162,7 @@ namespace Ingame
         private void DoUpperBoxMove(Action<bool> callback)
         {
             Sequence mySequence = DOTween.Sequence();
-            renderUpper.gameObject.SetActive(true);
+            renderUpper.enabled = true;
             // Thêm các hành động di chuyển vào Sequence
             mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f) // Di chuyển theo trục Y
                     .SetEase(Ease.InCirc).OnComplete(TunOffScrews))

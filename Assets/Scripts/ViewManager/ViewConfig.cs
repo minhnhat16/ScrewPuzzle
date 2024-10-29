@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UIScript;
 
 public enum ViewIndex
 {
@@ -6,11 +7,11 @@ public enum ViewIndex
     LoadingView = 1,
     MainScreenView = 2,
     GamePlayView = 3,
-    CollectionView =4,
+    LevelView =4,
     DailyView = 5,
     WardrobeView = 6,   
     ShopView = 7,
-    LevelView = 8,
+    CollectionView = 8,
 }
 
 public class ViewParam { }
@@ -54,8 +55,10 @@ public class ViewConfig
         ViewIndex.MainScreenView,
         ViewIndex.GamePlayView,
         ViewIndex.DailyView,
-        ViewIndex.CollectionView,
-        ViewIndex.ShopView,
         ViewIndex.LevelView,
+
+        ViewIndex.ShopView,
+        ViewIndex.CollectionView,
+
     };
 }

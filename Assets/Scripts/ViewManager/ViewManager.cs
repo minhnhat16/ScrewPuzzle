@@ -36,7 +36,7 @@ public class ViewManager : MonoBehaviour
     }
     public void SwitchView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
-        Debug.Log("Switch View" + newView);
+        //Debug.Log("Switch View" + newView);
         if (currentView != null)
         {
             currentView.HideViewAnimation(() =>

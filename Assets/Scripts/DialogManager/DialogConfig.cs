@@ -60,6 +60,7 @@ public class SettingParam : DialogParam
 public class DailyParam : DialogParam
 {
     int currenReward;
+    public DailyData data;
     public DailyRewardConfig config;
 }
 

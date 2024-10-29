@@ -9,19 +9,19 @@ public class DailyClaimBtn : MonoBehaviour
     public Button claim;
     public Button ads;
     private bool isClaimed;
-    [HideInInspector] UnityEvent<bool> onClickClaim = new();
-    [HideInInspector] UnityEvent<bool> onClickAds = new();
+    [HideInInspector] private UnityEvent<bool> _onClickClaim = new();
+    [HideInInspector]  private UnityEvent<bool> _onClickAds = new();
 
     private void OnEnable()
     {
         claim.onClick?.AddListener(ClaimBtn);
-        ads.onClick?.AddListener(AdsBtn);
+        /*ads.onClick?.AddListener(AdsBtn);*/
 
     }
     private void OnDisable()
     {
         claim.onClick.RemoveListener(ClaimBtn);
-        ads.onClick.RemoveListener(AdsBtn);
+        /*ads.onClick.RemoveListener(AdsBtn);*/
     }
     public void CheckButtonType()
     {
@@ -37,18 +37,18 @@ public class DailyClaimBtn : MonoBehaviour
     public void SetButtonEvent(UnityEvent<bool> claimEvent, UnityEvent<bool> adsEvent) 
      {
         //Debug.Log($"sett btn event {claimEvent} +{adsEvent} ");
-        this.onClickClaim = claimEvent;
-        this.onClickAds = adsEvent;
+        this._onClickClaim = claimEvent;
+        this._onClickAds = adsEvent;
     }
 
     public void ClaimBtn()
     {
         Debug.Log("Claim reward");
-        onClickClaim?.Invoke(true);
+        _onClickClaim?.Invoke(true);
     }
     public void AdsBtn()
     {
         //Debug.Log("Ads Btn");
-        onClickAds?.Invoke(true);
+        _onClickAds?.Invoke(true);
     }
 }

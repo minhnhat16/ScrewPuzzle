@@ -295,6 +295,12 @@ namespace System.DataBase
                 callback?.Invoke();
             });
         }
+
+        public DailyData GetDailyData()
+        {
+            var dailyData = dataModel.ReadData<DailyData>(DataPath.DAILYDATA);
+            return dailyData;
+        }
         public List<DailyItemData> GetAllDailyData()
         {
             var dailyData = dataModel.ReadData<List<DailyItemData>>(DataPath.DAILYLIST);

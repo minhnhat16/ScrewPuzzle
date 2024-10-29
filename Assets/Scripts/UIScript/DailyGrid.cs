@@ -48,6 +48,7 @@ public class DailyGrid : MonoBehaviour
 
     public void FetchDailyData(DailyRewardConfig config)
     {
+        Debug.Log("Fecth daily data");
         DailyItem curItem;
        for (int i = 0; i < 7; i++)
         {

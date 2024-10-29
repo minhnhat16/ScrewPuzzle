@@ -63,7 +63,7 @@ namespace UIScript.UI.UI
                 shopItem.IconImage.sprite = spriteImg;
                 shopItem.IconImage.SetNativeSize();
                 shopItem.BuyButton.onClick.AddListener(()=>OnShopItemPurchase(shopItem)); 
-                Debug.LogError($"shop item config init {i}  and shop item {shopItem ==null}");
+                //Debug.LogError($"shop item config init {i}  and shop item {shopItem ==null}");
                 shopItems.Add(shopItem);
             }
         }

@@ -61,8 +61,25 @@ namespace Ingame
 
         public void LoadBoxConfigRecord(BoxConfig boxConfig)
         {
+            this.boxConfig = boxConfig;
+            Debug.Log("Load box config record" + boxConfig == null);
             var allRecord = boxConfig.GetAllRecord();
             configRecords.AddRange(allRecord);
+        }
+
+        public void ClearConfigRecords()
+        {
+            configRecords.Clear();
+        }
+
+        public void ClearCurrentBoxes()
+        {
+            foreach (var box in screwBoxes.ToList())
+            {
+                box.SetBoxActive(false);
+                screwBoxes.Remove(box);
+            }
+            boxesStack.Clear();
         }
         private void InitAndShuffleColor()
         {   

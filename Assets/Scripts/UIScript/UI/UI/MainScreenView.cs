@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.DataBase;
+using UIScript;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,7 @@ public class MainScreenView : BaseView
         dailyReward.onClick.AddListener(OnDailyReward);*/
         shopButton.onClick.AddListener(ShopButton);
         levelButton.onClick.AddListener(LevelButton);
+        dailyReward.onClick.AddListener(OnDailyReward);
     }
     private void OnDisable()
     {
@@ -47,8 +49,11 @@ public class MainScreenView : BaseView
     private void OnDailyReward()
     {
         SetLevelPanelIs(false);
-        DailyParam param = new();
-        param.config = ConfigFileManager.Instance.DailyRewardConfig;
+        DailyParam param = new()
+        {
+            config = ConfigFileManager.Instance.DailyRewardConfig,
+            data = DataAPIController.instance.GetDailyData(),
+        };
         DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog,param, null);
     }
 
@@ -64,11 +69,14 @@ public class MainScreenView : BaseView
     {
 
     }
-    public void DailyRewardButton()
+    /*public void DailyRewardButton()
     {
         //Debug.Log("Daily Reward Button");
+        DailyParam param = new DailyParam();
+        param.config = ConfigFileManager.Instance.DailyRewardConfig;
+        param.data = DataAPIController.instance.GetDailyData();
         DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog);
-    }
+    }*/
     public void SpinView()
     {
         ///Debug.Log("View SPin Button");
@@ -99,7 +107,12 @@ public class MainScreenView : BaseView
             var currentLevel= levelData.Find((data)=>data.levelID == id);
             bool isComplete = currentLevel is { isCompleted: true };
             // Create new LevelItem and add to the list
-            LevelItem newItem = new(id, isComplete, false);
+            LevelItem newItem = new()
+            {
+                IDLevel = id,
+                IsCompleted = isComplete,
+                IsHardLevel = false
+            };
             listLevel.Add(newItem);
         }
 

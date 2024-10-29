@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c02705b6b77868a4dacd6d3b2e9517d1, type: 3}
+  m_Name: DailyRewardConfig
+  m_EditorClassIdentifier: 
+  records:
+  - id: 0
+    spriteName: Coin_day 1
+    type: 1
+    itemName: 0
+    totalItem: 1000
+  - id: 1
+    spriteName: Coin_day 2
+    type: 1
+    itemName: 1
+    totalItem: 1250
+  - id: 2
+    spriteName: Coin_day 3
+    type: 1
+    itemName: 2
+    totalItem: 1563
+  - id: 3
+    spriteName: Coin_day 4
+    type: 1
+    itemName: 3
+    totalItem: 1953
+  - id: 4
+    spriteName: 1
+    type: 1
+    itemName: 5
+    totalItem: 2441
+  - id: 5
+    spriteName: Coin_day 5
+    type: 0
+    itemName: 6
+    totalItem: 3052
+  - id: 6
+    spriteName: Coin_day 6
+    type: 1
+    itemName: 6
+    totalItem: 10
+  - id: 7
+    spriteName: Coin_day 7
+    type: 1
+    itemName: 2
+    totalItem: 10

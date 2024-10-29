@@ -27,6 +27,7 @@ public class DailyItem : MonoBehaviour
     private void OnEnable()
     {
         onRewardRemain.AddListener(DailyRemain);
+        onItemClaim.AddListener(ItemClaim);
     }
 
     private void OnDisable()
@@ -104,22 +105,21 @@ public class DailyItem : MonoBehaviour
     }
     public void SetCanBeClaim()
     {
-        CanBeClaimed.SetActive(true);
+        //CanBeClaimed.SetActive(true);
         Claimed.SetActive(false);
-        CanNotClaimed.SetActive(false);
-        tickImg.gameObject.SetActive(false);
+        //CanNotClaimed.SetActive(false);
+        //tickImg.gameObject.SetActive(false);
 
     }
     public void SetCantClaim()
     {
-        CanBeClaimed.SetActive(false);
+        //CanBeClaimed.SetActive(false);
         Claimed.SetActive(false);
-        CanNotClaimed.SetActive(true);
-        tickImg.gameObject.SetActive(false);
+        //CanNotClaimed.SetActive(true);
+        //tickImg.gameObject.SetActive(false);
     }
     public void SwitchItemType(DailyReward item)
     {
-
         switch (item)
         {
             case DailyReward.GoldS:

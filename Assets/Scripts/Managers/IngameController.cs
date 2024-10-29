@@ -95,7 +95,8 @@ namespace Managers
 
         public void ActivateBG(bool isActive)
         {
-            bgRender.gameObject.SetActive(isActive);
+            Debug.Log("ActiveBG " +isActive);
+            bgRender.enabled = isActive ;
         }
 
         public void Init(Action callback)
@@ -174,10 +175,14 @@ namespace Managers
             bool boxQueueInitDone = false;
             bool playerInitDone = false;
             /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
-            StartCoroutine(LoadPlayer(() => playerInitDone = true));
+            StartCoroutine(LoadPlayer(() =>
+            {
+                playerInitDone = true;
+                ActivateBG(playerInitDone);
+
+            }));
             //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
             yield return new WaitUntil(() => boxQueueInitDone && playerInitDone);
-            ActivateBG(playerInitDone);
             callback?.Invoke();
         }
 
@@ -286,9 +291,9 @@ namespace Managers
             int currentLevel = LevelManager.Instance.currentLevelID;
             Player.instance.CanClick = false;
             LevelManager.Instance.Reset();
-            LevelManager.Instance.LoadLevel(currentLevel);
             ArrayScrew.Instance.ClearAllScrewsOnArray();
             BoxQueue.Instance.Reset();
+            LevelManager.Instance.LoadLevel(currentLevel);
         }
     }
 }
