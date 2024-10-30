@@ -1,3 +1,5 @@
+using System;
+using UIScript.UI.UI;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -6,16 +8,20 @@ public class RateDialog : BaseDialog
 {
     [SerializeField] Button rateBtn;
     [SerializeField] Button remindBtn;
-
+    [SerializeField] private Button closeBtn;
     [HideInInspector]
     public UnityEvent<bool> rateEvent = new UnityEvent<bool>();
 
+    public void OnEnable()
+    {
+        closeBtn.onClick.AddListener(CloseButton);
+    }
     public void CloseButton()
     {
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
             //Debug.Log("CloseButton");
-            DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
+          //  DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
         });
     }
     public override void OnStartHideDialog()

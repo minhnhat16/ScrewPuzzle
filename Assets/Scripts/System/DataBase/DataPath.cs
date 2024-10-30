@@ -6,6 +6,7 @@ public class DataPath
 {
     public const string NAME = "userInfo/name";
     public const string ALLLEVEL = "levelInfo/levelData";
+    public const string CURRENTPLAYERLEVEL = "levelInfo/currentLevel";
     public const string EXPCURRENT = "levelInfo/expLevel";
     public const string ITEM = "itemInventory";
     public const string MAGNET = "itemInventory/magnetItem";

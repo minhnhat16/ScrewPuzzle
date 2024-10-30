@@ -133,7 +133,10 @@ namespace UIScript
             Debug.Log("Handle logic for level: " + id);
             LevelManager.Instance.LoadLevel(id);
         }
-    
-    
+
+        private void OnDisable()
+        {
+            button.onClick.RemoveAllListeners();
+        }
     }
 }

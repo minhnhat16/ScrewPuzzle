@@ -113,11 +113,19 @@ public class LevelManager : MonoBehaviour
     public void LoadLevel(int levelID, Action callback = null)
     {
         Debug.LogWarning("Start loading level ");
+       
+        LoadSceneManager.instance.LoadSceneByName("InGame", () =>
+        {
+            Debug.LogWarning("Load scence done  ");
 
-        StartCoroutine(LoadGameObjectFromLevel(levelID));
-        IngameController.Instance.Init(() => { StartCoroutine(LoadGameObjectFromLevel(levelID)); });
-        LoadSceneManager.instance.LoadSceneByName("InGame",
-            () => { ViewManager.Instance.SwitchView(ViewIndex.GamePlayView); });
+            IngameController.Instance.Init(() =>
+                {
+                    StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
+                    {
+                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView);
+                    })) ;
+                });
+        });
     }
 
     public Dictionary<int, int> GetScrewCountByColor()
@@ -158,7 +166,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public IEnumerator LoadGameObjectFromLevel(int levelId)
+    public IEnumerator LoadGameObjectFromLevel(int levelId,Action callback = null)
     {
         currentLevelID = levelId;
         //spawn level obj
@@ -273,7 +281,8 @@ public class LevelManager : MonoBehaviour
             part.Body.bodyType = RigidbodyType2D.Dynamic;
             yield return null;
         }
-
+        yield return null;
+        callback?.Invoke();
         Debug.Log($"Level data with ID {levelId} loaded.");
     }
 

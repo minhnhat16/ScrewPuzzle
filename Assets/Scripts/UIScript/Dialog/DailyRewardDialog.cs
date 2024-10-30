@@ -51,6 +51,7 @@ namespace UIScript.Dialog
             bool isCurrentAvailable = dailyGrid.currentDaily != null;
             //dailyGrid.Content.gameObject.SetActive(true);
             ClickDailyItem(isCurrentAvailable);
+            claimBtn.SetButtonEvent(onClickClaim,onClickAds);
             Profiler.EndSample();
 
         }

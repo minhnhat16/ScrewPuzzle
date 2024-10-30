@@ -27,7 +27,8 @@ namespace System.DataBase
             Debug.Log("==========> BOOT PROCESS SUCCESS <==========");
         }
 
-        #region Get Data
+
+        #region Get DataS
         /*public int GetPlayerLevel()
         {
             //Debug.Log("DATA === LEVEL");
@@ -40,6 +41,11 @@ namespace System.DataBase
         public void SetPlayerNewAtFalse(Action callback)
         {
             dataModel.UpdateData(DataPath.NEWPLAYER, false, () => callback?.Invoke());
+        }
+
+        public int GetPlayerLevel()
+        {
+            return dataModel.ReadData<int>(DataPath.CURRENTPLAYERLEVEL);
         }
         #region CURRRENCY
         public CurrencyWallet GetWalletByType(Currency currency)
@@ -351,6 +357,12 @@ namespace System.DataBase
         {
             var listLevelData =  dataModel.ReadData<List<LevelData>>(DataPath.ALLLEVEL);
             return listLevelData ?? new List<LevelData>();
+        }
+        public void SaveNewLevelData(LevelData data,Action callback = null)
+        {
+            var levelsData = GetAllLevelData();
+            levelsData.Add(data);
+            dataModel.UpdateData(DataPath.ALLLEVEL, levelsData, callback);
         }
     }
 }

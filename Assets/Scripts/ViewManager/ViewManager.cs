@@ -19,7 +19,7 @@ public class ViewManager : MonoBehaviour
 
     IEnumerator Start() 
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.1f);
         foreach (ViewIndex viewIndex in ViewConfig.viewArray)
         {
             string viewName = viewIndex.ToString();

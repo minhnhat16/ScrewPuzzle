@@ -182,13 +182,17 @@ namespace Managers
 
             }));
             //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
-            yield return new WaitUntil(() => boxQueueInitDone && playerInitDone);
+            yield return new WaitUntil(() => playerInitDone);
             callback?.Invoke();
         }
 
         protected IEnumerator LoadPlayer(Action callback)
         {
-            if (player != null) yield break;
+            if (player != null)
+            {
+                callback?.Invoke();
+                yield break;
+            }
             var playerGameObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Player"), transform);
             yield return new WaitUntil(() => playerGameObject != null);
             playerGameObject.TryGetComponent<Player>(out player);

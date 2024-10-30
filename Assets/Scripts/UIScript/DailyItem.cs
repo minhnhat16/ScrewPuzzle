@@ -35,6 +35,7 @@ public class DailyItem : MonoBehaviour
         onItemClaim.RemoveAllListeners();
         //onRewardRemain.RemoveListener(DailyRemain);
     }
+
     private void Start()
     {
         //onRewardRemain.AddListener(DailyRemain);
@@ -48,27 +49,32 @@ public class DailyItem : MonoBehaviour
         SetItemImg(spriteName);
         SetItemNameType(itemName);
     }
+
     public void SetItemImg(string spriteName)
     {
         //Debug.Log(itemName);
         itemImg.sprite = SpriteLibControl.Instance.GetSpriteByName(spriteName);
     }
+
     public void SetItemNameType(DailyReward itemName)
     {
         this.itemName = itemName;
     }
+
     public void SetDayLB(int day)
     {
         //Debug.Log($"Set day lb {day}");
         this.day = day;
         day_lb.text = $"Day {day}";
     }
+
     public void SetAmountLb(int amount)
     {
         //Debug.Log($"Set amount lb {amount}");
         intAmount = amount;
         Amount_lb.text = amount.ToString();
     }
+
     public virtual void SwitchType(IEDailyType type)
     {
         currentType = type;
@@ -95,22 +101,23 @@ public class DailyItem : MonoBehaviour
                 break;
         }
     }
+
     public void SetClaimed()
     {
-        CanBeClaimed.SetActive(false);
+//        CanBeClaimed.SetActive(fdkralse);
         Claimed.SetActive(true);
-        CanNotClaimed.SetActive(false);
+        // CanNotClaimed.SetActive(false);
         tickImg.gameObject.SetActive(true);
-
     }
+
     public void SetCanBeClaim()
     {
         //CanBeClaimed.SetActive(true);
         Claimed.SetActive(false);
         //CanNotClaimed.SetActive(false);
         //tickImg.gameObject.SetActive(false);
-
     }
+
     public void SetCantClaim()
     {
         //CanBeClaimed.SetActive(false);
@@ -118,6 +125,7 @@ public class DailyItem : MonoBehaviour
         //CanNotClaimed.SetActive(true);
         //tickImg.gameObject.SetActive(false);
     }
+
     public void SwitchItemType(DailyReward item)
     {
         switch (item)
@@ -165,6 +173,7 @@ public class DailyItem : MonoBehaviour
                 break;
         }
     }
+
     public void ItemClaim(bool isClaim)
     {
         if (isClaim)
@@ -176,6 +185,7 @@ public class DailyItem : MonoBehaviour
             SwitchItemType(itemName);
         }
     }
+
     public void CheckItemAvailable()
     {
         //Debug.Log("On Click Daily Item");
@@ -194,17 +204,14 @@ public class DailyItem : MonoBehaviour
 
     public void DailyRemain(bool isRemain)
     {
-
         if (isRemain && gameObject.activeInHierarchy)
         {
             Debug.LogWarning("daily remain and playing anim");
         }
         else
         {
-
             Debug.LogWarning("daily not  remain either playing anim");
         }
-
     }
 
     public virtual void OnClickDailyItem()
