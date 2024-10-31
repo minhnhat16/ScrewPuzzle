@@ -101,7 +101,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
 
         allLevels.Add(currentLoadedLevel);
         allLevels[this.currentLoadedLevel] = newLevelData;
-        CreateBoxConfig(newLevelData.levelId,newLevelData);
+        newLevelData.boxConfig  = CreateBoxConfig(newLevelData.levelId,newLevelData);
         AssetDatabase.CreateAsset(newLevelData, assetPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh(); // Refresh the AssetDatabase to see the changes
@@ -252,7 +252,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         return boxRecords;
     }
 
-    public void CreateBoxConfig(int idLevel, Level.Level level)
+    public BoxConfig CreateBoxConfig(int idLevel, Level.Level level)
     {
         // Create a new instance of the BoxConfig asset
         BoxConfig newConfig = ScriptableObject.CreateInstance<BoxConfig>();
@@ -289,6 +289,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         EditorUtility.FocusProjectWindow();
         Selection.activeObject = newConfig;
 
+        return newConfig;
         Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
     }
 

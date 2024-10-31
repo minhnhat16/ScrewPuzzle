@@ -185,9 +185,9 @@ MonoBehaviour:
   timeCouter: {fileID: 0}
   anchorTutorials: []
   settingBtn: {fileID: 2356599892372868593}
-  addBoxBtn: {fileID: 0}
-  addHoldBtn: {fileID: 0}
-  clearOneScrewBtn: {fileID: 0}
+  addBoxBtn: {fileID: 245049636290343181}
+  addHoldBtn: {fileID: 3366624737606681490}
+  clearOneScrewBtn: {fileID: 5040419919795980799}
   isNewPlayer: 0
   magnetItemEvent:
     m_PersistentCalls:
@@ -876,7 +876,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 73605b9247fb486499962901991e935e, type: 3}
     - target: {fileID: 6342457446750209258, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_Name
-      value: BtnItem (2)
+      value: ClearOnScrew
       objectReference: {fileID: 0}
     - target: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_Pivot.x
@@ -964,6 +964,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+--- !u!114 &5040419919795980799 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+  m_PrefabInstance: {fileID: 4075964754769617647}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7143192487445175261 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
@@ -986,7 +997,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 6481060c2d2317d4fa803c0fca889a06, type: 3}
     - target: {fileID: 6342457446750209258, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_Name
-      value: BtnItem (1)
+      value: AddHoldBtn
       objectReference: {fileID: 0}
     - target: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_Pivot.x
@@ -1079,6 +1090,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
   m_PrefabInstance: {fileID: 6042476324711753858}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3366624737606681490 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+  m_PrefabInstance: {fileID: 6042476324711753858}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &9080664463649839645
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1092,7 +1114,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 874a6de8ae008264ca8c8c59138248b5, type: 3}
     - target: {fileID: 6342457446750209258, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_Name
-      value: BtnItem
+      value: AddBoxBtn
       objectReference: {fileID: 0}
     - target: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_Pivot.x
@@ -1180,6 +1202,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+--- !u!114 &245049636290343181 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+  m_PrefabInstance: {fileID: 9080664463649839645}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &2716809489586725679 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}

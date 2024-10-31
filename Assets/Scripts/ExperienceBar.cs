@@ -123,13 +123,13 @@ public class ExperienceBar : MonoBehaviour
 
         lv_lb.text = level.ToString();
     }
-    public int LevelRecordCheck(CardType type)
+  /*  public int LevelRecordCheck(CardType type)
     {
         if (type == CardType.Default) return currentLevel;
         int level;
         level = Mathf.Abs((int)type*10 - currentLevel);
         return level;
-    }
+    }*/
     //HACK: (DONE) CHECK CONDITIONAL FOR LEVEL UP BETWEEN THIS AND INGAMECONTROLLER
     private void ResetFill()
     {

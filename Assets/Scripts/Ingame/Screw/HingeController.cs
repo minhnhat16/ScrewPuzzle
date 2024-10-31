@@ -71,7 +71,30 @@ namespace Ingame.Screw
             for (int i = 0; i < hingeJoint2D.Count; i++)
             {
                 hingeJoint2D[i].connectedBody = null;   
+                var hinge = hingeJoint2D[i];
+                var crBodyConnect = hinge.connectedBody;
+                hinge.connectedBody = null;
+                ClearBody(crBodyConnect);
+                Destroy(hinge.gameObject);
             }
+            hingeJoint2D.Clear();
+
+        }
+        public virtual void ClearBody(Rigidbody2D body)
+        {
+            bodyConnect.Remove(body);
+        }
+        public virtual void ClearBody()
+        {
+            /*foreach(var body in bodyConnect)
+            {
+                bod
+            }*/
+            bodyConnect.Clear();
+        }
+        internal void Reset()
+        {
+            ClearBody();
         }
     }
 }

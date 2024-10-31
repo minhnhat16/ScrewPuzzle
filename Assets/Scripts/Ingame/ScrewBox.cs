@@ -99,9 +99,14 @@ namespace Ingame
         {
             _transform.localScale = Vector3.one;
             color = ColorEnum.Empty;
-            var upperGameObj = render.gameObject;
+            var upperGameObj =renderUpper.gameObject;
             upperGameObj.transform.localPosition = 10 * Vector3.up;
-            upperGameObj.SetActive(false);
+            renderUpper.enabled = false;
+
+            var renderGObj= render.gameObject;
+
+            renderGObj.SetActive(true);
+            renderGObj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             foreach (var h in holdScrews)   
             {
                 
@@ -163,6 +168,7 @@ namespace Ingame
         {
             Sequence mySequence = DOTween.Sequence();
             renderUpper.enabled = true;
+           
             // Thêm các hành động di chuyển vào Sequence
             mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f) // Di chuyển theo trục Y
                     .SetEase(Ease.InCirc).OnComplete(TunOffScrews))

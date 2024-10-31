@@ -33,3 +33,11 @@ public class LableTab : MonoBehaviour
         //Debug.Log($"on button unchoose {type}");
     }
 }
+
+public enum Lable
+{
+    Home,
+    Collection,
+    Rate,
+    Spin,
+}

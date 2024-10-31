@@ -126,6 +126,7 @@ namespace Managers
 
         private void ItemIvoked(ItemType item)
         {
+            itemJustInvoke = true;
             StartCoroutine(ItemCoroutine(item));
         }
 
@@ -138,7 +139,10 @@ namespace Managers
             switch (itemType)
             {
                 case ItemType.AddHold:
-                    AddHold(null);
+                    AddHold(() =>
+                    {
+
+                    });
                     break;
                 case ItemType.AddBox:
                     AddBox(null);

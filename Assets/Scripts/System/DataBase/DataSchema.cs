@@ -35,8 +35,7 @@ public class LevelInfo
 [Serializable]
 public class ItemInvent
 {
-    public ItemData bombItem;
-    public ItemData magnetItem;
+    public Dictionary<string, ItemData> itemDict;
 }
 [Serializable]
 public class DailyItemData

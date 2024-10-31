@@ -196,13 +196,13 @@ namespace System.DataBase
         }
         public ItemData GetItemData(ItemType type)
         {
-            string subPath = SubPathForItem(type);
-            if(subPath !=null)
-            {
-                ItemData itemData = dataModel.ReadData<ItemData>(subPath);
-                return itemData;
-            }
-            return null;
+            var itemData = dataModel.ReadDictionary<ItemData>(DataPath.ITEMDICT,type.ToString());
+            return itemData ??null;
+        }
+        public int GetItemDataTotal(ItemType type)
+        {
+            var itemData = dataModel.ReadDictionary<int>(DataPath.ITEMDICT, type.ToString());
+            return itemData;
         }
         public int GetItemTotal(ItemType type)
         {

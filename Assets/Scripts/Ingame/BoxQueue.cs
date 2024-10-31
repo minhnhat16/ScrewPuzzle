@@ -9,6 +9,7 @@ using Managers;
 using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Ingame
 {
@@ -41,7 +42,12 @@ namespace Ingame
 
         private void Start()
         {
-            onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
+            var currentScene = SceneManager.GetActiveScene();
+          
+            if (currentScene.name.CompareTo("LevelMaker") != 0)
+            {
+                onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
+            }
         }
 
         public void Init()

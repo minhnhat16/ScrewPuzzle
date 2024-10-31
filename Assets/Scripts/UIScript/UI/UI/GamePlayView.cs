@@ -85,15 +85,15 @@ public class GamePlayView : BaseView
 
         //});
 
-        //addHoldBtn.onClick.AddListener(AddHoldItemClick);
-        //addBoxBtn.onClick.AddListener(AddBoxItemClick);
+        addHoldBtn.onClick.AddListener(AddHoldItemClick);
+        addBoxBtn.onClick.AddListener(AddBoxItemClick);
         settingBtn.onClick.AddListener(SettingButton);
         //onNewPlayer.AddListener(OnNewPlayer);
     }
     private void OnDisable()
     {
-        //addHoldBtn.onClick.RemoveListener(AddHoldItemClick);
-        //addBoxBtn.onClick.RemoveListener(AddBoxItemClick);
+        addHoldBtn.onClick.RemoveListener(AddHoldItemClick);
+        addBoxBtn.onClick.RemoveListener(AddBoxItemClick);
         //settingBtn.onClick.RemoveListener(SettingButton);
         //onNewPlayer.RemoveListener(OnNewPlayer);
     }
@@ -181,8 +181,8 @@ public class GamePlayView : BaseView
         Debug.LogWarning("Button Couroutine invoke");
         button.interactable = true;
     }
- 
-    /*
+
+
     public void AddHoldItemClick()
     {
         // Disable the button to avoid multiple clicks
@@ -194,41 +194,7 @@ public class GamePlayView : BaseView
         // If the total amount of the item is 0 or less, show confirmation dialog
         if (itemData.total <= 0)
         {
-            ItemConfirmParam param = new ItemConfirmParam
-            {
-                type =itemType
-            };
-
-            // Show the item confirmation dialog
-            DialogManager.Instance.ShowDialog(DialogIndex.AddItemDialog, param);
-
-            // Invoke bombItemEvent with false indicating no item available
-            bombItemEvent?.Invoke(false);
-        }
-        else
-        {
-            // If there are available items, invoke the item event
-            IngameController.Instance.onItemInvoke?.Invoke(itemType);
-
-            // Re-enable the button so it's clickable again
-            addHoldBtn.interactable = true;
-        }
-    }
-    */
-
-    /*
-    public void AddBoxItemClick()
-    {
-        // Disable the button to avoid multiple clicks
-        addBoxBtn.interactable = false;
-        var itemType = ItemType.AddBox;
-        // Get the item data for the 'AddHold' item type
-        var itemData = DataAPIController.instance.GetItemData(itemType);
-
-        // If the total amount of the item is 0 or less, show confirmation dialog
-        if (itemData.total <= 0)
-        {
-            AddItemDialogParam param = new AddItemDialogParam()
+            AddItemDialogParam param = new AddItemDialogParam
             {
                 ItemType = itemType
             };
@@ -248,6 +214,41 @@ public class GamePlayView : BaseView
             addHoldBtn.interactable = true;
         }
     }
+
+
+
+    public void AddBoxItemClick()
+    {
+        // Disable the button to avoid multiple clicks
+        addBoxBtn.interactable = false;
+        var itemType = ItemType.AddBox;
+        // Get the item data for the 'AddHold' item type
+        var itemData = DataAPIController.instance.GetItemData(itemType);
+
+        // If the total amount of the item is 0 or less, show confirmation dialog
+        if (itemData.total <= 0)
+        {
+            Debug.Log("Item total < 0");
+            AddItemDialogParam param = new AddItemDialogParam()
+            {
+                ItemType = itemType
+            };
+
+            // Show the item confirmation dialog
+            DialogManager.Instance.ShowDialog(DialogIndex.AddItemDialog, param);
+
+            // Invoke bombItemEvent with false indicating no item available
+            bombItemEvent?.Invoke(false);
+        }
+        else
+        {
+            Debug.Log("Item total > 0");
+            addBoxBtn.interactable = true;
+            // If there are available items, invoke the item event
+            IngameController.Instance.onItemInvoke?.Invoke(itemType);
+            // Re-enable the button so it's clickable again
+        }
+    }
     public void OneScrewClearClick()
     {
         // Disable the button to avoid multiple clicks
@@ -259,9 +260,9 @@ public class GamePlayView : BaseView
         // If the total amount of the item is 0 or less, show confirmation dialog
         if (itemData.total <= 0)
         {
-            ItemConfirmParam param = new ItemConfirmParam
+            AddItemDialogParam param = new AddItemDialogParam
             {
-                type = itemType
+               ItemType = itemType
             };
 
             // Show the item confirmation dialog
@@ -276,10 +277,10 @@ public class GamePlayView : BaseView
             IngameController.Instance.onItemInvoke?.Invoke(itemType);
 
             // Re-enable the button so it's clickable again
-            addHoldBtn.interactable = true;
+            clearOneScrewBtn.interactable = true;
         }
     }
-    */
+
 
     public void PauseButton()
     {

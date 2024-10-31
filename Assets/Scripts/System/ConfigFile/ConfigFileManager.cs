@@ -18,7 +18,6 @@ public class ConfigFileManager : MonoBehaviour
 
 
     [SerializeField] private ColorConfig colorConfig;
-    [SerializeField] private SlotConfig slotConfig;
     [SerializeField] private ItemConfig itemConfig;
     [SerializeField] private DailyRewardConfig dailyConfig;
     [SerializeField] private SpinConfig spinConfig;
@@ -39,11 +38,6 @@ public class ConfigFileManager : MonoBehaviour
     public ColorConfig ColorConfig
     {
         get => colorConfig;
-    }
-
-    public SlotConfig SlotConfig
-    {
-        get => slotConfig;
     }
 
     public ItemConfig ItemConfig

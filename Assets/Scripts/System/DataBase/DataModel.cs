@@ -243,22 +243,33 @@ public class DataModel : MonoBehaviour
         inf.isNewPlayer = true;
         userData.userInfo = inf;
 
-        
+
         ///item
         userData.itemInventory = new();
+        Dictionary<string, ItemData> newItemDict = new();
+
         ItemData newAddHoldInvent = new();
         newAddHoldInvent.type = ItemType.AddHold;
         newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
+        var key = newAddHoldInvent.type.ToString();
+        newItemDict.Add(key, newAddHoldInvent);
+
         ItemData newAddBoxInvent = new();
         newAddBoxInvent.type = ItemType.AddBox;
         newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
-        ItemData newClearOnScrewInvent = new();
+        key = newAddBoxInvent.type.ToString();
+        newItemDict.Add(key, newAddBoxInvent);
 
-        newClearOnScrewInvent.type = ItemType.AddBox;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
-        userData.itemInventory.magnetItem = newClearOnScrewInvent;
-       //leve
-       LevelInfo levelInf = new();
+        ItemData newClearOnScrewInvent = new();
+        newClearOnScrewInvent.type = ItemType.ClearOneScrew;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.ClearOneScrew.ToString(), 5);
+        key = newClearOnScrewInvent.type.ToString();
+        newItemDict.Add(key, newClearOnScrewInvent);
+
+        userData.itemInventory.itemDict = new();
+        userData.itemInventory.itemDict = newItemDict;
+        //leve
+        LevelInfo levelInf = new();
        levelInf.expLevel = 0.0f;
        LevelData dataLevelOne = new();
        dataLevelOne.levelID = 1;
@@ -318,18 +329,29 @@ public class DataModel : MonoBehaviour
 
         ///item
         userData.itemInventory = new();
+        Dictionary<string, ItemData> newItemDict = new();
+
         ItemData newAddHoldInvent = new();
         newAddHoldInvent.type = ItemType.AddHold;
         newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
+        var key = newAddHoldInvent.type.ToString();
+        newItemDict.Add(key, newAddHoldInvent);
+
         ItemData newAddBoxInvent = new();
         newAddBoxInvent.type = ItemType.AddBox;
         newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
-        ItemData newClearOnScrewInvent = new();
+        key = newAddBoxInvent.type.ToString();
+        newItemDict.Add(key, newAddBoxInvent);
 
-        newClearOnScrewInvent.type = ItemType.AddBox;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
-        userData.itemInventory.magnetItem = newClearOnScrewInvent;
-        
+        ItemData newClearOnScrewInvent = new();
+        newClearOnScrewInvent.type = ItemType.ClearOneScrew;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.ClearOneScrew.ToString(), 5);
+        key = newClearOnScrewInvent.type.ToString();
+        newItemDict.Add(key, newClearOnScrewInvent);
+
+        userData.itemInventory.itemDict = new();
+        userData.itemInventory.itemDict = newItemDict;
+
         //player level
         LevelInfo levelInf = new();
         levelInf.expLevel = 0.0f;

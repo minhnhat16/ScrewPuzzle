@@ -288,12 +288,16 @@ public class LevelManager : MonoBehaviour
 
     public void Reset()
     {
-        LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
+        if(transform.childCount > 0)
+        {
+            LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
+            layerManager.Reset();
+            ScrewManager.Reset();
+        }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
-        layerManager.Reset();
-        ScrewManager.Reset();
         LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
         currentLevelObject = null;
+
     }
 }

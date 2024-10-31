@@ -79,7 +79,14 @@ public class ReviveDialogParam : DialogParam
     public bool isRevive;
     public bool isHasAds;
 }
-
+public class WinParam : DialogParam
+{
+    public int level;
+    public int gold;
+    public int reward;
+    public float score;
+    public ItemType typeReward;
+}
 public class AddItemDialogParam : DialogParam
 {
     public ItemType ItemType;

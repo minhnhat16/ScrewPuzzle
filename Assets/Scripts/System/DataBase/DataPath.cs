@@ -9,8 +9,7 @@ public class DataPath
     public const string CURRENTPLAYERLEVEL = "levelInfo/currentLevel";
     public const string EXPCURRENT = "levelInfo/expLevel";
     public const string ITEM = "itemInventory";
-    public const string MAGNET = "itemInventory/magnetItem";
-    public const string BOMB = "itemInventory/bombItem";
+    public const string ITEMDICT = "itemInventory/itemDict";
     public const string WALLETINVENT = "wallet";
     public const string GOLDINVENT = "wallet/goldWallet";
     public const string GEMINVENT = "wallet/gemWallet";
