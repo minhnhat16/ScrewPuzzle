@@ -1,7 +1,9 @@
 using System;
+using System.Drawing;
 using DG.Tweening;
 using Enum;
 using Managers;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
@@ -23,7 +25,7 @@ namespace Ingame.Screw
 
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
-         [SerializeField] protected HingeController hingeController;
+        [SerializeField] protected HingeController hingeController;
         public HingeController HingeController
         {
             get => hingeController;
@@ -254,7 +256,7 @@ namespace Ingame.Screw
             hingeController.FreeHinges();
         }
 
-        public void ChangeScrewColor(Color color)
+        public void ChangeScrewColor(UnityEngine.Color color)
         {
             render.color = color;
         }
@@ -318,6 +320,15 @@ namespace Ingame.Screw
             hingeController.BodyConnect.Add(targetScrew); // Thêm Rigidbody2D vào danh sách bodyConnect
             hingeJoint.autoConfigureConnectedAnchor = true;
         
+        }
+        public void Reset()
+        {
+            isClicked = false;
+            color = ColorEnum.Clear;
+            CircleCollider2D.enabled = true;
+            render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
+            hingeController.Reset();
         }
     }
 }
