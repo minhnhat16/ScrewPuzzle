@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using ConfigFile;
 using DG.Tweening;
 using Enum;
+using PoolManager;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -151,6 +152,7 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull)=>
             {
+               
                 callback?.Invoke(boxFull);
             });
         }
@@ -161,7 +163,7 @@ namespace Ingame
             Debug.Log("Turn off Screww");
             foreach (var t in holdScrews)
             {
-                t.Screw.gameObject.SetActive(false);
+                ScrewPool.Instance.Pool.ReturnToPool(t.Screw) ;
             }
         }
         private void DoUpperBoxMove(Action<bool> callback)

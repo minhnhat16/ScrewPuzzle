@@ -74,7 +74,12 @@ namespace Managers
           
             }
         }
-   
+        public int GoldCalculation(int level)
+        {
+            float gold = (int)((1f + level * 0.4f) * 1000);
+            int goldInt = Mathf.FloorToInt(gold);
+            return goldInt;
+        }
         public string DevideCurrency(int currency)
         {
             if (currency < 10000) return currency.ToString();

@@ -68,6 +68,8 @@ namespace Managers
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
+            int level = LevelManager.Instance.currentLevelID;
+            int totalGold = GameManager.instance.GoldCalculation(level);
             DialogManager.Instance.ShowDialog(DialogIndex.WinDialog);
         }
 

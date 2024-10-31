@@ -87,6 +87,12 @@ namespace System.DataBase
             }
             else { callback.Invoke(false); }
         }
+
+        internal void SavePlayerLevel(int currentLevel)
+        {
+            dataModel.UpdateData(DataPath.CURRENTPLAYERLEVEL,  currentLevel);
+        }
+
         public void SaveWallet(CurrencyWallet wallet, Currency currency, Action<bool> callback)
         {
             dataModel.UpdateDataDictionary(DataPath.WALLETINVENT, currency.ToString(), wallet, () =>

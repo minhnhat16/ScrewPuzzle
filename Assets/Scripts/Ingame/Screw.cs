@@ -239,7 +239,7 @@ namespace Ingame.Screw
             sequence.OnComplete(() =>
             {
                 // _transform.SetParent(holdScrew.Transf);
-                MoveScrewDown();
+                MoveScrewDown(holdScrew);
             });
         }
 
@@ -294,14 +294,15 @@ namespace Ingame.Screw
             }
         }
 
-        public virtual void MoveScrewDown()
+        public virtual void MoveScrewDown(HoldScrew holdScrew)
         {
             var targetPos = render.transform.position;
             targetPos-= new Vector3(0, 0.25f,0);
             cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
              
             render.transform.DOMove(targetPos, 0.5f).OnComplete(()=> { isMoving = false; });
-            
+            _transform.SetParent(holdScrew.transform);
+
         }
         public virtual void CreateHinge(Rigidbody2D targetScrew)
         {

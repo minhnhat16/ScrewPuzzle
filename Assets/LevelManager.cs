@@ -1,16 +1,13 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using ConfigFile;
 using Enum;
 using Ingame;
 using Ingame.Board;
-using Ingame.Screw;
 using Managers;
 using PoolManager;
-using Unity.VisualScripting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -124,7 +121,7 @@ public class LevelManager : MonoBehaviour
                     StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
                     {
                         ViewManager.Instance.SwitchView(ViewIndex.GamePlayView);
-                    })) ;
+                    }));
                 });
         });
     }
@@ -167,7 +164,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public IEnumerator LoadGameObjectFromLevel(int levelId,Action callback = null)
+    public IEnumerator LoadGameObjectFromLevel(int levelId, Action callback = null)
     {
         currentLevelID = levelId;
         //spawn level obj
@@ -289,16 +286,16 @@ public class LevelManager : MonoBehaviour
 
     public void Reset()
     {
-        if(transform.childCount > 0)
+        if (transform.childCount > 0)
         {
             LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
             layerManager.Reset();
-            ScrewManager.Reset();
+            LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
         }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
-        LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
-        currentLevelObject = null;
+        ScrewManager.Reset();
 
+        currentLevelObject = null;
     }
 }
