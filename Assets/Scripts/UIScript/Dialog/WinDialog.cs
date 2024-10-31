@@ -19,6 +19,12 @@ namespace UIScript.Dialog
             nextLevelButton.interactable = isInteractable;
 
         }
+        public override void OnEndHideDialog()
+        {
+            base.OnEndHideDialog();
+            SetButtonInteractAble(true);
+
+        }
         private void OnNextButtonClicked()
         {
             SetButtonInteractAble(false);
@@ -30,11 +36,10 @@ namespace UIScript.Dialog
             data.levelStar = 3;
             data.levelID = currentLevel;
             data.isCompleted = true;
-            levelManager.Reset();
             DataAPIController.instance.SaveNewLevelData(data, () =>
             {
-                SetButtonInteractAble(true);
                 DialogManager.Instance.HideDialog(dialogIndex);
+                levelManager.Reset();
                 levelManager.LoadLevel(currentLevel);
 
             });

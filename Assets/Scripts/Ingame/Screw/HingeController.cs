@@ -6,7 +6,7 @@ namespace Ingame.Screw
 {
     public abstract class HingeController : MonoBehaviour
     {
-        [FormerlySerializedAs("_layer")] [SerializeField] private LayerMask layer;
+        [FormerlySerializedAs("_layer")][SerializeField] private LayerMask layer;
         [SerializeField] private List<Rigidbody2D> bodyConnect;
         [SerializeField] private List<HingeJoint2D> hingeJoint2D;
 
@@ -29,8 +29,8 @@ namespace Ingame.Screw
         }
 
 
-        
-       
+
+
         // Start is called before the first frame update
         public virtual void Start()
         {
@@ -40,7 +40,7 @@ namespace Ingame.Screw
 
         public virtual void InitHingeJoints()
         {
-            for (int i  = 0; i < hingeJoint2D.Count; i++)
+            for (int i = 0; i < hingeJoint2D.Count; i++)
             {
                 if (bodyConnect.Count == 1)
                 {
@@ -70,8 +70,15 @@ namespace Ingame.Screw
         {
             for (int i = 0; i < hingeJoint2D.Count; i++)
             {
-                hingeJoint2D[i].connectedBody = null;   
+                var hinge = hingeJoint2D[i];
+                hinge.connectedBody = null;
+                Destroy(hinge.gameObject);
             }
+        }
+
+        internal void Reset()
+        {
+            FreeHinges();
         }
     }
 }

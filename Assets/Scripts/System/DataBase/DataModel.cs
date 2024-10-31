@@ -262,8 +262,8 @@ public class DataModel : MonoBehaviour
        levelInf.expLevel = 0.0f;
        LevelData dataLevelOne = new();
        dataLevelOne.levelID = 1;
-       dataLevelOne.levelStar = 0;
-       dataLevelOne.isCompleted = false;
+        dataLevelOne.levelStar = 0;
+       dataLevelOne.isCompleted = true;
        levelInf.currentLevel = 1;
        levelInf.levelData = new();
        levelInf.levelData.Add(dataLevelOne);
