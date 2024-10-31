@@ -1,14 +1,12 @@
-using Managers;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Ingame.Screw
 {
     public abstract class HingeController : MonoBehaviour
     {
-        [FormerlySerializedAs("_layer")] [SerializeField] private LayerMask layer;
+        [FormerlySerializedAs("_layer")][SerializeField] private LayerMask layer;
         [SerializeField] private List<Rigidbody2D> bodyConnect;
         [SerializeField] private List<HingeJoint2D> hingeJoint2D;
 
@@ -31,24 +29,18 @@ namespace Ingame.Screw
         }
 
 
-        
-       
+
+
         // Start is called before the first frame update
         public virtual void Start()
         {
-            var currentScene = SceneManager.GetActiveScene();
-
-            if (currentScene.name.CompareTo("LevelMaker") != 0)
-            {
-                InitHingeJoints();
-
-            }
+            InitHingeJoints();
         }
 
 
         public virtual void InitHingeJoints()
         {
-            for (int i  = 0; i < hingeJoint2D.Count; i++)
+            for (int i = 0; i < hingeJoint2D.Count; i++)
             {
                 if (bodyConnect.Count == 1)
                 {
@@ -60,8 +52,7 @@ namespace Ingame.Screw
 
         public string GetConnectedBodyRenderLayer(int index)
         {
-
-            if (bodyConnect.Count  <= 0) return null;
+            if (bodyConnect[index] == null) return null;
             var body = bodyConnect[index];
             return body.gameObject.GetComponent<SpriteRenderer>().sortingLayerName;
         }
@@ -79,32 +70,15 @@ namespace Ingame.Screw
         {
             for (int i = 0; i < hingeJoint2D.Count; i++)
             {
-                hingeJoint2D[i].connectedBody = null;   
                 var hinge = hingeJoint2D[i];
-                var crBodyConnect = hinge.connectedBody;
-                var hingeComp = hinge.GetComponent<HingeObject>();
                 hinge.connectedBody = null;
-                ClearBody(crBodyConnect);
-                HingePool.Instance.pool.ReturnToPool(hingeComp);
+                Destroy(hinge.gameObject);
             }
-            hingeJoint2D.Clear();
+        }
 
-        }
-        public virtual void ClearBody(Rigidbody2D body)
-        {
-            bodyConnect.Remove(body);
-        }
-        public virtual void ClearBody()
-        {
-            /*foreach(var body in bodyConnect)
-            {
-                bod
-            }*/
-            bodyConnect.Clear();
-        }
         internal void Reset()
         {
-            ClearBody();
+            FreeHinges();
         }
     }
 }

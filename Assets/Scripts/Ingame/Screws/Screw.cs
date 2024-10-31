@@ -339,5 +339,14 @@ namespace Ingame.Screw
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
             hingeController.Reset();
         }
+        public void Reset()
+        {
+            isClicked = false;
+            color = ColorEnum.Clear;
+            CircleCollider2D.enabled = true;
+            render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
+            hingeController.Reset();
+        }
     }
 }

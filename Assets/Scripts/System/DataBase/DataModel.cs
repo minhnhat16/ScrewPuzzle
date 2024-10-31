@@ -73,7 +73,7 @@ public class DataModel : MonoBehaviour
         {
             //if (false) NewDataForTester();
             //else
-            NewDataForPlayer();
+                NewDataForPlayer();
             SaveData();
 
             Debug.Log("(BOOT) // INIT DATA DONE");
@@ -243,45 +243,34 @@ public class DataModel : MonoBehaviour
         inf.isNewPlayer = true;
         userData.userInfo = inf;
 
-
+        
         ///item
         userData.itemInventory = new();
-        Dictionary<string, ItemData> newItemDict = new();
-
         ItemData newAddHoldInvent = new();
         newAddHoldInvent.type = ItemType.AddHold;
         newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
-        var key = newAddHoldInvent.type.ToString();
-        newItemDict.Add(key, newAddHoldInvent);
-
         ItemData newAddBoxInvent = new();
         newAddBoxInvent.type = ItemType.AddBox;
         newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
-        key = newAddBoxInvent.type.ToString();
-        newItemDict.Add(key, newAddBoxInvent);
-
         ItemData newClearOnScrewInvent = new();
-        newClearOnScrewInvent.type = ItemType.ClearOneScrew;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.ClearOneScrew.ToString(), 5);
-        key = newClearOnScrewInvent.type.ToString();
-        newItemDict.Add(key, newClearOnScrewInvent);
 
-        userData.itemInventory.itemDict = new();
-        userData.itemInventory.itemDict = newItemDict;
-        //leve
-        LevelInfo levelInf = new();
-        levelInf.expLevel = 0.0f;
-        LevelData dataLevelOne = new();
-        dataLevelOne.levelID = 1;
+        newClearOnScrewInvent.type = ItemType.AddBox;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
+        userData.itemInventory.magnetItem = newClearOnScrewInvent;
+       //leve
+       LevelInfo levelInf = new();
+       levelInf.expLevel = 0.0f;
+       LevelData dataLevelOne = new();
+       dataLevelOne.levelID = 1;
         dataLevelOne.levelStar = 0;
-        dataLevelOne.isCompleted = true;
-        levelInf.currentLevel = 1;
-        levelInf.levelData = new();
-        levelInf.levelData.Add(dataLevelOne);
-
-        userData.levelInfo = levelInf;
-        userData.wallet = new();
-
+       dataLevelOne.isCompleted = true;
+       levelInf.currentLevel = 1;
+       levelInf.levelData = new();
+       levelInf.levelData.Add(dataLevelOne);
+        
+       userData.levelInfo = levelInf;
+       userData.wallet = new();
+       
         //WALLET 
         userData.wallet = new();
         //Add gold 
@@ -311,38 +300,7 @@ public class DataModel : MonoBehaviour
         newDaily.dailyList = _dailyData;
         userData.dailyData = newDaily;
 
-        ; CollectionData newCollectionData = new CollectionData();
-
-        // Initialize current items
-        newCollectionData.currentBG = new BackGroundData { isUnlocked = true ,name = "07_Shape_mini board" };
-        newCollectionData.currentBoard = new BoardColorData { isUnlocked = true, name = "18_Screw_mini board" };
-        newCollectionData.currentScrew = new ScrewSkinData { isUnlocked = true, name = "19_Screw_mini board" };
-
-        // Initialize background dictionary with example entries
-        newCollectionData.backGroundDict = new Dictionary<string, BackGroundData>();
-        for (int i = 0; i < 5; i++)
-        {
-            BackGroundData bgData = new BackGroundData { /* Set properties for each background */ };
-            newCollectionData.backGroundDict.Add($"Background_{i + 1}", bgData);
-        }
-        // Initialize board color dictionary with example entries
-        newCollectionData.boardColorDict = new Dictionary<string, BoardColorData>();
-        for (int i = 0; i < 5; i++)
-        {
-            BoardColorData boardColorData = new BoardColorData { /* Set properties for each board color */ };
-            newCollectionData.boardColorDict.Add($"BoardColor_{i + 1}", boardColorData);
-        }
-
-        // Initialize screw color dictionary with example entries
-        newCollectionData.screwColorDict = new Dictionary<string, ScrewSkinData>();
-        for (int i = 0; i < 5; i++)
-        {
-            ScrewSkinData screwSkinData = new ScrewSkinData { /* Set properties for each screw color */ };
-            newCollectionData.screwColorDict.Add($"ScrewColor_{i + 1}", screwSkinData);
-        }
-
-        // Assign to user data
-        userData.collectionData = newCollectionData;
+;
 
         SpinData newSpinData = new();
         newSpinData.isSpin = false;
@@ -360,29 +318,18 @@ public class DataModel : MonoBehaviour
 
         ///item
         userData.itemInventory = new();
-        Dictionary<string, ItemData> newItemDict = new();
-
         ItemData newAddHoldInvent = new();
         newAddHoldInvent.type = ItemType.AddHold;
         newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
-        var key = newAddHoldInvent.type.ToString();
-        newItemDict.Add(key, newAddHoldInvent);
-
         ItemData newAddBoxInvent = new();
         newAddBoxInvent.type = ItemType.AddBox;
         newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
-        key = newAddBoxInvent.type.ToString();
-        newItemDict.Add(key, newAddBoxInvent);
-
         ItemData newClearOnScrewInvent = new();
-        newClearOnScrewInvent.type = ItemType.ClearOneScrew;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.ClearOneScrew.ToString(), 5);
-        key = newClearOnScrewInvent.type.ToString();
-        newItemDict.Add(key, newClearOnScrewInvent);
 
-        userData.itemInventory.itemDict = new();
-        userData.itemInventory.itemDict = newItemDict;
-
+        newClearOnScrewInvent.type = ItemType.AddBox;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
+        userData.itemInventory.magnetItem = newClearOnScrewInvent;
+        
         //player level
         LevelInfo levelInf = new();
         levelInf.expLevel = 0.0f;
@@ -392,7 +339,7 @@ public class DataModel : MonoBehaviour
         dataLevelOne.isCompleted = false;
         levelInf.currentLevel = 1;
         levelInf.levelData.Add(dataLevelOne);
-
+        
         userData.levelInfo = levelInf;
         userData.wallet = new();
         //Add gold 
