@@ -43,11 +43,11 @@ namespace Ingame
         private void Start()
         {
             var currentScene = SceneManager.GetActiveScene();
-          
-            if (currentScene.name.CompareTo("LevelMaker") != 0)
+          if (currentScene.name.CompareTo("LevelMaker") != 0)
             {
                 onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
             }
+            
         }
 
         public void Init()

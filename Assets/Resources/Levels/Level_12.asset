@@ -1,0 +1,181 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
+  m_Name: Level_12
+  m_EditorClassIdentifier: 
+  levelId: 12
+  totalColorInLevel: 0
+  layer: 0
+  boxConfig: {fileID: 11400000, guid: 4caf1795f3d09c346b6e36a1a53931ec, type: 2}
+  screws:
+  - idScrew: -243170
+    idColor: 7
+    screwPosition: {x: -0.28454357, y: 2.233047, z: -4}
+    hingeConnections:
+    - hingePosition: {x: 1.2245436, y: -1.783047, z: 0}
+      bodyPartUniqueID: 2446
+      bodyPartHingePosition: {x: 0.94, y: 0.45, z: 0}
+    - hingePosition: {x: 1.2245436, y: -1.783047, z: 0}
+      bodyPartUniqueID: 2446
+      bodyPartHingePosition: {x: 0.94, y: 0.45, z: 0}
+  - idScrew: -243212
+    idColor: 7
+    screwPosition: {x: -1.4804581, y: -0.331721, z: -6}
+    hingeConnections:
+    - hingePosition: {x: -0.01954186, y: 0.331721, z: 0}
+      bodyPartUniqueID: 4578
+      bodyPartHingePosition: {x: -1.5, y: 0, z: 0}
+    - hingePosition: {x: -0.01954186, y: 0.331721, z: 0}
+      bodyPartUniqueID: 4578
+      bodyPartHingePosition: {x: -1.5, y: 0, z: 0}
+  - idScrew: -243254
+    idColor: 7
+    screwPosition: {x: 0.97673315, y: -2.3896184, z: -6}
+    hingeConnections:
+    - hingePosition: {x: 0.023266852, y: -0.1103816, z: 0}
+      bodyPartUniqueID: 7539
+      bodyPartHingePosition: {x: 1, y: -2.5, z: 0}
+    - hingePosition: {x: 0.023266852, y: -0.1103816, z: 0}
+      bodyPartUniqueID: 7539
+      bodyPartHingePosition: {x: 1, y: -2.5, z: 0}
+  - idScrew: -243296
+    idColor: 6
+    screwPosition: {x: 1.376026, y: -0.30100614, z: -5}
+    hingeConnections:
+    - hingePosition: {x: -0.14602602, y: -1.0089939, z: 0}
+      bodyPartUniqueID: 5370
+      bodyPartHingePosition: {x: 1.23, y: -1.31, z: 0}
+  - idScrew: -243330
+    idColor: 6
+    screwPosition: {x: 0.4852952, y: 1.2654531, z: -4}
+    hingeConnections:
+    - hingePosition: {x: 0.4547048, y: -0.8154531, z: 0}
+      bodyPartUniqueID: 2446
+      bodyPartHingePosition: {x: 0.94, y: 0.45, z: 0}
+    - hingePosition: {x: 0.4547048, y: -0.8154531, z: 0}
+      bodyPartUniqueID: 2446
+      bodyPartHingePosition: {x: 0.94, y: 0.45, z: 0}
+  - idScrew: -243372
+    idColor: 5
+    screwPosition: {x: -1.2433312, y: 0.47011495, z: -4}
+    hingeConnections:
+    - hingePosition: {x: 2.1833313, y: -0.020114958, z: 0}
+      bodyPartUniqueID: 2446
+      bodyPartHingePosition: {x: 0.94, y: 0.45, z: 0}
+    - hingePosition: {x: 2.1833313, y: -0.020114958, z: 0}
+      bodyPartUniqueID: 2446
+      bodyPartHingePosition: {x: 0.94, y: 0.45, z: 0}
+  - idScrew: -243414
+    idColor: 5
+    screwPosition: {x: 1.7876742, y: 0.40825725, z: -6}
+    hingeConnections:
+    - hingePosition: {x: -0.2876742, y: -0.40825725, z: 0}
+      bodyPartUniqueID: 7395
+      bodyPartHingePosition: {x: 1.5, y: 0, z: 0}
+  - idScrew: -243448
+    idColor: 5
+    screwPosition: {x: -1.0577594, y: -2.3134613, z: 0}
+    hingeConnections: []
+  - idScrew: -243474
+    idColor: 6
+    screwPosition: {x: 0.6742446, y: 2.5423331, z: 0}
+    hingeConnections:
+    - hingePosition: {x: 0.6804289, y: 0.43300128, z: 0}
+      bodyPartUniqueID: 6864
+      bodyPartHingePosition: {x: 1.3546735, y: 2.9753344, z: 0}
+  layers:
+  - layerId: 0
+    parts:
+    - idBodyPart: 0
+      partName: 7395
+      spriteName: 1 (58)
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 1.5, y: 0, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 1
+      partName: 4578
+      spriteName: 1 (58)
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.5, y: 0, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 2
+      partName: 7539
+      spriteName: 1 (87)
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 1, y: -2.5, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 3
+      partName: 2206
+      spriteName: 1 (87)
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.0268413, y: -2.4990335, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 4
+      partName: 1137
+      spriteName: 1 (66) #2873
+      layer: Layer 1
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.031550974, y: 2.13, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+  - layerId: 1
+    parts:
+    - idBodyPart: 0
+      partName: 5370
+      spriteName: 1 (44)
+      layer: Layer 2
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 1.23, y: -1.31, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 2821
+      spriteName: 1 (44)
+      layer: Layer 2
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -1.23, y: -1.31, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: 0.1085112, w: 0.99409527}
+  - layerId: 2
+    parts:
+    - idBodyPart: 0
+      partName: 2446
+      spriteName: 1 (44)
+      layer: Layer 3
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 0.94, y: 0.45, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: 0.24203975, w: 0.9702664}
+    - idBodyPart: 1
+      partName: 2446
+      spriteName: 1 (44)
+      layer: Layer 3
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: -0.73, y: 1.39, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.24204043, w: 0.9702662}
+    - idBodyPart: 2
+      partName: 6864
+      spriteName: 1 (79)
+      layer: Layer 3
+      colorString: RGBA(0.890, 0.757, 0.667, 0.659)
+      partPosition: {x: 1.3546735, y: 2.9753344, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: 0.34471375, w: 0.93870795}

@@ -1,5 +1,7 @@
+using Managers;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Ingame.Screw
@@ -34,7 +36,13 @@ namespace Ingame.Screw
         // Start is called before the first frame update
         public virtual void Start()
         {
-            InitHingeJoints();
+            var currentScene = SceneManager.GetActiveScene();
+
+            if (currentScene.name.CompareTo("LevelMaker") != 0)
+            {
+                InitHingeJoints();
+
+            }
         }
 
 

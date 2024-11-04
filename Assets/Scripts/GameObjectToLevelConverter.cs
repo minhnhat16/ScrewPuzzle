@@ -343,7 +343,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 if (partGameObject != null)
                 {
                     partGameObject.transform.SetParent(layerGameObject.transform);
-                    partGameObject.transform.SetPositionAndRotation(partData.partPosition ,Quaternion.identity);
+                    partGameObject.transform.SetPositionAndRotation(partData.partPosition , partData.partRotation);
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
