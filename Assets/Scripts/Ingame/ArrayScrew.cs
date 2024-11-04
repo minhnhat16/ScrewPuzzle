@@ -50,9 +50,15 @@ namespace Ingame
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             coutHoldActive = 5;
-            HoldAlignment();
         }
-
+        public void ShowArrayScrew()
+        {
+            spriteRenderer.enabled = true;
+            for (int i = 0; i < coutHoldActive; i++)
+            {
+                holdScrews[i].gameObject.SetActive(true);
+            }
+        }
         public void SpawnNewHold()
         {
             coutHoldActive++;
@@ -60,7 +66,7 @@ namespace Ingame
             hold.gameObject.SetActive(true);  // Activate the new hold
             HoldAlignment();
         }
-        private void HoldAlignment()
+         internal void HoldAlignment()
         {
             if (holdScrews.Count == 0) return;
 

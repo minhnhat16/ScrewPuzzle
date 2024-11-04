@@ -28,12 +28,12 @@ namespace System.DataBase
         }
 
 
-        #region Get DataS
-        /*public int GetPlayerLevel()
-        {
-            //Debug.Log("DATA === LEVEL");
-            return dataModel.ReadData<int>(DataPath.LEVEL);
-        }*/
+        /*      #region Get DataS
+              *//*public int GetPlayerLevel()
+              {
+                  //Debug.Log("DATA === LEVEL");
+                  return dataModel.ReadData<int>(DataPath.LEVEL);
+              }*/
         public bool IsNewPlayer()
         {
             return dataModel.ReadData<bool>(DataPath.NEWPLAYER);
@@ -69,13 +69,13 @@ namespace System.DataBase
             goldWallet.amount -= minus;
             SaveGold(goldWallet, callback);
         }
-        public void MinusGemWallet(int minus, Action<bool> callback)
+       /* public void MinusGemWallet(int minus, Action<bool> callback)
         {
             var gemWallet = GetGemWallet();
             gemWallet.amount -= minus;
             SaveGem(gemWallet, callback);
-        }
-        public void MinusWalletByType(int minus, Currency currency, Action<bool> callback)
+        }*/
+       /* public void MinusWalletByType(int minus, Currency currency, Action<bool> callback)
         {
             if (currency == Currency.Gold)
             {
@@ -86,11 +86,11 @@ namespace System.DataBase
                 MinusGemWallet(minus, callback);
             }
             else { callback.Invoke(false); }
-        }
+        }*/
 
         internal void SavePlayerLevel(int currentLevel)
         {
-            dataModel.UpdateData(DataPath.CURRENTPLAYERLEVEL,  currentLevel);
+            dataModel.UpdateData(DataPath.CURRENTPLAYERLEVEL, currentLevel);
         }
 
         public void SaveWallet(CurrencyWallet wallet, Currency currency, Action<bool> callback)
@@ -132,7 +132,7 @@ namespace System.DataBase
             });
         }*/
 
-        public void AddGold(int add,Action<bool> callback)
+        public void AddGold(int add, Action<bool> callback)
         {
             CurrencyWallet gold = GetGoldWallet();
             gold.amount += add;
@@ -144,12 +144,12 @@ namespace System.DataBase
             dataModel.UpdateData(DataPath.GOLDINVENT, gold, () =>
             {
                 //Debug.Log("gold amount" + gold.amount);
-                if(callback != null) callback.Invoke(true);
+                if (callback != null) callback.Invoke(true);
                 return;
             });
 
         }
-        public void AddGem(int add)
+       /* public void AddGem(int add)
         {
             CurrencyWallet gem = GetGemWallet();
             gem.amount += add;
@@ -165,27 +165,11 @@ namespace System.DataBase
             });
             callback?.Invoke(false);
 
-        }
-        #endregion
+        }*/
+#endregion
 
-        #endregion
         #region daytimedata
-        public string GetDayTimeData()
-        {
-            string day = dataModel.ReadData<string>(DataPath.LASTSAVETIME);
-            //Debug.Log($"day {day}");
-            return day;
-        }
-        public void SetDayTimeData(string day)
-        {
-            if (!string.IsNullOrEmpty(day))
-            {
-                dataModel.UpdateData(DataPath.CURRENTTIME, day, () =>
-                {
-                    Debug.Log("SAVE DAYTIME DATA SUCCESSFULL");
-                });
-            }
-        }
+
         #endregion
         #region Others
         public float GetCurrentExp()

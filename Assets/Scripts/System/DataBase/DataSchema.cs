@@ -17,6 +17,12 @@ public class UserData
     public DailyData dailyData;
     [SerializeField]
     public SpinData spinData;
+    [SerializeField]
+    public Dictionary<string,BackGroundData> backGroundDict;
+    [SerializeField]
+    public Dictionary<string, BoardColorData> boardColorDict;
+    [SerializeField]
+    public Dictionary<string, ScrewSkinData> screwColorDict;
 }
 [Serializable]
 public class UserInfo
@@ -82,4 +88,20 @@ public class LevelData
     public int levelID;
     public bool isCompleted;
     public int levelStar;
+}
+[Serializable]
+public class ScrewSkinData
+{
+
+}
+[Serializable]
+
+public class BackGroundData
+{
+
+}
+[Serializable]
+public class BoardColorData
+{
+
 }

@@ -110,8 +110,11 @@ public class LevelManager : MonoBehaviour
     public void LoadLevel(int levelID, Action callback = null)
     {
         Debug.LogWarning("Start loading level ");
-
+        var boxManager = BoxQueue.Instance;
+        var arrayScrew = ArrayScrew.Instance;
+        arrayScrew.ShowArrayScrew() ;
         Reset();
+        arrayScrew.HoldAlignment();
         LoadSceneManager.instance.LoadSceneByName("InGame", () =>
         {
             Debug.LogWarning("Load scence done  ");

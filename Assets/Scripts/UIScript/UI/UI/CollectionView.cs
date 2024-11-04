@@ -7,7 +7,6 @@ public class CollectionView : BaseView
     [SerializeField] private Image bgImg;
     [SerializeField] private Image fill_collection;
     [SerializeField] private Button returnBtn;
-    [SerializeField] private CollectionCards collection;
 
     public override void OnInit()
     {   

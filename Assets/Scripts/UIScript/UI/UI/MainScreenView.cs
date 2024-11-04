@@ -13,6 +13,7 @@ namespace UIScript.UI.UI
         [SerializeField] private Button shopButton;
         [SerializeField] private Button levelButton;
         [SerializeField] private Button rateButton;
+        [SerializeField] private Button skinButton;
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private int gold;
 
@@ -25,9 +26,11 @@ namespace UIScript.UI.UI
             dailyReward.onClick.AddListener(OnDailyReward);
             rateButton.onClick.AddListener(RateButton);
             playBtn.onClick.AddListener(OnPlayButton);
+            skinButton.onClick.AddListener(OnSkinButton);
+
         }
 
-   
+       
 
         private void OnDisable()
         {
@@ -69,6 +72,12 @@ namespace UIScript.UI.UI
             };
             DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog,param, null);
         }
+        private void OnSkinButton()
+        {
+            CollectionDialogParam param = new();
+            DialogManager.Instance.ShowDialog(DialogIndex.CollectionDialog, param, null);
+
+        }
         private void RateButton()
         {
             DialogManager.Instance.ShowDialog(DialogIndex.RateDialog);
@@ -94,11 +103,7 @@ namespace UIScript.UI.UI
 
             ViewManager.Instance.SwitchView(ViewIndex.CollectionView);
         }
-        public void OnPanelCentered(int center, int selected)
-        {
-            LevelItem item = LevelItemPool.Instance.pool.list[center];
-            //playBtn.interactable = isUnlocked;
-        }
+     
 
         public void ShopButton()
         {

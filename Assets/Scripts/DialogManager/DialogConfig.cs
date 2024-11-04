@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public enum DialogIndex
 {
@@ -14,6 +15,7 @@ public enum DialogIndex
     LoseDialog,
     BreakDialog,
     LevelDialog,
+    CollectionDialog,
 }
 
 public class DialogParam
@@ -94,6 +96,12 @@ public class AddItemDialogParam : DialogParam
     public int ItemPrice;
     public string detail;
 }
+public class CollectionDialogParam: DialogParam
+{
+    List<ScrewSkinData> screwSkin;
+    List<BackGroundData> backGround;
+    List<BoardColorData> BoardColo;
+}
 public class DialogConfig
 {
     public static DialogIndex[] dialogArray =
@@ -109,5 +117,6 @@ public class DialogConfig
         DialogIndex.LoseDialog,
         DialogIndex.BreakDialog,
         DialogIndex.LevelDialog,
+        DialogIndex.CollectionDialog,
     };
 }
