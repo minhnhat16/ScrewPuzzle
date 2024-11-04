@@ -170,10 +170,13 @@ namespace Ingame
         {
             Sequence mySequence = DOTween.Sequence();
             renderUpper.enabled = true;
-           
+
             // Thêm các hành động di chuyển vào Sequence
             mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f) // Di chuyển theo trục Y
-                    .SetEase(Ease.InCirc).OnComplete(TunOffScrews))
+                    .SetEase(Ease.InCirc).OnComplete(() => 
+                    {
+                        TunOffScrews();
+                    }))
                 .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f), 0.5f, 1) // Punch scale
                     .SetEase(Ease.InBack).OnComplete(()=>
                     {
@@ -237,6 +240,7 @@ namespace Ingame
         }
         private void AddScrewToSlot(Screw.Screw screw)
         {
+            if (IsBoxFull) return;
             // Nếu đã biết vị trí lỗ trống
             if (nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Count)
             {
@@ -246,7 +250,6 @@ namespace Ingame
                     holdScrews[nextEmptyIndex].AddScrew(screw, (onComplete) =>
                     {
                         ArrayScrew.Instance.RemoveScrewOutHold(screw);
-
                     });
                     UpdateNextEmptyIndex(); // Cập nhật vị trí trống tiếp theo
                     return;

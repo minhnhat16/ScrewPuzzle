@@ -206,7 +206,7 @@ namespace Ingame
             else
             {
                 // Kiểm tra và tìm holdScrew trống
-                var holdScrew = holdScrews.FirstOrDefault(hold => hold.IsEmpty());
+                var holdScrew = holdScrews.FirstOrDefault(hold => hold.IsEmpty() && hold.isActiveAndEnabled);
 
                 // Kiểm tra nếu không còn holdScrew trống
                 if (holdScrew == null)
@@ -244,6 +244,12 @@ namespace Ingame
                 hold.ClearScrewOnHold();
                 yield return null;
 
+            }
+        }
+        public void ClearScrewOnArray()
+        {
+            foreach(var hold in holdScrews)
+            {
             }
         }
     }
