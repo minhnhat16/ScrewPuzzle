@@ -139,4 +139,10 @@ public class ScrewLevelMaker : Screw
         isHeld = false;
         Debug.Log("Mouse Released the Screw.");
     }
+
+    public void ResetScrew()
+    {
+        isHeld = isSelecting = false;
+        ChangeScrewColorByEnum(Color);
+    }
 }

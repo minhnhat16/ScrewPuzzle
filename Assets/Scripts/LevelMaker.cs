@@ -224,24 +224,30 @@ public class LevelMaker : MonoBehaviour
             isEditScrewColor = 
                 isEditHinge = 
                     isEditPartPosition = false;
+        converter.ResetAllScrewsFlag();
     }
     public void ClickOnEditScrewPos()
     {
+        TurnAllEditModeOff();
         SetEditMode(EditMode.ScrewPosition);
     }
 
     public void ClickOnEditScrewColor()
     {
+        TurnAllEditModeOff();
         SetEditMode(EditMode.ScrewColor);
     }
 
     public void ClickOnEditScrewHinge()
     {
+        TurnAllEditModeOff();
+
         SetEditMode(EditMode.Hinge);
     }
 
     public void ClickOnEditPartPosition()
     {
+        TurnAllEditModeOff();
         SetEditMode(EditMode.PartPosition);
     }
 

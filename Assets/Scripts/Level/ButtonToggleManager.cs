@@ -31,7 +31,10 @@ namespace Level
 
         void OnButtonClicked(Button btn)
         {
-            bool isClicked = _buttonStates[btn];    
+            LevelMaker.instance.TurnAllEditModeOff();
+            LevelMaker.instance.SetEditMode(btn.GetComponent<EditLevelBtn>().editModeOnBtn);
+
+            /*bool isClicked = _buttonStates[btn];    
 
             if (!isClicked)
             {
@@ -49,7 +52,7 @@ namespace Level
             }
 
             // Toggle the button state
-            _buttonStates[btn] = !isClicked;
+            _buttonStates[btn] = !isClicked;*/
         }
     }
 }

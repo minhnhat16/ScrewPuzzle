@@ -16,6 +16,14 @@ public class SceneSwitcher : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
+
+        // Optional: Lock the orientation if needed
+        Screen.autorotateToLandscapeLeft = true;
+        Screen.autorotateToLandscapeRight = true;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+        Screen.SetResolution(1920, 1080, false);
     }
 
     private void Update()

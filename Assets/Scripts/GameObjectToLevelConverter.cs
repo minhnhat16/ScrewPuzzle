@@ -480,6 +480,18 @@ public class GameObjectToLevelConverter : MonoBehaviour
         return layerGameObject;
     }
 
+    public void ResetAllScrewsFlag()
+    {
+        var levelObj = levelObject.GetComponent<BaseLevelObject>();
+        var screwMnger = levelObj.ScrewManager;
+        var screws = screwMnger.GetScrews();
+
+        foreach(var s in screws)
+        {
+            var sLv = (ScrewLevelMaker)s;
+            sLv.ResetScrew();
+        }
+    }
     private bool IsMouseOnScreen()
     {
         Vector3 mousePosition = Input.mousePosition;
