@@ -421,7 +421,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         if (isMouseOnScreen)
         {
             var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            screwComp.Position = new Vector3(mousePos.x, mousePos.y, 0);
+            screwComp.Position = new Vector3(mousePos.x, mousePos.y, screwComp.Position.z);
             return;
         }
 
