@@ -68,10 +68,10 @@ public class CollectionItem : MonoBehaviour
         Debug.Log("Toggle check listioner " + toggleClicked.GetPersistentEventCount());
         //throw new NotImplementedException();
     }
-    internal void Init(int index, Image img)
+    public void Init(int index,Sprite img)
     {
         this.index = index;
-        this.img = img;
+        this.img.sprite = img;
         toggleClicked.AddListener(OnToggleValueChanged);
         //throw new NotImplementedException();
     }

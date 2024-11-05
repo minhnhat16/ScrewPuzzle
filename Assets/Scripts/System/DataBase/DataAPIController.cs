@@ -69,24 +69,36 @@ namespace System.DataBase
             goldWallet.amount -= minus;
             SaveGold(goldWallet, callback);
         }
-       /* public void MinusGemWallet(int minus, Action<bool> callback)
+
+        public Dictionary<string, ScrewSkinData> GetAllScrewSkinData()
         {
-            var gemWallet = GetGemWallet();
-            gemWallet.amount -= minus;
-            SaveGem(gemWallet, callback);
-        }*/
-       /* public void MinusWalletByType(int minus, Currency currency, Action<bool> callback)
+            var screwSkinData = dataModel.ReadData<Dictionary<string, ScrewSkinData>>(DataPath.SCREWCOLOR);
+            return screwSkinData;
+        }
+
+        internal object GetBoardData()
         {
-            if (currency == Currency.Gold)
-            {
-                MinusGoldWallet(minus, callback);
-            }
-            else if (currency == Currency.Gem)
-            {
-                MinusGemWallet(minus, callback);
-            }
-            else { callback.Invoke(false); }
-        }*/
+            throw new NotImplementedException();
+        }
+
+        /* public void MinusGemWallet(int minus, Action<bool> callback)
+{
+    var gemWallet = GetGemWallet();
+    gemWallet.amount -= minus;
+    SaveGem(gemWallet, callback);
+}*/
+        /* public void MinusWalletByType(int minus, Currency currency, Action<bool> callback)
+         {
+             if (currency == Currency.Gold)
+             {
+                 MinusGoldWallet(minus, callback);
+             }
+             else if (currency == Currency.Gem)
+             {
+                 MinusGemWallet(minus, callback);
+             }
+             else { callback.Invoke(false); }
+         }*/
 
         internal void SavePlayerLevel(int currentLevel)
         {

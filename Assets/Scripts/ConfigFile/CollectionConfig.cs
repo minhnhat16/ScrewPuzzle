@@ -1,18 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CollectionConfig : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+[Serializable]
 
-    // Update is called once per frame
-    void Update()
+public class CollectionConfigRecord
+{
+    public CollectionLable type;
+    public string iconName;
+}
+
+[Serializable]
+public class CollectionConfig : BYDataTable<CollectionConfigRecord>
+{
+    public override ConfigCompare<CollectionConfigRecord> DefineConfigCompare()
     {
-        
+        var configCompare = new ConfigCompare<CollectionConfigRecord>("type");
+        return configCompare;
     }
 }

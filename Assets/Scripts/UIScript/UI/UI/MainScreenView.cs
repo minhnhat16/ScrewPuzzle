@@ -60,6 +60,7 @@ namespace UIScript.UI.UI
         public override void Setup(ViewParam viewParam)
         {
             base.Setup(viewParam);
+
             SetLevelPanelIs(true);
         }
         private void OnDailyReward()
@@ -75,6 +76,9 @@ namespace UIScript.UI.UI
         private void OnSkinButton()
         {
             CollectionDialogParam param = new();
+            param.collection = ConfigFileManager.Instance.CollectionConfig;
+            //var screwCollectionData = DataAPIController.instance.GetAllScrewSkinData();
+            //var boardCollectionData = DataAPIController.instance.GetBoardData();
             DialogManager.Instance.ShowDialog(DialogIndex.CollectionDialog, param, null);
 
         }

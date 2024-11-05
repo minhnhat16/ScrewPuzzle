@@ -96,12 +96,15 @@ public class AddItemDialogParam : DialogParam
     public int ItemPrice;
     public string detail;
 }
-public class CollectionDialogParam: DialogParam
+public class CollectionDialogParam : DialogParam
 {
-    List<ScrewSkinData> screwSkin;
-    List<BackGroundData> backGround;
-    List<BoardColorData> BoardColo;
+    public CollectionConfig collection;
+    public List<ScrewSkinData> skinData;    
+    public List<BackGroundData> backGround;
+    public List<BoardColorData> BoardColor;
+
 }
+
 public class DialogConfig
 {
     public static DialogIndex[] dialogArray =

@@ -1,7 +1,4 @@
-using Managers;
 using System.Collections.Generic;
-using System.DataBase;
-using UIScript.UI.UI;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -27,6 +24,9 @@ public class CollectionDialog : BaseDialog
     public ToggleGroup _toggleBoardColors;
     public ToggleGroup _toggleScrews;
 
+    public List<CollectionConfigRecord> collectionBG;
+    public List<CollectionConfigRecord> collectionBoard;
+    public List<CollectionConfigRecord> collectionScrew;
     [SerializeField] Button btn_Setting;
     [HideInInspector]
     public UnityEvent<CollectionLable> onClickBg = new();
@@ -39,80 +39,113 @@ public class CollectionDialog : BaseDialog
 
     private void OnEnable()
     {
-        screwToggle.onValueChanged.AddListener(BackGroundClicked);
+        bgToggle.onValueChanged.AddListener(BackGroundClicked);
+        screwToggle.onValueChanged.AddListener(ScrewColorClicked);
+        boardToggle.onValueChanged.AddListener(BoardColorClicked);
     }
     private void OnDisable()
     {
         //onGoldChanged.RemoveListener(GoldChange);
-     /*   onClickBg.RemoveListener(BackGroundClicked);
-        onClickBoardColor.RemoveListener(BoardColorClicked);
-        onClickedScrewColor.RemoveListener(ScrewColorClicked);*/
+        /*   onClickBg.RemoveListener(BackGroundClicked);
+           onClickBoardColor.RemoveListener(BoardColorClicked);
+           onClickedScrewColor.RemoveListener(ScrewColorClicked);*/
     }
     public override void Setup(DialogParam dialogParam)
     {
         base.Setup(dialogParam);
         Debug.Log("Set up before show dialog");
-        InitBackGroundToggleGroup();
+        CollectionDialogParam param = (CollectionDialogParam)dialogParam;
+        var _collectionRecords = param.collection.GetAllRecord();
+        var _screwSkinRecord = collectionScrew = _collectionRecords.FindAll(item => item.type == CollectionLable.Screw);
+        var _boardRecord = collectionBoard = _collectionRecords.FindAll(item => item.type == CollectionLable.BoardColor);
+        var _bgRecords = collectionBG = _collectionRecords.FindAll(item => item.type == CollectionLable.BackGround);
+
+        InitBackGroundToggleGroup(_bgRecords);
+        InitBoardToggleGroup(_boardRecord);
+        InitScrewColorToggleGroup(_screwSkinRecord);
     }
     public override void OnStartShowDialog()
     {
-      
-       /* if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
-        {
-            Debug.Log("MainScreenView");
-            var view = ViewManager.Instance.currentView as MainScreenView;
-            view.SetLevelPanelIs(true);
-        }
-        else if (ViewManager.Instance.currentView.viewIndex == ViewIndex.CollectionView)
-        {
-            Debug.Log("CollectionView   ");
-        }
-        else
-        {
-        }*/
+
+        /* if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
+         {
+             Debug.Log("MainScreenView");
+             var view = ViewManager.Instance.currentView as MainScreenView;
+             view.SetLevelPanelIs(true);
+         }
+         else if (ViewManager.Instance.currentView.viewIndex == ViewIndex.CollectionView)
+         {
+             Debug.Log("CollectionView   ");
+         }
+         else
+         {
+         }*/
     }
-    private void InitBackGroundToggleGroup()
+    private void InitBackGroundToggleGroup(List<CollectionConfigRecord> records)
     {
         List<CollectionItem> items = new List<CollectionItem>(_toggleBGs.GetComponentsInChildren<CollectionItem>());
         Debug.Log(" collection item count " + items.Count);
-        for (int i = 0; i < items.Count; i++)
+        if (records.Count <= 0) return;
+        for (int i = 0; i < records.Count; i++)
         {
-            items[i].Init(i);
+            string spriteName = records[i].iconName;
+            var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
+            items[i].Init(i, sprite);
         }
         items[0].Toggle.onValueChanged.Invoke(true);
 
     }
-
-    void BoardColorClicked(CollectionLable lable)
+    private void InitBoardToggleGroup(List<CollectionConfigRecord> records)
     {
-        if (lable != CollectionLable.BoardColor) return;
-        SwitchButtonChose(lable);
-        Debug.Log("home clicked");
-        if (ViewManager.Instance.currentView.viewIndex != ViewIndex.MainScreenView) ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
+        List<CollectionItem> items = new List<CollectionItem>(_toggleBoardColors.GetComponentsInChildren<CollectionItem>());
+        Debug.Log(" collection item count " + items.Count);
+        if (records.Count <= 0) return;
+
+        for (int i = 0; i < records.Count; i++)
+        {
+            string spriteName = records[i].iconName;
+            var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
+            items[i].Init(i, sprite);
+        }
+        items[0].Toggle.onValueChanged.Invoke(true);
+    }
+    private void InitScrewColorToggleGroup(List<CollectionConfigRecord> records)
+    {
+        List<CollectionItem> items = new List<CollectionItem>(_toggleScrews.GetComponentsInChildren<CollectionItem>());
+        Debug.Log(" collection item count " + items.Count);
+        if (records.Count <= 0) return;
+        for (int i = 0; i < records.Count; i++)
+        {
+            string spriteName = records[i].iconName;
+            var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
+            items[i].Init(i, sprite);
+        }
+        items[0].Toggle.onValueChanged.Invoke(true);
+    }
+    void BoardColorClicked(bool isChangedValue)
+    {
+        boardGroup.gameObject.SetActive(isChangedValue);
+        bgGroup.gameObject.SetActive(!isChangedValue);
+        screwGroup.gameObject.SetActive(!isChangedValue);
 
     }
     void BackGroundClicked(bool isChangedValue)
     {
         bgGroup.gameObject.SetActive(isChangedValue);
+        boardGroup.gameObject.SetActive(!isChangedValue);
+        screwGroup.gameObject.SetActive(!isChangedValue);
 
     }
-    void ScrewColorClicked(CollectionLable lable)
+    void ScrewColorClicked(bool isChangedValue)
     {
-        if (lable != CollectionLable.Screw) return;
-        SwitchButtonChose(lable);
-        DialogManager.Instance.ShowDialog(DialogIndex.SpinDialog, null, () =>
-         {
-             if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
-             {
-                 var main = ViewManager.Instance.currentView as MainScreenView;
-                 main.SetLevelPanelIs(false);
-             }
-         });
-
+        screwGroup.gameObject.SetActive(isChangedValue);
+        bgGroup.gameObject.SetActive(!isChangedValue);
+        boardGroup.gameObject.SetActive(!isChangedValue);
     }
+
     void SwitchButtonChose(CollectionLable lable)
     {
     }
-   
-   
+
+
 }

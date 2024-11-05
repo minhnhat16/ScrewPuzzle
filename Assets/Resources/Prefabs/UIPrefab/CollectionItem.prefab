@@ -281,11 +281,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8629561ee587414da7be2760337d4af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  index: 0
   isLock: 0
-  cardImg: {fileID: 0}
+  img: {fileID: 7551850074603350476}
   lockImage: {fileID: 0}
   toggle: {fileID: 4132537887622299802}
   tickIcn: {fileID: 6929259698838117539}
+  toggleClicked:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &4132537887622299802
 MonoBehaviour:
   m_ObjectHideFlags: 0
