@@ -15,6 +15,8 @@ public class CollectionDialog : BaseDialog
     public RectTransform boardGroup;
     public RectTransform screwGroup;
 
+    public Button closeBtn;
+
     public Toggle bgToggle;
     public Toggle boardToggle;
     public Toggle screwToggle;
@@ -42,9 +44,14 @@ public class CollectionDialog : BaseDialog
         bgToggle.onValueChanged.AddListener(BackGroundClicked);
         screwToggle.onValueChanged.AddListener(ScrewColorClicked);
         boardToggle.onValueChanged.AddListener(BoardColorClicked);
+        closeBtn.onClick.AddListener(OnCloseButton);
     }
     private void OnDisable()
     {
+        bgToggle.onValueChanged.RemoveListener(BackGroundClicked);
+        screwToggle.onValueChanged.RemoveListener(ScrewColorClicked);
+        boardToggle.onValueChanged.RemoveListener(BoardColorClicked);
+        closeBtn.onClick.RemoveListener(OnCloseButton);
         //onGoldChanged.RemoveListener(GoldChange);
         /*   onClickBg.RemoveListener(BackGroundClicked);
            onClickBoardColor.RemoveListener(BoardColorClicked);
@@ -59,10 +66,14 @@ public class CollectionDialog : BaseDialog
         var _screwSkinRecord = collectionScrew = _collectionRecords.FindAll(item => item.type == CollectionLable.Screw);
         var _boardRecord = collectionBoard = _collectionRecords.FindAll(item => item.type == CollectionLable.BoardColor);
         var _bgRecords = collectionBG = _collectionRecords.FindAll(item => item.type == CollectionLable.BackGround);
+        var crBackGround = param.currentBG;
+        var crScrewSkin = param.currentSkin;
+        var crBoardColor = param.currentBoard;
 
-        InitBackGroundToggleGroup(_bgRecords);
-        InitBoardToggleGroup(_boardRecord);
-        InitScrewColorToggleGroup(_screwSkinRecord);
+        InitBackGroundToggleGroup(crBackGround,_bgRecords);
+        InitBoardToggleGroup(crBoardColor,_boardRecord);
+        InitScrewColorToggleGroup(crScrewSkin,_screwSkinRecord);
+        bgToggle.isOn = true;
     }
     public override void OnStartShowDialog()
     {
@@ -81,7 +92,7 @@ public class CollectionDialog : BaseDialog
          {
          }*/
     }
-    private void InitBackGroundToggleGroup(List<CollectionConfigRecord> records)
+    private void InitBackGroundToggleGroup(BackGroundData crBackGround,List<CollectionConfigRecord> records)
     {
         List<CollectionItem> items = new List<CollectionItem>(_toggleBGs.GetComponentsInChildren<CollectionItem>());
         Debug.Log(" collection item count " + items.Count);
@@ -90,12 +101,13 @@ public class CollectionDialog : BaseDialog
         {
             string spriteName = records[i].iconName;
             var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
-            items[i].Init(i, sprite);
+            bool isToggleOn = spriteName.CompareTo(crBackGround.name) == 0;
+            Debug.Log($"Init BackGround Toggle Group id{i} and isToggleOn:{isToggleOn}");
+            items[i].Init(i, sprite, isToggleOn,CollectionLable.BackGround);
         }
-        items[0].Toggle.onValueChanged.Invoke(true);
 
     }
-    private void InitBoardToggleGroup(List<CollectionConfigRecord> records)
+    private void InitBoardToggleGroup(BoardColorData crBoardColor, List<CollectionConfigRecord> records)
     {
         List<CollectionItem> items = new List<CollectionItem>(_toggleBoardColors.GetComponentsInChildren<CollectionItem>());
         Debug.Log(" collection item count " + items.Count);
@@ -105,25 +117,32 @@ public class CollectionDialog : BaseDialog
         {
             string spriteName = records[i].iconName;
             var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
-            items[i].Init(i, sprite);
+            bool isToggleOn = spriteName.CompareTo(crBoardColor.name) == 0;
+            Debug.Log($"Init Board Toggle Group id{i} and isToggleOn:{isToggleOn}");
+
+            items[i].Init(i, sprite, isToggleOn, CollectionLable.BoardColor);
+
         }
-        items[0].Toggle.onValueChanged.Invoke(true);
     }
-    private void InitScrewColorToggleGroup(List<CollectionConfigRecord> records)
+    private void InitScrewColorToggleGroup(ScrewSkinData crScrewSkin, List<CollectionConfigRecord> records)
     {
         List<CollectionItem> items = new List<CollectionItem>(_toggleScrews.GetComponentsInChildren<CollectionItem>());
         Debug.Log(" collection item count " + items.Count);
         if (records.Count <= 0) return;
+
         for (int i = 0; i < records.Count; i++)
         {
             string spriteName = records[i].iconName;
             var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
-            items[i].Init(i, sprite);
+            bool isToggleOn = spriteName.CompareTo(crScrewSkin.name) == 0;
+            Debug.Log($"{i} and isToggleOn:{isToggleOn}");
+
+            items[i].Init(i, sprite, isToggleOn, CollectionLable.Screw);
         }
-        items[0].Toggle.onValueChanged.Invoke(true);
     }
     void BoardColorClicked(bool isChangedValue)
     {
+        boardToggle.interactable = !isChangedValue;
         boardGroup.gameObject.SetActive(isChangedValue);
         bgGroup.gameObject.SetActive(!isChangedValue);
         screwGroup.gameObject.SetActive(!isChangedValue);
@@ -131,6 +150,8 @@ public class CollectionDialog : BaseDialog
     }
     void BackGroundClicked(bool isChangedValue)
     {
+        bgToggle.interactable = !isChangedValue;
+
         bgGroup.gameObject.SetActive(isChangedValue);
         boardGroup.gameObject.SetActive(!isChangedValue);
         screwGroup.gameObject.SetActive(!isChangedValue);
@@ -138,14 +159,16 @@ public class CollectionDialog : BaseDialog
     }
     void ScrewColorClicked(bool isChangedValue)
     {
+
+        screwToggle.interactable = !isChangedValue;
         screwGroup.gameObject.SetActive(isChangedValue);
         bgGroup.gameObject.SetActive(!isChangedValue);
         boardGroup.gameObject.SetActive(!isChangedValue);
     }
 
-    void SwitchButtonChose(CollectionLable lable)
+    public void OnCloseButton()
     {
+        DialogManager.Instance.HideDialog(dialogIndex);
     }
-
 
 }

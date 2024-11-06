@@ -16,6 +16,8 @@ public enum DialogIndex
     BreakDialog,
     LevelDialog,
     CollectionDialog,
+    SpecialDialog,
+    AdsRemoveDialog,
 }
 
 public class DialogParam
@@ -99,11 +101,34 @@ public class AddItemDialogParam : DialogParam
 public class CollectionDialogParam : DialogParam
 {
     public CollectionConfig collection;
+    public ScrewSkinData currentSkin;
+    public BackGroundData currentBG;
+    public BoardColorData currentBoard;
     public List<ScrewSkinData> skinData;    
     public List<BackGroundData> backGround;
     public List<BoardColorData> BoardColor;
 
 }
+public class AdsRemoveParam : DialogParam
+{
+    public bool isPaid;
+
+    public float price;
+    public string currency;
+
+}
+public class SpecialDialogParam : DialogParam
+{
+    public bool isPaymentAvailable;
+    public bool isPaid;
+
+    public string time;
+    public float price;
+    public string currency;
+    public List<ShopItem> specialItems;
+
+}
+
 
 public class DialogConfig
 {
@@ -121,5 +146,7 @@ public class DialogConfig
         DialogIndex.BreakDialog,
         DialogIndex.LevelDialog,
         DialogIndex.CollectionDialog,
+        DialogIndex.SpecialDialog,
+        DialogIndex.AdsRemoveDialog,
     };
 }

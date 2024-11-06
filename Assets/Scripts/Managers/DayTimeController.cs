@@ -12,10 +12,12 @@ public class DayTimeController : MonoBehaviour
     public bool isNewDay;
     public string lastCheckedTimeCard;
     public UnityEvent<bool> newDateEvent = new UnityEvent<bool>();
+    [SerializeField] private DateTime targetDateTime;
 
     private void Awake()
     {
         instance = this;
+        targetDateTime = DateTime.Now.AddDays(1);
     }
     // Update is called once per frsame
     public  IEnumerator InitCouroutine()
@@ -85,5 +87,20 @@ public class DayTimeController : MonoBehaviour
         }
         
     }
-
+    public void DayTimeCounter(string targetDateTimeString, Text countdownText)
+    {
+        // Parse the target date and time
+        if (DateTime.TryParse(targetDateTimeString, out targetDateTime))
+        {
+            // Check if the target time is in the future
+            if (targetDateTime <= DateTime.Now)
+            {
+                countdownText.text = "The target date and time has passed.";
+            }
+        }
+        else
+        {
+            Debug.LogError("Invalid date and time format.");
+        }
+    }
 }

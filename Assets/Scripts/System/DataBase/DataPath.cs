@@ -22,8 +22,11 @@ public class DataPath
     public const string ISSPIN =  SPINDATA +"/isSpin";
     public const string TIMESPIN = SPINDATA+ "/timeSpin";
     internal static readonly string NEWPLAYER = "userInfo/isNewPlayer";
-    public const string BACKGROUND = "/backGroundDict";
-    public const string BOARDCOLOR = "/boardColorDict";
-    public const string SCREWCOLOR = "/screwColorDict";
+    public const string CRBACKGROUND = "collectionData/currentBG";
+    public const string CRBOARDCOLOR = "collectionData/currentBoard";
+    public const string CRSCREWCOLOR = "collectionData/currentScrew";
+    public const string BACKGROUND = "collectionData/backGroundDict";
+    public const string BOARDCOLOR = "collectionData/boardColorDict";
+    public const string SCREWCOLOR = "collectionData/screwColorDict";
 
 }

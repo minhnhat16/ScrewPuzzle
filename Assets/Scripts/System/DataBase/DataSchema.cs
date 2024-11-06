@@ -93,9 +93,9 @@ public class CollectionData
     [SerializeField]
     public BackGroundData currentBG;
     [SerializeField]
-    public BackGroundData currentBoard;
+    public BoardColorData currentBoard;
     [SerializeField]
-    public BackGroundData currentScrew;
+    public ScrewSkinData currentScrew;
 
     [SerializeField]
     public Dictionary<string, BackGroundData> backGroundDict;

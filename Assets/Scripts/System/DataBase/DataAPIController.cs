@@ -70,10 +70,67 @@ namespace System.DataBase
             SaveGold(goldWallet, callback);
         }
 
+
+
+        public void SetCurrentScrewData(ScrewSkinData newSkin, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.CRSCREWCOLOR, newSkin, callback);
+        }
+        public void SetCurrentBoardData(BoardColorData newBoardColor, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.CRBOARDCOLOR, newBoardColor, callback);
+        }
+
+        public void SetCurrentBackGroundData(BackGroundData newBackground, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.CRBACKGROUND, newBackground, callback);
+        }
+        public ScrewSkinData GetCurrentScrewData()
+        {
+            var screwSkinData = dataModel.ReadData<ScrewSkinData>(DataPath.CRSCREWCOLOR);
+            Debug.LogWarning("Screw Skin data" + screwSkinData.name);
+            return screwSkinData;
+        }
+        public BackGroundData GetCurrentBackGroundData()
+        {
+            var backGroundData = dataModel.ReadData<BackGroundData>(DataPath.CRBACKGROUND);
+            Debug.LogWarning("Back Ground data" + backGroundData.name);
+            return backGroundData;
+        }
+        public BoardColorData GetCurrentBoardData()
+        {
+            var boardColorData = dataModel.ReadData<BoardColorData>(DataPath.CRBOARDCOLOR);
+            Debug.LogWarning("Board Color data" + boardColorData.name);
+            return boardColorData;
+        }
         public Dictionary<string, ScrewSkinData> GetAllScrewSkinData()
         {
             var screwSkinData = dataModel.ReadData<Dictionary<string, ScrewSkinData>>(DataPath.SCREWCOLOR);
             return screwSkinData;
+        }
+
+        public Dictionary<string, BackGroundData> GetAllBackGroundData()
+        {
+            var backGroundData = dataModel.ReadData<Dictionary<string, BackGroundData>>(DataPath.BACKGROUND);
+            return backGroundData;
+        }
+        public Dictionary<string, BoardColorData> GetAllScrewBoardColorData()
+        {
+            var boardColorData = dataModel.ReadData<Dictionary<string, BoardColorData>>(DataPath.BOARDCOLOR);
+            return boardColorData;
+        }
+
+        public void UpdateScrewSkinData(ScrewSkinData newData, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.SCREWCOLOR, newData, callback);
+        }
+        public void UpdateBoardColorData(BoardColorData newData, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.BOARDCOLOR, newData, callback);
+        }
+        public void UpdateBackGroundData(BackGroundData newData, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.BACKGROUND, newData, callback);
         }
 
         internal object GetBoardData()
@@ -161,24 +218,24 @@ namespace System.DataBase
             });
 
         }
-       /* public void AddGem(int add)
-        {
-            CurrencyWallet gem = GetGemWallet();
-            gem.amount += add;
-            SaveGem(gem, null);
-        }
-        public void SaveGem(CurrencyWallet gem, Action<bool> callback)
-        {
-            dataModel.UpdateData(DataPath.GEMINVENT, gem, () =>
-            {
-                callback?.Invoke(true);
-                DataTrigger.TriggerValueChange(DataPath.GEMINVENT, gem);
-                return;
-            });
-            callback?.Invoke(false);
+        /* public void AddGem(int add)
+         {
+             CurrencyWallet gem = GetGemWallet();
+             gem.amount += add;
+             SaveGem(gem, null);
+         }
+         public void SaveGem(CurrencyWallet gem, Action<bool> callback)
+         {
+             dataModel.UpdateData(DataPath.GEMINVENT, gem, () =>
+             {
+                 callback?.Invoke(true);
+                 DataTrigger.TriggerValueChange(DataPath.GEMINVENT, gem);
+                 return;
+             });
+             callback?.Invoke(false);
 
-        }*/
-#endregion
+         }*/
+        #endregion
 
         #region daytimedata
 
@@ -198,8 +255,8 @@ namespace System.DataBase
         }
         public ItemData GetItemData(ItemType type)
         {
-            var itemData = dataModel.ReadDictionary<ItemData>(DataPath.ITEMDICT,type.ToString());
-            return itemData ??null;
+            var itemData = dataModel.ReadDictionary<ItemData>(DataPath.ITEMDICT, type.ToString());
+            return itemData ?? null;
         }
         public int GetItemDataTotal(ItemType type)
         {
@@ -211,14 +268,14 @@ namespace System.DataBase
             //Debug.Log("GetItemTotal");
             ItemData itemData = GetItemData(type);
             int total = itemData.total;
-            if(total < 0) total = 0;
+            if (total < 0) total = 0;
             //Debug.Log($"TOTAL ITEM{itemData.id} {total}");
             return total;
         }
         public void AddItemTotal(ItemType type, int inTotal)
         {
-            int total  = GetItemTotal(type) + inTotal;
-    
+            int total = GetItemTotal(type) + inTotal;
+
             SetItemTotal(type, total);
         }
         public void SetItemTotal(ItemType type, int inTotal)
@@ -234,8 +291,8 @@ namespace System.DataBase
             dataModel.UpdateData(subPath, itemData, () =>
             {
                 return;
-            }); 
-  
+            });
+
         }
 
         private static string SubPathForItem(ItemType type)
@@ -357,10 +414,10 @@ namespace System.DataBase
 
         public List<LevelData> GetAllLevelData()
         {
-            var listLevelData =  dataModel.ReadData<List<LevelData>>(DataPath.ALLLEVEL);
+            var listLevelData = dataModel.ReadData<List<LevelData>>(DataPath.ALLLEVEL);
             return listLevelData ?? new List<LevelData>();
         }
-        public void SaveNewLevelData(LevelData data,Action callback = null)
+        public void SaveNewLevelData(LevelData data, Action callback = null)
         {
             var levelsData = GetAllLevelData();
             levelsData.Add(data);

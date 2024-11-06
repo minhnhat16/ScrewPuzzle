@@ -14,6 +14,8 @@ namespace UIScript.UI.UI
         [SerializeField] private Button levelButton;
         [SerializeField] private Button rateButton;
         [SerializeField] private Button skinButton;
+        [SerializeField] private Button specialButton;
+
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private int gold;
 
@@ -27,10 +29,11 @@ namespace UIScript.UI.UI
             rateButton.onClick.AddListener(RateButton);
             playBtn.onClick.AddListener(OnPlayButton);
             skinButton.onClick.AddListener(OnSkinButton);
+            specialButton.onClick.AddListener(OnClickSpecialButton);
 
         }
 
-       
+    
 
         private void OnDisable()
         {
@@ -77,10 +80,25 @@ namespace UIScript.UI.UI
         {
             CollectionDialogParam param = new();
             param.collection = ConfigFileManager.Instance.CollectionConfig;
-            //var screwCollectionData = DataAPIController.instance.GetAllScrewSkinData();
-            //var boardCollectionData = DataAPIController.instance.GetBoardData();
+            param.currentSkin = DataAPIController.instance.GetCurrentScrewData();
+            param.currentBG = DataAPIController.instance.GetCurrentBackGroundData();
+            param.currentBoard = DataAPIController.instance.GetCurrentBoardData();
             DialogManager.Instance.ShowDialog(DialogIndex.CollectionDialog, param, null);
 
+        }
+
+        private void OnClickSpecialButton()
+        {
+            SpecialDialogParam param = new();
+            param.isPaymentAvailable = true;
+            param.isPaid = false;
+
+            param.time = DateTime.Now.ToString();
+            param.price = 600000;
+            param.currency = "VND";
+            List<ShopItem> specialItems = new List<ShopItem>();
+          
+            DialogManager.Instance.ShowDialog(DialogIndex.SpecialDialog, param, null);
         }
         private void RateButton()
         {
