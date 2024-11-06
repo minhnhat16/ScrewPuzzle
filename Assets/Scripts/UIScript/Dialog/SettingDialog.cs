@@ -39,7 +39,7 @@ public class SettingDialog : BaseDialog
     public override void Setup(DialogParam dialogParam)
     {
         SettingParam param = dialogParam as SettingParam;
-        isMainScreen = param.isMainScreen;
+        //isMainScreen = param.isMainScreen;
 //        below.gameObject.SetActive(!param.isMainScreen);
     }
     public override void OnStartShowDialog()

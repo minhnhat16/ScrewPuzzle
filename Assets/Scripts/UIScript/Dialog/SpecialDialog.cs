@@ -14,9 +14,14 @@ public class SpecialDialog : BaseDialog
     [SerializeField] private string currency;
     [SerializeField] private List<ShopItem> _shopItem;
     [SerializeField] Button onPurchaceButton;
+    [SerializeField] Button closeBtn;
     [SerializeField] Text timeCounter;
     [SerializeField] Text priceLable;
     [SerializeField] Action<bool> onPaymentHasDone;
+    public void OnEnable()
+    {
+        closeBtn.onClick.AddListener(CloseDialog);
+    }
     public override void Setup(DialogParam dialogParam)
     {
         SpecialDialogParam param = dialogParam as SpecialDialogParam;
@@ -61,5 +66,9 @@ public class SpecialDialog : BaseDialog
         {
             DataAPIController.instance.AddItemTotal(item.Type,item.Quantity);
         }
+    }
+    public void CloseDialog()
+    {
+        DialogManager.Instance.HideDialog(dialogIndex);
     }
 }

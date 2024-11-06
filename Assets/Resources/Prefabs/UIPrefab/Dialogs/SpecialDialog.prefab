@@ -938,7 +938,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8db54f2be3b8b4438c594d6c3ee6e54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialogIndex: 0
+  dialogIndex: 13
   baseDialogAnim: {fileID: 1716474508979534035}
   isPaymentAvailable: 0
   isPaid: 0
@@ -947,6 +947,7 @@ MonoBehaviour:
   currency: 
   _shopItem: []
   onPurchaceButton: {fileID: 3372990936116987867}
+  closeBtn: {fileID: 4723715605125788734}
   timeCounter: {fileID: 4396790345413804560}
   priceLable: {fileID: 6372767447864637199}
 --- !u!1 &6811342427867173734
@@ -1438,6 +1439,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6beec09b669ed354ab11b00b2233aed8, type: 3}
+--- !u!114 &4723715605125788734 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7380777902955762379, guid: 6beec09b669ed354ab11b00b2233aed8, type: 3}
+  m_PrefabInstance: {fileID: 2874361117298583285}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &4946557991890486592 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7153541930532889525, guid: 6beec09b669ed354ab11b00b2233aed8, type: 3}

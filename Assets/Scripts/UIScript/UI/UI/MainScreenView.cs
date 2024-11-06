@@ -15,6 +15,7 @@ namespace UIScript.UI.UI
         [SerializeField] private Button rateButton;
         [SerializeField] private Button skinButton;
         [SerializeField] private Button specialButton;
+        [SerializeField] private Button settingButton;
 
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private int gold;
@@ -30,7 +31,7 @@ namespace UIScript.UI.UI
             playBtn.onClick.AddListener(OnPlayButton);
             skinButton.onClick.AddListener(OnSkinButton);
             specialButton.onClick.AddListener(OnClickSpecialButton);
-
+            settingButton.onClick.AddListener(OnClickSettingButton);
         }
 
     
@@ -125,8 +126,11 @@ namespace UIScript.UI.UI
 
             ViewManager.Instance.SwitchView(ViewIndex.CollectionView);
         }
-     
 
+        private void OnClickSettingButton()
+        {
+            DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog);
+        }
         public void ShopButton()
         {
             var param = new  ShopViewParam();
