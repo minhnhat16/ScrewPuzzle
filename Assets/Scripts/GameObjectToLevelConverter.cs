@@ -108,7 +108,10 @@ public class GameObjectToLevelConverter : MonoBehaviour
         LoadLevel();
         Debug.Log("Level data saved as ScriptableObject: " + assetPath);
     }
+    public void ResetScrew()
+    {
 
+    }
     public Level.Level CreateLevelData(Level.Level newLevelData)
     {
         newLevelData.levelId = nextLevelId++;
@@ -186,6 +189,48 @@ public class GameObjectToLevelConverter : MonoBehaviour
         }
         // Save the new level data as a ScriptableObject in the Resources folder
         return newLevelData;
+    }
+    public void ResetLevelData(Level.Level levelData)
+    {
+        if (levelData == null)
+        {
+            Debug.LogWarning("The level data to reset is null.");
+            return;
+        }
+
+        // Reset the level ID
+        levelData.levelId = 0;
+
+        // Clear all layers
+        if (levelData.layers != null)
+        {
+            foreach (var layer in levelData.layers)
+            {
+                // Clear parts from each layer
+                if (layer.parts != null)
+                {
+                    layer.parts.Clear();
+                }
+            }
+            levelData.layers.Clear();
+        }
+
+        // Clear screws
+        if (levelData.screws != null)
+        {
+            foreach (var screw in levelData.screws)
+            {
+                // Clear hinge connections for each screw
+                if (screw.hingeConnections != null)
+                {
+                    screw.hingeConnections.Clear();
+                }
+            }
+            levelData.screws.Clear();
+        }
+
+        // Optionally reset other properties or references if needed
+        Debug.Log("Level data has been reset.");
     }
 
     public Dictionary<int, int> GetScrewCountByColor(Level.Level level)
@@ -405,7 +450,11 @@ public class GameObjectToLevelConverter : MonoBehaviour
             Destroy(child.gameObject);
         }
     }
-
+    public void ResetScrewHinge()
+    {
+        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        screwManager.ResetHinge();
+    }
     public void SpawnScrew()
     {
         if (LevelMaker.instance.isInputData) return;
@@ -426,6 +475,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         }
 
         screw.transform.position = new Vector3(-5, 0, 0);
+        screwManager.AppendScrew(screwComp);
     }
 
     public void SpawnPart()

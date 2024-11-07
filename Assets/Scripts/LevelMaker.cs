@@ -210,7 +210,10 @@ public class LevelMaker : MonoBehaviour
           
         }
     }
-
+    public void ResetAllScrewHinge()
+    {
+        
+    }
     public void SetEditMode(EditMode mode)
     {
         isEditScrewPosition = (mode == EditMode.ScrewPosition);
