@@ -58,18 +58,24 @@ public class BuyConfirmDialogParam : DialogParam
 }
 public class SettingParam : DialogParam
 {
+    public int totalGold;
     public bool isMainScreen;
+    public string title;
 }
 
 public class DailyParam : DialogParam
 {
     int currenReward;
+    public int totalGold;
+
     public DailyData data;
     public DailyRewardConfig config;
 }
 
 public class RateParam : DialogParam
 {
+    public int totalGold;
+
 }
 
 public class PickCardParam : DialogParam
@@ -93,6 +99,7 @@ public class WinParam : DialogParam
 }
 public class AddItemDialogParam : DialogParam
 {
+    public int totalGold;
     public ItemType ItemType;
     public bool IsAdsAvailable;
     public int ItemPrice;
@@ -100,6 +107,7 @@ public class AddItemDialogParam : DialogParam
 }
 public class CollectionDialogParam : DialogParam
 {
+    public int totalGold;
     public CollectionConfig collection;
     public ScrewSkinData currentSkin;
     public BackGroundData currentBG;
@@ -111,10 +119,12 @@ public class CollectionDialogParam : DialogParam
 }
 public class AdsRemoveParam : DialogParam
 {
+    public bool isPaymentAvailable;
     public bool isPaid;
 
     public float price;
     public string currency;
+    public int totalGold;
 
 }
 public class SpecialDialogParam : DialogParam
@@ -125,6 +135,8 @@ public class SpecialDialogParam : DialogParam
     public string time;
     public float price;
     public string currency;
+    public int totalGold;
+
     public List<ShopItem> specialItems;
 
 }

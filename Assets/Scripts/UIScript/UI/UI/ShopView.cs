@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using ConfigFile;
@@ -34,8 +35,10 @@ namespace UIScript.UI.UI
             
             var packItemConfigLists =  ConfigFileManager.Instance.PackConfig.GetAllRecord();
             LoadPackFormConfig(packItemConfigLists);
-            closeButton.onClick.AddListener(()=> ViewManager.Instance.SwitchView(ViewIndex.MainScreenView));
+            closeButton.onClick.AddListener(CloseButton);
         }
+
+      
         public override void Setup(ViewParam param)
         {
             var newParam = (ShopViewParam)param;
@@ -90,6 +93,13 @@ namespace UIScript.UI.UI
                 packItem.PurchaseButton.onClick.AddListener(()=>OnPackItemPurchase(packItem));
             }
         }
+        private void CloseButton()
+        {
+            MainScreenViewParam param = new MainScreenViewParam();
+            param.totalGold = DataAPIController.instance.GetGold();
+            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
+        }
+
         private void OnShopItemPurchase(ShopItem shopItem)
         {
             // Your purchase logic here

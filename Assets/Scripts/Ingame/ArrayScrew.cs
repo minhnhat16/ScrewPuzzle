@@ -66,7 +66,7 @@ namespace Ingame
             hold.gameObject.SetActive(true);  // Activate the new hold
             HoldAlignment();
         }
-         internal void HoldAlignment()
+        internal void HoldAlignment()
         {
             if (holdScrews.Count == 0) return;
 
@@ -135,6 +135,7 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()
         {
+            Debug.Log("Screw full event");
             IngameController.Instance.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
@@ -142,16 +143,16 @@ namespace Ingame
         {
             while (true)
             {
-
                 // Kiểm tra nếu tất cả các ô đều đầy
-                bool allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
+                var actvieHold = holdScrews.FindAll(hold => hold.gameObject.activeInHierarchy);
+                bool allFull = screws.Count >= actvieHold.Count;
                 if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
                     yield return new WaitForSeconds(2f); // Chờ 2 giây để chắc chắn
 
                     // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
-                    allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
+                    allFull = screws.Count >= actvieHold.Count;
 
                     if (allFull)
                     {
@@ -244,13 +245,14 @@ namespace Ingame
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
                 yield return null;
             }
-
+            screws.Clear();
             foreach (var hold in holdScrews)
             {
                 hold.ClearScrewOnHold();
                 yield return null;
 
             }
+
         }
         public void ClearScrewOnArray()
         {

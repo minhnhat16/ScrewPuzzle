@@ -17,7 +17,7 @@ public class DayTimeController : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        targetDateTime = DateTime.Now.AddDays(1);
+        targetDateTime = DateTime.Now.AddDays(2);
     }
     // Update is called once per frsame
     public  IEnumerator InitCouroutine()
@@ -87,20 +87,62 @@ public class DayTimeController : MonoBehaviour
         }
         
     }
-    public void DayTimeCounter(string targetDateTimeString, Text countdownText)
+    public void StartCountingTime(string targetDateTimeString, Text countdownText)
     {
+        StartCoroutine(CountingTime(targetDateTimeString, countdownText));
+
+    }
+    IEnumerator CountingTime(string targetDateTimeString, Text countdownText)
+    {
+        DateTime targetDateTime;
+
         // Parse the target date and time
         if (DateTime.TryParse(targetDateTimeString, out targetDateTime))
         {
-            // Check if the target time is in the future
-            if (targetDateTime <= DateTime.Now)
+            while (true)
             {
-                countdownText.text = "The target date and time has passed.";
+                // Calculate the time remaining
+                TimeSpan countdown = targetDateTime - DateTime.Now;
+
+                if (countdown.TotalSeconds > 0)
+                {
+                    // Display the countdown in "dd:hh:mm:ss" format
+                    countdownText.text = "Time remaining: " + countdown.ToString(@"hh\:mm\:ss");
+                }
+                else
+                {
+                    countdownText.text = "The countdown has ended.";
+                    yield break; // Exit the coroutine when countdown ends
+                }
+
+                // Wait for a second before updating again
+                yield return new WaitForSeconds(1f);
             }
         }
         else
         {
-            Debug.LogError("Invalid date and time format.");
+            countdownText.text = "Invalid date and time format.";
         }
     }
+
+    //public void DayTimeCounter()
+    //{
+    //    // Parse the target date and time
+    //    if (DateTime.TryParse(targetDateTimeString, out targetDateTime))
+    //    {
+    //        // Check if the target time is in the future
+    //        if (targetDateTime <= DateTime.Now)
+    //        {
+    //            countdownText.text = "The target date and time has passed.";
+    //        }
+    //        else
+    //        {
+    //            StartCoroutine(CountingTime());
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Debug.LogError("Invalid date and time format.");
+    //    }
+    ////}
 }

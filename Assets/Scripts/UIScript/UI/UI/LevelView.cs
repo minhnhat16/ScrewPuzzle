@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UI;
@@ -51,7 +52,9 @@ namespace UIScript.UI.UI
 
         private void CloseView()
         {
-            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
+            MainScreenViewParam param = new();
+            param.totalGold = DataAPIController.instance.GetGold(); 
+            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView,param);
         }
     }
 }

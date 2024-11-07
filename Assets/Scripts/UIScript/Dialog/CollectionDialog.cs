@@ -11,6 +11,7 @@ public class CollectionDialog : BaseDialog
 
     private int gold;
     private int gem;
+    public GoldDisplay goldDisplay;
     public RectTransform bgGroup;
     public RectTransform boardGroup;
     public RectTransform screwGroup;
@@ -70,9 +71,12 @@ public class CollectionDialog : BaseDialog
         var crScrewSkin = param.currentSkin;
         var crBoardColor = param.currentBoard;
 
+        goldDisplay.SetGoldToLable(param.totalGold);
+
         InitBackGroundToggleGroup(crBackGround,_bgRecords);
         InitBoardToggleGroup(crBoardColor,_boardRecord);
         InitScrewColorToggleGroup(crScrewSkin,_screwSkinRecord);
+
         bgToggle.isOn = true;
     }
     public override void OnStartShowDialog()
@@ -168,6 +172,7 @@ public class CollectionDialog : BaseDialog
 
     public void OnCloseButton()
     {
+        
         DialogManager.Instance.HideDialog(dialogIndex);
     }
 

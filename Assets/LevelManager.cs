@@ -7,6 +7,7 @@ using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -123,7 +124,10 @@ public class LevelManager : MonoBehaviour
                 {
                     StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
                     {
-                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView);
+                        int userGold = DataAPIController.instance.GetGold();
+                        GamePlayViewParam param = new();
+                        param.totalGold = userGold;
+                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView,param);
                     }));
                 });
         });

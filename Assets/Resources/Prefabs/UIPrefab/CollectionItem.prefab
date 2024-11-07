@@ -283,6 +283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   index: 0
   isLock: 0
+  type: 0
   img: {fileID: 7551850074603350476}
   lockImage: {fileID: 0}
   toggle: {fileID: 4132537887622299802}
@@ -329,7 +330,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 7551850074603350476}
   toggleTransition: 1
   graphic: {fileID: 9119841425569205036}
@@ -337,5 +338,5 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 1
+  m_IsOn: 0
   checkIcon: {fileID: 0}

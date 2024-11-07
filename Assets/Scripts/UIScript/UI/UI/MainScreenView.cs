@@ -1,3 +1,4 @@
+using Managers;
 using System;
 using System.Collections.Generic;
 using System.DataBase;
@@ -16,7 +17,8 @@ namespace UIScript.UI.UI
         [SerializeField] private Button skinButton;
         [SerializeField] private Button specialButton;
         [SerializeField] private Button settingButton;
-
+        [SerializeField] private Button adsRemover;
+        [SerializeField] private Text goldLB;
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private int gold;
 
@@ -32,9 +34,10 @@ namespace UIScript.UI.UI
             skinButton.onClick.AddListener(OnSkinButton);
             specialButton.onClick.AddListener(OnClickSpecialButton);
             settingButton.onClick.AddListener(OnClickSettingButton);
+            adsRemover.onClick.AddListener(OnClickAdsRemover);
         }
 
-    
+      
 
         private void OnDisable()
         {
@@ -65,7 +68,16 @@ namespace UIScript.UI.UI
         {
             base.Setup(viewParam);
 
+            MainScreenViewParam param = viewParam as MainScreenViewParam;
+            int userGold = gold = param.totalGold;
+
+            SetUpGold(userGold);
             SetLevelPanelIs(true);
+        }
+
+        private void SetUpGold(int userGold)
+        {
+            goldLB.text = GameManager.instance.DevideCurrency(userGold);
         }
         private void OnDailyReward()
         {
@@ -74,16 +86,21 @@ namespace UIScript.UI.UI
             {
                 config = ConfigFileManager.Instance.DailyRewardConfig,
                 data = DataAPIController.instance.GetDailyData(),
+                totalGold = DataAPIController.instance.GetGold(),
             };
-            DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog,param, null);
+            DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog, param, null);
         }
         private void OnSkinButton()
         {
-            CollectionDialogParam param = new();
-            param.collection = ConfigFileManager.Instance.CollectionConfig;
-            param.currentSkin = DataAPIController.instance.GetCurrentScrewData();
-            param.currentBG = DataAPIController.instance.GetCurrentBackGroundData();
-            param.currentBoard = DataAPIController.instance.GetCurrentBoardData();
+            CollectionDialogParam param = new()
+            {
+                collection = ConfigFileManager.Instance.CollectionConfig,
+                currentSkin = DataAPIController.instance.GetCurrentScrewData(),
+                currentBG = DataAPIController.instance.GetCurrentBackGroundData(),
+                currentBoard = DataAPIController.instance.GetCurrentBoardData(),
+                totalGold = DataAPIController.instance.GetGold(),
+            };
+
             DialogManager.Instance.ShowDialog(DialogIndex.CollectionDialog, param, null);
 
         }
@@ -94,11 +111,12 @@ namespace UIScript.UI.UI
             param.isPaymentAvailable = true;
             param.isPaid = false;
 
-            param.time = DateTime.Now.ToString();
+            param.time = DateTime.Now.AddDays(2).ToString();
             param.price = 600000;
             param.currency = "VND";
+            param.totalGold = DataAPIController.instance.GetGold();
             List<ShopItem> specialItems = new List<ShopItem>();
-          
+
             DialogManager.Instance.ShowDialog(DialogIndex.SpecialDialog, param, null);
         }
         private void RateButton()
@@ -109,17 +127,17 @@ namespace UIScript.UI.UI
         public override void OnInit(Action callback)
         {
             levelPanel.Init(callback);
-       
+
         }
         public void SetLevelPanelIs(bool isOn)
         {
         }
         private void OnPlayButton()
         {
-            int currentLevel =   LevelManager.Instance.currentLevelID;
+            int currentLevel = LevelManager.Instance.currentLevelID;
             LevelManager.Instance.LoadLevel(currentLevel);
         }
-    
+
         public void SpinView()
         {
             ///Debug.Log("View SPin Button");
@@ -129,13 +147,30 @@ namespace UIScript.UI.UI
 
         private void OnClickSettingButton()
         {
-            DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog);
+            SettingParam param = new();
+            param.isMainScreen = viewIndex.Equals(ViewIndex.MainScreenView);
+            param.totalGold = DataAPIController.instance.GetGold();
+            if (param.totalGold == null) Debug.Log("total gold is null");
+            param.title = "SETTING";
+            DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param);
         }
         public void ShopButton()
         {
-            var param = new  ShopViewParam();
+            var param = new ShopViewParam();
             param.gold = gold;
-            ViewManager.Instance.SwitchView(ViewIndex.ShopView,param);
+            ViewManager.Instance.SwitchView(ViewIndex.ShopView, param);
+        }
+        private void OnClickAdsRemover()
+        {
+            AdsRemoveParam param = new();
+            param.isPaymentAvailable = true;
+            param.isPaid = false;
+
+            param.price = 600000;
+            param.currency = "VND";
+            param.totalGold = DataAPIController.instance.GetGold();
+
+            DialogManager.Instance.ShowDialog(DialogIndex.AdsRemoveDialog, param, null);
         }
         private void LevelButton()
         {
@@ -146,7 +181,7 @@ namespace UIScript.UI.UI
             foreach (var levelConfig in levelsConfig)
             {
                 int id = levelConfig.levelId;
-                var currentLevel= levelData.Find((data)=>data.levelID == id);
+                var currentLevel = levelData.Find((data) => data.levelID == id);
                 bool isComplete = currentLevel?.isCompleted == true;
 
                 Debug.LogError($"CURRENT LEVEL {id} DATA {currentLevel} and isComplete {isComplete}");

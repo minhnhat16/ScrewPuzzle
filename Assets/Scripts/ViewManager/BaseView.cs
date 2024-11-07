@@ -22,7 +22,9 @@ public class BaseView : MonoBehaviour
 
     }
 
-    public virtual void Setup(ViewParam viewParam) { }
+    public virtual void Setup(ViewParam viewParam) { 
+       if(viewParam == null ) return;
+    }
 
     public virtual void OnInit() { }
     public virtual void OnInit(Action callback) { }

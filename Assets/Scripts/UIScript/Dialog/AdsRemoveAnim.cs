@@ -1,14 +1,16 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class SpecialAnim : BaseDialogAnimation
+public class AdsRemoveAnim : BaseDialogAnimation
 {
     public Animator animator;
     private Action callback;
     public override void HideDialogAnimation(Action callback)
     {
         this.callback = callback;
-        animator.Play("SpecialHide"); 
+        animator.Play("SpecialHide");
     }
 
     public override void ShowDialogAnimation(Action callback)

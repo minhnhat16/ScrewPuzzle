@@ -3,19 +3,20 @@ using UnityEngine;
 
 namespace UIScript.Dialog
 {
-    public class LevelDialogAnim : BaseDialogAnimation
+    public class LevelAnim : BaseViewAnimation
+
     {
         public Animator animator;
         private Action _callback;
 
-        public override void HideDialogAnimation(Action callback)
+        public override void HideViewAnimation(Action callback)
         {
             this._callback = callback;
             //Debug.Log("RateHideAnim");
             animator.Play("LevelHideAnim");
         }
 
-        public override void ShowDialogAnimation(Action callback)
+        public override void ShowViewAnimation(Action callback)
         {
             this._callback = callback;
             //Debug.Log("RateShowAnim");
@@ -38,7 +39,6 @@ namespace UIScript.Dialog
         }
         public void RateCallBack()
         {
-            Debug.Log("RateCallBack");
             _callback?.Invoke();
         }
     }

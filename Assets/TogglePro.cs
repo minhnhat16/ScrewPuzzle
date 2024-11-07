@@ -11,6 +11,8 @@ public class TogglePro : Toggle
     {
         base.OnEnable();
         onValueChanged.AddListener(OnToggleValueChanged);
+        checkIcon.canvasRenderer.SetAlpha(isOn ? 1f : 0f);
+
     }
     protected override void OnDisable()
     {
