@@ -53,11 +53,13 @@ namespace Ingame
         }
         public void ShowArrayScrew()
         {
+            coutHoldActive = 5;
             spriteRenderer.enabled = true;
             for (int i = 0; i < coutHoldActive; i++)
             {
                 holdScrews[i].gameObject.SetActive(true);
             }
+            holdScrews[coutHoldActive].gameObject.SetActive(false);
         }
         public void SpawnNewHold()
         {
@@ -149,7 +151,7 @@ namespace Ingame
                 if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
-                    yield return new WaitForSeconds(2f); // Chờ 2 giây để chắc chắn
+                    yield return new WaitForSeconds(5f); // Chờ 2 giây để chắc chắn
 
                     // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
                     allFull = screws.Count >= actvieHold.Count;

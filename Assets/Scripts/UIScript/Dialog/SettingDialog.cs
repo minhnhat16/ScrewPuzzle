@@ -23,7 +23,8 @@ public class SettingDialog : BaseDialog
 
     [SerializeField] private Button homeButton;
 
-    [SerializeField] private Text goldLb;
+    [SerializeField] private GoldDisplay goldDisplay;
+
     [SerializeField] private Text titleLB;
     [SerializeField] RectTransform below;
     [HideInInspector]
@@ -53,7 +54,7 @@ public class SettingDialog : BaseDialog
         int userGold = param.totalGold;
         bool isMainScreen = param.isMainScreen;
         SetupButton(isMainScreen);
-        SetupGold(userGold);
+        goldDisplay.SetGoldToLable(userGold);
         //isMainScreen = param.isMainScreen;
         //        below.gameObject.SetActive(!param.isMainScreen);
     }
@@ -77,10 +78,7 @@ public class SettingDialog : BaseDialog
 
     }
 
-    public void SetupGold(int userGold)
-    {
-        goldLb.text = userGold.ToString();
-    }
+   
     public void HomeButton()
     {
        // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);

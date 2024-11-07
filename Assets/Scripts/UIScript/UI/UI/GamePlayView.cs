@@ -80,7 +80,7 @@ public class GamePlayView : BaseView
         base.Setup(viewParam);
         GamePlayViewParam param = viewParam as GamePlayViewParam;
 
-        int userGold = param.totalGold;
+        int userGold= gold = param.totalGold;
         goldDisplay.SetGoldToLable(userGold);
     }
     public void SetTimeCounter(DateTime time)
@@ -253,6 +253,7 @@ public class GamePlayView : BaseView
         //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_3);
         SettingParam param = new();
         param.isMainScreen = false;
+        param.totalGold = gold;
         param.title = "PAUSE";
         DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param, null);
     }
