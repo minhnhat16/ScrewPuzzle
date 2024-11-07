@@ -57,6 +57,17 @@ public class ScrewLevelMaker : Screw
         }
     }
 
+    internal void ResetHinge()
+    {
+        var allHinge = hingeController.HingeJoint2D;
+        foreach(var hinge in allHinge)
+        {
+            Destroy(hinge.gameObject);
+        }
+        hingeController.HingeJoint2D.Clear();
+        hingeController.BodyConnect.Clear();
+    }
+
     private void OnMouseClick()
     {
         if (!isSelecting)
@@ -120,6 +131,7 @@ public class ScrewLevelMaker : Screw
         isSelecting = false;
         ScrewChangeColorOnClick(true);
     }
+
 
     private void OnMouseHold()
     {
