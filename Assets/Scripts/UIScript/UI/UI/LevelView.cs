@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.DataBase;
+using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,7 +34,8 @@ namespace UIScript.UI.UI
 
             currentLevel = newParam.currentLevel;  
             levelItems = newParam.listLevelItems;
-            InitListLevelItem(levelItems);
+            var orderLevelItems = levelItems.OrderBy(item => item.IDLevel);
+            InitListLevelItem(orderLevelItems.ToList());
         }
 
         private void InitListLevelItem( List<LevelItem> items)

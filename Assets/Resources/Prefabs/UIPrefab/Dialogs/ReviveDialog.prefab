@@ -863,6 +863,7 @@ MonoBehaviour:
   acceptButton: {fileID: 3566679363633357473}
   denyButton: {fileID: 9210354235695315161}
   closeDialogButton: {fileID: 4025863293544959083}
+  goldDisplay: {fileID: 4696884676957710805}
 --- !u!1 &6591705218118000449
 GameObject:
   m_ObjectHideFlags: 0
@@ -1352,6 +1353,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e2ab47a6959aa148afe260a3acb143b, type: 3}
+--- !u!114 &4696884676957710805 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1938245008376050118, guid: 9e2ab47a6959aa148afe260a3acb143b, type: 3}
+  m_PrefabInstance: {fileID: 6613720952660793363}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5046d27b2f5f8eb458d73fbc7662c978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7876306429141553044 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3929085963493185415, guid: 9e2ab47a6959aa148afe260a3acb143b, type: 3}

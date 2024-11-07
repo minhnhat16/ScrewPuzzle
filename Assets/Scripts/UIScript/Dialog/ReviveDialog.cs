@@ -10,15 +10,19 @@ namespace UIScript.Dialog
         [SerializeField] Button acceptButton;
         [SerializeField] Button denyButton;
         [SerializeField] Button closeDialogButton;
+        [SerializeField] GoldDisplay goldDisplay;
 
-      
-            
+
+
         public override void Setup(DialogParam param)
         {
             ReviveDialogParam newParam = (ReviveDialogParam)param;
             if (newParam == null) return;
+            int userGold = newParam.totalGold;
             acceptButton.onClick.AddListener(AcceptedWatch);
             denyButton.onClick.AddListener(DenyWatch);
+
+            goldDisplay.SetGoldToLable(userGold);
         }
 
         public override void OnEndHideDialog()

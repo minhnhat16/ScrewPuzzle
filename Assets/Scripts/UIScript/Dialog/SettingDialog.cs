@@ -86,6 +86,7 @@ public class SettingDialog : BaseDialog
        // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
+            LevelManager.Instance.Reset();
             LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
             {
                 MainScreenViewParam param = new();
