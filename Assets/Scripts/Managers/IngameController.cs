@@ -15,6 +15,7 @@ namespace Managers
         public string playerLevel;
         [SerializeField] public bool isOnMagnet;
         [SerializeField] public bool isOnBomb;
+        [SerializeField] private bool isGameOver;
 
         [SerializeField] private float exp_Current;
         [SerializeField] private Player player;
@@ -42,6 +43,7 @@ namespace Managers
             set { exp_Current = value; }
         }
 
+        public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
 
         private Coroutine inputCoroutine;
 
@@ -304,6 +306,7 @@ namespace Managers
         public void OnGameOver()
         {
             // minuss 1 life heart
+            IsGameOver = true;
             int currentLevel = LevelManager.Instance.currentLevelID;
             Player.instance.CanClick = false;
             LevelManager.Instance.Reset();

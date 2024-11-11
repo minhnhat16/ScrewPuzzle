@@ -50,17 +50,9 @@ namespace Ingame
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             coutHoldActive = 5;
+            HoldAlignment();
         }
-        public void ShowArrayScrew()
-        {
-            coutHoldActive = 5;
-            spriteRenderer.enabled = true;
-            for (int i = 0; i < coutHoldActive; i++)
-            {
-                holdScrews[i].gameObject.SetActive(true);
-            }
-            holdScrews[coutHoldActive].gameObject.SetActive(false);
-        }
+
         public void SpawnNewHold()
         {
             coutHoldActive++;
@@ -68,7 +60,7 @@ namespace Ingame
             hold.gameObject.SetActive(true);  // Activate the new hold
             HoldAlignment();
         }
-        internal void HoldAlignment()
+        private void HoldAlignment()
         {
             if (holdScrews.Count == 0) return;
 
@@ -137,24 +129,24 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()
         {
-            Debug.Log("Screw full event");
             IngameController.Instance.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
         private IEnumerator CheckHoldCoroutine()
         {
-            while (true)
+            bool isGameOver = IngameController.Instance.IsGameOver;
+            while (!isGameOver)
             {
+
                 // Kiểm tra nếu tất cả các ô đều đầy
-                var actvieHold = holdScrews.FindAll(hold => hold.gameObject.activeInHierarchy);
-                bool allFull = screws.Count >= actvieHold.Count;
+                bool allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
                 if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
-                    yield return new WaitForSeconds(5f); // Chờ 2 giây để chắc chắn
+                    yield return new WaitForSeconds(2.5f); // Chờ 2 giây để chắc chắn
 
                     // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
-                    allFull = screws.Count >= actvieHold.Count;
+                    allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
 
                     if (allFull)
                     {
@@ -215,7 +207,7 @@ namespace Ingame
             else
             {
                 // Kiểm tra và tìm holdScrew trống
-                var holdScrew = holdScrews.FirstOrDefault(hold => hold.IsEmpty() && hold.isActiveAndEnabled);
+                var holdScrew = holdScrews.FirstOrDefault(hold => hold.IsEmpty());
 
                 // Kiểm tra nếu không còn holdScrew trống
                 if (holdScrew == null)
@@ -247,19 +239,12 @@ namespace Ingame
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
                 yield return null;
             }
-            screws.Clear();
+
             foreach (var hold in holdScrews)
             {
                 hold.ClearScrewOnHold();
                 yield return null;
 
-            }
-
-        }
-        public void ClearScrewOnArray()
-        {
-            foreach(var hold in holdScrews)
-            {
             }
         }
     }
