@@ -349,6 +349,8 @@ public class GameObjectToLevelConverter : MonoBehaviour
         currentLoadedLevel = levelId;
         // Clear existing GameObjects in levelObject to prepare for new loading
         var layerManager = levelObject.GetComponent<LayerManager>();
+        var baseLevel = levelObject.GetComponent<BaseLevelObject>();
+
         foreach (Transform child in levelObject.transform)
         {
             Destroy(child.gameObject);
@@ -410,6 +412,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
 
         // Instantiate the screw manager
         var screwManager = Instantiate(Resources.Load("Prefabs/ScrewManager"), levelObject.transform) as GameObject;
+        baseLevel.ScrewManager = screwManager.GetComponent<ScrewManager>();
         screwManager.transform.position = Vector3.zero;
         var screwTransform = screwManager.transform;
 
