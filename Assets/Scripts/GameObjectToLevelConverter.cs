@@ -180,7 +180,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     bodyPartUniqueID = $"{screw.HingeController.BodyConnect[i].GetComponent<BasePart>().uniqueID}",
                     bodyPartHingePosition = hinge.connectedBody.transform.localPosition,
                 };
-
+                i++;
                 listHingeObject.Add(hingeConnection);
             }
 

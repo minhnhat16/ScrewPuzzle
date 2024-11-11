@@ -60,7 +60,17 @@ namespace Ingame
             hold.gameObject.SetActive(true);  // Activate the new hold
             HoldAlignment();
         }
-        private void HoldAlignment()
+        public void ShowArrayScrew()
+        {
+            coutHoldActive = 5;
+            spriteRenderer.enabled = true;
+            for (int i = 0; i < coutHoldActive; i++)
+            {
+                holdScrews[i].gameObject.SetActive(true);
+            }
+            holdScrews[coutHoldActive].gameObject.SetActive(false);
+        }
+        public void HoldAlignment()
         {
             if (holdScrews.Count == 0) return;
 
@@ -68,7 +78,6 @@ namespace Ingame
             {
                 StopCoroutine(alignmentCoroutine);
             }
-
             alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine());
         }
 
