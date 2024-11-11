@@ -1,5 +1,5 @@
 using ConfigFile;
-using Enum;
+using Enums;
 using Ingame;
 using Ingame.Board;
 using Managers;
@@ -237,6 +237,15 @@ public class LevelManager : MonoBehaviour
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     /*if (sprite == null) Debug.LogWarning($" Sprite {partData.spriteName} null");*/
                     partComponent.Renderer.sprite = sprite;
+                    if (TryHexToColor(partData.colorString, out Color color))
+                    {
+                        Debug.Log($"Parsed Color: {color}");
+                        partComponent.Renderer.color = color;
+                    }
+                    else
+                    {
+                        Debug.LogError("Invalid Hex Color String");
+                    }
                     partComponent.GenerateColliderFromSprite();
                     partComponent.SetSortingLayer(partLayer);
                 }
@@ -305,5 +314,20 @@ public class LevelManager : MonoBehaviour
         ScrewManager.Reset();
 
         currentLevelObject = null;
+    }
+    public bool TryHexToColor(string hex, out Color color)
+    {
+        color = default;
+
+        if (hex.Length == 8)
+        { // Check if it's in RRGGBBAA format
+            // Parse R, G, B, and A components
+            if (ColorUtility.TryParseHtmlString("#" + hex, out color))
+            {
+                return true;
+            }
+        }
+        Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
+        return false;
     }
 }

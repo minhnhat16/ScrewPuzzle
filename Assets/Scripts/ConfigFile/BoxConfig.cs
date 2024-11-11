@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.ConfigFile;
-using Enum;
+using Enums;
 
 namespace ConfigFile
 {

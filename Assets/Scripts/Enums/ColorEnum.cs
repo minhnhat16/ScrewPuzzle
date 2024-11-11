@@ -1,6 +1,6 @@
 ﻿using Unity.VisualScripting;
 
-namespace Enum
+namespace Enums
 {
     public enum ColorEnum
     {

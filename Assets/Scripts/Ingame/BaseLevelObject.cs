@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Ingame
 {
@@ -8,14 +7,17 @@ namespace Ingame
         public bool canMove = true; // Flag to allow/disallow movement
         public float moveSpeed = 10f; // Speed at which the object follows the mouse
 
-        private bool isDragging = false; // Track if the object is being dragged
+        [SerializeField] private bool isDragging = false; // Track if the object is being dragged
+       [SerializeField] private bool isEditColor  =false;
         private Camera mainCamera;
         [SerializeField] private ScrewManager screwManager;
-        public ScrewManager ScrewManager    
+
+        public ScrewManager ScrewManager
         {
             get => screwManager;
             set => screwManager = value;
         }
+        public bool IsEditColor { get => isEditColor; set => isEditColor = value; }
 
         private void Start()
         {
@@ -31,9 +33,16 @@ namespace Ingame
         // Detect click to start dragging
         private void OnMouseDown()
         {
-            if (canMove  && LevelMaker.instance.isEditPartPosition )
+            if (canMove && LevelMaker.instance.isEditPartPosition)
             {
                 isDragging = true; // Start dragging when the mouse button is pressed
+                Debug.Log("Object clicked and started dragging");
+            }
+            else if (LevelMaker.instance.isEditPartColor)
+            {
+                IsEditColor = true;
+                var part = GetComponent<BasePart>();
+                ApplyColor.instance.ApplyColorToSprite(part);// Start dragging when the mouse button is pressed
                 Debug.Log("Object clicked and started dragging");
             }
             else
@@ -57,12 +66,13 @@ namespace Ingame
                 // Get the mouse position in world space
                 Vector3 mousePosition = Input.mousePosition;
                 mousePosition.z = 10f; // Set a distance from the camera if it's 2D (adjust as needed)
-                
+
                 Vector3 worldPosition = mainCamera.ScreenToWorldPoint(mousePosition);
 
                 // Move the object smoothly to follow the mouse position
                 transform.position = Vector3.Lerp(transform.position, worldPosition, moveSpeed * Time.deltaTime);
             }
+
         }
 
         public void SaveIvoke()

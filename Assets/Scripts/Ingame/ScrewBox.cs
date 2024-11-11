@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using ConfigFile;
 using DG.Tweening;
-using Enum;
+using Enums;
 using PoolManager;
 using Unity.VisualScripting;
 using UnityEngine;

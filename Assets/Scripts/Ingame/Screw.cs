@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 using DG.Tweening;
-using Enum;
+using Enums;
 using Managers;
 using Unity.Mathematics;
 using UnityEngine;
