@@ -23,13 +23,14 @@ public class LevelManager : MonoBehaviour
     public int currentLevelID;
     [SerializeField] private BaseLevelObject currentLevelObject;
     [SerializeField] private GameObject screwManagerPrefb;
-    [SerializeField] private ScrewManager ScrewManager;
+    [SerializeField] private ScrewManager screwManager;
 
     public bool IsInitDone
     {
         get => isInitDone;
         set => isInitDone = value;
     }
+    public ScrewManager ScrewManager { get => screwManager; set => screwManager = value; }
 
     public void Awake()
     {
@@ -264,6 +265,7 @@ public class LevelManager : MonoBehaviour
         var screwManagerGameObject = Instantiate(screwManagerPrefb, levelObject.transform) as GameObject;
         screwManagerGameObject.transform.SetPositionAndRotation(new Vector3(0, -5, 0), Quaternion.identity);
         ScrewManager = screwManagerGameObject.GetComponent<ScrewManager>();
+        ScrewManager.hingeConnections = new();
         // Load screws
         foreach (var screwData in levelData.screws)
         {
@@ -279,7 +281,8 @@ public class LevelManager : MonoBehaviour
                 Debug.Log($"Level data with ID {levelId} loaded.");
                 var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
                 Debug.Log($"Connected part id {connectedPart.uniqueID}");
-                screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+                var hinge = screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+                ScrewManager.AddHingeConnection(hinge, connectedPart);
             }
 
             ScrewManager.AddScrew(screw);
@@ -293,7 +296,7 @@ public class LevelManager : MonoBehaviour
         foreach (var part in allParts)
         {
             part.Body.bodyType = RigidbodyType2D.Dynamic;
-            //part.Body.gravityScale = 0;
+            part.Body.gravityScale = 0;
             yield return null;
         }
         yield return null;
@@ -311,7 +314,7 @@ public class LevelManager : MonoBehaviour
         }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
-        ScrewManager.Reset();
+        screwManager.Reset();
 
         currentLevelObject = null;
     }

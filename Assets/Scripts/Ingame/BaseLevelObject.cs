@@ -1,3 +1,5 @@
+using Ingame.Screw;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ingame
@@ -8,9 +10,10 @@ namespace Ingame
         public float moveSpeed = 10f; // Speed at which the object follows the mouse
 
         [SerializeField] private bool isDragging = false; // Track if the object is being dragged
-       [SerializeField] private bool isEditColor  =false;
+        [SerializeField] private bool isEditColor  =false;
         private Camera mainCamera;
         [SerializeField] private ScrewManager screwManager;
+        [SerializeField] private Dictionary<string,TwoHingeScrew> screwByPart;
 
         public ScrewManager ScrewManager
         {

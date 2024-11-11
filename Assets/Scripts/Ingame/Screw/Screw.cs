@@ -304,23 +304,23 @@ namespace Ingame.Screw
             _transform.SetParent(holdScrew.transform);
 
         }
-        public virtual void CreateHinge(Rigidbody2D targetScrew)
+        public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart)
         {
             HingeObject hinge = HingePool.Instance.pool.SpawnNonGravity();
             GameObject newHingeChild = hinge.gameObject;
             newHingeChild.transform.SetParent(transform);
             newHingeChild.transform.localPosition = Vector3.zero;
-            newHingeChild.transform.position = targetScrew.transform.position;
+            newHingeChild.transform.position = targetPart.transform.position;
 
             // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
             HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
             newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-            hingeJoint.connectedBody = targetScrew; // Kết nối hinge với đối tượng screw mục tiêu
+            hingeJoint.connectedBody = targetPart; // Kết nối hinge với đối tượng screw mục tiêu
             // Lưu HingeJoint2D vào danh sách nếu cần
             hingeController.HingeJoint2D.Add(hingeJoint);
-            hingeController.BodyConnect.Add(targetScrew); // Thêm Rigidbody2D vào danh sách bodyConnect
+            hingeController.BodyConnect.Add(targetPart); // Thêm Rigidbody2D vào danh sách bodyConnect
             hingeJoint.autoConfigureConnectedAnchor = true;
-        
+            return hingeJoint;
         }
         public void Reset()
         {

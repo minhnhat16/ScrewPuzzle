@@ -82,7 +82,7 @@ namespace Ingame
             collider.SetPath(0,renderer.sprite.vertices);
         }
 
-
+    
         private void SetUpCollider()
         {
             
@@ -158,7 +158,7 @@ namespace Ingame
             // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
         }
-
+            
         public  virtual void GenerateColliderFromSprite()
         {
             // Use the sprite's texture to define the polygon's points
