@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ConfigFile;
-using Enum;
+using Enums;
 using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
