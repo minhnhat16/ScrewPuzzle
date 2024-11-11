@@ -134,7 +134,8 @@ namespace Ingame
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
         private IEnumerator CheckHoldCoroutine()
         {
-            while (true)
+            bool isGameOver = IngameController.Instance.IsGameOver;
+            while (!isGameOver)
             {
 
                 // Kiểm tra nếu tất cả các ô đều đầy
@@ -142,7 +143,7 @@ namespace Ingame
                 if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
-                    yield return new WaitForSeconds(2f); // Chờ 2 giây để chắc chắn
+                    yield return new WaitForSeconds(2.5f); // Chờ 2 giây để chắc chắn
 
                     // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
                     allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());

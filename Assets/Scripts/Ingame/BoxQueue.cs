@@ -276,7 +276,8 @@ namespace Ingame
             Debug.LogError(onCompleteClearBoxes != null
                 ? "OnCompleteClearBoxes is not null and can invoke"
                 : "OnCompleteClearBoxes is null");
-            if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(onCompleteClearBoxes != null);
+            bool isComplete = onCompleteClearBoxes != null && IngameController.Instance.IsGameOver;
+            if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(isComplete);
         }
 
         private IEnumerator MoveNewBoxToLastBox(ScrewBox newBox, BoxSlot slot, Action<bool> callback = null)
