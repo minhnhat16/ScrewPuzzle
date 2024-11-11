@@ -1,14 +1,16 @@
-using ConfigFile;
-using Enums;
-using Ingame;
-using Ingame.Board;
-using Managers;
-using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.DataBase;
+using ConfigFile;
+using Enum;
+using Ingame;
+using Ingame.Board;
+using Ingame.Screw;
+using Managers;
+using PoolManager;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -111,11 +113,7 @@ public class LevelManager : MonoBehaviour
     public void LoadLevel(int levelID, Action callback = null)
     {
         Debug.LogWarning("Start loading level ");
-        var boxManager = BoxQueue.Instance;
-        var arrayScrew = ArrayScrew.Instance;
-        arrayScrew.ShowArrayScrew() ;
-        Reset();
-        arrayScrew.HoldAlignment();
+       
         LoadSceneManager.instance.LoadSceneByName("InGame", () =>
         {
             Debug.LogWarning("Load scence done  ");
@@ -124,11 +122,8 @@ public class LevelManager : MonoBehaviour
                 {
                     StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
                     {
-                        int userGold = DataAPIController.instance.GetGold();
-                        GamePlayViewParam param = new();
-                        param.totalGold = userGold;
-                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView,param);
-                    }));
+                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView);
+                    })) ;
                 });
         });
     }
@@ -171,7 +166,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public IEnumerator LoadGameObjectFromLevel(int levelId, Action callback = null)
+    public IEnumerator LoadGameObjectFromLevel(int levelId,Action callback = null)
     {
         currentLevelID = levelId;
         //spawn level obj
@@ -237,15 +232,6 @@ public class LevelManager : MonoBehaviour
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     /*if (sprite == null) Debug.LogWarning($" Sprite {partData.spriteName} null");*/
                     partComponent.Renderer.sprite = sprite;
-                    if (TryHexToColor(partData.colorString, out Color color))
-                    {
-                        Debug.Log($"Parsed Color: {color}");
-                        partComponent.Renderer.color = color;
-                    }
-                    else
-                    {
-                        Debug.LogError("Invalid Hex Color String");
-                    }
                     partComponent.GenerateColliderFromSprite();
                     partComponent.SetSortingLayer(partLayer);
                 }
@@ -293,7 +279,7 @@ public class LevelManager : MonoBehaviour
         foreach (var part in allParts)
         {
             part.Body.bodyType = RigidbodyType2D.Dynamic;
-            //part.Body.gravityScale = 0;
+            part.Body.gravityScale = 0;
             yield return null;
         }
         yield return null;
@@ -303,31 +289,16 @@ public class LevelManager : MonoBehaviour
 
     public void Reset()
     {
-        if (transform.childCount > 0)
+        if(transform.childCount > 0)
         {
             LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
             layerManager.Reset();
-            LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
+            ScrewManager.Reset();
         }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
-        ScrewManager.Reset();
-
+        LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
         currentLevelObject = null;
-    }
-    public bool TryHexToColor(string hex, out Color color)
-    {
-        color = default;
 
-        if (hex.Length == 8)
-        { // Check if it's in RRGGBBAA format
-            // Parse R, G, B, and A components
-            if (ColorUtility.TryParseHtmlString("#" + hex, out color))
-            {
-                return true;
-            }
-        }
-        Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
-        return false;
     }
 }
