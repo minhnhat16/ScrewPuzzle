@@ -13,6 +13,7 @@ namespace UIScript.Dialog
         [SerializeField] private Text levelLb;
         [SerializeField] private Text rewardLB;
         [SerializeField] private Text goldLb;
+        [SerializeField] private GoldDisplay goldDisplay;
 
         private void OnEnable()
         {
@@ -27,10 +28,14 @@ namespace UIScript.Dialog
             WinParam param = (WinParam)dialogParam;
             string levelStr = param.level.ToString();
             string scoreStr = param.score.ToString();
+            int userGold = param.totalGold;
             string rewardString = param.reward.ToString();
             SetLevelLB(levelStr);
             SetScore(scoreStr);
             SetReward(rewardString);
+
+            goldDisplay= GetComponentInChildren<GoldDisplay>();
+            goldDisplay.SetGoldToLable(userGold);
         }
 
 

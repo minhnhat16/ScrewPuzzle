@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewIndex: 8
-  baseViewAnim: {fileID: 9089062021833880102}
+  baseViewAnim: {fileID: 0}
   currentLevel: 0
   levelItems: []
   closeButton: {fileID: 7362698052293118877}
@@ -347,7 +347,6 @@ GameObject:
   - component: {fileID: 7267075698517208980}
   - component: {fileID: 2234571816819492685}
   - component: {fileID: 5504931839637628160}
-  - component: {fileID: 8099193412657424634}
   m_Layer: 5
   m_Name: LevelGrid
   m_TagString: Untagged
@@ -445,18 +444,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &8099193412657424634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3930060440395763967}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba8c43efdb8862b4e9dc59e002596898, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4279932296019779743
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,10 +490,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7258472308038672380}
-  - component: {fileID: 9089062021833880102}
   - component: {fileID: 4044462993827116870}
+  - component: {fileID: 6533201668917020730}
   m_Layer: 5
-  m_Name: CollectionAnim
+  m_Name: LevelAnim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -536,19 +523,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &9089062021833880102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6378772059653825682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 986cca7ef1581fc4b9e28385a9296200, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 4044462993827116870}
 --- !u!95 &4044462993827116870
 Animator:
   serializedVersion: 5
@@ -559,7 +533,7 @@ Animator:
   m_GameObject: {fileID: 6378772059653825682}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 9203b944a5105ed4f824cf5d85cf7545, type: 2}
+  m_Controller: {fileID: 9100000, guid: cf62b844e21020143bf6c564e1b18fa2, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -570,6 +544,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6533201668917020730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6378772059653825682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4bdea9afc389a44fbf98147f164f7cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 4044462993827116870}
 --- !u!1 &6505621334058955737
 GameObject:
   m_ObjectHideFlags: 0

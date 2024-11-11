@@ -1,11 +1,10 @@
+using Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
-using Managers;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class GamePlayView : BaseView
@@ -22,11 +21,14 @@ public class GamePlayView : BaseView
     [SerializeField] private RectTransform gemParent;
     [SerializeField] private Text gold_lb;
     [SerializeField] private Text timeCouter;
-     [SerializeField] private List<RectTransform> anchorTutorials;
-    [SerializeField]private Button settingBtn;
-     [SerializeField] private Button addBoxBtn;
-     [SerializeField] private Button addHoldBtn;
-     [SerializeField] private Button clearOneScrewBtn;
+    [SerializeField] private List<RectTransform> anchorTutorials;
+
+    [SerializeField] private Button settingBtn;
+    [SerializeField] private Button addBoxBtn;
+    [SerializeField] private Button addHoldBtn;
+    [SerializeField] private Button clearOneScrewBtn;
+
+    [SerializeField] private GoldDisplay goldDisplay;
     [SerializeField] bool isNewPlayer;
 
     [HideInInspector]
@@ -43,48 +45,6 @@ public class GamePlayView : BaseView
 
     private void OnEnable()
     {
-        //DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, (data) =>
-        //{
-        //    if (data == null) return;
-        //    CurrencyWallet newData = data as CurrencyWallet;
-        //    gold = newData.amount;
-        //    gold_lb.text = GameManager.instance.DevideCurrency(gold);
-        //});
-        //DataTrigger.RegisterValueChange(DataPath.GEMINVENT, (data) =>
-        //{
-        //    if (data == null) return;
-        //    CurrencyWallet newData = data as CurrencyWallet;
-        //    gem = newData.amount;
-        //    gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        //});
-        //DataTrigger.RegisterValueChange(DataPath.MAGNET, (data) =>
-        //{
-        //    if (data == null) return;
-        //    ItemData newData = data as ItemData;
-        //    if (newData.total > 0) magnet_lb.text = $"{newData.total}";
-        //    else magnet_lb.text = "0";
-        //});
-        //DataTrigger.RegisterValueChange(DataPath.BOMB, (data) =>
-        // {
-        //     if (data == null) return;
-        //     ItemData newData = data as ItemData;
-        //     if (newData.total > 0) bomb_lb.text = $"{newData.total}";
-        //     else bomb_lb.text = "0";
-
-        // });
-        //DataTrigger.RegisterValueChange(DataPath.LASTSAVETIME, (data) =>
-        //{
-        //    if (data == null) return;
-        //    string newData = data as string;
-
-        //});
-        //DataTrigger.RegisterValueChange(DataPath.MAXCARDPOOL, (data) =>
-        //{
-        //    if (data == null) return;
-        //    int newData = (int)data;
-
-        //});
-
         addHoldBtn.onClick.AddListener(AddHoldItemClick);
         addBoxBtn.onClick.AddListener(AddBoxItemClick);
         settingBtn.onClick.AddListener(SettingButton);
@@ -118,19 +78,10 @@ public class GamePlayView : BaseView
     public override void Setup(ViewParam viewParam)
     {
         base.Setup(viewParam);
-        //GamePlayViewParam param = viewParam as GamePlayViewParam;
-        //isNewPlayer = param.isNewPlayer;
-        //int gold = DataAPIController.instance.GetGold();
-        //int gem = DataAPIController.instance.GetGem();
-        //this.gold = gold;
-        //this.gem = gem;
+        GamePlayViewParam param = viewParam as GamePlayViewParam;
 
-        //gold_lb.text = GameManager.instance.DevideCurrency(gold);
-        //gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        //if (isNewPlayer) onNewPlayer?.Invoke(isNewPlayer);
-
-        //addHoldBtn.interactable = true;
-        //addBoxBtn.interactable = true;
+        int userGold= gold = param.totalGold;
+        goldDisplay.SetGoldToLable(userGold);
     }
     public void SetTimeCounter(DateTime time)
     {
@@ -138,9 +89,11 @@ public class GamePlayView : BaseView
         int second = time.Second;
         timeCouter.text = $" 500 in {minute}:{second}";
     }
+
+
     IEnumerator BreakCouroutine()
     {
-        
+
         while (true)
         {
             yield return new WaitForSeconds(breakCounter);
@@ -153,7 +106,7 @@ public class GamePlayView : BaseView
     public void OnNewPlayer(bool newPlayer)
     {
     }
-   
+
     IEnumerator GetItemFormData()
     {
         yield return new WaitUntil(() => DataAPIController.instance.GetItemData(ItemType.AddHold) is not null);
@@ -175,7 +128,7 @@ public class GamePlayView : BaseView
 
     }
 
-    public IEnumerator ButtonCouroutine(Button button,bool isPlaying)
+    public IEnumerator ButtonCouroutine(Button button, bool isPlaying)
     {
         yield return new WaitUntil(() => isPlaying == false);
         Debug.LogWarning("Button Couroutine invoke");
@@ -262,7 +215,7 @@ public class GamePlayView : BaseView
         {
             AddItemDialogParam param = new AddItemDialogParam
             {
-               ItemType = itemType
+                ItemType = itemType
             };
 
             // Show the item confirmation dialog
@@ -300,6 +253,8 @@ public class GamePlayView : BaseView
         //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_3);
         SettingParam param = new();
         param.isMainScreen = false;
+        param.totalGold = gold;
+        param.title = "PAUSE";
         DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param, null);
     }
     public void RateButton()

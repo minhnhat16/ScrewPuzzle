@@ -19,15 +19,15 @@ namespace Ingame
         public float xRightCam;
         public float xLeftCam;
         public int activeBoxCount = 2; // Số box mặc định mở
+        [SerializeField] private float spacingBox = 10;
+        [SerializeField] private float topAlignSpacing;
+
         public Stack ConfigStack = new Stack();
         public BoxConfig boxConfig;
         public List<BoxConfigRecord> configRecords = new List<BoxConfigRecord>();
         public List<ScrewBox> screwBoxes = new List<ScrewBox>(); // Initialize to avoid null reference
         public Stack<ScrewBox> boxesStack = new Stack<ScrewBox>();
         [SerializeField] private List<BoxSlot> boxSlots;
-        [SerializeField] private float spacingBox = 10;
-        [SerializeField] private float topAlignSpacing;
-
         public UnityEvent<bool> onCompleteClearBoxes = new();
         private Coroutine alignCoroutine;
         private void Awake()
@@ -135,20 +135,20 @@ namespace Ingame
                 {
                     case 1:
                         var boxOneHold = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxOneHold.OnInit(Vector3.left * 10, config, false);
+                        boxOneHold.OnInit(Vector3.left * 5, config, false);
                         boxOneHold.gameObject.SetActive(false);
                         screwBoxes.Add(boxOneHold);
                         break;
                     case 2:
                         var  boxTwoHold = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxTwoHold.OnInit(Vector3.left * 10, config, false);
+                        boxTwoHold.OnInit(Vector3.left * 5, config, false);
                         boxTwoHold.gameObject.SetActive(false);
 
                          screwBoxes.Add(boxTwoHold);
                         break;
                     case 3:
                         var boxThreeHold = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxThreeHold.OnInit(Vector3.left * 10, config, false);
+                        boxThreeHold.OnInit(Vector3.left * 5, config, false);
                         boxThreeHold.gameObject.SetActive(false);
                         screwBoxes.Add(boxThreeHold);
                         break;

@@ -17,6 +17,8 @@ public class UserData
     public DailyData dailyData;
     [SerializeField]
     public SpinData spinData;
+    [SerializeField]
+    public CollectionData collectionData;
 }
 [Serializable]
 public class UserInfo
@@ -82,4 +84,49 @@ public class LevelData
     public int levelID;
     public bool isCompleted;
     public int levelStar;
+}
+
+[Serializable]
+public class CollectionData
+{
+
+    [SerializeField]
+    public BackGroundData currentBG;
+    [SerializeField]
+    public BoardColorData currentBoard;
+    [SerializeField]
+    public ScrewSkinData currentScrew;
+
+    [SerializeField]
+    public Dictionary<string, BackGroundData> backGroundDict;
+    [SerializeField]
+    public Dictionary<string, BoardColorData> boardColorDict;
+    [SerializeField]
+    public Dictionary<string, ScrewSkinData> screwColorDict;
+}
+[Serializable]
+public class ScrewSkinData
+{
+    [SerializeField]
+   public bool isUnlocked;
+    [SerializeField]
+    public string name;
+
+}
+[Serializable]
+
+public class BackGroundData
+{
+    [SerializeField]
+    public bool isUnlocked;
+    [SerializeField]
+    public string name;
+}
+[Serializable]
+public class BoardColorData
+{
+    [SerializeField]
+    public bool isUnlocked;
+    [SerializeField]
+    public string name;
 }

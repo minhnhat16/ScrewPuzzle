@@ -1,3 +1,5 @@
+using System;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -16,7 +18,14 @@ public class SettingDialog : BaseDialog
     [SerializeField] private Image sfxOff;
     [SerializeField] private Image vibOn;
     [SerializeField] private Image vibOff;
+
     [SerializeField] private Dropdown language_dr;
+
+    [SerializeField] private Button homeButton;
+
+    [SerializeField] private GoldDisplay goldDisplay;
+
+    [SerializeField] private Text titleLB;
     [SerializeField] RectTransform below;
     [HideInInspector]
     public UnityEvent<bool> musicEvent = new UnityEvent<bool>();
@@ -28,8 +37,11 @@ public class SettingDialog : BaseDialog
     {
         musicEvent.AddListener(MusicChange);
         sfxEvent.AddListener(SFXChange);
+        homeButton.onClick.AddListener(HomeButton);
         //language_dr.onValueChanged.AddListener(OnDropdownValueChanged);
     }
+
+ 
     private void OnDisable()
     {
         musicEvent.RemoveListener(MusicChange);
@@ -38,9 +50,13 @@ public class SettingDialog : BaseDialog
     }
     public override void Setup(DialogParam dialogParam)
     {
-        SettingParam param = dialogParam as SettingParam;
-        isMainScreen = param.isMainScreen;
-//        below.gameObject.SetActive(!param.isMainScreen);
+        SettingParam param = (SettingParam)dialogParam ;
+        int userGold = param.totalGold;
+        bool isMainScreen = param.isMainScreen;
+        SetupButton(isMainScreen);
+        goldDisplay.SetGoldToLable(userGold);
+        //isMainScreen = param.isMainScreen;
+        //        below.gameObject.SetActive(!param.isMainScreen);
     }
     public override void OnStartShowDialog()
     {
@@ -61,23 +77,29 @@ public class SettingDialog : BaseDialog
         });
 
     }
+
+   
     public void HomeButton()
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
+       // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
+            LevelManager.Instance.Reset();
             LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
             {
-
+                MainScreenViewParam param = new();
+                param.totalGold = DataAPIController.instance.GetGold();
+                ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
+                /*  
                 DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog, null, () =>
                 {
-                });
+                });*/
             });
         });
     }
     public void MusicChange(bool isOn)
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+        //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         //Debug.Log("MUSIC CHANGED" + isOn);
         SoundManager.instance.musicSetting = isOn;
         SoundManager.instance.SettingMusicVolume(isOn);
@@ -95,10 +117,10 @@ public class SettingDialog : BaseDialog
     }
     public void SFXChange(bool isOn)
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+        //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         //Debug.Log("SFX CHANGED" + isOn);
         SoundManager.instance.sfxSetting = isOn;
-        SoundManager.instance.SettingSFXVolume(isOn);
+        //SoundManager.instance.SettingSFXVolume(isOn);
         if (isOn)
         {   
             sfxOn.gameObject.SetActive(true);
@@ -129,6 +151,12 @@ public class SettingDialog : BaseDialog
         {
             
         });
+    }
+
+    private void SetupButton(bool isMainScreen)
+    {
+        language_dr.gameObject.SetActive(isMainScreen);
+        homeButton.gameObject.SetActive(!isMainScreen);
     }
     private void OnDropdownValueChanged(int index)
     {

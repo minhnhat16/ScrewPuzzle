@@ -1,7 +1,9 @@
 using System;
+using System.Drawing;
 using DG.Tweening;
-using Enum;
+using Enums;
 using Managers;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
@@ -23,7 +25,7 @@ namespace Ingame.Screw
 
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
-         [SerializeField] protected HingeController hingeController;
+        [SerializeField] protected HingeController hingeController;
         public HingeController HingeController
         {
             get => hingeController;
@@ -237,7 +239,7 @@ namespace Ingame.Screw
             sequence.OnComplete(() =>
             {
                 // _transform.SetParent(holdScrew.Transf);
-                MoveScrewDown();
+                MoveScrewDown(holdScrew);
             });
         }
 
@@ -254,7 +256,7 @@ namespace Ingame.Screw
             hingeController.FreeHinges();
         }
 
-        public void ChangeScrewColor(Color color)
+        public void ChangeScrewColor(UnityEngine.Color color)
         {
             render.color = color;
         }
@@ -292,14 +294,15 @@ namespace Ingame.Screw
             }
         }
 
-        public virtual void MoveScrewDown()
+        public virtual void MoveScrewDown(HoldScrew holdScrew)
         {
             var targetPos = render.transform.position;
             targetPos-= new Vector3(0, 0.25f,0);
             cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
              
             render.transform.DOMove(targetPos, 0.5f).OnComplete(()=> { isMoving = false; });
-            
+            _transform.SetParent(holdScrew.transform);
+
         }
         public virtual void CreateHinge(Rigidbody2D targetScrew)
         {
@@ -318,6 +321,15 @@ namespace Ingame.Screw
             hingeController.BodyConnect.Add(targetScrew); // Thêm Rigidbody2D vào danh sách bodyConnect
             hingeJoint.autoConfigureConnectedAnchor = true;
         
+        }
+        public void Reset()
+        {
+            isClicked = false;
+            color = ColorEnum.Clear;
+            CircleCollider2D.enabled = true;
+            render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
+            hingeController.Reset();
         }
     }
 }

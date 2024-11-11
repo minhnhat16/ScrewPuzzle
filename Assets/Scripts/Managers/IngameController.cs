@@ -1,6 +1,7 @@
 using Ingame;
 using System;
 using System.Collections;
+using System.DataBase;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Events;
@@ -70,6 +71,12 @@ namespace Managers
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
+            int level = LevelManager.Instance.currentLevelID;
+            int totalGold = GameManager.instance.GoldCalculation(level);
+            DialogManager.Instance.HideAllDialog();
+
+            WinParam param = new();
+            param.totalGold = DataAPIController.instance.GetGold();
             DialogManager.Instance.ShowDialog(DialogIndex.WinDialog);
         }
 
@@ -245,7 +252,8 @@ namespace Managers
             player.CanClick = false;
             ReviveDialogParam param = new ReviveDialogParam();
             param.isRevive = false;
-            param.isHasAds = true; // set defaul allway true cus has none ads
+            param.isHasAds = true;// set defaul allway true cus has none ads
+            param.totalGold = DataAPIController.instance.GetGold();
             // ZenSDK.instance.IsVideoRewardReady();
             Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
 

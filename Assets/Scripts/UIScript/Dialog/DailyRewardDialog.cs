@@ -1,3 +1,4 @@
+using Managers;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Profiling;
@@ -9,7 +10,9 @@ namespace UIScript.Dialog
     {
         public DailyClaimBtn claimBtn;
         public DailyGrid dailyGrid;
+        [SerializeField] private GoldDisplay goldDisplay;
         [SerializeField] private Button closeBtn;
+        [SerializeField] private Text goldLb;
         [HideInInspector] public UnityEvent<bool> onClickDailyItem = new();
         [HideInInspector] public UnityEvent<bool> onClickClaim = new();
         [HideInInspector] public UnityEvent<bool> onClickAds = new();
@@ -38,11 +41,8 @@ namespace UIScript.Dialog
         {
             base.Setup(dialogParam);
             DailyParam param = dialogParam as DailyParam;
-            if(param != null)
-            {
                 dailyGrid.FetchDailyData(param.config);
-            }
-        
+            goldDisplay.SetGoldToLable(param.totalGold);
         }
         public override void OnStartShowDialog()
         {
@@ -82,7 +82,11 @@ namespace UIScript.Dialog
         {
             DialogManager.Instance.HideDialog(dialogIndex);
         }
-
+        public void SetupGoldLable(int gold)
+        {
+            goldLb.text = GameManager.instance.DevideCurrency(gold);
+        }
+      
         public void ClickClaimReward(bool isClaim)
         {
             Debug.Log("ClickClaimReward");

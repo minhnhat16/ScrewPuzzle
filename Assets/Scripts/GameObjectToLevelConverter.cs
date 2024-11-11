@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ConfigFile;
-using Enum;
+using Enums;
 using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
@@ -13,6 +13,7 @@ using Level;
 using Unity.VisualScripting;
 using UnityEditor;
 using BoxConfig = ConfigFile.BoxConfig;
+using ColorUtility = UnityEngine.ColorUtility;
 
 public class GameObjectToLevelConverter : MonoBehaviour
 {
@@ -148,7 +149,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     partLocalScale = partTransform.transform.localScale,
                     spriteName = parComponent.Renderer.sprite.name,
                     layer = baseLayerName,
-                    colorString = partTransform.Renderer.color.ToString(),
+                    colorString = ColorUtility.ToHtmlStringRGBA(partTransform.Renderer.color),
                 };
                 layerData.parts.Add(partData);
             }
@@ -389,10 +390,21 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 {
                     partGameObject.transform.SetParent(layerGameObject.transform);
                     partGameObject.transform.SetPositionAndRotation(partData.partPosition , partData.partRotation);
+                    partGameObject.transform.localScale = partData.partLocalScale;
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
+
                     partComponent.Renderer.sprite = sprite;
+                    if (TryHexToColor(partData.colorString, out Color color))
+                    {
+                        Debug.Log($"Parsed Color: {color}");
+                        partComponent.Renderer.color = color;
+                    }
+                    else
+                    {
+                        Debug.LogError("Invalid Hex Color String");
+                    }
                     layerManager.AddPart(partComponent);
                     var partLayer = LayerMask.LayerToName(layerGameObject.layer);
                     partComponent.SetSortingLayer(partLayer);
@@ -551,5 +563,20 @@ public class GameObjectToLevelConverter : MonoBehaviour
         bool isWithinYBounds = mousePosition.y >= 0 && mousePosition.y <= Screen.height;
 
         return isWithinXBounds && isWithinYBounds;
+    }
+    public bool TryHexToColor(string hex, out Color color)
+    {
+        color = default;
+
+        if (hex.Length == 8)
+        { // Check if it's in RRGGBBAA format
+            // Parse R, G, B, and A components
+            if (ColorUtility.TryParseHtmlString("#" + hex, out color))
+            {
+                return true;
+            }
+        }
+        Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
+        return false;
     }
 }

@@ -50,9 +50,11 @@ namespace Ingame
 
         public void ReturnAllScrewToPool()
         {
+            var screwPool = ScrewPool.Instance;
             foreach (var screw in _screws)
             {
-                ScrewPool.Instance.Pool.ReturnToPool(screw);
+                screw.Reset();
+                screwPool.Pool.ReturnToPool(screw);
             }
         }
         public void ResetHinge()

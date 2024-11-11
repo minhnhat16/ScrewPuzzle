@@ -20,7 +20,6 @@ public class BootLoader : MonoBehaviour
 
             });
         });
-       
         yield return new WaitUntil(()=> ConfigFileManager.Instance.isDone);
         StartCoroutine(SetUpUI(() =>
         {
@@ -46,25 +45,25 @@ public class BootLoader : MonoBehaviour
         LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
         {
             MainScreenViewParam param = new MainScreenViewParam();
-            param.totalGold = 0;
+            param.totalGold = DataAPIController.instance.GetGold() ;
             //Debug.Log("LoadSenceCallback");
             ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
             {
                 DayTimeController.instance.CheckNewDay();
                 ZenSDK.instance.ShowAppOpen((isDone) =>
                 {
-                    //SoundManager.instance.PlayMusic(SoundManager.Music.GamplayMusic);
-                    ////Debug.LogWarning("SHOW APP OPEN ON END LOADING");
-                    //if (DayTimeController.instance.isNewDay)
-                    //{
-                    //    //Debug.Log("isnewday now go to claim spin reward");
-                    //    DataAPIController.instance.SetSpinData(false);
-                    //}
-                    //else
-                    //{
-                    //    //Debug.Log("still in last day can't claim spin reward");
-                    //    //DialogManager.Instance.ShowDialog(DialogIndex.LabelChooseDialog);
-                    //}
+                  //  SoundManager.instance.PlayMusic(SoundManager.Music.GamplayMusic);
+                    //Debug.LogWarning("SHOW APP OPEN ON END LOADING");
+                    if (DayTimeController.instance.isNewDay)
+                    {
+                        //Debug.Log("isnewday now go to claim spin reward");
+                        DataAPIController.instance.SetSpinData(false);
+                    }
+                    else
+                    {
+                        //Debug.Log("still in last day can't claim spin reward");
+                        //DialogManager.Instance.ShowDialog(DialogIndex.LabelChooseDialog);
+                    }
                 });
             });
            
