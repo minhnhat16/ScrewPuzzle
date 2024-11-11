@@ -293,7 +293,7 @@ public class LevelManager : MonoBehaviour
         foreach (var part in allParts)
         {
             part.Body.bodyType = RigidbodyType2D.Dynamic;
-            part.Body.gravityScale = 0;
+            //part.Body.gravityScale = 0;
             yield return null;
         }
         yield return null;
