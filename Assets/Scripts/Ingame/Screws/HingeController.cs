@@ -82,9 +82,10 @@ namespace Ingame.Screw
                 hingeJoint2D[i].connectedBody = null;   
                 var hinge = hingeJoint2D[i];
                 var crBodyConnect = hinge.connectedBody;
+                var hingeComp = hinge.GetComponent<HingeObject>();
                 hinge.connectedBody = null;
                 ClearBody(crBodyConnect);
-                Destroy(hinge.gameObject);
+                HingePool.Instance.pool.ReturnToPool(hingeComp);
             }
             hingeJoint2D.Clear();
 

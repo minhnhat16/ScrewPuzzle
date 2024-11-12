@@ -12,7 +12,7 @@ namespace Ingame
     {
         public string uniqueID; 
         private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
-        
+        private List<HingeJoint> joints = new List<HingeJoint>();
         
         public virtual Rigidbody2D Body
         {
@@ -110,7 +110,6 @@ namespace Ingame
                 yield return new WaitForSeconds(0.1f); // Kiểm tra sau mỗi 0.1 giây
             }
         }
-
         // Hàm dừng Coroutine kiểm tra trạng thái rơi
         public void StopFallingCheck()
         {
@@ -120,7 +119,11 @@ namespace Ingame
                 checkFallingRoutine = null;
             }
         }
-
+        public void HandleNoHingesLeft()
+        {
+            // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
+            body.gravityScale = 1;
+        }
         public void SetSortingLayer(string layerName)
         {
             Debug.Log("sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);

@@ -56,7 +56,6 @@ namespace Ingame.Board
                 {
                     layers.Add(baseLayer);
                      applyParentLayer.ApplyLayerToChildren(child.gameObject);
-                   
                 }
             }
         }

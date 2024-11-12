@@ -13,7 +13,7 @@ namespace Ingame
         [SerializeField] private bool isEditColor  =false;
         private Camera mainCamera;
         [SerializeField] private ScrewManager screwManager;
-        [SerializeField] private Dictionary<string,TwoHingeScrew> screwByPart;
+        [SerializeField] private Dictionary<string,HingeJoint2D> screwByPart;
 
         public ScrewManager ScrewManager
         {

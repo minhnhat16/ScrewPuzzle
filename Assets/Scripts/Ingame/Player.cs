@@ -134,8 +134,7 @@ namespace Ingame
             if (processCoroutine == null)
             {
                 ArrayScrew.Instance.AddScrew(screw);
-                var screwMng = LevelManager.Instance.ScrewManager;
-                screwMng.RemoveScrew(screw);
+               
             }
         }
 

@@ -3,6 +3,8 @@ using System.Collections;
 using System.DataBase;
 using Managers;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public class BootLoader : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
@@ -11,8 +13,14 @@ public class BootLoader : MonoBehaviour
     IEnumerator Start()
     {
         DontDestroyOnLoad(this.gameObject);
+        Screen.orientation = ScreenOrientation.AutoRotation;
+
+        // Ch? cho phép xoay ngang
+        Screen.autorotateToLandscapeLeft = false;
+        Screen.autorotateToLandscapeRight = false;
+        Screen.autorotateToPortrait = true;
+        Screen.autorotateToPortraitUpsideDown = false;
         yield return new WaitForSeconds(1f);
-        
         InitConfig(() =>
         {
             InitDataDone(() =>

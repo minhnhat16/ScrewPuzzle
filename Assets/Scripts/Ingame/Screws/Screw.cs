@@ -22,7 +22,6 @@ namespace Ingame.Screw
         [SerializeField] protected CircleCollider2D _circleCollider2D;
         [SerializeField] private Rigidbody2D rb;
         [SerializeField] protected SpriteRenderer render ;
-
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
         [SerializeField] protected HingeController hingeController;
@@ -103,6 +102,11 @@ namespace Ingame.Screw
             layerMask = gameObject.layer;
         }
 
+        public void ResetRender()
+        {
+            render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            cross.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
         private void SetSortingOrderAndLayer(int order, string layer)
         {
             // Debug.LogError("Setting sorting order and layer");
@@ -112,7 +116,7 @@ namespace Ingame.Screw
             cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
-            Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
+            //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
             Position = new Vector3(Position.x, Position.y, -layerIndex  +10);
         }
 
@@ -327,6 +331,7 @@ namespace Ingame.Screw
             isClicked = false;
             color = ColorEnum.Clear;
             CircleCollider2D.enabled = true;
+            Debug.Log("Reset screw");
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
             hingeController.Reset();

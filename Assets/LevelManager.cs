@@ -2,6 +2,7 @@ using ConfigFile;
 using Enums;
 using Ingame;
 using Ingame.Board;
+using Ingame.Screw;
 using Managers;
 using PoolManager;
 using System;
@@ -28,7 +29,7 @@ public class LevelManager : MonoBehaviour
     public bool IsInitDone
     {
         get => isInitDone;
-        set => isInitDone = value;
+        set => isInitDone = value;  
     }
     public ScrewManager ScrewManager { get => screwManager; set => screwManager = value; }
 
@@ -73,7 +74,7 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"No BoxConfig assets found at path: {resourcePath}");
+            //Debug.LogError($"No BoxConfig assets found at path: {resourcePath}");
         }
 
         // Call the callback if it's not null
@@ -266,15 +267,19 @@ public class LevelManager : MonoBehaviour
         screwManagerGameObject.transform.SetPositionAndRotation(new Vector3(0, -5, 0), Quaternion.identity);
         ScrewManager = screwManagerGameObject.GetComponent<ScrewManager>();
         ScrewManager.hingeConnections = new();
+        ScrewManager.OnScrewRemoved += HandleScrewRemoved;
         // Load screws
         foreach (var screwData in levelData.screws)
         {
             var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
             GameObject screwGameObject = screw.gameObject;
+            var screwComp = screwGameObject.GetComponent<Screw>();
             screwGameObject.transform.SetParent(screwManagerGameObject.transform);
             screwGameObject.transform.SetLocalPositionAndRotation(screwData.screwPosition, Quaternion.identity);
             var color = screw.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
             screw.ChangeScrewColorByEnum(color);
+            screw.ResetRender();
+
             // Handle hinge connections
             foreach (var hingeConnection in screwData.hingeConnections)
             {
@@ -303,7 +308,10 @@ public class LevelManager : MonoBehaviour
         callback?.Invoke();
         Debug.Log($"Level data with ID {levelId} loaded.");
     }
-
+    private void HandleScrewRemoved(Screw removedScrew)
+    {
+        Debug.Log($"Screw {removedScrew.name} has been removed. Handling additional logic...");
+    }
     public void Reset()
     {
         if (transform.childCount > 0)
@@ -314,6 +322,7 @@ public class LevelManager : MonoBehaviour
         }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
+        ArrayScrew.Instance.ClearAllScrewsOnArray();
         screwManager.Reset();
 
         currentLevelObject = null;

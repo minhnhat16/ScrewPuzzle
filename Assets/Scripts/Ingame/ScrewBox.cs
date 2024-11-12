@@ -110,9 +110,10 @@ namespace Ingame
             renderGObj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             foreach (var h in holdScrews)   
             {
-                
                 h.Screw = null; // should put reset here
+                Debug.Log("reset hold screw " + h.Screw);
             };
+
         }
 
         // Hàm kiểm tra xem các lỗ trong CrewBox có đầy đủ Screw không
