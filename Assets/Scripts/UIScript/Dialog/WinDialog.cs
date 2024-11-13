@@ -1,3 +1,4 @@
+using Managers;
 using System;
 using System.DataBase;
 using UnityEngine;
@@ -36,6 +37,7 @@ namespace UIScript.Dialog
 
             goldDisplay= GetComponentInChildren<GoldDisplay>();
             goldDisplay.SetGoldToLable(userGold);
+            IngameController.Instance.PauseGame();
         }
 
 
@@ -63,7 +65,7 @@ namespace UIScript.Dialog
         {
             base.OnEndHideDialog();
             SetButtonInteractAble(true);
-
+            IngameController.Instance.ResumeGame();
         }
         private void OnNextButtonClicked()
         {

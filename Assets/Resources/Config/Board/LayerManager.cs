@@ -1,6 +1,6 @@
+using PoolManager;
 using System.Collections;
 using System.Collections.Generic;
-using PoolManager;
 using UnityEngine;
 
 namespace Ingame.Board
@@ -23,7 +23,7 @@ namespace Ingame.Board
             set => layers = value;
         }
 
-        [SerializeField]private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
+        [SerializeField] private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
 
         public ApplyParentLayer applyParentLayer;
         [SerializeField] private const int MaxVisibleLayers = 3;
@@ -55,7 +55,7 @@ namespace Ingame.Board
                 if (baseLayer != null)
                 {
                     layers.Add(baseLayer);
-                     applyParentLayer.ApplyLayerToChildren(child.gameObject);
+                    applyParentLayer.ApplyLayerToChildren(child.gameObject);
                 }
             }
         }
@@ -81,7 +81,7 @@ namespace Ingame.Board
             }
         }
 
-       void ApplyLayerVisibility()
+        void ApplyLayerVisibility()
         {
             // Đảm bảo hàng đợi không bị trống
             if (layerQueue.Count == 0) return;
@@ -164,7 +164,7 @@ namespace Ingame.Board
         {
             // Bắt đầu với màu xám nhưng có alpha bằng 0 (trong suốt)
             Color startColor = new Color(Color.gray.r, Color.gray.g, Color.gray.b, 0f);
-            Color endColor = new Color(Color.gray.r, Color.gray.g, Color.gray.b, 0.5f);; // Màu xám với alpha = 1 (đầy đủ)
+            Color endColor = new Color(Color.gray.r, Color.gray.g, Color.gray.b, 0.5f); ; // Màu xám với alpha = 1 (đầy đủ)
 
             float elapsedTime = 0f;
 
@@ -226,7 +226,7 @@ namespace Ingame.Board
         {
             ResetAllParts();
             ResetAllLayer();
-            
+
         }
 
         private void ResetAllLayer()
@@ -246,5 +246,5 @@ namespace Ingame.Board
                 PartPool.Instance.pool.ReturnToPool(part);
             }
         }
-    }   
+    }
 }

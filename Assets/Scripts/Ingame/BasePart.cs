@@ -44,7 +44,6 @@ namespace Ingame
             get => isFalling;
             private set => isFalling = value;
         }
-
         public SpriteRenderer OutLine => outLine;
 
         public Action OnStateChanged;
@@ -54,6 +53,11 @@ namespace Ingame
             this.renderer = renderer;
             this.collider = collider;
         }
+        public string PartLayer()
+        {
+            return gameObject.layer.ToString();
+        }
+
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
@@ -123,6 +127,22 @@ namespace Ingame
         {
             // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
             body.gravityScale = 1;
+            body.bodyType = RigidbodyType2D.Dynamic;
+        }
+        public void SetIgnoreColliderLayer(bool isIgnoring, string layerName, string targetLayerName)
+        {
+            int layer = LayerMask.NameToLayer(layerName);
+            int targetLayer = LayerMask.NameToLayer(targetLayerName);
+
+            if (layer < 0 || targetLayer < 0)
+            {
+                Debug.LogWarning($"Layer {layerName} hoặc {targetLayerName} không tồn tại.");
+                return;
+            }
+
+            Physics2D.IgnoreLayerCollision(layer, targetLayer, isIgnoring);
+
+            Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {layerName} và {targetLayerName}.");
         }
         public void SetSortingLayer(string layerName)
         {

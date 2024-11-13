@@ -171,6 +171,14 @@ namespace Managers
             callback?.Invoke();
         }
 
+        internal void PauseGame()
+        {
+            Time.timeScale = 0;
+        }
+        internal void ResumeGame()
+        {
+            Time.timeScale =1;
+        }
         private void AddBox(Action callback)
         {
             BoxQueue.Instance.AddNewBoxSlot();
@@ -184,8 +192,8 @@ namespace Managers
 
         public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
-            bool arrayScrewInitDone = false;
-            bool boxQueueInitDone = false;
+            //bool arrayScrewInitDone = false;
+            //bool boxQueueInitDone = false;
             bool playerInitDone = false;
             /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
             StartCoroutine(LoadPlayer(() =>

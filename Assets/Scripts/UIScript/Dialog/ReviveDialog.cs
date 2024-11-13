@@ -21,12 +21,17 @@ namespace UIScript.Dialog
             int userGold = newParam.totalGold;
             acceptButton.onClick.AddListener(AcceptedWatch);
             denyButton.onClick.AddListener(DenyWatch);
-
             goldDisplay.SetGoldToLable(userGold);
+            IngameController.Instance.PauseGame();
         }
+        public override void OnStartHideDialog()
+        {
+            IngameController.Instance.ResumeGame();
 
+        }
         public override void OnEndHideDialog()
         {
+            IngameController.Instance.ResumeGame();
             acceptButton.onClick.RemoveListener(AcceptedWatch);
             denyButton.onClick.RemoveListener(DenyWatch);
         }

@@ -8,6 +8,10 @@ namespace UIScript.Dialog
     {
         public Animator animator;
         private Action _callback;
+        private void Awake()
+    {
+        animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+    }
 
         public override void HideViewAnimation(Action callback)
         {

@@ -1,3 +1,4 @@
+using Managers;
 using System;
 using System.DataBase;
 using UnityEngine;
@@ -55,6 +56,7 @@ public class SettingDialog : BaseDialog
         bool isMainScreen = param.isMainScreen;
         SetupButton(isMainScreen);
         goldDisplay.SetGoldToLable(userGold);
+        SetupPauseGame(isMainScreen);
         //isMainScreen = param.isMainScreen;
         //        below.gameObject.SetActive(!param.isMainScreen);
     }
@@ -67,7 +69,7 @@ public class SettingDialog : BaseDialog
     public override void OnEndHideDialog()
     {
         base.OnEndHideDialog();
-
+        IngameController.Instance.ResumeGame();
     }
     public void PlayButton()
     {
@@ -157,6 +159,12 @@ public class SettingDialog : BaseDialog
     {
         language_dr.gameObject.SetActive(isMainScreen);
         homeButton.gameObject.SetActive(!isMainScreen);
+    }
+
+    private void SetupPauseGame(bool isMainScreen)
+    {
+        if (isMainScreen) return;
+        IngameController.Instance.PauseGame();
     }
     private void OnDropdownValueChanged(int index)
     {

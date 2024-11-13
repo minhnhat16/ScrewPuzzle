@@ -12,7 +12,10 @@ public class GamePlayAnim : BaseViewAnimation
     public Animator animator;
     private Action callback;
 
-
+    private void Awake()
+    {
+        animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+    }
     // Start is called before the first frame update
     public override void HideViewAnimation(Action callback)
     {
