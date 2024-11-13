@@ -23,7 +23,7 @@ public class LableChooseDialog : BaseDialog
     public UnityEvent<Lable> onClickedCollection = new();
     private void OnEnable()
     {
-        btn_Setting.onClick.AddListener(SettingDialogButton);
+       /* btn_Setting.onClick.AddListener(SettingDialogButton);
         onClickedRate = lableList[0].onChooseLable;
         onClickedHome = lableList[1].onChooseLable;
         onClickedSpin = lableList[2].onChooseLable;
@@ -45,7 +45,7 @@ public class LableChooseDialog : BaseDialog
             CurrencyWallet newData = data as CurrencyWallet;
             gem = newData.amount;
             gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        });
+        });*/
     }
     private void OnDisable()
     {
@@ -57,7 +57,7 @@ public class LableChooseDialog : BaseDialog
     }
     public override void OnStartShowDialog()
     {
-        base.OnStartShowDialog();
+/*        base.OnStartShowDialog();
         gold = DataAPIController.instance.GetGold();
         gem = DataAPIController.instance.GetGem();
         gold_lb.text = GameManager.instance.DevideCurrency(gold);
@@ -80,7 +80,7 @@ public class LableChooseDialog : BaseDialog
             GetLable(Lable.Home).OnButtonClicked();
             //var view = ViewManager.Instance.currentView as MainScreenView;
             //view.SetLevelPanelIs(true);
-        }
+        }*/
     }
     void HomeClicked(Lable lable)
     {
@@ -127,13 +127,13 @@ public class LableChooseDialog : BaseDialog
         }
 
         }
-        void SwitchButtonChose(Lable lable)
+    void SwitchButtonChose(Lable lable)
     {
-       foreach(var tab in lableList)
+      /* foreach(var tab in lableList)
         {
             if (tab.type != lable) tab.OnButtonUnchose();
             //else tab.OnButtonClicked();
-        }
+        }*/
     }
     LableTab GetLable(Lable lable)
     {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ConfigFile;
-using Enum;
+using Enums;
 using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
@@ -13,6 +13,7 @@ using Level;
 using Unity.VisualScripting;
 using UnityEditor;
 using BoxConfig = ConfigFile.BoxConfig;
+using ColorUtility = UnityEngine.ColorUtility;
 
 public class GameObjectToLevelConverter : MonoBehaviour
 {
@@ -101,14 +102,17 @@ public class GameObjectToLevelConverter : MonoBehaviour
 
         allLevels.Add(currentLoadedLevel);
         allLevels[this.currentLoadedLevel] = newLevelData;
-        CreateBoxConfig(newLevelData.levelId,newLevelData);
+        newLevelData.boxConfig  = CreateBoxConfig(newLevelData.levelId,newLevelData);
         AssetDatabase.CreateAsset(newLevelData, assetPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh(); // Refresh the AssetDatabase to see the changes
         LoadLevel();
         Debug.Log("Level data saved as ScriptableObject: " + assetPath);
     }
+    public void ResetScrew()
+    {
 
+    }
     public Level.Level CreateLevelData(Level.Level newLevelData)
     {
         newLevelData.levelId = nextLevelId++;
@@ -145,7 +149,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     partLocalScale = partTransform.transform.localScale,
                     spriteName = parComponent.Renderer.sprite.name,
                     layer = baseLayerName,
-                    colorString = partTransform.Renderer.color.ToString(),
+                    colorString = ColorUtility.ToHtmlStringRGBA(partTransform.Renderer.color),
                 };
                 layerData.parts.Add(partData);
             }
@@ -177,7 +181,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     bodyPartUniqueID = $"{screw.HingeController.BodyConnect[i].GetComponent<BasePart>().uniqueID}",
                     bodyPartHingePosition = hinge.connectedBody.transform.localPosition,
                 };
-
+                i++;
                 listHingeObject.Add(hingeConnection);
             }
 
@@ -186,6 +190,48 @@ public class GameObjectToLevelConverter : MonoBehaviour
         }
         // Save the new level data as a ScriptableObject in the Resources folder
         return newLevelData;
+    }
+    public void ResetLevelData(Level.Level levelData)
+    {
+        if (levelData == null)
+        {
+            Debug.LogWarning("The level data to reset is null.");
+            return;
+        }
+
+        // Reset the level ID
+        levelData.levelId = 0;
+
+        // Clear all layers
+        if (levelData.layers != null)
+        {
+            foreach (var layer in levelData.layers)
+            {
+                // Clear parts from each layer
+                if (layer.parts != null)
+                {
+                    layer.parts.Clear();
+                }
+            }
+            levelData.layers.Clear();
+        }
+
+        // Clear screws
+        if (levelData.screws != null)
+        {
+            foreach (var screw in levelData.screws)
+            {
+                // Clear hinge connections for each screw
+                if (screw.hingeConnections != null)
+                {
+                    screw.hingeConnections.Clear();
+                }
+            }
+            levelData.screws.Clear();
+        }
+
+        // Optionally reset other properties or references if needed
+        Debug.Log("Level data has been reset.");
     }
 
     public Dictionary<int, int> GetScrewCountByColor(Level.Level level)
@@ -252,7 +298,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         return boxRecords;
     }
 
-    public void CreateBoxConfig(int idLevel, Level.Level level)
+    public BoxConfig CreateBoxConfig(int idLevel, Level.Level level)
     {
         // Create a new instance of the BoxConfig asset
         BoxConfig newConfig = ScriptableObject.CreateInstance<BoxConfig>();
@@ -289,6 +335,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         EditorUtility.FocusProjectWindow();
         Selection.activeObject = newConfig;
 
+        return newConfig;
         Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
     }
 
@@ -303,6 +350,8 @@ public class GameObjectToLevelConverter : MonoBehaviour
         currentLoadedLevel = levelId;
         // Clear existing GameObjects in levelObject to prepare for new loading
         var layerManager = levelObject.GetComponent<LayerManager>();
+        var baseLevel = levelObject.GetComponent<BaseLevelObject>();
+
         foreach (Transform child in levelObject.transform)
         {
             Destroy(child.gameObject);
@@ -342,11 +391,22 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 if (partGameObject != null)
                 {
                     partGameObject.transform.SetParent(layerGameObject.transform);
-                    partGameObject.transform.SetPositionAndRotation(partData.partPosition ,Quaternion.identity);
+                    partGameObject.transform.SetPositionAndRotation(partData.partPosition , partData.partRotation);
+                    partGameObject.transform.localScale = partData.partLocalScale;
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
+
                     partComponent.Renderer.sprite = sprite;
+                    if (TryHexToColor(partData.colorString, out Color color))
+                    {
+                        Debug.Log($"Parsed Color: {color}");
+                        partComponent.Renderer.color = color;
+                    }
+                    else
+                    {
+                        Debug.LogError("Invalid Hex Color String");
+                    }
                     layerManager.AddPart(partComponent);
                     var partLayer = LayerMask.LayerToName(layerGameObject.layer);
                     partComponent.SetSortingLayer(partLayer);
@@ -364,6 +424,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
 
         // Instantiate the screw manager
         var screwManager = Instantiate(Resources.Load("Prefabs/ScrewManager"), levelObject.transform) as GameObject;
+        baseLevel.ScrewManager = screwManager.GetComponent<ScrewManager>();
         screwManager.transform.position = Vector3.zero;
         var screwTransform = screwManager.transform;
 
@@ -404,7 +465,11 @@ public class GameObjectToLevelConverter : MonoBehaviour
             Destroy(child.gameObject);
         }
     }
-
+    public void ResetScrewHinge()
+    {
+        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        screwManager.ResetHinge();
+    }
     public void SpawnScrew()
     {
         if (LevelMaker.instance.isInputData) return;
@@ -420,11 +485,12 @@ public class GameObjectToLevelConverter : MonoBehaviour
         if (isMouseOnScreen)
         {
             var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            screwComp.Position = new Vector3(mousePos.x, mousePos.y, 0);
+            screwComp.Position = new Vector3(mousePos.x, mousePos.y, screwComp.Position.z);
             return;
         }
 
         screw.transform.position = new Vector3(-5, 0, 0);
+        screwManager.AppendScrew(screwComp);
     }
 
     public void SpawnPart()
@@ -479,6 +545,18 @@ public class GameObjectToLevelConverter : MonoBehaviour
         return layerGameObject;
     }
 
+    public void ResetAllScrewsFlag()
+    {
+        var levelObj = levelObject.GetComponent<BaseLevelObject>();
+        var screwMnger = levelObj.ScrewManager;
+        var screws = screwMnger.GetScrews();
+
+        foreach(var s in screws)
+        {
+            var sLv = (ScrewLevelMaker)s;
+            sLv.ResetScrew();
+        }
+    }
     private bool IsMouseOnScreen()
     {
         Vector3 mousePosition = Input.mousePosition;
@@ -488,5 +566,20 @@ public class GameObjectToLevelConverter : MonoBehaviour
         bool isWithinYBounds = mousePosition.y >= 0 && mousePosition.y <= Screen.height;
 
         return isWithinXBounds && isWithinYBounds;
+    }
+    public bool TryHexToColor(string hex, out Color color)
+    {
+        color = default;
+
+        if (hex.Length == 8)
+        { // Check if it's in RRGGBBAA format
+            // Parse R, G, B, and A components
+            if (ColorUtility.TryParseHtmlString("#" + hex, out color))
+            {
+                return true;
+            }
+        }
+        Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
+        return false;
     }
 }

@@ -1,5 +1,5 @@
 using System;
-using Enum;
+using Enums;
 using Ingame.Screw;
 using UnityEditor;
 using UnityEngine;
@@ -35,6 +35,7 @@ public class ScrewLevelMaker : Screw
              ||LevelMaker.instance.isEditScrewColor 
              || LevelMaker.instance.isEditHinge))
         {
+            
             RaycastHit2D hit = Physics2D.Raycast(_mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
             if (hit.collider != null && hit.collider.gameObject == gameObject)
@@ -54,6 +55,17 @@ public class ScrewLevelMaker : Screw
         {
             OnMouseRelease();
         }
+    }
+
+    internal void ResetHinge()
+    {
+        var allHinge = hingeController.HingeJoint2D;
+        foreach(var hinge in allHinge)
+        {
+            Destroy(hinge.gameObject);
+        }
+        hingeController.HingeJoint2D.Clear();
+        hingeController.BodyConnect.Clear();
     }
 
     private void OnMouseClick()
@@ -94,7 +106,7 @@ public class ScrewLevelMaker : Screw
         ChangeScrewColorByEnum(isSelected ? Color: ColorEnum.Green);
     }
 
-    public override void CreateHinge(Rigidbody2D targetScrew)
+    public override HingeJoint2D CreateHinge(Rigidbody2D targetScrew)
     {
         Debug.Log("try to add new hinge " + targetScrew == null);
         GameObject newHingeChild = new()
@@ -118,7 +130,9 @@ public class ScrewLevelMaker : Screw
         Debug.Log("Created hinge joint with: " + targetScrew.name);
         isSelecting = false;
         ScrewChangeColorOnClick(true);
+        return hingeJoint;
     }
+
 
     private void OnMouseHold()
     {
@@ -138,5 +152,11 @@ public class ScrewLevelMaker : Screw
     {
         isHeld = false;
         Debug.Log("Mouse Released the Screw.");
+    }
+
+    public void ResetScrew()
+    {
+        isHeld = isSelecting = false;
+        ChangeScrewColorByEnum(Color);
     }
 }

@@ -12,7 +12,7 @@ namespace Ingame
     {
         public string uniqueID; 
         private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
-        
+        private List<HingeJoint> joints = new List<HingeJoint>();
         
         public virtual Rigidbody2D Body
         {
@@ -44,7 +44,6 @@ namespace Ingame
             get => isFalling;
             private set => isFalling = value;
         }
-
         public SpriteRenderer OutLine => outLine;
 
         public Action OnStateChanged;
@@ -54,6 +53,11 @@ namespace Ingame
             this.renderer = renderer;
             this.collider = collider;
         }
+        public string PartLayer()
+        {
+            return gameObject.layer.ToString();
+        }
+
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
@@ -82,7 +86,7 @@ namespace Ingame
             collider.SetPath(0,renderer.sprite.vertices);
         }
 
-
+    
         private void SetUpCollider()
         {
             
@@ -110,7 +114,6 @@ namespace Ingame
                 yield return new WaitForSeconds(0.1f); // Kiểm tra sau mỗi 0.1 giây
             }
         }
-
         // Hàm dừng Coroutine kiểm tra trạng thái rơi
         public void StopFallingCheck()
         {
@@ -120,7 +123,27 @@ namespace Ingame
                 checkFallingRoutine = null;
             }
         }
+        public void HandleNoHingesLeft()
+        {
+            // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
+            body.gravityScale = 1;
+            body.bodyType = RigidbodyType2D.Dynamic;
+        }
+        public void SetIgnoreColliderLayer(bool isIgnoring, string layerName, string targetLayerName)
+        {
+            int layer = LayerMask.NameToLayer(layerName);
+            int targetLayer = LayerMask.NameToLayer(targetLayerName);
 
+            if (layer < 0 || targetLayer < 0)
+            {
+                Debug.LogWarning($"Layer {layerName} hoặc {targetLayerName} không tồn tại.");
+                return;
+            }
+
+            Physics2D.IgnoreLayerCollision(layer, targetLayer, isIgnoring);
+
+            Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {layerName} và {targetLayerName}.");
+        }
         public void SetSortingLayer(string layerName)
         {
             Debug.Log("sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
@@ -158,7 +181,7 @@ namespace Ingame
             // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
         }
-
+            
         public  virtual void GenerateColliderFromSprite()
         {
             // Use the sprite's texture to define the polygon's points

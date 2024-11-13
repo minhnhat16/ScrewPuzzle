@@ -60,7 +60,17 @@ namespace Ingame
             hold.gameObject.SetActive(true);  // Activate the new hold
             HoldAlignment();
         }
-        private void HoldAlignment()
+        public void ShowArrayScrew()
+        {
+            coutHoldActive = 5;
+            spriteRenderer.enabled = true;
+            for (int i = 0; i < coutHoldActive; i++)
+            {
+                holdScrews[i].gameObject.SetActive(true);
+            }
+            holdScrews[coutHoldActive].gameObject.SetActive(false);
+        }
+        public void HoldAlignment()
         {
             if (holdScrews.Count == 0) return;
 
@@ -68,7 +78,6 @@ namespace Ingame
             {
                 StopCoroutine(alignmentCoroutine);
             }
-
             alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine());
         }
 
@@ -134,7 +143,8 @@ namespace Ingame
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
         private IEnumerator CheckHoldCoroutine()
         {
-            while (true)
+            bool isGameOver = IngameController.Instance.IsGameOver;
+            while (!isGameOver)
             {
 
                 // Kiểm tra nếu tất cả các ô đều đầy
@@ -186,46 +196,54 @@ namespace Ingame
         }
         public void AddScrew(Screw.Screw screw)
         {
+            // Kiểm tra trạng thái của screw (ngăn click nhiều lần)
+            if (screw.OnScrewClicked())
+                return;
 
-            if (screw.OnScrewClicked()) return;
-            // Tìm các box đang active có cùng màu với screw
-            var boxActive = BoxQueue.Instance.screwBoxes
-               .Where(b => b.isActiveAndEnabled && b.Color == screw.Color && !b.isMoving && !b.IsBoxFull)
-               .ToList();
-
-            // Sắp xếp các box theo NextEmptyIndex để tìm box thích hợp
-            var boxSameColor = boxActive
-               .OrderByDescending(b => b.NextEmptyIndex)
-               .FirstOrDefault();
-
-            // Nếu tìm thấy box thích hợp và nó đang active
-            if (boxSameColor != null && !boxSameColor.IsAddingScrew)
+            // Nếu không có box phù hợp, thêm vào holdScrew
+            var emptyHoldScrew = FindEmptyHoldScrew();
+            if (emptyHoldScrew != null)
             {
-                boxSameColor.AddScrew(screw); // Thêm screw vào box
+                AddScrewToHoldScrew(screw, emptyHoldScrew);
             }
             else
             {
-                // Kiểm tra và tìm holdScrew trống
-                var holdScrew = holdScrews.FirstOrDefault(hold => hold.IsEmpty());
-
-                // Kiểm tra nếu không còn holdScrew trống
-                if (holdScrew == null)
-                {
-                    Debug.LogWarning("No empty holdScrew available to hold the screw.");
-                    screw.ResetClickedFlag();
-                    return; // Ngừng thực thi nếu không tìm thấy holdScrew trống
-                }
-
-                // Nếu không có box nào phù hợp, thêm vào holdScrew và danh sách screws
-                holdScrew.AddScrew(screw, (onMoved) =>
-                {
-                    CheckIfHoldScrewsFull();
-                });
-                screws.Add(screw); // Lưu screw vào danh sách tạm thời
+                // Nếu không có holdScrew trống, reset trạng thái của screw
+                Debug.LogWarning("No empty holdScrew available to hold the screw.");
+                screw.ResetClickedFlag();
             }
         }
 
-        internal void ClearAllScrewsOnArray()
+
+        private HoldScrew FindEmptyHoldScrew()
+        {
+            return holdScrews.FirstOrDefault(hold => hold.IsEmpty());
+        }
+
+        private void AddScrewToHoldScrew(Screw.Screw screw, HoldScrew holdScrew)
+        {
+            // Tìm box phù hợp cho screw
+            var suitableBox = BoxQueue.Instance.FindSuitableBox(screw);
+
+            if (suitableBox != null)
+            {
+                // Thêm screw vào box phù hợp
+                BoxQueue.Instance.AddScrewToBox(screw, suitableBox);
+                return;
+            }
+            holdScrew.AddScrew(screw, (onMoved) =>
+            {
+                // Kiểm tra nếu tất cả holdScrew đã đầy
+                CheckIfHoldScrewsFull();
+            });
+
+            // Thêm screw vào danh sách tạm thời
+            screws.Add(screw);
+            var screwMng = LevelManager.Instance.ScrewManager;
+            screwMng.RemoveScrew(screw);
+        }
+
+        public void ClearAllScrewsOnArray()
         {
             StartCoroutine(SetScrewInActive());
         }
@@ -245,6 +263,7 @@ namespace Ingame
                 yield return null;
 
             }
+            screws.Clear();
         }
     }
 }

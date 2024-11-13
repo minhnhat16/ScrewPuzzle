@@ -16,9 +16,9 @@ public class ConfigFileManager : MonoBehaviour
     [SerializeField] private PriceConfig priceConfig;
     [SerializeField] private PackConfig packConfig;
 
+    [SerializeField] private CollectionConfig collectionConfig;
 
     [SerializeField] private ColorConfig colorConfig;
-    [SerializeField] private SlotConfig slotConfig;
     [SerializeField] private ItemConfig itemConfig;
     [SerializeField] private DailyRewardConfig dailyConfig;
     [SerializeField] private SpinConfig spinConfig;
@@ -41,11 +41,6 @@ public class ConfigFileManager : MonoBehaviour
         get => colorConfig;
     }
 
-    public SlotConfig SlotConfig
-    {
-        get => slotConfig;
-    }
-
     public ItemConfig ItemConfig
     {
         get => itemConfig;
@@ -65,6 +60,7 @@ public class ConfigFileManager : MonoBehaviour
     {
         get => soundFactory;
     }
+    public CollectionConfig CollectionConfig { get => collectionConfig; }
 
     private void Awake()
     {
@@ -98,7 +94,8 @@ public class ConfigFileManager : MonoBehaviour
         yield return new WaitUntil(() => priceConfig != null);
         packConfig = Resources.Load("Config/PackConfig", typeof(ScriptableObject)) as PackConfig;
         yield return new WaitUntil(() => packConfig != null);
-        
+        collectionConfig = Resources.Load("Config/CollectionConfig", typeof(ScriptableObject)) as CollectionConfig;
+        yield return new WaitUntil(() => collectionConfig != null);
         dailyConfig = Resources.Load("Config/DailyRewardConfig", typeof(ScriptableObject)) as DailyRewardConfig;
         yield return new WaitUntil(() => dailyConfig != null);
         /* spinConfig = Resources.Load("Config/SpinConfig", typeof(ScriptableObject)) as SpinConfig;

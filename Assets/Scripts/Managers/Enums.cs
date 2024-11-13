@@ -1,24 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-public enum Direction
-{
-    Left,
-    Right,
-    Up,
-    Down,
-    UpperLeft,
-    UpperRight,
-    DownLeft,
-    DownRight,
-    Unknown
-}
 public enum ItemType
 {
    AddHold = 0,
    AddBox = 1,
    ClearOneScrew =2,
+   Gold = 3,
 }
 public enum Currency
 {
@@ -49,18 +35,6 @@ public enum IEDailyType
     Available = 0,
     Unavailable = 1,
     Claimed = 2,
-}
-public enum CardType
-{
-    Default ,
-    Lozenge,
-    Lego,
-    Cassette,
-    Mail,
-    Dics,
-    Shirt,
-    Cheese,
-    Gift,
 }
 public enum CardColorPallet
 {
@@ -99,12 +73,6 @@ public enum CardColorPallet
     SkyBlue ,       // 32
 }
 
-public enum SlotStatus
-{
-    Active,
-    InActive,
-    Locked,
-}
 public enum SizeAmoutGold
 {
     S = 5,
@@ -112,19 +80,8 @@ public enum SizeAmoutGold
     L = 15,
    XL = 20,
 }
-public enum CardPickerType
-{
-    Premium,
-    Free,
-}
 
-public enum Lable
-{
-    Rate,
-    Home,
-    Spin,
-    Collection,
-}
+
 public enum TutorialEnum
 {
     StepOne = 1,

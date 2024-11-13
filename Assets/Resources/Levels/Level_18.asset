@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
+  m_Name: Level_18
+  m_EditorClassIdentifier: 
+  levelId: 18
+  totalColorInLevel: 0
+  layer: 0
+  boxConfig: {fileID: 11400000, guid: feeec7aa1a70dcf45a1c1ce4d7502f9b, type: 2}
+  screws: []
+  layers:
+  - layerId: 0
+    parts:
+    - idBodyPart: 0
+      partName: 1886
+      spriteName: 1 (12)
+      layer: Layer 1
+      colorString: 0090FFFF
+      partPosition: {x: -0.15127182, y: -0.3489524, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 1
+      partName: 8560
+      spriteName: 1 (12)
+      layer: Layer 1
+      colorString: 0090FFFF
+      partPosition: {x: -1.4194642, y: 1.6801548, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 2
+      partName: 3408
+      spriteName: 1 (12)
+      layer: Layer 1
+      colorString: 004172FF
+      partPosition: {x: 0.89146405, y: 0.8628756, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 3
+      partName: 9987
+      spriteName: 1 (12)
+      layer: Layer 1
+      colorString: FF0000FF
+      partPosition: {x: -0.35863718, y: -2.9916313, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}
+    - idBodyPart: 4
+      partName: 1365
+      spriteName: 1 (12)
+      layer: Layer 1
+      colorString: FF0000FF
+      partPosition: {x: -1.583981, y: -1.4225938, z: 0}
+      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      partRotation: {x: -0, y: -0, z: -0.10851409, w: 0.99409497}

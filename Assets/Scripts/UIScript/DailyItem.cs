@@ -152,7 +152,7 @@ public class DailyItem : MonoBehaviour
             case DailyReward.Gem:
                 //Debug.Log("Reward: Gem");
                 // Add logic for gem reward
-                DataAPIController.instance.AddGem(intAmount);
+                //DataAPIController.instance.AddGem(intAmount);
                 break;
             case DailyReward.AddBox:
                 //Debug.Log("Reward: Magnet");
@@ -166,7 +166,7 @@ public class DailyItem : MonoBehaviour
                 DataAPIController.instance.AddItemTotal(ItemType.AddBox, 10);
                 DataAPIController.instance.AddItemTotal(ItemType.ClearOneScrew, 10);
                 DataAPIController.instance.AddGold(1500, null);
-                DataAPIController.instance.AddGem(20);
+                //DataAPIController.instance.AddGem(20);
                 break;
             default:
                 //Debug.LogWarning("Unexpected reward type: " + item);

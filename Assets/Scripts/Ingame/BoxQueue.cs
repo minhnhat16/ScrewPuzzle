@@ -9,6 +9,7 @@ using Managers;
 using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Ingame
 {
@@ -18,15 +19,15 @@ namespace Ingame
         public float xRightCam;
         public float xLeftCam;
         public int activeBoxCount = 2; // Số box mặc định mở
+        [SerializeField] private float spacingBox = 10;
+        [SerializeField] private float topAlignSpacing;
+
         public Stack ConfigStack = new Stack();
         public BoxConfig boxConfig;
         public List<BoxConfigRecord> configRecords = new List<BoxConfigRecord>();
         public List<ScrewBox> screwBoxes = new List<ScrewBox>(); // Initialize to avoid null reference
         public Stack<ScrewBox> boxesStack = new Stack<ScrewBox>();
         [SerializeField] private List<BoxSlot> boxSlots;
-        [SerializeField] private float spacingBox = 10;
-        [SerializeField] private float topAlignSpacing;
-
         public UnityEvent<bool> onCompleteClearBoxes = new();
         private Coroutine alignCoroutine;
         private void Awake()
@@ -41,7 +42,12 @@ namespace Ingame
 
         private void Start()
         {
-            onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
+            var currentScene = SceneManager.GetActiveScene();
+          if (currentScene.name.CompareTo("LevelMaker") != 0)
+            {
+                onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
+            }
+            
         }
 
         public void Init()
@@ -129,20 +135,20 @@ namespace Ingame
                 {
                     case 1:
                         var boxOneHold = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxOneHold.OnInit(Vector3.left * 10, config, false);
+                        boxOneHold.OnInit(Vector3.left * 5, config, false);
                         boxOneHold.gameObject.SetActive(false);
                         screwBoxes.Add(boxOneHold);
                         break;
                     case 2:
                         var  boxTwoHold = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxTwoHold.OnInit(Vector3.left * 10, config, false);
+                        boxTwoHold.OnInit(Vector3.left * 5, config, false);
                         boxTwoHold.gameObject.SetActive(false);
 
                          screwBoxes.Add(boxTwoHold);
                         break;
                     case 3:
                         var boxThreeHold = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxThreeHold.OnInit(Vector3.left * 10, config, false);
+                        boxThreeHold.OnInit(Vector3.left * 5, config, false);
                         boxThreeHold.gameObject.SetActive(false);
                         screwBoxes.Add(boxThreeHold);
                         break;
@@ -234,7 +240,7 @@ namespace Ingame
             var newBox = SpawnBox();
             if (newBox == null || currentSlot == null)
             {
-                Debug.LogError("Error: new box or slot is null" + newBox + " or " + currentSlot);
+                //Debug.LogError("Error: new box or slot is null" + newBox + " or " + currentSlot);
                 return null;
             }
             return newBox;
@@ -264,13 +270,38 @@ namespace Ingame
             yield return new WaitUntil(() => isMoveBoxDone == true);
             
         }
+        public void AddScrewToBox(Screw.Screw screw, ScrewBox box)
+        {
+            if (!box.IsAddingScrew)
+            {
+                box.AddScrew(screw);
+                var screwMng = LevelManager.Instance.ScrewManager;
+                screwMng.RemoveScrew(screw); // Xóa screw khỏi danh sách quản lý
+            }
+            else
+            {
+                Debug.LogWarning($"Box {box.name} is currently adding a screw.");
+            }
+        }
+
+        public ScrewBox FindSuitableBox(Screw.Screw screw)
+        {
+            return BoxQueue.Instance.screwBoxes
+                .Where(box => box.isActiveAndEnabled &&
+                              box.Color == screw.Color &&
+                              !box.isMoving &&
+                              !box.IsBoxFull)
+                .OrderByDescending(box => box.NextEmptyIndex) // Ưu tiên box có NextEmptyIndex cao nhất
+                .FirstOrDefault();
+        }
 
         private void OnLastBoxClearScrew()
         {
             Debug.LogError(onCompleteClearBoxes != null
                 ? "OnCompleteClearBoxes is not null and can invoke"
                 : "OnCompleteClearBoxes is null");
-            if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(onCompleteClearBoxes != null);
+            bool isComplete = onCompleteClearBoxes != null && IngameController.Instance.IsGameOver;
+            if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(isComplete);
         }
 
         private IEnumerator MoveNewBoxToLastBox(ScrewBox newBox, BoxSlot slot, Action<bool> callback = null)
@@ -320,7 +351,22 @@ namespace Ingame
                 StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
             }
         }
-
+        public void ReturnBoxToPool(ScrewBox box)
+        {
+            int totalhold = box.holdScrews.Count;
+            switch (totalhold)
+            {
+                case 1:
+                    OneHoldBoxPool.Instance.pool.ReturnToPool(box as BoxOneHold);
+                    break;
+                case 2:
+                    TwoHoldBoxPool.Instance.pool.ReturnToPool(box as BoxTwoHold);
+                    break;
+                case 3:
+                    ThreeHoldBoxPool.Instance.pool.ReturnToPool(box as BoxThreeHold);
+                    break;
+            }
+        }
         public void Reset()
         {
             foreach (var box in screwBoxes)

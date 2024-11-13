@@ -14,6 +14,7 @@ public class LevelMaker : MonoBehaviour
     public static LevelMaker instance;
     public bool isInputData;
     public bool isEditPartPosition;
+    public bool isEditPartColor;
     public bool isEditScrewPosition;
     public bool isSelectColorForScrew;
     public bool isEditHinge;
@@ -210,41 +211,57 @@ public class LevelMaker : MonoBehaviour
           
         }
     }
-
+    public void ResetAllScrewHinge()
+    {
+        
+    }
     public void SetEditMode(EditMode mode)
     {
         isEditScrewPosition = (mode == EditMode.ScrewPosition);
         isEditScrewColor = (mode == EditMode.ScrewColor);
         isEditHinge = (mode == EditMode.Hinge);
         isEditPartPosition = (mode == EditMode.PartPosition);
+        isEditPartColor = (mode == EditMode.PartColor);
     }
     public void TurnAllEditModeOff()
     {
         isEditScrewPosition = 
             isEditScrewColor = 
-                isEditHinge = 
-                    isEditPartPosition = false;
+                    isEditHinge =
+                    isEditPartColor =
+                        isEditPartPosition = false;
+        converter.ResetAllScrewsFlag();
     }
     public void ClickOnEditScrewPos()
     {
+        TurnAllEditModeOff();
         SetEditMode(EditMode.ScrewPosition);
     }
 
     public void ClickOnEditScrewColor()
     {
+        TurnAllEditModeOff();
         SetEditMode(EditMode.ScrewColor);
     }
 
     public void ClickOnEditScrewHinge()
     {
+        TurnAllEditModeOff();
+
         SetEditMode(EditMode.Hinge);
     }
 
     public void ClickOnEditPartPosition()
     {
+        TurnAllEditModeOff();
         SetEditMode(EditMode.PartPosition);
     }
 
+    public void ClickOnEditPartColor()
+    {
+        TurnAllEditModeOff();
+        SetEditMode(EditMode.PartColor);
+    }
 }
 
 public enum EditMode
@@ -252,5 +269,6 @@ public enum EditMode
     ScrewPosition,
     ScrewColor,
     Hinge,
-    PartPosition
+    PartPosition,
+    PartColor
 }

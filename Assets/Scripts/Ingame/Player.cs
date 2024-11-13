@@ -130,11 +130,11 @@ namespace Ingame
         {
            // Debug.LogWarning("Screw Clicked");
             screwQueue.Enqueue(screw);
-
             // Start processing the queue if it's not already processing
             if (processCoroutine == null)
             {
                 ArrayScrew.Instance.AddScrew(screw);
+               
             }
         }
 

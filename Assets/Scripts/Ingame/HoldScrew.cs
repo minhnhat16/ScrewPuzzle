@@ -1,3 +1,4 @@
+using PoolManager;
 using System;
 using UnityEngine;
 
@@ -49,7 +50,7 @@ namespace Ingame
         }
         public bool IsEmpty()
         {
-            return screw == null;
+            return screw == null && gameObject.activeInHierarchy;
         }
 
         public bool IsContain(Screw.Screw screw)

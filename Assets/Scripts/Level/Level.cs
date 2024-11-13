@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using ConfigFile;
-using Enum;
+using Enums;
 using UnityEngine.Serialization;
 
 namespace Level

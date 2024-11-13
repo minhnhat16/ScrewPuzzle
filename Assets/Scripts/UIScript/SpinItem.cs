@@ -57,7 +57,7 @@ public class SpinItem : MonoBehaviour
         }
         else if (itemType == SpinEnum.Gem)
         {
-            DataAPIController.instance.AddGem(Amount);
+            //DataAPIController.instance.AddGem(Amount);
 
         }
         else if (itemType == SpinEnum.Magnet && itemType == SpinEnum.Bomb )

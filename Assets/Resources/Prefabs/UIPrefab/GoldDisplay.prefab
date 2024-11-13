@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3929085963493185415}
+  - component: {fileID: 1938245008376050118}
   m_Layer: 5
   m_Name: GoldDisplay
   m_TagString: Untagged
@@ -40,6 +41,20 @@ RectTransform:
   m_AnchoredPosition: {x: 318, y: 867}
   m_SizeDelta: {x: 300, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1938245008376050118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 592151921473122950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5046d27b2f5f8eb458d73fbc7662c978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  goldLB: {fileID: 4912951741299375924}
+  addGoldBtn: {fileID: 3213207753261846180}
 --- !u!1 &5501967520972435889
 GameObject:
   m_ObjectHideFlags: 0
@@ -307,7 +322,7 @@ MonoBehaviour:
     m_Font: {fileID: 12800000, guid: 81e60168d62de164fa68260952aeddc8, type: 3}
     m_FontSize: 49
     m_FontStyle: 0
-    m_BestFit: 0
+    m_BestFit: 1
     m_MinSize: 10
     m_MaxSize: 49
     m_Alignment: 4
@@ -316,7 +331,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 1600
+  m_Text: 1600000000
 --- !u!1 &8340243134897967633
 GameObject:
   m_ObjectHideFlags: 0

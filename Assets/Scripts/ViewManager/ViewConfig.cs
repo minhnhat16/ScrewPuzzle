@@ -21,6 +21,7 @@ public class LoadingViewParam : ViewParam
 }
 public class GamePlayViewParam : ViewParam
 {
+    public int totalGold;
     public bool isNewPlayer;
     public int currentCardCount;
     public int maxCardCount;

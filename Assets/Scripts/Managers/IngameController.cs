@@ -1,6 +1,7 @@
 using Ingame;
 using System;
 using System.Collections;
+using System.DataBase;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,6 +15,7 @@ namespace Managers
         public string playerLevel;
         [SerializeField] public bool isOnMagnet;
         [SerializeField] public bool isOnBomb;
+        [SerializeField] private bool isGameOver;
 
         [SerializeField] private float exp_Current;
         [SerializeField] private Player player;
@@ -41,6 +43,7 @@ namespace Managers
             set { exp_Current = value; }
         }
 
+        public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
 
         private Coroutine inputCoroutine;
 
@@ -68,6 +71,12 @@ namespace Managers
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
+            int level = LevelManager.Instance.currentLevelID;
+            int totalGold = GameManager.instance.GoldCalculation(level);
+            DialogManager.Instance.HideAllDialog();
+
+            WinParam param = new();
+            param.totalGold = DataAPIController.instance.GetGold();
             DialogManager.Instance.ShowDialog(DialogIndex.WinDialog);
         }
 
@@ -126,6 +135,7 @@ namespace Managers
 
         private void ItemIvoked(ItemType item)
         {
+            itemJustInvoke = true;
             StartCoroutine(ItemCoroutine(item));
         }
 
@@ -138,7 +148,10 @@ namespace Managers
             switch (itemType)
             {
                 case ItemType.AddHold:
-                    AddHold(null);
+                    AddHold(() =>
+                    {
+
+                    });
                     break;
                 case ItemType.AddBox:
                     AddBox(null);
@@ -158,6 +171,14 @@ namespace Managers
             callback?.Invoke();
         }
 
+        internal void PauseGame()
+        {
+            Time.timeScale = 0;
+        }
+        internal void ResumeGame()
+        {
+            Time.timeScale =1;
+        }
         private void AddBox(Action callback)
         {
             BoxQueue.Instance.AddNewBoxSlot();
@@ -171,8 +192,8 @@ namespace Managers
 
         public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
-            bool arrayScrewInitDone = false;
-            bool boxQueueInitDone = false;
+            //bool arrayScrewInitDone = false;
+            //bool boxQueueInitDone = false;
             bool playerInitDone = false;
             /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
             StartCoroutine(LoadPlayer(() =>
@@ -239,7 +260,8 @@ namespace Managers
             player.CanClick = false;
             ReviveDialogParam param = new ReviveDialogParam();
             param.isRevive = false;
-            param.isHasAds = true; // set defaul allway true cus has none ads
+            param.isHasAds = true;// set defaul allway true cus has none ads
+            param.totalGold = DataAPIController.instance.GetGold();
             // ZenSDK.instance.IsVideoRewardReady();
             Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
 
@@ -292,6 +314,7 @@ namespace Managers
         public void OnGameOver()
         {
             // minuss 1 life heart
+            IsGameOver = true;
             int currentLevel = LevelManager.Instance.currentLevelID;
             Player.instance.CanClick = false;
             LevelManager.Instance.Reset();

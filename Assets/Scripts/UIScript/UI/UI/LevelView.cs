@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DataBase;
+using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,7 +34,8 @@ namespace UIScript.UI.UI
 
             currentLevel = newParam.currentLevel;  
             levelItems = newParam.listLevelItems;
-            InitListLevelItem(levelItems);
+            var orderLevelItems = levelItems.OrderBy(item => item.IDLevel);
+            InitListLevelItem(orderLevelItems.ToList());
         }
 
         private void InitListLevelItem( List<LevelItem> items)
@@ -42,7 +45,7 @@ namespace UIScript.UI.UI
             {
                 var levelOnPool = LevelItemPool.Instance.pool.SpawnNonGravity();
                 levelOnPool.IDLevel = level.IDLevel;
-                levelOnPool.IsCompleted  = level.IsCompleted;
+                levelOnPool.IsCompleted  = true;
                 levelOnPool.Init();
                 newItems.Add(levelOnPool);
             }
@@ -51,7 +54,9 @@ namespace UIScript.UI.UI
 
         private void CloseView()
         {
-            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
+            MainScreenViewParam param = new();
+            param.totalGold = DataAPIController.instance.GetGold(); 
+            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView,param);
         }
     }
 }
