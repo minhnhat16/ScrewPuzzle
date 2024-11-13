@@ -33,10 +33,7 @@ namespace Ingame
         {
             
         }
-        public void AppendScrew(ScrewLevelMaker screw)
-        {
-            _screws.Add(screw); 
-        }
+
         public List<Screw.Screw> GetScrews()
         {
             Screw.Screw[] screwsInChildren = GetComponentsInChildren<Screw.Screw>();
@@ -55,15 +52,6 @@ namespace Ingame
             {
                 screw.Reset();
                 screwPool.Pool.ReturnToPool(screw);
-            }
-        }
-        public void ResetHinge()
-        {
-            Debug.LogError("reset hinge");
-            var screws = GetComponentsInChildren<ScrewLevelMaker>();
-            foreach (ScrewLevelMaker screw in screws)
-            {
-                screw.ResetHinge();
             }
         }
         public void Reset()
