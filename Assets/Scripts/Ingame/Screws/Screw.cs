@@ -22,7 +22,6 @@ namespace Ingame.Screw
         [SerializeField] protected CircleCollider2D _circleCollider2D;
         [SerializeField] private Rigidbody2D rb;
         [SerializeField] protected SpriteRenderer render ;
-
         [SerializeField] private SpriteRenderer cross ;
         [SerializeField] private LayerMask _layerMask;
         [SerializeField] protected HingeController hingeController;
@@ -103,6 +102,11 @@ namespace Ingame.Screw
             layerMask = gameObject.layer;
         }
 
+        public void ResetRender()
+        {
+            render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            cross.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
         private void SetSortingOrderAndLayer(int order, string layer)
         {
             // Debug.LogError("Setting sorting order and layer");
@@ -112,7 +116,7 @@ namespace Ingame.Screw
             cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
-            Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
+            //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
             Position = new Vector3(Position.x, Position.y, -layerIndex  +10);
         }
 
@@ -304,23 +308,33 @@ namespace Ingame.Screw
             _transform.SetParent(holdScrew.transform);
 
         }
-        public virtual void CreateHinge(Rigidbody2D targetScrew)
+        public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart)
         {
             HingeObject hinge = HingePool.Instance.pool.SpawnNonGravity();
             GameObject newHingeChild = hinge.gameObject;
             newHingeChild.transform.SetParent(transform);
             newHingeChild.transform.localPosition = Vector3.zero;
-            newHingeChild.transform.position = targetScrew.transform.position;
+            newHingeChild.transform.position = targetPart.transform.position;
 
             // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
             HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
             newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-            hingeJoint.connectedBody = targetScrew; // Kết nối hinge với đối tượng screw mục tiêu
+            hingeJoint.connectedBody = targetPart; // Kết nối hinge với đối tượng screw mục tiêu
             // Lưu HingeJoint2D vào danh sách nếu cần
             hingeController.HingeJoint2D.Add(hingeJoint);
-            hingeController.BodyConnect.Add(targetScrew); // Thêm Rigidbody2D vào danh sách bodyConnect
+            hingeController.BodyConnect.Add(targetPart); // Thêm Rigidbody2D vào danh sách bodyConnect
             hingeJoint.autoConfigureConnectedAnchor = true;
-        
+            return hingeJoint;
+        }
+        public void Reset()
+        {
+            isClicked = false;
+            color = ColorEnum.Clear;
+            CircleCollider2D.enabled = true;
+            Debug.Log("Reset screw");
+            render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
+            hingeController.Reset();
         }
         public void Reset()
         {

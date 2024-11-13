@@ -7,6 +7,10 @@ public class BreakAnim : BaseDialogAnimation
 {
     public Animator animator;
     private Action callback;
+    private void Awake()
+    {
+        animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+    }
     public override void HideDialogAnimation(Action callback)
     {
         this.callback = callback;

@@ -1,16 +1,16 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using ConfigFile;
 using Enums;
 using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
+using Level;
 using Managers;
 using PoolManager;
-using Unity.VisualScripting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.DataBase;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -25,13 +25,14 @@ public class LevelManager : MonoBehaviour
     public int currentLevelID;
     [SerializeField] private BaseLevelObject currentLevelObject;
     [SerializeField] private GameObject screwManagerPrefb;
-    [SerializeField] private ScrewManager ScrewManager;
+    [SerializeField] private ScrewManager screwManager;
 
     public bool IsInitDone
     {
         get => isInitDone;
-        set => isInitDone = value;
+        set => isInitDone = value;  
     }
+    public ScrewManager ScrewManager { get => screwManager; set => screwManager = value; }
 
     public void Awake()
     {
@@ -74,7 +75,7 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"No BoxConfig assets found at path: {resourcePath}");
+            //Debug.LogError($"No BoxConfig assets found at path: {resourcePath}");
         }
 
         // Call the callback if it's not null
@@ -113,8 +114,11 @@ public class LevelManager : MonoBehaviour
     public void LoadLevel(int levelID, Action callback = null)
     {
         Debug.LogWarning("Start loading level ");
-
-
+        var boxManager = BoxQueue.Instance;
+        var arrayScrew = ArrayScrew.Instance;
+        arrayScrew.ShowArrayScrew() ;
+        Reset();
+        arrayScrew.HoldAlignment();
         LoadSceneManager.instance.LoadSceneByName("InGame", () =>
         {
             Debug.LogWarning("Load scence done  ");
@@ -123,8 +127,11 @@ public class LevelManager : MonoBehaviour
                 {
                     StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
                     {
-                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView);
-                    })) ;
+                        int userGold = DataAPIController.instance.GetGold();
+                        GamePlayViewParam param = new();
+                        param.totalGold = userGold;
+                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView,param);
+                    }));
                 });
         });
     }
@@ -167,15 +174,41 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public IEnumerator LoadGameObjectFromLevel(int levelId,Action callback = null)
+    public IEnumerator LoadGameObjectFromLevel(int levelId, Action callback = null)
     {
         currentLevelID = levelId;
-        //spawn level obj
+
+        // B??c 1: Kh?i t?o Level Object
+        yield return InitializeLevelObject();
+
+        // B??c 2: L?y d? li?u Level
+        var levelData = GetLevelData(levelId);
+        if (levelData == null) yield break;
+        currentLevel = levelData;
+
+        // B??c 3: T?i Box Configuration
+        InitializeBoxQueue(levelData);
+
+        // B??c 4: T?i các Layers
+        yield return LoadLayers(levelData);
+
+        // B??c 5: T?i Screw Manager và các Screw
+        yield return LoadScrewManagerAndScrews(levelData);
+
+        // B??c 6: Kích ho?t Parts
+        yield return ActivateAllParts();
+
+        callback?.Invoke();
+        Debug.Log($"Level data with ID {levelId} loaded.");
+    }
+    private IEnumerator InitializeLevelObject()
+    {
         var levelObject = LevelObjectPool.Instance.pool.SpawnNonGravity();
         currentLevelObject = levelObject;
         levelObject.transform.SetParent(transform);
         levelObject.transform.localPosition = Vector3.zero;
-        // Clear existing GameObjects in levelObject to prepare for new loading
+
+        // Xóa các ??i t??ng c? trong levelObject
         var layerManager = levelObject.GetComponent<LayerManager>();
         foreach (Transform child in levelObject.transform)
         {
@@ -183,62 +216,35 @@ public class LevelManager : MonoBehaviour
             layerManager.ClearPartDict();
         }
 
-        // Wait until the end of the frame to ensure all objects are destroyed
+        // ??i cu?i frame ?? ??m b?o t?t c? ??i t??ng b? xóa
         yield return new WaitForEndOfFrame();
-        // Find the level data with the given ID
+    }
+    private Level.Level GetLevelData(int levelId)
+    {
         Level.Level levelData = Levels.GetValueOrDefault(levelId.ToString());
-        this.currentLevel = levelData;
         if (levelData == null)
         {
             Debug.LogWarning($"Level with ID {levelId} not found!");
-            yield break;
         }
-
-        int layerID = 1;
-
+        return levelData;
+    }
+    private void InitializeBoxQueue(Level.Level levelData)
+    {
         BoxQueue.Instance.LoadBoxConfigRecord(levelData.boxConfig);
         BoxQueue.Instance.Init();
-
+    }
+    private IEnumerator LoadLayers(Level.Level levelData)
+    {
+        int layerID = 1;
         List<BaseLayer> listBaseLayer = new();
-        // Loop through all layers in the level data
+        var layerManager = currentLevelObject.GetComponent<LayerManager>();
+
         foreach (var layerData in levelData.layers)
         {
-            // Create a new GameObject for the layer
-            BaseLayer layerComponent = LayerPool.Instance.pool.SpawnNonGravity();
-            var layerName = $"Layer {layerID++}";
-            layerComponent.name = layerName;
-            layerComponent.transform.SetParent(levelObject.transform);
-            layerComponent.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-            var layerObj = layerComponent.gameObject;
-            var layername = layerObj.layer = LayerMask.NameToLayer(layerName);
-            // Loop through all parts in the current layer
+            var layerComponent = CreateLayer(layerID++);
             foreach (var partData in layerData.parts)
             {
-                var partComponent = PartPool.Instance.pool.SpawnNonGravity();
-                // Instantiate a new GameObject for the part
-                GameObject partGameObject = partComponent.gameObject;
-                partComponent = partGameObject.GetComponent<BasePart>();
-
-                if (partGameObject != null && partComponent != null)
-                {
-                    partGameObject.transform.SetParent(layerComponent.transform);
-                    partGameObject.transform.SetLocalPositionAndRotation(partData.partPosition, Quaternion.identity);
-                    partComponent.Body.bodyType = RigidbodyType2D.Static;
-                    partComponent.uniqueID = partData.partName;
-                    layerManager.AddPart(partComponent);
-                    var partLayer = LayerMask.LayerToName(layername);
-                    partGameObject.layer = layername;
-                    Debug.Log("sprite name " + partData.spriteName + "layer name " + layername);
-                    var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
-                    /*if (sprite == null) Debug.LogWarning($" Sprite {partData.spriteName} null");*/
-                    partComponent.Renderer.sprite = sprite;
-                    partComponent.GenerateColliderFromSprite();
-                    partComponent.SetSortingLayer(partLayer);
-                }
-
-                // Add a delay to visually see the progress or avoid blocking
-                yield return null; // Wait for one frame before the next iteration
+                yield return LoadPart(layerComponent, partData, layerManager);
             }
 
             listBaseLayer.Add(layerComponent);
@@ -246,60 +252,126 @@ public class LevelManager : MonoBehaviour
 
         layerManager.Layers = listBaseLayer;
         layerManager.CoverDictToList();
+    }
+    private BaseLayer CreateLayer(int layerID)
+    {
+        var layerComponent = LayerPool.Instance.pool.SpawnNonGravity();
+        layerComponent.name = $"Layer {layerID}";
+        layerComponent.transform.SetParent(currentLevelObject.transform);
+        layerComponent.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        return layerComponent;
+    }
+    private IEnumerator LoadPart(BaseLayer layerComponent, BodyPartScriptable partData, LayerManager layerManager)
+    {
+        var partComponent = PartPool.Instance.pool.SpawnNonGravity();
+        var partGameObject = partComponent.gameObject;
+        partComponent = partGameObject.GetComponent<BasePart>();
 
-        // Instantiate the screw manager
-        var screwManagerGameObject = Instantiate(screwManagerPrefb, levelObject.transform) as GameObject;
-        screwManagerGameObject.transform.SetPositionAndRotation(new Vector3(0, -5, 0), Quaternion.identity);
-        ScrewManager = screwManagerGameObject.GetComponent<ScrewManager>();
-        // Load screws
-        foreach (var screwData in levelData.screws)
+        if (partGameObject != null && partComponent != null)
         {
-            var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
-            GameObject screwGameObject = screw.gameObject;
-            screwGameObject.transform.SetParent(screwManagerGameObject.transform);
-            screwGameObject.transform.SetLocalPositionAndRotation(screwData.screwPosition, Quaternion.identity);
-            var color = screw.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
-            screw.ChangeScrewColorByEnum(color);
-            // Handle hinge connections
-            foreach (var hingeConnection in screwData.hingeConnections)
+            partGameObject.transform.SetParent(layerComponent.transform);
+            partGameObject.transform.SetLocalPositionAndRotation(partData.partPosition, partData.partRotation);
+            partGameObject.transform.localScale = partData.partLocalScale;
+            partComponent.Body.bodyType = RigidbodyType2D.Static;
+            partComponent.uniqueID = partData.partName;
+            layerManager.AddPart(partComponent);
+
+            partGameObject.layer = LayerMask.NameToLayer(layerComponent.name);
+            var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
+            partComponent.Renderer.sprite = sprite;
+
+            if (TryHexToColor(partData.colorString, out Color color))
             {
-                Debug.Log($"Level data with ID {levelId} loaded.");
-                var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
-                Debug.Log($"Connected part id {connectedPart.uniqueID}");
-                screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+                partComponent.Renderer.color = color;
             }
 
-            ScrewManager.AddScrew(screw);
-            StartCoroutine(screw.Init());
-
-            // Add a delay after each screw is loaded
-            yield return null; // Wait for one frame before loading the next screw
+            partComponent.GenerateColliderFromSprite();
+            partComponent.SetSortingLayer(LayerMask.LayerToName(partGameObject.layer));
         }
 
-        var allParts = layerManager.Parts;
-        foreach (var part in allParts)
+        yield return null;
+    }
+    private IEnumerator LoadScrewManagerAndScrews(Level.Level levelData)
+    {
+        var screwManagerGameObject = Instantiate(screwManagerPrefb, currentLevelObject.transform) as GameObject;
+        screwManagerGameObject.transform.SetPositionAndRotation(new Vector3(0, -5, 0), Quaternion.identity);
+        ScrewManager = screwManagerGameObject.GetComponent<ScrewManager>();
+        ScrewManager.hingeConnections = new();
+        ScrewManager.OnScrewRemoved += HandleScrewRemoved;
+
+        foreach (var screwData in levelData.screws)
         {
-            part.Body.bodyType = RigidbodyType2D.Dynamic;
+            yield return LoadScrew(screwData);
+        }
+    }
+    private IEnumerator LoadScrew(ScrewScriptable screwData)
+    {
+        var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
+        var screwGameObject = screw.gameObject;
+        var screwComp = screwGameObject.GetComponent<Screw>();
+        screwGameObject.transform.SetParent(ScrewManager.transform);
+        screwGameObject.transform.SetLocalPositionAndRotation(screwData.screwPosition, Quaternion.identity);
+
+        screw.Color = (ColorEnum)screwData.idColor;
+        screw.ChangeScrewColorByEnum(screw.Color);
+        screw.ResetRender();
+
+        foreach (var hingeConnection in screwData.hingeConnections)
+        {
+            var connectedPart = currentLevelObject.GetComponent<LayerManager>().GetPartByKey(hingeConnection.bodyPartUniqueID);
+            var hinge = screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+            ScrewManager.AddHingeConnection(hinge, connectedPart);
+        }
+
+        ScrewManager.AddScrew(screw);
+        yield return screw.Init();
+        yield return null;
+    }
+    private IEnumerator ActivateAllParts()
+    {
+        var layerManager = currentLevelObject.GetComponent<LayerManager>();
+        foreach (var part in layerManager.Parts)
+        {
+            part.Body.bodyType = RigidbodyType2D.Static;
             part.Body.gravityScale = 0;
+           var partLayer =  part.PartLayer();
+            part.SetIgnoreColliderLayer(true, partLayer, partLayer);
             yield return null;
         }
-        yield return null;
-        callback?.Invoke();
-        Debug.Log($"Level data with ID {levelId} loaded.");
     }
 
+    private void HandleScrewRemoved(Screw removedScrew)
+    {
+        Debug.Log($"Screw {removedScrew.name} has been removed. Handling additional logic...");
+    }
     public void Reset()
     {
-        if(transform.childCount > 0)
+        if (transform.childCount > 0)
         {
             LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
             layerManager.Reset();
-            ScrewManager.Reset();
+            LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
         }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
-        LevelObjectPool.Instance.pool.ReturnToPool(currentLevelObject);
-        currentLevelObject = null;
+        ArrayScrew.Instance.ClearAllScrewsOnArray();
+        screwManager.Reset();
 
+        currentLevelObject = null;
+    }
+    public bool TryHexToColor(string hex, out Color color)
+    {
+        color = default;
+
+        if (hex.Length == 8)
+        { // Check if it's in RRGGBBAA format
+            // Parse R, G, B, and A components
+            if (ColorUtility.TryParseHtmlString("#" + hex, out color))
+            {
+                return true;
+            }
+        }
+        Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
+        return false;
     }
 }

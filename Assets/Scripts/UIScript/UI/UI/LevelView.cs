@@ -45,7 +45,7 @@ namespace UIScript.UI.UI
             {
                 var levelOnPool = LevelItemPool.Instance.pool.SpawnNonGravity();
                 levelOnPool.IDLevel = level.IDLevel;
-                levelOnPool.IsCompleted  = level.IsCompleted;
+                levelOnPool.IsCompleted  = true;
                 levelOnPool.Init();
                 newItems.Add(levelOnPool);
             }

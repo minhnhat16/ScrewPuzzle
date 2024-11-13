@@ -240,7 +240,7 @@ namespace Ingame
             var newBox = SpawnBox();
             if (newBox == null || currentSlot == null)
             {
-                Debug.LogError("Error: new box or slot is null" + newBox + " or " + currentSlot);
+                //Debug.LogError("Error: new box or slot is null" + newBox + " or " + currentSlot);
                 return null;
             }
             return newBox;
@@ -269,6 +269,30 @@ namespace Ingame
             }));
             yield return new WaitUntil(() => isMoveBoxDone == true);
             
+        }
+        public void AddScrewToBox(Screw.Screw screw, ScrewBox box)
+        {
+            if (!box.IsAddingScrew)
+            {
+                box.AddScrew(screw);
+                var screwMng = LevelManager.Instance.ScrewManager;
+                screwMng.RemoveScrew(screw); // Xóa screw khỏi danh sách quản lý
+            }
+            else
+            {
+                Debug.LogWarning($"Box {box.name} is currently adding a screw.");
+            }
+        }
+
+        public ScrewBox FindSuitableBox(Screw.Screw screw)
+        {
+            return BoxQueue.Instance.screwBoxes
+                .Where(box => box.isActiveAndEnabled &&
+                              box.Color == screw.Color &&
+                              !box.isMoving &&
+                              !box.IsBoxFull)
+                .OrderByDescending(box => box.NextEmptyIndex) // Ưu tiên box có NextEmptyIndex cao nhất
+                .FirstOrDefault();
         }
 
         private void OnLastBoxClearScrew()
@@ -327,7 +351,22 @@ namespace Ingame
                 StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
             }
         }
-
+        public void ReturnBoxToPool(ScrewBox box)
+        {
+            int totalhold = box.holdScrews.Count;
+            switch (totalhold)
+            {
+                case 1:
+                    OneHoldBoxPool.Instance.pool.ReturnToPool(box as BoxOneHold);
+                    break;
+                case 2:
+                    TwoHoldBoxPool.Instance.pool.ReturnToPool(box as BoxTwoHold);
+                    break;
+                case 3:
+                    ThreeHoldBoxPool.Instance.pool.ReturnToPool(box as BoxThreeHold);
+                    break;
+            }
+        }
         public void Reset()
         {
             foreach (var box in screwBoxes)

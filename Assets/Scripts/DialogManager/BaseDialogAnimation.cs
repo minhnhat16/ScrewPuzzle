@@ -9,6 +9,7 @@ public class BaseDialogAnimation : MonoBehaviour
 
     private void Awake()
     {
+
         /*canvasGroup = gameObject.GetComponent<CanvasGroup>();
 
         if (canvasGroup != null)

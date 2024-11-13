@@ -5,6 +5,10 @@ public class CollectionAnim : BaseViewAnimation
 {
     public Animator animator;
     private Action callback;
+    private void Awake()
+    {
+        animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+    }
     public override void HideViewAnimation(Action callback)
     {
         this.callback = callback;
