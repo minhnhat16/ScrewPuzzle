@@ -17,12 +17,19 @@ namespace Managers
         [SerializeField] private int trackLevelStart;
         [SerializeField] private int levelCanUnlockNewCard;
         [SerializeField] private int playerGold;
+        [SerializeField] private float popupDuration = 1;
+        [SerializeField] private float starMoveDuration = 1;
+        [SerializeField] private Vector3 starScale = new(0.5f,0.5f);
+
         [SerializeField] private bool isNewPlayer;
         public List<CardColorPallet> listCurrentCardColor;
         public UIRootControlScale UIRoot;
         public int TrackLevelStart { get=> trackLevelStart; set => trackLevelStart = value; }
         public bool IsNewPlayer { get => isNewPlayer; set => isNewPlayer = value; }
         public int TotalLevel { get => totalLevel; set => totalLevel = value; }
+        public float PopupDuration { get => popupDuration; set => popupDuration = value; }
+        public float StarMoveDuration { get => starMoveDuration; set => starMoveDuration = value; }
+        public Vector3 StarScale { get => starScale; set => starScale = value; }
 
         private void Awake()
         {
@@ -33,8 +40,7 @@ namespace Managers
         void Start()
         {
             UIRoot = GetComponentInParent<UIRootControlScale>();
-            totalLevel = DataAPIController.instance.GetPlayerLevel();
-            playerGold = DataAPIController.instance.GetGold();
+         
            //DataTrigger.RegisterValueChange(DataPath.ALLLEVEL, OnLevelChange);
             //ingameController.gameObject.SetActive(false);
         }
@@ -93,6 +99,8 @@ namespace Managers
         {
             dayTimeController.StartCoroutine(dayTimeController.InitCouroutine());
             isNewPlayer = DataAPIController.instance.IsNewPlayer();
+            totalLevel = DataAPIController.instance.GetPlayerLevel();
+            playerGold = DataAPIController.instance.GetGold();
         }
         public void SetupTutorial()
         {

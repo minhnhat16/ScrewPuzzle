@@ -7,8 +7,9 @@ namespace Ingame
     {
         public override void OnEnable()
         {
+            base.OnEnable();
             onScrewBoxFull.AddListener(BoxFullInvoker);
-
+            spawnStartEvent.AddListener(SpawningStar);
             Transform = transform;
         }
         public override void Start()

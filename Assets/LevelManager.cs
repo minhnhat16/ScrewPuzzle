@@ -371,7 +371,7 @@ public class LevelManager : MonoBehaviour
                 return true;
             }
         }
-        Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
+        //Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
         return false;
     }
 }

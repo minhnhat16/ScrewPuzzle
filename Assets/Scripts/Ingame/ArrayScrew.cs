@@ -149,15 +149,16 @@ namespace Ingame
 
                 // Kiểm tra nếu tất cả các ô đều đầy
                 bool allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
-                if (allFull)
+                if (allFull )
                 {
                     Debug.Log("All holdScrews are full!");
+                    
                     yield return new WaitForSeconds(2f); // Chờ 2 giây để chắc chắn
 
                     // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
                     allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
 
-                    if (allFull)
+                    if (allFull && BoxQueue.Instance.MovingBox == false)
                     {
                         // Nếu vẫn đầy, gọi sự kiện
                         onHoldScrewsFull?.Invoke();

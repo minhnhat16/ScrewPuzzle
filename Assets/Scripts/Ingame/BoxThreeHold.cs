@@ -14,6 +14,8 @@ namespace Ingame
         {
             Transform = transform; 
             onScrewBoxFull.AddListener(BoxFullInvoker);
+            spawnStartEvent.AddListener(SpawningStar);
+
         }
 
         private void OnDisable()
