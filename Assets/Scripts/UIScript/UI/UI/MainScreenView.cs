@@ -86,7 +86,7 @@ namespace UIScript.UI.UI
             {
                 config = ConfigFileManager.Instance.DailyRewardConfig,
                 data = DataAPIController.instance.GetDailyData(),
-                totalGold = DataAPIController.instance.GetGold(),
+                totalGold = GameManager.instance.GetPlayerGold(),
             };
             DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog, param, null);
         }
@@ -98,7 +98,7 @@ namespace UIScript.UI.UI
                 currentSkin = DataAPIController.instance.GetCurrentScrewData(),
                 currentBG = DataAPIController.instance.GetCurrentBackGroundData(),
                 currentBoard = DataAPIController.instance.GetCurrentBoardData(),
-                totalGold = DataAPIController.instance.GetGold(),
+                totalGold = GameManager.instance.GetPlayerGold(),
             };
 
             DialogManager.Instance.ShowDialog(DialogIndex.CollectionDialog, param, null);
@@ -114,7 +114,7 @@ namespace UIScript.UI.UI
             param.time = DateTime.Now.AddDays(2).ToString();
             param.price = 600000;
             param.currency = "VND";
-            param.totalGold = DataAPIController.instance.GetGold();
+            param.totalGold = GameManager.instance.GetPlayerGold();
             List<ShopItem> specialItems = new List<ShopItem>();
 
             DialogManager.Instance.ShowDialog(DialogIndex.SpecialDialog, param, null);
@@ -149,7 +149,7 @@ namespace UIScript.UI.UI
         {
             SettingParam param = new();
             param.isMainScreen = viewIndex.Equals(ViewIndex.MainScreenView);
-            param.totalGold = DataAPIController.instance.GetGold();
+            param.totalGold = GameManager.instance.GetPlayerGold();
             if (param.totalGold == null) Debug.Log("total gold is null");
             param.title = "SETTING";
             DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param);
@@ -168,7 +168,7 @@ namespace UIScript.UI.UI
 
             param.price = 600000;
             param.currency = "VND";
-            param.totalGold = DataAPIController.instance.GetGold();
+            param.totalGold = GameManager.instance.GetPlayerGold();
 
             DialogManager.Instance.ShowDialog(DialogIndex.AdsRemoveDialog, param, null);
         }

@@ -127,7 +127,7 @@ public class LevelManager : MonoBehaviour
                 {
                     StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
                     {
-                        int userGold = DataAPIController.instance.GetGold();
+                        int userGold = GameManager.instance.GetPlayerGold();
                         GamePlayViewParam param = new();
                         param.totalGold = userGold;
                         ViewManager.Instance.SwitchView(ViewIndex.GamePlayView,param);

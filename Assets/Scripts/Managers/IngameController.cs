@@ -76,7 +76,7 @@ namespace Managers
             DialogManager.Instance.HideAllDialog();
 
             WinParam param = new();
-            param.totalGold = DataAPIController.instance.GetGold();
+            param.totalGold = GameManager.instance.GetPlayerGold();
             DialogManager.Instance.ShowDialog(DialogIndex.WinDialog);
         }
 
@@ -261,7 +261,7 @@ namespace Managers
             ReviveDialogParam param = new ReviveDialogParam();
             param.isRevive = false;
             param.isHasAds = true;// set defaul allway true cus has none ads
-            param.totalGold = DataAPIController.instance.GetGold();
+            param.totalGold = GameManager.instance.GetPlayerGold();
             // ZenSDK.instance.IsVideoRewardReady();
             Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
 

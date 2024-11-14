@@ -1,3 +1,4 @@
+using Managers;
 using System.DataBase;
 using UnityEngine;
 using UnityEngine.UI;
@@ -76,7 +77,7 @@ namespace UIScript.Dialog
         public void PurchaseItem()
         {
             // Get the current gold in the wallet
-            int wallet = DataAPIController.instance.GetGold();
+            int wallet = GameManager.instance.GetPlayerGold();
 
             // Check if the user has enough gold to purchase the item
             if (wallet >= price)

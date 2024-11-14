@@ -53,7 +53,7 @@ public class BootLoader : MonoBehaviour
         LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
         {
             MainScreenViewParam param = new MainScreenViewParam();
-            param.totalGold = DataAPIController.instance.GetGold() ;
+            param.totalGold = GameManager.instance.GetPlayerGold();
             //Debug.Log("LoadSenceCallback");
             ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
             {
@@ -83,7 +83,7 @@ public class BootLoader : MonoBehaviour
     private void SetupAfterInitConfig()
     {
         MainScreenViewParam param = new();
-        param.totalGold = DataAPIController.instance.GetGold();
+        param.totalGold = GameManager.instance.GetPlayerGold();
 
     }
     private void InitConfig(Action callback)

@@ -90,7 +90,7 @@ public class SettingDialog : BaseDialog
             LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
             {
                 MainScreenViewParam param = new();
-                param.totalGold = DataAPIController.instance.GetGold();
+                param.totalGold = GameManager.instance.GetPlayerGold();
                 ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
                 /*  
                 DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog, null, () =>

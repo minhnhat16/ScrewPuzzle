@@ -96,7 +96,7 @@ namespace UIScript.UI.UI
         private void CloseButton()
         {
             MainScreenViewParam param = new MainScreenViewParam();
-            param.totalGold = DataAPIController.instance.GetGold();
+            param.totalGold = GameManager.instance.GetPlayerGold();
             ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
         }
 

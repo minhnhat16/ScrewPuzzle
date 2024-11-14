@@ -21,7 +21,7 @@ public class GoldDisplay : MonoBehaviour
     private void AddGoldButton()
     {
         ShopViewParam param = new();
-        param.gold = DataAPIController.instance.GetGold();
+        param.gold = GameManager.instance.GetPlayerGold();
         ViewManager.Instance.SwitchView(ViewIndex.ShopView,param);
     }
     public void SetGoldToLable(int gold)

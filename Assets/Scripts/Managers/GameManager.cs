@@ -11,15 +11,15 @@ namespace Managers
         public static GameManager instance;
         [SerializeField] private IngameController ingameController;
         [SerializeField] private DayTimeController dayTimeController;
-        public List<CardColorPallet> listCurrentCardColor;
-        public UIRootControlScale UIRoot;
+       
         [SerializeField] private int languageID;
         [SerializeField] private int totalLevel;
         [SerializeField] private int trackLevelStart;
         [SerializeField] private int levelCanUnlockNewCard;
-
+        [SerializeField] private int playerGold;
         [SerializeField] private bool isNewPlayer;
-
+        public List<CardColorPallet> listCurrentCardColor;
+        public UIRootControlScale UIRoot;
         public int TrackLevelStart { get=> trackLevelStart; set => trackLevelStart = value; }
         public bool IsNewPlayer { get => isNewPlayer; set => isNewPlayer = value; }
         public int TotalLevel { get => totalLevel; set => totalLevel = value; }
@@ -33,6 +33,8 @@ namespace Managers
         void Start()
         {
             UIRoot = GetComponentInParent<UIRootControlScale>();
+            totalLevel = DataAPIController.instance.GetPlayerLevel();
+            playerGold = DataAPIController.instance.GetGold();
            //DataTrigger.RegisterValueChange(DataPath.ALLLEVEL, OnLevelChange);
             //ingameController.gameObject.SetActive(false);
         }
@@ -44,6 +46,31 @@ namespace Managers
                 level /= levelCanUnlockNewCard;
                 NextLevelCanUnlock(level);
             }
+        }
+        public void AddGoldToCurrent(int gold, Action<bool> success = null)
+        {
+
+            int current = playerGold;
+            playerGold += gold;
+            success?.Invoke(current < playerGold);
+        }
+        public void MinusGoldToCurrent(int gold, Action<bool> success = null)
+        {
+
+            int current = playerGold;
+            playerGold -= gold;
+            success?.Invoke(current > playerGold);
+        }
+        public int GetPlayerGold()
+        {
+            return playerGold;
+        }
+        public void SaveGoldToData(Action<bool> success = null)
+        {
+            CurrencyWallet gold = new();
+            gold.currency = Currency.Gold;
+            gold.amount = playerGold;
+            DataAPIController.instance.SaveGold(gold, success);
         }
         public void NextLevelCanUnlock(int levelCanUnlock)
         {
