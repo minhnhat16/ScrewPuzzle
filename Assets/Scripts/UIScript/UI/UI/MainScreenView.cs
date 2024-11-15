@@ -176,7 +176,7 @@ namespace UIScript.UI.UI
         {
             var levelsConfig = LevelManager.Instance.levelConfig;
             var levelData = DataAPIController.instance.GetAllLevelData();
-            List<LevelItem> listLevel = new();
+            List<BaseLevelItem> listLevel = new();
 
             foreach (var levelConfig in levelsConfig)
             {
@@ -186,12 +186,7 @@ namespace UIScript.UI.UI
 
                 Debug.LogError($"CURRENT LEVEL {id} DATA {currentLevel} and isComplete {isComplete}");
                 // Create new LevelItem and add to the list
-                LevelItem newItem = new()
-                {
-                    IDLevel = id,
-                    IsCompleted = isComplete,
-                    IsHardLevel = false
-                };
+                BaseLevelItem newItem = new BaseLevelItem(id, isComplete, false);
                 listLevel.Add(newItem);
             }
 

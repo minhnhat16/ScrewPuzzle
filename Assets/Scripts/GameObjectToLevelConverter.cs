@@ -160,30 +160,37 @@ public class GameObjectToLevelConverter : MonoBehaviour
         // Collect screw data
         var screws = levelObject.GetComponentsInChildren<Screw>();
         newLevelData.screws = new List<ScrewScriptable>();
+        int idScrew = 0;
+      
         foreach (var screw in screws)
         {
             ScrewScriptable screwData = new ScrewScriptable()
             {
-                screwPosition = screw.Position  ,
-                idScrew = screw.GetInstanceID(),
+                screwPosition = screw.transform.localPosition,
+                idScrew = idScrew,
                 idColor = (int)screw.Color,
                 hingeConnections = new List<HingeConnection>()
             };
 
             var hinges = screw.HingeController.HingeJoint2D;
             var listHingeObject = new List<HingeConnection>();
-            var i = 0;
+            if (hinges.Count == 0) continue;
+            int idBody = 0;
             foreach (var hinge in hinges)
             {
+                var pos = hinge.transform.localPosition;
+                var body = $"{screw.HingeController.BodyConnect[idBody].GetComponent<BasePart>().uniqueID}";
+                var hingPos = hinge.connectedBody.transform.localPosition;
                 HingeConnection hingeConnection = new HingeConnection()
                 {
-                    hingePosition = hinge.transform.localPosition ,
-                    bodyPartUniqueID = $"{screw.HingeController.BodyConnect[i].GetComponent<BasePart>().uniqueID}",
-                    bodyPartHingePosition = hinge.connectedBody.transform.localPosition,
+                    hingePosition = pos,
+                    bodyPartUniqueID = body,
+                    bodyPartHingePosition = hingPos,
                 };
-                i++;
+                idBody++;
                 listHingeObject.Add(hingeConnection);
             }
+            idScrew++;
 
             screwData.hingeConnections = listHingeObject;
             newLevelData.screws.Add(screwData);
@@ -439,11 +446,12 @@ public class GameObjectToLevelConverter : MonoBehaviour
             var color = screwComponent.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
             screwComponent.ChangeScrewColorByEnum(color);
             // Handle hinge connections
+            Debug.Log($"Connected part id {screwData.idScrew}");
+
             foreach (var hingeConnection in screwData.hingeConnections)
             {
-                Debug.Log($"Level data with ID {levelId} loaded.");
+               // Debug.Log($"Level data with ID {levelId} loaded.");
                 var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
-                Debug.Log($"Connected part id {connectedPart.uniqueID}");
                 screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
             }
 

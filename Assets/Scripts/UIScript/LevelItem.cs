@@ -4,6 +4,24 @@ using UnityEngine.UI;
 
 namespace UIScript
 {
+    [Serializable]
+    public class BaseLevelItem {
+        [SerializeField] private int idLevel;
+        [SerializeField] private bool isCompleted;
+        [SerializeField] private bool isHardLevel;
+
+        public bool IsHardLevel { get => isHardLevel; set => isHardLevel = value; }
+        public bool IsCompleted { get => isCompleted; set => isCompleted = value; }
+        public int IdLevel { get => idLevel; set => idLevel = value; }
+        public BaseLevelItem(int idLevel, bool isCompleted, bool isHardLevel)
+        {
+            this.idLevel = idLevel;
+            this.isCompleted = isCompleted;
+            this.isHardLevel = isHardLevel;
+        }
+
+    }
+
     public class LevelItem : MonoBehaviour
     {
         [SerializeField] private int idLevel;
@@ -26,11 +44,6 @@ namespace UIScript
         [SerializeField] private Image imageIcon;
         [SerializeField] private Text textLevel;
         [SerializeField] private Button button;
-
-        public LevelItem()
-        {
-        
-        }
         public LevelItem(int idLevel, bool isCompleted, bool isHardLevel)
         {
             this.idLevel = idLevel;

@@ -12,6 +12,7 @@ namespace UIScript.UI.UI
     public class LevelView : BaseView
     {
         [SerializeField] private int currentLevel = 0;
+        [SerializeField] private List<BaseLevelItem> baseLevelItems;
         [SerializeField]private List<LevelItem> levelItems;
         [SerializeField] private Button closeButton;
         public override void OnStartShowView()
@@ -33,19 +34,19 @@ namespace UIScript.UI.UI
 
             LevelParam newParam = (LevelParam)param;
 
-            currentLevel = newParam.currentLevel;  
-            levelItems = newParam.listLevelItems;
-            var orderLevelItems = levelItems.OrderBy(item => item.IDLevel);
+            currentLevel = newParam.currentLevel;
+            baseLevelItems = newParam.listLevelItems;
+            var orderLevelItems = baseLevelItems.OrderBy(item => item.IdLevel);
             InitListLevelItem(orderLevelItems.ToList());
         }
 
-        private void InitListLevelItem( List<LevelItem> items)
+        private void InitListLevelItem( List<BaseLevelItem> items)
         {
             List<LevelItem> newItems = new();
             foreach (var level in items)
             {
                 var levelOnPool = LevelItemPool.Instance.pool.SpawnNonGravity();
-                levelOnPool.IDLevel = level.IDLevel;
+                levelOnPool.IDLevel = level.IdLevel;
                 levelOnPool.IsCompleted  = true;
                 levelOnPool.Init();
                 newItems.Add(levelOnPool);

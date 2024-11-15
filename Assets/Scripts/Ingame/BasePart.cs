@@ -53,9 +53,9 @@ namespace Ingame
             this.renderer = renderer;
             this.collider = collider;
         }
-        public string PartLayer()
+        public int PartLayer()
         {
-            return gameObject.layer.ToString();
+            return gameObject.layer;
         }
 
         private void Awake()
@@ -129,20 +129,18 @@ namespace Ingame
             body.gravityScale = 1;
             body.bodyType = RigidbodyType2D.Dynamic;
         }
-        public void SetIgnoreColliderLayer(bool isIgnoring, string layerName, string targetLayerName)
+        public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
         {
-            int layer = LayerMask.NameToLayer(layerName);
-            int targetLayer = LayerMask.NameToLayer(targetLayerName);
 
-            if (layer < 0 || targetLayer < 0)
+            if (idLayer < 0 || idTargetLayer < 0)
             {
-                Debug.LogWarning($"Layer {layerName} hoặc {targetLayerName} không tồn tại.");
+                Debug.LogWarning($"Layer {idLayer} hoặc {idTargetLayer} không tồn tại.");
                 return;
             }
 
-            Physics2D.IgnoreLayerCollision(layer, targetLayer, isIgnoring);
+            Physics2D.IgnoreLayerCollision(idLayer, idLayer, isIgnoring);
 
-            Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {layerName} và {targetLayerName}.");
+            Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {idLayer} và {idTargetLayer}.");
         }
         public void SetSortingLayer(string layerName)
         {

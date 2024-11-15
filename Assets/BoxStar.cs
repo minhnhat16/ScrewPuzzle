@@ -38,7 +38,7 @@ public class BoxStar : MonoBehaviour
         sequence.Append(transform.DOScale(scale, popupDuration/2 ).SetEase(Ease.InBack));
 
         // Step 2: Move to the target position
-        sequence.Append(transform.DOMove(targetPos, moveDuration/2).SetEase(Ease.OutQuad));
+        sequence.Append(transform.DOMove(targetPos, moveDuration/2).SetEase(Ease.InQuart));
 
         // Optional: Play the sequence
         sequence.Play();

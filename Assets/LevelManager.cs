@@ -9,7 +9,6 @@ using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.DataBase;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -30,7 +29,7 @@ public class LevelManager : MonoBehaviour
     public bool IsInitDone
     {
         get => isInitDone;
-        set => isInitDone = value;  
+        set => isInitDone = value;
     }
     public ScrewManager ScrewManager { get => screwManager; set => screwManager = value; }
 
@@ -116,7 +115,7 @@ public class LevelManager : MonoBehaviour
         Debug.LogWarning("Start loading level ");
         var boxManager = BoxQueue.Instance;
         var arrayScrew = ArrayScrew.Instance;
-        arrayScrew.ShowArrayScrew() ;
+        arrayScrew.ShowArrayScrew();
         Reset();
         arrayScrew.HoldAlignment();
         LoadSceneManager.instance.LoadSceneByName("InGame", () =>
@@ -130,7 +129,7 @@ public class LevelManager : MonoBehaviour
                         int userGold = GameManager.instance.GetPlayerGold();
                         GamePlayViewParam param = new();
                         param.totalGold = userGold;
-                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView,param);
+                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView, param);
                     }));
                 });
         });
@@ -178,29 +177,46 @@ public class LevelManager : MonoBehaviour
     {
         currentLevelID = levelId;
 
-        // B??c 1: Kh?i t?o Level Object
+        Debug.Log("Step 1: Initializing Level Object");
+        // Step 1: Initialize Level Object
         yield return InitializeLevelObject();
+        Debug.Log("Step 1 complete");
 
-        // B??c 2: L?y d? li?u Level
+        Debug.Log("Step 2: Retrieving Level Data");
+        // Step 2: Retrieve Level Data
         var levelData = GetLevelData(levelId);
-        if (levelData == null) yield break;
+        if (levelData == null)
+        {
+            Debug.LogWarning("Level data is null. Exiting coroutine.");
+            yield break;
+        }
         currentLevel = levelData;
+        Debug.Log("Step 2 complete");
 
-        // B??c 3: T?i Box Configuration
+        Debug.Log("Step 3: Initializing Box Queue");
+        // Step 3: Load Box Configuration
         InitializeBoxQueue(levelData);
+        Debug.Log("Step 3 complete");
 
-        // B??c 4: T?i các Layers
+        Debug.Log("Step 4: Loading Layers");
+        // Step 4: Load Layers
         yield return LoadLayers(levelData);
+        Debug.Log("Step 4 complete");
 
-        // B??c 5: T?i Screw Manager và các Screw
+        Debug.Log("Step 5: Loading Screw Manager and Screws");
+        // Step 5: Load Screw Manager and Screws
         yield return LoadScrewManagerAndScrews(levelData);
+        Debug.Log("Step 5 complete");
 
-        // B??c 6: Kích ho?t Parts
+        Debug.Log("Step 6: Activating All Parts");
+        // Step 6: Activate Parts
         yield return ActivateAllParts();
+        Debug.Log("Step 6 complete");
 
         callback?.Invoke();
         Debug.Log($"Level data with ID {levelId} loaded.");
     }
+
     private IEnumerator InitializeLevelObject()
     {
         var levelObject = LevelObjectPool.Instance.pool.SpawnNonGravity();
@@ -293,40 +309,73 @@ public class LevelManager : MonoBehaviour
     }
     private IEnumerator LoadScrewManagerAndScrews(Level.Level levelData)
     {
+        Debug.Log("Step 5.1: Instantiating Screw Manager");
         var screwManagerGameObject = Instantiate(screwManagerPrefb, currentLevelObject.transform) as GameObject;
         screwManagerGameObject.transform.SetPositionAndRotation(new Vector3(0, -5, 0), Quaternion.identity);
         ScrewManager = screwManagerGameObject.GetComponent<ScrewManager>();
         ScrewManager.hingeConnections = new();
         ScrewManager.OnScrewRemoved += HandleScrewRemoved;
-
+        Debug.Log("Step 5.2: Screw Manager instantiated successfully");
         foreach (var screwData in levelData.screws)
         {
+            Debug.Log($"Step 5.3: Loading screw {screwData.idColor}");
             yield return LoadScrew(screwData);
+            Debug.Log($"Step 5.4: Finished loading screw {screwData.idColor}");
         }
     }
+
     private IEnumerator LoadScrew(ScrewScriptable screwData)
     {
+        Debug.Log($"Loading screw with ID color {screwData.idColor}");
         var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
         var screwGameObject = screw.gameObject;
-        var screwComp = screwGameObject.GetComponent<Screw>();
         screwGameObject.transform.SetParent(ScrewManager.transform);
         screwGameObject.transform.SetLocalPositionAndRotation(screwData.screwPosition, Quaternion.identity);
-
+        Debug.Log("Screw position set");
         screw.Color = (ColorEnum)screwData.idColor;
         screw.ChangeScrewColorByEnum(screw.Color);
         screw.ResetRender();
+        Debug.Log("Screw color and render reset");
 
         foreach (var hingeConnection in screwData.hingeConnections)
         {
-            var connectedPart = currentLevelObject.GetComponent<LayerManager>().GetPartByKey(hingeConnection.bodyPartUniqueID);
-            var hinge = screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+            Debug.Log($"Attempting to create hinge connection for part ID {hingeConnection.bodyPartUniqueID}");
+
+            // Try to fetch the connected part
+            var connectedPart = currentLevelObject.GetComponent<LayerManager>()?.GetPartByKey(hingeConnection.bodyPartUniqueID);
+
+            // Check if connectedPart is null and provide detailed feedback
+            if (connectedPart == null)
+            {
+                Debug.LogError($"Error: Part with ID {hingeConnection.bodyPartUniqueID} not found. " +
+                               $"Ensure that the part is loaded correctly and the ID matches.");
+                continue;
+            }
+
+            // Check if the connected part has a Rigidbody2D component
+            var connectedRigidBody = connectedPart.GetComponent<Rigidbody2D>();
+            if (connectedRigidBody == null)
+            {
+                Debug.LogError($"Error: Part with ID {hingeConnection.bodyPartUniqueID} is missing a Rigidbody2D component.");
+                continue;
+            }
+
+            // Create the hinge connection
+            var hinge = screw.CreateHinge(connectedRigidBody);
+
+            // Add the hinge to the ScrewManager
             ScrewManager.AddHingeConnection(hinge, connectedPart);
+
+            Debug.Log($"Hinge connection successfully created for part ID {hingeConnection.bodyPartUniqueID}");
         }
 
         ScrewManager.AddScrew(screw);
+        Debug.Log("Screw added to ScrewManager");
         yield return screw.Init();
+        Debug.Log($"Screw initialization complete");
         yield return null;
     }
+
     private IEnumerator ActivateAllParts()
     {
         var layerManager = currentLevelObject.GetComponent<LayerManager>();
@@ -334,7 +383,7 @@ public class LevelManager : MonoBehaviour
         {
             part.Body.bodyType = RigidbodyType2D.Static;
             part.Body.gravityScale = 0;
-           var partLayer =  part.PartLayer();
+            var partLayer = part.PartLayer();
             part.SetIgnoreColliderLayer(true, partLayer, partLayer);
             yield return null;
         }

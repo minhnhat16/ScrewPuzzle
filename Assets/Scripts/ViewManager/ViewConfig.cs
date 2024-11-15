@@ -46,7 +46,7 @@ public class CollectionParam : ViewParam
 public class LevelParam : ViewParam
 {
     public int currentLevel;
-    public List<LevelItem> listLevelItems;
+    public List<BaseLevelItem> listLevelItems;
 }
 public class ViewConfig
 {

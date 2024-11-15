@@ -117,7 +117,7 @@ namespace Ingame.Screw
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
             //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
-            Position = new Vector3(Position.x, Position.y, -layerIndex  +10);
+            Position = new Vector3(Position.x, Position.y, Position.y);
         }
 
         private void SetScrewColor()
