@@ -33,7 +33,6 @@ namespace Ingame
         private void OnDisable()
         {
             onHoldScrewsFull.RemoveListener(ScrewFullEvent);
-            
         }
 
         public void Awake()
@@ -57,6 +56,7 @@ namespace Ingame
         {
             coutHoldActive++;
             var hold = holdScrews.FirstOrDefault(hold => !hold.gameObject.activeSelf);
+            if (hold == null) return;
             hold.gameObject.SetActive(true);  // Activate the new hold
             HoldAlignment();
         }
@@ -136,7 +136,7 @@ namespace Ingame
             alignmentCoroutine = null;
         }
         // Hàm thêm Screw vào một ô trống trong holdScrew
-        private void ScrewFullEvent()
+        private void ScrewFullEvent()   
         {
             IngameController.Instance.GameEndInvoker();
         }
@@ -162,16 +162,15 @@ namespace Ingame
                     {
                         // Nếu vẫn đầy, gọi sự kiện
                         onHoldScrewsFull?.Invoke();
-                        yield break; // Kết thúc coroutine sau khi gọi sự kiện
+                        yield return null; // Kết thúc coroutine sau khi gọi sự kiện
                     }
                     else
                     {
                         Debug.Log("HoldScrews cleared during waiting period.");
                     }
                 }
-
                 // Đợi 0.5 giây trước khi kiểm tra lại
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(1f);
             }
         }
 

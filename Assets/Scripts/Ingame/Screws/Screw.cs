@@ -71,7 +71,7 @@ namespace Ingame.Screw
         public IEnumerator Init()
         {
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
-            yield return new WaitUntil(()=>bodyLayer !=null );
+            yield return new WaitUntil(()=> bodyLayer !=null );
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
             /*yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();*/
@@ -110,6 +110,7 @@ namespace Ingame.Screw
         private void SetSortingOrderAndLayer(int order, string layer)
         {
             // Debug.LogError("Setting sorting order and layer");
+            //if (string.Compare(layer, "Default") == 0) return;
             render.sortingLayerName =layer;
             cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
@@ -117,7 +118,7 @@ namespace Ingame.Screw
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
             //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
-            Position = new Vector3(Position.x, Position.y, Position.y);
+            Position = new Vector3(Position.x, Position.y, Position.z);
         }
 
         private void SetScrewColor()

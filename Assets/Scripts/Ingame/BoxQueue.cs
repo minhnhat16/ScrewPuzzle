@@ -94,7 +94,7 @@ namespace Ingame
         }
         private void InitAndShuffleColor()
         {
-            if (configRecords == null) return;
+            //if (configRecords == null) return;
 
             List<BoxConfigRecord> threeHoldList = configRecords.Where(record => record.NumberOfScrewHoles == 3).ToList();
             List<BoxConfigRecord> twoHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.NumberOfScrewHoles == 2).ToList();
@@ -350,6 +350,7 @@ namespace Ingame
         }
         public void AddNewBoxSlot()
         {
+            if (boxSlots.All(slot => slot.gameObject.activeSelf)) return;
             var newBoxSlot = boxSlots.First(slot => !slot.gameObject.activeSelf);
             newBoxSlot.gameObject.SetActive(true);
             var newBox = TrySpawnNewBox(newBoxSlot);

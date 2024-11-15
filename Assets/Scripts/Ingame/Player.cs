@@ -107,7 +107,7 @@ namespace Ingame
             
             Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
 
-            RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero, Mathf.NegativeInfinity);
+            RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero, Mathf.Infinity);
 
             if (hit.collider != null)
             {
