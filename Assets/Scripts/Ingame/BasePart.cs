@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.U2D.Path;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
@@ -58,7 +59,7 @@ namespace Ingame
             return gameObject.layer;
         }
 
-        private void Awake()
+        public void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             renderer = GetComponent<SpriteRenderer>();
@@ -72,7 +73,7 @@ namespace Ingame
         }
 
         // Start is called before the first frame update
-        private void Start()
+        public void Start()
         {
             StartFallingCheck(); 
         }
@@ -125,9 +126,12 @@ namespace Ingame
         }
         public void HandleNoHingesLeft()
         {
+            var partLayer = PartLayer();
+            SetIgnoreColliderLayer(false, partLayer, partLayer);
             // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
             body.gravityScale = 1;
             body.bodyType = RigidbodyType2D.Dynamic;
+           
         }
         public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
         {

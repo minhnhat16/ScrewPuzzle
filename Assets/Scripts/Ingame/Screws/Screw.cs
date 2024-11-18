@@ -117,8 +117,9 @@ namespace Ingame.Screw
             cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
+            float z =  -0.01f * order;
             //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
-            Position = new Vector3(Position.x, Position.y, Position.z);
+            Position = new Vector3(Position.x, Position.y, z);
         }
 
         private void SetScrewColor()
@@ -146,7 +147,7 @@ namespace Ingame.Screw
 
 
             // Kiểm tra các Collider2D thuộc các lớp trong bán kính của CircleCollider2D
-            Collider2D[] overlappingColliders = Physics2D.OverlapCircleAll(CircleCollider2D.transform.position, CircleCollider2D.radius, mask);
+            Collider2D[] overlappingColliders = Physics2D.OverlapCircleAll(CircleCollider2D.transform.position, CircleCollider2D.radius - 0.05f, mask);
 
             // Nếu có đối tượng nào chặn, đưa ra cảnh báo và thực hiện hành động
             if (overlappingColliders.Length > 0)

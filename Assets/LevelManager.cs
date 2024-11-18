@@ -378,15 +378,16 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator ActivateAllParts()
     {
-        var layerManager = currentLevelObject.GetComponent<LayerManager>();
-        foreach (var part in layerManager.Parts)
+        var parts = currentLevelObject.GetComponentsInChildren<BasePart>();
+        foreach (var part in parts)
         {
-            part.Body.bodyType = RigidbodyType2D.Static;
-            part.Body.gravityScale = 0;
+            part.Body.bodyType = RigidbodyType2D.Dynamic;
+            part.Body.gravityScale = 1f;
             var partLayer = part.PartLayer();
             part.SetIgnoreColliderLayer(true, partLayer, partLayer);
             yield return null;
         }
+        yield return new WaitForEndOfFrame();
     }
 
     private void HandleScrewRemoved(Screw removedScrew)

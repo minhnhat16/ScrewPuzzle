@@ -184,7 +184,7 @@ namespace UIScript.UI.UI
                 var currentLevel = levelData.Find((data) => data.levelID == id);
                 bool isComplete = currentLevel?.isCompleted == true;
 
-                Debug.LogError($"CURRENT LEVEL {id} DATA {currentLevel} and isComplete {isComplete}");
+                //Debug.LogError($"CURRENT LEVEL {id} DATA {currentLevel} and isComplete {isComplete}");
                 // Create new LevelItem and add to the list
                 BaseLevelItem newItem = new BaseLevelItem(id, isComplete, false);
                 listLevel.Add(newItem);

@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Managers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using Managers;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -23,17 +21,12 @@ namespace Ingame
 
         [SerializeField] private Screw.Screw CurrentScrew;
         [SerializeField] private Camera mainCam;
+        [SerializeField] private List<Screw.Screw> _screw;
         [SerializeField] private Queue<Screw.Screw> screwQueue;
         [HideInInspector] public UnityEvent onPlayerClick = new();  // Custom event for player clicks
         [HideInInspector] public UnityEvent<Screw.Screw> onScrewClicked;
         private Coroutine inputCoroutine;
         private Coroutine processCoroutine;
-
-        public Player()
-        {
-            canClick = true;
-        }
-
         private void OnEnable()
         {
             if (onScrewClicked != null)
@@ -79,7 +72,7 @@ namespace Ingame
 
         private IEnumerator WaitForInput()
         {
-            yield return new WaitUntil( ()=>IngameController.Instance != null);
+            yield return new WaitUntil(() => IngameController.Instance != null);
             while (true)
             {
                 if (!IngameController.Instance.isPause)
@@ -96,7 +89,7 @@ namespace Ingame
                 }
 #endif
                 }
-                
+
 
                 yield return null;
             }
@@ -104,40 +97,50 @@ namespace Ingame
 
         private void HandleInput(Vector3 screenPosition)
         {
-            
             Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
 
-            RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero, Mathf.Infinity);
+            var hits = Physics2D.RaycastAll(worldPosition, Vector2.zero, Mathf.Infinity);
 
-            if (hit.collider != null)
+            // Sort hits by Z position (assuming all objects have a Transform)
+            var sortedHits = hits.OrderByDescending(hit => hit.transform.position.z).ToArray();
+
+            foreach (var hit in sortedHits)
             {
-                var clickedObject = hit.collider.gameObject;
-
-                if (clickedObject.CompareTag("Player"))
+                if (hit.collider != null)
                 {
-                    onScrewClicked?.Invoke(clickedObject.GetComponent<Screw.Screw>());
-                }
+                    var clickedObject = hit.collider.gameObject;
 
-                Debug.Log("2D Game object clicked: " + hit.collider.name);
+                    if (clickedObject.CompareTag("Player"))
+                    {
+                        var screw = clickedObject.GetComponent<Screw.Screw>();
+                        _screw.Add(screw);
+                        Debug.Log("Player clicked: " + clickedObject.name);
+                        // return; // Exit after the first valid click, if needed
+                    }
+                }
             }
-            else
-            {
-               // Debug.LogWarning("No 2D object was hit by the raycast.");
-            }
+            if (_screw.Count == 0) return;
+            var firstScrew = _screw.Last();
+            if (firstScrew == null) return;
+            onScrewClicked?.Invoke(firstScrew);
+
+            Debug.LogWarning("No valid 2D object was clicked.");
         }
+
+
 
         private void ScrewClicked(Screw.Screw screw)
         {
-           // Debug.LogWarning("Screw Clicked");
+            // Debug.LogWarning("Screw Clicked");
             screwQueue.Enqueue(screw);
+            _screw.Clear();
             // Start processing the queue if it's not already processing
             if (processCoroutine == null)
             {
                 ArrayScrew.Instance.AddScrew(screw);
-               
             }
         }
 
-        
+
     }
 }

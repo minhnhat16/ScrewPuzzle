@@ -85,6 +85,7 @@ public class ScrewLevelMaker : Screw
                 LevelMaker.instance.OnScrewClicked(); // Gọi phương thức từ LevelMaker
                 isSelecting = true; // Bật chế độ chọn
                 Debug.Log("Selected screw. Now select another object.");
+               TurnColliderIs(!isSelecting);
                 LevelMaker.instance.ChosePartCoroutine(this);
                 return;
             }
@@ -105,7 +106,10 @@ public class ScrewLevelMaker : Screw
     {
         ChangeScrewColorByEnum(isSelected ? Color: ColorEnum.Green);
     }
-
+    public void TurnColliderIs(bool isEnable)
+    {
+        CircleCollider2D.enabled = isEnable;
+    }
     public override HingeJoint2D CreateHinge(Rigidbody2D targetScrew)
     {
         Debug.Log("try to add new hinge " + targetScrew == null);
@@ -130,6 +134,7 @@ public class ScrewLevelMaker : Screw
         Debug.Log("Created hinge joint with: " + targetScrew.name);
         isSelecting = false;
         ScrewChangeColorOnClick(true);
+        TurnColliderIs(!isSelecting);
         return hingeJoint;
     }
 

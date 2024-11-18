@@ -3811,7 +3811,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 878363533}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.05, y: 0, z: 0}
+  m_LocalPosition: {x: 0.05, y: 0, z: 20}
   m_LocalScale: {x: 4.79, y: 8.515555, z: 0.5322222}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -8872,5 +8872,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpriteManager
       objectReference: {fileID: 0}
+    - target: {fileID: 7175410795283015979, guid: 6df11c146e9e9d441b63cff2a36084cd, type: 3}
+      propertyPath: sprites.Array.size
+      value: 1073
+      objectReference: {fileID: 0}
+    - target: {fileID: 7175410795283015979, guid: 6df11c146e9e9d441b63cff2a36084cd, type: 3}
+      propertyPath: sprites.Array.data[1072]
+      value: 
+      objectReference: {fileID: 21300000, guid: 132e537d386949549b6362b289b4c572, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6df11c146e9e9d441b63cff2a36084cd, type: 3}

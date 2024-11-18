@@ -113,7 +113,7 @@ public class LevelMaker : MonoBehaviour
     private IEnumerator ChosePart(ScrewLevelMaker screw)
     {
         GameObject partChosen = null;
-
+        yield return new WaitForEndOfFrame();
         // Wait until a valid part is clicked
         yield return new WaitUntil(() => 
         {
