@@ -16,6 +16,10 @@ namespace Managers
         [SerializeField] public bool isOnMagnet;
         [SerializeField] public bool isOnBomb;
         [SerializeField] private bool isGameOver;
+        [SerializeField] private bool itemJustInvoke;
+        [SerializeField] private bool itemPerforming;
+        [SerializeField] private int currentStar;
+        [SerializeField] private int totalStarInLevel;
 
         [SerializeField] private float exp_Current;
         [SerializeField] private Player player;
@@ -27,8 +31,7 @@ namespace Managers
         [HideInInspector] public UnityEvent<float> onExpChange;
         [HideInInspector] public UnityEvent<bool> onCompleteLevel;
         [HideInInspector] public UnityEvent<ItemType> onItemInvoke;
-        [SerializeField] private bool itemJustInvoke;
-        [SerializeField] private bool itemPerforming;
+       
         public bool isPause;
 
         public bool ItemPerforming
@@ -44,6 +47,9 @@ namespace Managers
         }
 
         public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
+        public UnityEvent<float> onStarChange = new();
+        public int CurrentStar { get => currentStar; set => currentStar = value; }
+        public int TotalStarInLevel { get => totalStarInLevel; set => totalStarInLevel = value; }
 
         private Coroutine inputCoroutine;
 
@@ -305,7 +311,14 @@ namespace Managers
                 yield return null;
             }
         }
+        public void StarChanging(int addedStar)
+        {
+            CurrentStar += addedStar;
+            float percentStart = (float)CurrentStar / (float)totalStarInLevel;
+            Debug.LogWarning($"Star Changing {percentStart}");
 
+            onStarChange?.Invoke(percentStart);
+        }
         public void OnRevive()
         {
             throw new NotImplementedException();

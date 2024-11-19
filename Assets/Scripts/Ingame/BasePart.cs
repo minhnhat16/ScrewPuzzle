@@ -23,21 +23,21 @@ namespace Ingame
 
         public virtual SpriteRenderer Renderer
         {
-            get => renderer;
-            set => renderer = value;
+            get => render;
+            set => render = value;
         }
 
         public virtual PolygonCollider2D Collider
         {
-            get => collider;
-            set => collider = value;
+            get => col;
+            set => col = value;
         }
 
         [SerializeField] private bool isFalling;
         [SerializeField] private Rigidbody2D body;
-        [SerializeField] private SpriteRenderer renderer;
+        [SerializeField] private SpriteRenderer render;
         [SerializeField] private SpriteRenderer outLine;
-        [SerializeField] private PolygonCollider2D collider;
+        [SerializeField] private PolygonCollider2D col;
         
         private Coroutine checkFallingRoutine;
         public bool IsFalling
@@ -51,8 +51,8 @@ namespace Ingame
         public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
         {
             this.body = body;
-            this.renderer = renderer;
-            this.collider = collider;
+            this.render = renderer;
+            this.col = collider;
         }
         public int PartLayer()
         {
@@ -62,9 +62,9 @@ namespace Ingame
         public void Awake()
         {
             body = GetComponent<Rigidbody2D>();
-            renderer = GetComponent<SpriteRenderer>();
+            render = GetComponent<SpriteRenderer>();
             outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
-            collider = GetComponent<PolygonCollider2D>();
+            col = GetComponent<PolygonCollider2D>();
             // Assign a GUID if not already set
             if (string.IsNullOrEmpty(uniqueID))
             {
@@ -81,10 +81,10 @@ namespace Ingame
         public IEnumerator Init(SpriteRenderer render, Action callBack = null)
         {
             yield return new WaitForSeconds(0.125f);
-            collider = GetComponent<PolygonCollider2D>();
-            collider.pathCount = 0;
-            this.renderer = render;
-            collider.SetPath(0,renderer.sprite.vertices);
+            col = GetComponent<PolygonCollider2D>();
+            col.pathCount = 0;
+            this.render = render;
+            col.SetPath(0, this.render.sprite.vertices);
         }
 
     
@@ -149,11 +149,11 @@ namespace Ingame
         }
         public void SetSortingLayer(string layerName)
         {
-            Debug.Log("sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
+            Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            if (renderer != null)
+            if (render != null)
             {
-                renderer.sortingLayerName = layerName;
+                render.sortingLayerName = layerName;
             }
 
             if (outLine != null)
@@ -161,10 +161,10 @@ namespace Ingame
                 outLine.sortingLayerName = layerName; // Both sprites use the same sorting layer
             }
             
-            Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
+            Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            renderer.sortingOrder = 0;
-            outLine.sortingOrder = renderer.sortingOrder+1; 
+            render.sortingOrder = 0;
+            outLine.sortingOrder = render.sortingOrder+1; 
         }
         private string GenerateUniqueID()
         {
@@ -179,7 +179,7 @@ namespace Ingame
         public virtual void ResetAndReapplyPolygonCollider()
         {
             // Reset the collider by clearing all paths
-            collider.pathCount = 0;
+            col.pathCount = 0;
 
             // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
@@ -189,18 +189,18 @@ namespace Ingame
         {
             // Use the sprite's texture to define the polygon's points
             // This method is for auto-generating a polygon collider based on the sprite's shape
-            collider.enabled = false; // Disable the collider temporarily to prevent issues
-            Destroy(collider);        // Destroy the old collider
+            col.enabled = false; // Disable the collider temporarily to prevent issues
+            Destroy(col);        // Destroy the old collider
 
             // Add and create a new PolygonCollider2D
-            collider = gameObject.AddComponent<PolygonCollider2D>();
-            collider.enabled = true;
+            col = gameObject.AddComponent<PolygonCollider2D>();
+            col.enabled = true;
 
         }
         public void Reset()
         {
             isFalling = false;
-            renderer.sprite = null;
+            render.sprite = null;
             
         }
     }

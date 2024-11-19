@@ -19,6 +19,8 @@ public class GamePlayView : BaseView
 
     [SerializeField] private RectTransform goldParent;
     [SerializeField] private RectTransform gemParent;
+
+    [SerializeField] private StarBottleFill starBottle;
     [SerializeField] private Text gold_lb;
     [SerializeField] private Text timeCouter;
     [SerializeField] private List<RectTransform> anchorTutorials;
@@ -60,6 +62,8 @@ public class GamePlayView : BaseView
     public override void OnStartShowView()
     {
         base.OnStartShowView();
+        IngameController.Instance.onStarChange = starBottle.fillChange ;
+
         //expBar = GetComponentInChildren<ExperienceBar>();
         //expBar.Init();
         //StartCoroutine(GetItemFormData());
@@ -73,6 +77,7 @@ public class GamePlayView : BaseView
     public override void OnStartHideView()
     {
         base.OnStartHideView();
+        starBottle.Reset();
         //IngameController.instance.SaveCardListToSLots();
     }
     public override void Setup(ViewParam viewParam)

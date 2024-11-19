@@ -58,5 +58,9 @@ namespace Ingame
             if (this.screw == null) return false;
             return this.screw == screw;
         }
+        public void Reset()
+        {
+            ClearScrewOnHold();
+        }
     }
 }   

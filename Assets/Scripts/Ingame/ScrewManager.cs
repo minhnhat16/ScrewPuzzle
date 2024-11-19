@@ -116,8 +116,8 @@ namespace Ingame
                 hingeConnections.Remove(hinge);
 
                 Debug.Log($"Hinge removed: {hinge} disconnected from {part.uniqueID}");
-                part.Body.gravityScale = 1;
-                part.Body.bodyType = RigidbodyType2D.Dynamic;
+                part.HandleNoHingesLeft();
+
                 // Kiểm tra ngay khi xóa nếu part không còn liên kết
                 if (AreAllHingesRemoved(part))
                 {

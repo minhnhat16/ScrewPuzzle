@@ -11,16 +11,16 @@ namespace Ingame
         }
         public override void OnEnable()
         {
+            base.OnEnable();
+
             Transform = transform; 
             onScrewBoxFull.AddListener(BoxFullInvoker);
-            spawnStartEvent.AddListener(SpawningStar);
-
         }
 
-        private void OnDisable()
+        public override void OnDisable()
         {
+            base.OnDisable();
             onScrewBoxFull.RemoveListener(BoxFullInvoker);
-
         }
     }
 }

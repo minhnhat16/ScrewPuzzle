@@ -150,7 +150,7 @@ namespace UIScript.UI.UI
             SettingParam param = new();
             param.isMainScreen = viewIndex.Equals(ViewIndex.MainScreenView);
             param.totalGold = GameManager.instance.GetPlayerGold();
-            if (param.totalGold == null) Debug.Log("total gold is null");
+            //if (param.totalGold == null) Debug.Log("total gold is null");
             param.title = "SETTING";
             DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param);
         }

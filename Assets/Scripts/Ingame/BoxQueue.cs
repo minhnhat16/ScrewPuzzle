@@ -68,6 +68,7 @@ namespace Ingame
             InitBoxes();
             InitBoxSlots(this.boxSlots);
             yield return new WaitForSeconds(0.1f);
+
         }
 
         public void LoadBoxConfigRecord(BoxConfig boxConfig)
@@ -126,6 +127,8 @@ namespace Ingame
             finalList.AddRange(twoHoldList);
             finalList.AddRange(oneHoldList);
 
+            int totalStar = threeHoldList.Count * 3 + twoHoldList.Count * 2 + oneHoldList.Count;
+            IngameController.Instance.TotalStarInLevel = totalStar;
             configRecords = finalList;
             ConfigStack = new Stack(configRecords);
         }

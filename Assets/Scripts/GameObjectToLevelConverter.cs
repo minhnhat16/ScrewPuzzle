@@ -343,7 +343,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         Selection.activeObject = newConfig;
 
         return newConfig;
-        Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
+        //Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
     }
 
     public void LoadLevel(int levelID)

@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using Sequence = DG.Tweening.Sequence;
@@ -83,9 +84,15 @@ namespace Ingame
         public virtual void OnEnable()
         {
             _transform = transform.GetComponent<Transform>();
+            spawnStartEvent.RemoveAllListeners();
             spawnStartEvent.AddListener(SpawningStar);
-        }
 
+        }
+        public virtual void OnDisable()
+        {
+            spawnStartEvent.RemoveAllListeners();
+
+        }
         public void OnInit(Vector3 position, BoxConfigRecord config, bool isBoxFull)
         {
             this.color = config.BoxColor;
@@ -111,7 +118,7 @@ namespace Ingame
             renderGObj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             foreach (var h in holdScrews)
             {
-                h.Screw = null; // should put reset here
+                h.ClearScrewOnHold(); // should put reset here
                 Debug.Log("reset hold screw " + h.Screw);
             };
 
@@ -210,17 +217,37 @@ namespace Ingame
                 Debug.LogWarning("No screws to spawn stars for.");
                 return;
             }
+            Debug.Log("SpawningStar");
 
-           foreach(var hold in holdScrews)
+            StartCoroutine(PoppingStar(totalHold));
+        }
+
+        private IEnumerator PoppingStar(int totalHold)
+        {
+            int newStarAdded = 0;
+
+            foreach (var hold in holdScrews)
             {
-                //Debug.Log($"Processing Hold Screw at Index {i}");/*{hold.Index}: {holdAtIndex.name}*/
                 var star = StarPool.Instance.pool.SpawnNonGravity();
                 star.SetStarPos(hold.transform.position);
+
                 Vector3 newPosition = new Vector3(CameraMain.instance.GetTop(), CameraMain.instance.GetRight());
                 Vector3 starScale = GameManager.instance.StarScale;
-                star.PopingStar(starScale, newPosition);
+
+                star.PopingStar(starScale, newPosition, () =>
+                {
+                    Debug.Log("Callback triggered for a star!");
+                });
+                newStarAdded++;
             }
+
+            Debug.Log($"Stars popping initiated. Waiting for all {holdScrews.Count} stars to complete.");
+            yield return new WaitUntil(() => newStarAdded == holdScrews.Count);
+
+            Debug.Log("All stars completed popping!");
+            IngameController.Instance.StarChanging(holdScrews.Count);
         }
+
 
 
         // Hàm di chuyển Screw vào một lỗ trống trong CrewBox
