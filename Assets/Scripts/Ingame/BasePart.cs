@@ -133,6 +133,7 @@ namespace Ingame
             body.bodyType = RigidbodyType2D.Dynamic;
            
         }
+
         public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
         {
 

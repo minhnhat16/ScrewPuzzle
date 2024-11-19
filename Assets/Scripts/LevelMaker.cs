@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using Ingame;
 using Ingame.Screw;
+using Level;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
 
 public class LevelMaker : MonoBehaviour
 {
@@ -124,7 +126,16 @@ public class LevelMaker : MonoBehaviour
         // Once a part is selected, get its Rigidbody2D and create a hinge
         var partScript = partChosen.GetComponent<BasePart>();
         var bodyPart = partScript.Body;
-        screw.CreateHinge(bodyPart);
+
+        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorldPosition.z = 0;
+        HingeConnection hingeConnection = new HingeConnection()
+        {
+            hingePosition = mouseWorldPosition,
+            bodyPartUniqueID = partScript.uniqueID,
+            bodyPartHingePosition = partScript.transform.position,
+        };
+        screw.CreateHingeWithMousePos(bodyPart, hingeConnection);
     }
 
     private GameObject PartGetInput()

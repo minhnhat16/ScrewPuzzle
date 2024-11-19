@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using DG.Tweening;
 using Enums;
+using Level;
 using Managers;
 using Unity.Mathematics;
 using UnityEngine;
@@ -310,13 +311,13 @@ namespace Ingame.Screw
             _transform.SetParent(holdScrew.transform);
 
         }
-        public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart)
+        public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart,HingeConnection connection)
         {
             HingeObject hinge = HingePool.Instance.pool.SpawnNonGravity();
             GameObject newHingeChild = hinge.gameObject;
             newHingeChild.transform.SetParent(transform);
-            newHingeChild.transform.localPosition = Vector3.zero;
-            newHingeChild.transform.position = targetPart.transform.position;
+            newHingeChild.transform.localPosition = connection.hingePosition;
+            //newHingeChild.transform.position = targetPart.transform.position;
 
             // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
             HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();

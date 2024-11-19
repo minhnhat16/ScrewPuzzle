@@ -361,7 +361,7 @@ public class LevelManager : MonoBehaviour
             }
 
             // Create the hinge connection
-            var hinge = screw.CreateHinge(connectedRigidBody);
+            var hinge = screw.CreateHinge(connectedRigidBody,hingeConnection);
 
             // Add the hinge to the ScrewManager
             ScrewManager.AddHingeConnection(hinge, connectedPart);
@@ -382,7 +382,7 @@ public class LevelManager : MonoBehaviour
         foreach (var part in parts)
         {
             part.Body.bodyType = RigidbodyType2D.Dynamic;
-            part.Body.gravityScale = 1f;
+            part.Body.gravityScale = 0f;
             var partLayer = part.PartLayer();
             part.SetIgnoreColliderLayer(true, partLayer, partLayer);
             yield return null;

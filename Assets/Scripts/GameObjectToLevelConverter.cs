@@ -452,7 +452,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
             {
                // Debug.Log($"Level data with ID {levelId} loaded.");
                 var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
-                screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+                screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(),hingeConnection);
             }
 
 

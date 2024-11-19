@@ -1,6 +1,7 @@
 using System;
 using Enums;
 using Ingame.Screw;
+using Level;
 using UnityEditor;
 using UnityEngine;
 
@@ -80,12 +81,13 @@ public class ScrewLevelMaker : Screw
     
             if (LevelMaker.instance.isEditHinge)
             {
+                
                 ScrewChangeColorOnClick(isSelecting);
                 isHeld = true; // Đánh dấu screw là đang được giữ
                 LevelMaker.instance.OnScrewClicked(); // Gọi phương thức từ LevelMaker
                 isSelecting = true; // Bật chế độ chọn
                 Debug.Log("Selected screw. Now select another object.");
-               TurnColliderIs(!isSelecting);
+                 TurnColliderIs(!isSelecting);
                 LevelMaker.instance.ChosePartCoroutine(this);
                 return;
             }
@@ -110,7 +112,34 @@ public class ScrewLevelMaker : Screw
     {
         CircleCollider2D.enabled = isEnable;
     }
-    public override HingeJoint2D CreateHinge(Rigidbody2D targetScrew)
+    public  HingeJoint2D CreateHingeWithMousePos(Rigidbody2D targetBody, HingeConnection connection)
+    {
+        Debug.Log($"try to add new hing: mousepos {connection.hingePosition} ");
+        GameObject newHingeChild = new()
+        {
+            transform =
+            {
+                parent = transform,
+                position = connection.hingePosition,
+                //position = targetScrew.transform.position
+            },
+            name = "connectW" + targetBody.name,
+        };
+        // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
+        HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
+        newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+        hingeJoint.connectedBody = targetBody; // Kết nối hinge với đối tượng screw mục tiêu
+        // Lưu HingeJoint2D vào danh sách nếu cần
+        hingeController.HingeJoint2D.Add(hingeJoint);
+        hingeController.BodyConnect.Add(targetBody); // Thêm Rigidbody2D vào danh sách bodyConnect
+        hingeJoint.autoConfigureConnectedAnchor = true;
+        Debug.Log("Created hinge joint with: " + targetBody.name);
+        isSelecting = false;
+        ScrewChangeColorOnClick(true);
+        TurnColliderIs(!isSelecting);
+        return hingeJoint;
+    }
+    public override HingeJoint2D CreateHinge(Rigidbody2D targetScrew,HingeConnection connection)
     {
         Debug.Log("try to add new hinge " + targetScrew == null);
         GameObject newHingeChild = new()
@@ -118,8 +147,8 @@ public class ScrewLevelMaker : Screw
             transform =
             {
                 parent = transform,
-                localPosition = Vector3.zero,
-                position = targetScrew.transform.position
+                localPosition = connection.hingePosition,
+                //position = targetScrew.transform.position
             },
             name = "connectW" + targetScrew.name,
         };
