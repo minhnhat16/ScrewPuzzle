@@ -5,8 +5,10 @@ using System.Linq;
 using ConfigFile;
 using DG.Tweening;
 using Ingame.Pools;
+using Ingame.Screw;
 using Managers;
 using Unity.VisualScripting.Dependencies.Sqlite;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -31,10 +33,14 @@ namespace Ingame
         public Stack<ScrewBox> boxesStack = new Stack<ScrewBox>();
         [SerializeField] private List<BoxSlot> boxSlots;
         public UnityEvent<bool> onCompleteClearBoxes = new();
+        public UnityEvent<Screw.Screw> onDeletOneScrew = new();
         private Coroutine alignCoroutine;
 
         public bool MovingBox { get => movingBox; set => movingBox = value; }
-
+        private void OnEnable()
+        {
+            onDeletOneScrew.AddListener(RecalculatingBox);
+        }
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -139,34 +145,67 @@ namespace Ingame
             {
                 var config = (BoxConfigRecord)ConfigStack.Pop();
                 var isLocked = i < activeBoxCount;
+                var color = config.BoxColor;
                 switch (config.NumberOfScrewHoles)
                 {
                     case 1:
                         var boxOneHold = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxOneHold.OnInit(Vector3.left * 5, config, false);
+                        boxOneHold.OnInit(Vector3.left * 5, color, false, config.NumberOfScrewHoles);
                         boxOneHold.gameObject.SetActive(false);
                         screwBoxes.Add(boxOneHold);
                         break;
                     case 2:
                         var boxTwoHold = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxTwoHold.OnInit(Vector3.left * 5, config, false);
+                        boxTwoHold.OnInit(Vector3.left * 5, color, false, config.NumberOfScrewHoles);
                         boxTwoHold.gameObject.SetActive(false);
-
                         screwBoxes.Add(boxTwoHold);
                         break;
                     case 3:
                         var boxThreeHold = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        boxThreeHold.OnInit(Vector3.left * 5, config, false);
+                        boxThreeHold.OnInit(Vector3.left * 5, color, false, config.NumberOfScrewHoles);
                         boxThreeHold.gameObject.SetActive(false);
                         screwBoxes.Add(boxThreeHold);
                         break;
                 }
             }
-
+            IngameController.Instance.ShuffleList(screwBoxes);
             var oderByHoldNumber = screwBoxes.OrderBy(box => box.holdScrews.Count);
             boxesStack = new Stack<ScrewBox>(oderByHoldNumber);
         }
-
+        private void RecalculatingBox(Screw.Screw clearedScrew)
+        {
+            var listBox = boxesStack.ToList();
+            var boxSameColor = listBox.FirstOrDefault((box) => box.Color == clearedScrew.Color);
+            if (boxSameColor == null) return;
+            var idCrBox = listBox.IndexOf(boxSameColor);
+            var color = boxSameColor.Color;
+            var totalHold = boxSameColor.TotalHold;
+            switch (totalHold)
+            {
+                case 1:
+                    listBox.RemoveAt(idCrBox);
+                    break;
+                case 2:
+                    var boxOneHold = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
+                    boxOneHold.OnInit(Vector3.left * 5, color, false, --totalHold);
+                    boxOneHold.gameObject.SetActive(false);
+                    listBox.RemoveAt(idCrBox);
+                    listBox[idCrBox] = boxOneHold;
+                    break;
+                case 3:
+                    var boxTwoHold = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
+                    boxTwoHold.OnInit(Vector3.left * 5, color, false, --totalHold);
+                    boxTwoHold.gameObject.SetActive(false);
+                    listBox.RemoveAt(idCrBox);
+                    listBox[idCrBox] = boxTwoHold;
+                    break;
+            }
+            IngameController.Instance.TotalStarInLevel--;
+            IngameController.Instance.ShuffleList(screwBoxes);
+            var oderByHoldNumber = listBox.OrderBy(box => box.holdScrews.Count);
+            boxesStack = new Stack<ScrewBox>(oderByHoldNumber);
+            screwBoxes = oderByHoldNumber.ToList();
+        }
         private ScrewBox SpawnBox()
         {
             if (boxesStack.Count == 0) return null;

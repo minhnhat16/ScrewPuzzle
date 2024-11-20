@@ -4,6 +4,7 @@ using PoolManager;
 using UnityEngine;
 using Ingame.Screw;
 using System;
+using Random = UnityEngine.Random;
 
 namespace Ingame
 {
@@ -79,7 +80,23 @@ namespace Ingame
             // Kiểm tra xem part có còn trong hingeConnections hay không
             return !hingeConnections.Values.Contains(part);
         }
+        public Screw.Screw RandomGetOneScrew()
+        {
+            Debug.LogWarning("Random Get One Screw");
 
+            var tempScrews = _screws.OrderBy(screw => screw.LayerMask).ToList();
+            int totalScrew = tempScrews.Count - 1;
+            int ramdomIndex = Random.Range(0, totalScrew);
+
+            var rdScrew = tempScrews.ElementAt(ramdomIndex);
+            rdScrew.FreeHinge();
+
+            ScrewPool.Instance.Pool.ReturnToPool(rdScrew);
+            _screws.Remove(rdScrew);
+            Debug.LogWarning("Random Get One Screw"+  rdScrew);
+
+            return rdScrew;
+        }
 
         public void ReturnAllScrewToPool()
         {

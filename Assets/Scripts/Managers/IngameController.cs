@@ -1,6 +1,7 @@
 using Ingame;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.DataBase;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -53,7 +54,7 @@ namespace Managers
 
         private Coroutine inputCoroutine;
 
-        private void OnEnable()
+        private void OnEnable() 
         {
             onCompleteLevel.AddListener(CompleteLevel);
             onItemInvoke.AddListener(ItemIvoked);
@@ -252,6 +253,10 @@ namespace Managers
 
         private void ClearOneScrew(Action callback)
         {
+            itemPerforming = true;
+            Debug.LogWarning("clear one screw");
+            var screw = LevelManager.Instance.ScrewManager.RandomGetOneScrew();
+            BoxQueue.Instance.onDeletOneScrew?.Invoke(screw);
             callback?.Invoke();
         }
 
@@ -262,6 +267,7 @@ namespace Managers
 
         public void GameEndInvoker(Action callback = null)
         {
+            isGameOver = true;
             itemPerforming = false;
             player.CanClick = false;
             ReviveDialogParam param = new ReviveDialogParam();
@@ -334,6 +340,17 @@ namespace Managers
             ArrayScrew.Instance.ClearAllScrewsOnArray();
             BoxQueue.Instance.Reset();
             LevelManager.Instance.LoadLevel(currentLevel);
+        }
+        public void ShuffleList<T>(List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, i + 1); // Unity's Random.Range
+                                                          // Swap elements
+                T temp = list[i];
+                list[i] = list[randomIndex];
+                list[randomIndex] = temp;
+            }
         }
     }
 }

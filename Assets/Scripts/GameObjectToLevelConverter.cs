@@ -403,7 +403,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
-
+                    partGameObject.name = partData.partName;
                     partComponent.Renderer.sprite = sprite;
                     if (TryHexToColor(partData.colorString, out Color color))
                     {
@@ -415,6 +415,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                         Debug.LogError("Invalid Hex Color String");
                     }
                     layerManager.AddPart(partComponent);
+                    partComponent.ResetAndReapplyPolygonCollider();
                     var partLayer = LayerMask.LayerToName(layerGameObject.layer);
                     partComponent.SetSortingLayer(partLayer);
                 }

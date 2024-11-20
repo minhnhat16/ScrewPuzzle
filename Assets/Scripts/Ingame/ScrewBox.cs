@@ -26,6 +26,7 @@ namespace Ingame
 
         [SerializeField] private bool isBoxFull;
         [SerializeField] private bool isAddingScrew = false;
+        [SerializeField] private int totalHold;
 
         public bool IsAddingScrew
         {
@@ -80,6 +81,7 @@ namespace Ingame
             get => _anchor.transform.position;
             set => transform.position = value;
         }
+        public int TotalHold { get => totalHold; set => totalHold = value; }
 
         public virtual void OnEnable()
         {
@@ -93,9 +95,9 @@ namespace Ingame
             spawnStartEvent.RemoveAllListeners();
 
         }
-        public void OnInit(Vector3 position, BoxConfigRecord config, bool isBoxFull)
+        public void OnInit(Vector3 position,ColorEnum color, bool isBoxFull,int totalHold)
         {
-            this.color = config.BoxColor;
+            this.color = color;
             this.Position = position;
             this.isBoxFull = isBoxFull;
         }

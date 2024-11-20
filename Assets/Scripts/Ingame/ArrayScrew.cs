@@ -138,6 +138,7 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()   
         {
+            
             IngameController.Instance.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
@@ -170,7 +171,7 @@ namespace Ingame
                     }
                 }
                 // Đợi 0.5 giây trước khi kiểm tra lại
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(2f);
             }
         }
 

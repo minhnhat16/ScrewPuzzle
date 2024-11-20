@@ -49,6 +49,7 @@ public class GamePlayView : BaseView
     {
         addHoldBtn.onClick.AddListener(AddHoldItemClick);
         addBoxBtn.onClick.AddListener(AddBoxItemClick);
+        clearOneScrewBtn.onClick.AddListener(OneScrewClearClick);
         settingBtn.onClick.AddListener(SettingButton);
         //onNewPlayer.AddListener(OnNewPlayer);
     }
@@ -56,6 +57,8 @@ public class GamePlayView : BaseView
     {
         addHoldBtn.onClick.RemoveListener(AddHoldItemClick);
         addBoxBtn.onClick.RemoveListener(AddBoxItemClick);
+        clearOneScrewBtn.onClick.RemoveListener(OneScrewClearClick);
+
         //settingBtn.onClick.RemoveListener(SettingButton);
         //onNewPlayer.RemoveListener(OnNewPlayer);
     }
