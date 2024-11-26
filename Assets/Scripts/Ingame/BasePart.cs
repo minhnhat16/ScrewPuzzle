@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.U2D.Path;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
@@ -139,17 +137,17 @@ namespace Ingame
 
             if (idLayer < 0 || idTargetLayer < 0)
             {
-                Debug.LogWarning($"Layer {idLayer} hoặc {idTargetLayer} không tồn tại.");
+                //Debug.LogWarning($"Layer {idLayer} hoặc {idTargetLayer} không tồn tại.");
                 return;
             }
 
             Physics2D.IgnoreLayerCollision(idLayer, idLayer, isIgnoring);
 
-            Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {idLayer} và {idTargetLayer}.");
+            //Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {idLayer} và {idTargetLayer}.");
         }
         public void SetSortingLayer(string layerName)
         {
-            Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
+            //Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
             if (render != null)
             {
@@ -161,7 +159,7 @@ namespace Ingame
                 outLine.sortingLayerName = layerName; // Both sprites use the same sorting layer
             }
             
-            Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
+            //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
             render.sortingOrder = 0;
             outLine.sortingOrder = render.sortingOrder+1; 

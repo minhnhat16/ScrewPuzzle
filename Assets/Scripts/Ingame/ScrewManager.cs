@@ -33,10 +33,13 @@ namespace Ingame
         {
             
         }
+#if UNITY_EDITOR
+
         public void AppendScrew(ScrewLevelMaker screw)
         {
             _screws.Add(screw); 
         }
+#endif
         public List<Screw.Screw> GetScrews()
         {
             Screw.Screw[] screwsInChildren = GetComponentsInChildren<Screw.Screw>();
@@ -64,7 +67,7 @@ namespace Ingame
             {
                 if (AreAllHingesRemoved(part))
                 {
-                    Debug.Log($"All hinges for part {part.uniqueID} have been removed.");
+                   // Debug.Log($"All hinges for part {part.uniqueID} have been removed.");
                     // Thực hiện logic bổ sung, ví dụ:
                     part.HandleNoHingesLeft();
                 }
@@ -107,21 +110,23 @@ namespace Ingame
                 screwPool.Pool.ReturnToPool(screw);
             }
         }
+#if UNITY_EDITOR
         public void ResetHinge()
         {
-            Debug.LogError("reset hinge");
+            //Debug.LogError("reset hinge");
             var screws = GetComponentsInChildren<ScrewLevelMaker>();
             foreach (ScrewLevelMaker screw in screws)
             {
                 screw.ResetHinge();
             }
         }
+#endif
         public void AddHingeConnection(HingeJoint2D hinge, BasePart part)
         {
             if (!hingeConnections.ContainsKey(hinge))
             {
                 hingeConnections[hinge] = part;
-                Debug.Log($"Hinge added: {hinge} connected to {part.uniqueID}");
+                //Debug.Log($"Hinge added: {hinge} connected to {part.uniqueID}");
             }
         }
 
@@ -132,13 +137,13 @@ namespace Ingame
                 var part = hingeConnections[hinge];
                 hingeConnections.Remove(hinge);
 
-                Debug.Log($"Hinge removed: {hinge} disconnected from {part.uniqueID}");
+               // Debug.Log($"Hinge removed: {hinge} disconnected from {part.uniqueID}");
                 part.HandleNoHingesLeft();
 
                 // Kiểm tra ngay khi xóa nếu part không còn liên kết
                 if (AreAllHingesRemoved(part))
                 {
-                    Debug.Log($"All hinges for part {part.uniqueID} have been removed.");
+                    //Debug.Log($"All hinges for part {part.uniqueID} have been removed.");
                     part.HandleNoHingesLeft();
                 }
             }

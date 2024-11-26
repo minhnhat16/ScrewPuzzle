@@ -12,19 +12,19 @@ namespace Ingame
     {
         public static ArrayScrew Instance;
         [SerializeField] private int coutHoldActive;
+        [SerializeField] private float totalWidth;
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
         [SerializeField] private List<Screw.Screw> screws; // Mảng các HoldScrew (ô chứa screw)
         private Coroutine alignmentCoroutine;
+
+
+        public UnityEvent onHoldScrewsFull = new(); // Sự kiện khi holdScrews đầy
         public List<Screw.Screw> Screws
         {
             get => screws;
             set => screws = value;
         }
-
-
-        public UnityEvent onHoldScrewsFull = new(); // Sự kiện khi holdScrews đầy
-
         private void OnEnable()
         {
             onHoldScrewsFull.AddListener(ScrewFullEvent);
@@ -87,16 +87,16 @@ namespace Ingame
             if (activeHolds.Count == 0) yield break;
 
             // Calculate the width of the spriteRenderer (assumed to be the boundary container)
-            float totalWidth = spriteRenderer.bounds.size.x;
+            float totalWidth = this.totalWidth;
 
             // Minimum spacing between holds
-            float minSpacing = 1.0f; // Adjust this as needed for spacing between screws
+            float minSpacing = 0.25f; // Adjust this as needed for spacing between screws
 
             // Calculate the spacing between active holds
             float spacing = Mathf.Max(minSpacing, totalWidth / (activeHolds.Count + 1));
 
             // Calculate the starting X position (leftmost position)
-            float startX = spriteRenderer.bounds.min.x;
+            float startX = spriteRenderer.bounds.min.x - minSpacing;
 
             // Duration of the movement (in seconds)
             float duration = 0.5f;
@@ -246,6 +246,7 @@ namespace Ingame
 
         public void ClearAllScrewsOnArray()
         {
+            if (screws.Count == 0) return;
             StartCoroutine(SetScrewInActive());
         }
 

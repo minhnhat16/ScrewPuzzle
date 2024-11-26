@@ -77,7 +77,7 @@ namespace Managers
 
         private static void CompleteLevel(bool onComplete)
         {
-            Debug.Log("Level complete");
+            //Debug.Log("Level complete");
             int level = LevelManager.Instance.currentLevelID;
             int totalGold = GameManager.instance.GoldCalculation(level);
             DialogManager.Instance.HideAllDialog();
@@ -111,7 +111,7 @@ namespace Managers
 
         public void ActivateBG(bool isActive)
         {
-            Debug.Log("ActiveBG " +isActive);
+            //Debug.Log("ActiveBG " +isActive);
             bgRender.enabled = isActive ;
         }
 

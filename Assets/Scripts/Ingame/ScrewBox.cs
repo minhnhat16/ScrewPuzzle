@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -22,6 +23,7 @@ namespace Ingame
         [SerializeField] private Transform _transform;
         [SerializeField] private Transform _anchor;
         [SerializeField] private Vector3 position;
+        [SerializeField] private Vector3 scale;
         [SerializeField] private Collider2D _collider;
 
         [SerializeField] private bool isBoxFull;
@@ -82,7 +84,10 @@ namespace Ingame
             set => transform.position = value;
         }
         public int TotalHold { get => totalHold; set => totalHold = value; }
-
+        public void Awake()
+        {
+            scale = transform.localScale;
+        }
         public virtual void OnEnable()
         {
             _transform = transform.GetComponent<Transform>();
@@ -103,12 +108,13 @@ namespace Ingame
         }
         public virtual void Start()
         {
+
             // SetBoxColor(UnityEngine.Color.white);
         }
 
         public void Reset()
         {
-            _transform.localScale = Vector3.one;
+            _transform.localScale = scale;
             color = ColorEnum.Empty;
             var upperGameObj = renderUpper.gameObject;
             upperGameObj.transform.localPosition = 10 * Vector3.up;
@@ -121,7 +127,7 @@ namespace Ingame
             foreach (var h in holdScrews)
             {
                 h.ClearScrewOnHold(); // should put reset here
-                Debug.Log("reset hold screw " + h.Screw);
+                //Debug.Log("reset hold screw " + h.Screw);
             };
 
         }
@@ -140,16 +146,16 @@ namespace Ingame
         public void OnClickCollider()
         {
             //OpenAds dialog;
-            Debug.Log("Open ads dialog");
+            //Debug.Log("Open ads dialog");
         }
         // khi box đầy thuc hien ham sau 
         protected virtual void BoxFullInvoker(bool isFull)
         {
-            Debug.Log("Box full invoker " + gameObject.name + "\t" + isBoxFull);
+            //Debug.Log("Box full invoker " + gameObject.name + "\t" + isBoxFull);
             if (!isFull) return;
             isBoxFull = true;
             // set box active fasle
-            Debug.Log("Box full invoker " + gameObject.name);
+            //Debug.Log("Box full invoker " + gameObject.name);
             StartCoroutine(InactiveBoxCoroutine());
         }
 
@@ -171,7 +177,7 @@ namespace Ingame
         private void TunOffScrews()
         {
 
-            Debug.Log("Turn off Screww");
+            //Debug.Log("Turn off Screww");
             foreach (var t in holdScrews)
             {
                 ScrewPool.Instance.Pool.ReturnToPool(t.Screw);
@@ -184,12 +190,12 @@ namespace Ingame
 
             int totalHold = holdScrews.Count;
             // Debug trước khi sử dụng giá trị này
-            Debug.Log("Total Hold Screws: " + totalHold);
+            //Debug.Log("Total Hold Screws: " + totalHold);
 
             mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f)
                 .SetEase(Ease.InCirc).OnComplete(() =>
                 {
-                    Debug.Log("OnComplete: TunOffScrews & SpawningStar");
+                    //Debug.Log("OnComplete: TunOffScrews & SpawningStar");
                     TunOffScrews();
                     spawnStartEvent?.Invoke(totalHold);
                     //Debug.Log($"Processing Hold Screw at { totalHold}");
@@ -216,10 +222,10 @@ namespace Ingame
         {
             if (totalHold <= 0)
             {
-                Debug.LogWarning("No screws to spawn stars for.");
+                //Debug.LogWarning("No screws to spawn stars for.");
                 return;
             }
-            Debug.Log("SpawningStar");
+            //Debug.Log("SpawningStar");
 
             StartCoroutine(PoppingStar(totalHold));
         }
@@ -238,15 +244,15 @@ namespace Ingame
 
                 star.PopingStar(starScale, newPosition, () =>
                 {
-                    Debug.Log("Callback triggered for a star!");
+                    //Debug.Log("Callback triggered for a star!");
                 });
                 newStarAdded++;
             }
 
-            Debug.Log($"Stars popping initiated. Waiting for all {holdScrews.Count} stars to complete.");
+            //Debug.Log($"Stars popping initiated. Waiting for all {holdScrews.Count} stars to complete.");
             yield return new WaitUntil(() => newStarAdded == holdScrews.Count);
 
-            Debug.Log("All stars completed popping!");
+            //Debug.Log("All stars completed popping!");
             IngameController.Instance.StarChanging(holdScrews.Count);
         }
 
@@ -272,7 +278,7 @@ namespace Ingame
 
         public virtual void AddScrew(List<Screw.Screw> screws)
         {
-            Debug.Log("Add many screw");
+            //Debug.Log("Add many screw");
             StartCoroutine(WaitForBoxStopAndAddScrew(() =>
             {
                 foreach (var screw in screws)
@@ -328,7 +334,15 @@ namespace Ingame
 
         private void UpdateNextEmptyIndex()
         {
-            nextEmptyIndex = -1; // Đặt mặc định không có lỗ trống
+            // Only run the logic if the state actually needs updating
+            if (nextEmptyIndex != -1 && holdScrews[nextEmptyIndex].IsEmpty())
+            {
+                // No need to recalculate; the current `nextEmptyIndex` is still valid
+                return;
+            }
+
+            // Reset the index and search for the next empty hole
+            nextEmptyIndex = -1;
             for (int i = 0; i < holdScrews.Count; i++)
             {
                 if (holdScrews[i].IsEmpty())
@@ -338,10 +352,14 @@ namespace Ingame
                 }
             }
 
-            if (nextEmptyIndex != -1) return;
-            Debug.Log("All screw holes are now filled!");
-            onScrewBoxFull.Invoke(true); // Gọi sự kiện khi tất cả lỗ đã đầy
+            // If no empty slots remain, invoke the event
+            if (nextEmptyIndex == -1)
+            {
+                //Debug.Log("All screw holes are now filled!");
+                onScrewBoxFull?.Invoke(true); // Ensure the event is only invoked once
+            }
         }
+
         // Hàm để thay đổi màu của CrewBox
         public void SetBoxColor(Color newColor)
         {
@@ -351,8 +369,16 @@ namespace Ingame
 
         public void FindScrew()
         {
-            Debug.Log("Start Find Screw");
+            //Debug.Log("Start Find Screw");
             StartCoroutine(FindScrewCoroutine());
+        }
+        public void ClearScrewOnHold()
+        {
+            foreach (var h in holdScrews)
+            {
+                h.ClearScrewOnHold(); // should put reset here
+                //Debug.Log("reset hold screw " + h.Screw);
+            };
         }
         public IEnumerator FindScrewCoroutine()
         {

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using Ingame;
@@ -7,10 +8,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
 
 public class LevelMaker : MonoBehaviour
 {
+    
     [SerializeField] private GameObjectToLevelConverter converter;
     public UnityEvent onScrewClicked;
     public static LevelMaker instance;
@@ -283,3 +284,4 @@ public enum EditMode
     PartPosition,
     PartColor
 }
+#endif

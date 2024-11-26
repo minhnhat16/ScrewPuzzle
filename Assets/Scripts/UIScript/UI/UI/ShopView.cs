@@ -21,11 +21,14 @@ namespace UIScript.UI.UI
         [SerializeField] private RectTransform priceRect;
         [SerializeField] private Slider switchSlider;
         [SerializeField] private List<ShopItem> shopItems;
+        [SerializeField] private List<PackItem> packItems;
         [SerializeField] private Text lablePrice;
         [SerializeField] private Text lablePack;
         [SerializeField] private Text goldLable;
         
         [SerializeField] private Button closeButton;
+        [SerializeField] private List<PackMiniItem> packMiniItems;
+
         // [SerializeField] private List<PackItem> packItems;
         public override void OnInit()
         {
@@ -81,14 +84,14 @@ namespace UIScript.UI.UI
                 var ribbonSprite = SpriteLibControl.Instance.GetSpriteByName(packItemCR.RibbonColorName);
                 packItem.Ribon.sprite =ribbonSprite;
 
-                PackMiniItem miniItem1 = new(packItemCR.QuantityItem1,packItemCR.IconItem1);
-                PackMiniItem miniItem2 = new(packItemCR.QuantityItem2,packItemCR.IconItem2);
-                PackMiniItem miniItem3 = new(packItemCR.QuantityItem3,packItemCR.IconItem3);
+                packMiniItems[0].Init(packItemCR.QuantityItem1,packItemCR.IconItem1);
+                packMiniItems[1].Init(packItemCR.QuantityItem2,packItemCR.IconItem2);
+                packMiniItems[2].Init(packItemCR.QuantityItem3, packItemCR.IconItem3);
 
                 packItem.MiniItemsDict = new ();
-                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem1,miniItem1);
-                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem2,miniItem2);
-                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem3,miniItem3);
+                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem1, packMiniItems[0]);
+                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem2, packMiniItems[1]);
+                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem3, packMiniItems[2]);
                 
                 packItem.PurchaseButton.onClick.AddListener(()=>OnPackItemPurchase(packItem));
             }

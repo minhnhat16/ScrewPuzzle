@@ -7,8 +7,6 @@ using DG.Tweening;
 using Ingame.Pools;
 using Ingame.Screw;
 using Managers;
-using Unity.VisualScripting.Dependencies.Sqlite;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -209,7 +207,7 @@ namespace Ingame
         private ScrewBox SpawnBox()
         {
             if (boxesStack.Count == 0) return null;
-            Debug.Log("SpawnBox");
+            //Debug.Log("SpawnBox");
             var box = boxesStack.Pop();
             return box;
         }
@@ -291,6 +289,7 @@ namespace Ingame
                 //Debug.LogError("Error: new box or slot is null" + newBox + " or " + currentSlot);
                 return null;
             }
+            newBox.ClearScrewOnHold();
             return newBox;
         }
 
@@ -346,9 +345,9 @@ namespace Ingame
 
         private void OnLastBoxClearScrew()
         {
-            Debug.LogError(onCompleteClearBoxes != null
-                ? "OnCompleteClearBoxes is not null and can invoke"
-                : "OnCompleteClearBoxes is null");
+            //Debug.LogError(onCompleteClearBoxes != null
+            //    ? "OnCompleteClearBoxes is not null and can invoke"
+            //    : "OnCompleteClearBoxes is null");
             bool isComplete = onCompleteClearBoxes != null && IngameController.Instance.IsGameOver;
             if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(isComplete);
         }

@@ -1,5 +1,5 @@
+#if UNITY_EDITOR
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Level
 {
@@ -9,3 +9,4 @@ namespace Level
    
     }
 }
+#endif

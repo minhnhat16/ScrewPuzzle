@@ -112,15 +112,15 @@ namespace Ingame.Screw
         {
             // Debug.LogError("Setting sorting order and layer");
             //if (string.Compare(layer, "Default") == 0) return;
-            render.sortingLayerName =layer;
+            render.sortingLayerName =layer; 
             cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
             cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
-            float z =  -0.01f * order;
+            float z =  -0.1f * layerIndex + 1 ;
             //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
-            Position = new Vector3(Position.x, Position.y, z);
+            transform.position = new Vector3(Position.x, Position.y, z);
         }
 
         private void SetScrewColor()
@@ -171,12 +171,12 @@ namespace Ingame.Screw
         }
         public IEnumerator ResetClickFlagAfterDelay(float delay)
         {
-            Debug.Log("Screw: Reset Click Flag After Delay after" + delay);
+            //Debug.Log("Screw: Reset Click Flag After Delay after" + delay);
             yield return new WaitForSeconds(delay);  // Wait for the specified delay
             isClicked = false;   
             CircleCollider2D.enabled = !isClicked;
             // Reset the flag
-            Debug.Log("Screw: Reset Click Flag After Delay Done" + isClicked);
+            //Debug.Log("Screw: Reset Click Flag After Delay Done" + isClicked);
         }
 
 
@@ -215,6 +215,7 @@ namespace Ingame.Screw
             DoMoveScrewUp(() =>
             {
                 _circleCollider2D.enabled = false;
+                FreeHinge();
                 JumpScrewToHold(holdScrew);
             });
         }
@@ -227,7 +228,7 @@ namespace Ingame.Screw
         public void JumpScrewToHold(HoldScrew holdScrew)
         {
             Vector3 toPos = holdScrew.Transf.position + new Vector3(0, 0.25f);
-            Debug.Log("DO move to hold " + toPos);
+            //Debug.Log("DO move to hold " + toPos);
 
             // Lưu lại vị trí offset giữa render và cha trước khi di chuyển
             Vector3 offset = toPos - _transform.position;
@@ -240,7 +241,6 @@ namespace Ingame.Screw
             sequence.Join(_transform.DOMove(toPos - offset, 0.5f)); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
             sequence.OnPlay(() => isMoving = true);
             // free joint to release wood and joint
-            FreeHinge();
 
             // Khi cả hai di chuyển xong
             sequence.OnComplete(() =>
@@ -250,6 +250,16 @@ namespace Ingame.Screw
             });
         }
 
+        public virtual void MoveScrewDown(HoldScrew holdScrew)
+        {
+            var targetPos = render.transform.position;
+            targetPos -= new Vector3(0, 0.25f, 0);
+            cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
+
+            render.transform.DOMove(targetPos, 0.5f).OnComplete(() => { isMoving = false; });
+            _transform.SetParent(holdScrew.transform);
+
+        }
         public void DoMoveScrewUp(Action callback)
         {
             var targetPos = render.transform.position;
@@ -300,17 +310,6 @@ namespace Ingame.Screw
                     throw new ArgumentOutOfRangeException(nameof(color), color, null);
             }
         }
-
-        public virtual void MoveScrewDown(HoldScrew holdScrew)
-        {
-            var targetPos = render.transform.position;
-            targetPos-= new Vector3(0, 0.25f,0);
-            cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
-             
-            render.transform.DOMove(targetPos, 0.5f).OnComplete(()=> { isMoving = false; });
-            _transform.SetParent(holdScrew.transform);
-
-        }
         public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart,HingeConnection connection)
         {
             HingeObject hinge = HingePool.Instance.pool.SpawnNonGravity();
@@ -334,7 +333,7 @@ namespace Ingame.Screw
             isClicked = false;
             color = ColorEnum.Clear;
             CircleCollider2D.enabled = true;
-            Debug.Log("Reset screw");
+            //Debug.Log("Reset screw");
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
             hingeController.Reset();

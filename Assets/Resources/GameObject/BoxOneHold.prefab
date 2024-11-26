@@ -252,7 +252,7 @@ Transform:
   m_GameObject: {fileID: 7372461536802393462}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3191023454667327246}
@@ -284,6 +284,7 @@ MonoBehaviour:
   _collider: {fileID: 0}
   isBoxFull: 0
   isAddingScrew: 0
+  totalHold: 0
   nextEmptyIndex: -1
   holdScrews:
   - {fileID: 5541671317930602014}
@@ -298,6 +299,9 @@ MonoBehaviour:
   squashDuration: 0.2
   initialPosition: {x: 0, y: 0, z: 0}
   isMoving: 0
+  spawnStartEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1676534350721570930
 PrefabInstance:
   m_ObjectHideFlags: 0

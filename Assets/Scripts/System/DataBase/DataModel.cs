@@ -271,6 +271,7 @@ public class DataModel : MonoBehaviour
         //leve
         LevelInfo levelInf = new();
         levelInf.expLevel = 0.0f;
+        levelInf.bonusCount = 0;
         LevelData dataLevelOne = new();
         dataLevelOne.levelID = 1;
         dataLevelOne.levelStar = 0;

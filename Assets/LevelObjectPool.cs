@@ -15,3 +15,4 @@ public class LevelObjectPool : MonoBehaviour
         pool = new BY_Local_Pool<BaseLevelObject>(prefab, total, transform);
     }
 }
+    

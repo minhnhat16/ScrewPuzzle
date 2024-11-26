@@ -2551,7 +2551,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3355454118572844204, guid: d83c947b5c503e843b0ad9f8ea19e9a6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -169
+      value: -169.00006
       objectReference: {fileID: 0}
     - target: {fileID: 3508250323642770808, guid: d83c947b5c503e843b0ad9f8ea19e9a6, type: 3}
       propertyPath: m_Spacing
@@ -8506,6 +8506,10 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 5628473247090571762, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 5976155496508265377, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
@@ -8535,6 +8539,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6117300413568002575, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: m_Size.x
+      value: 5.915217
+      objectReference: {fileID: 0}
+    - target: {fileID: 6117300413568002575, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -8547,8 +8555,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6117300414487791906, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6117300414487791906, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.5
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6117300414487791907, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: totalWidth
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6117300414487791907, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: spriteRenderer
@@ -8732,7 +8748,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7030888435365032290, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: topAlignSpacing
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7030888435365032290, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: configRecords.Array.size

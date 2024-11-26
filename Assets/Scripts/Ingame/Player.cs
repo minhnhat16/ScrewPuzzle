@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,7 +19,6 @@ namespace Ingame
             get => canClick;
             set => canClick = value;
         }
-
         [SerializeField] private Screw.Screw CurrentScrew;
         [SerializeField] private Camera mainCam;
         [SerializeField] private List<Screw.Screw> _screw;
@@ -94,38 +94,86 @@ namespace Ingame
                 yield return null;
             }
         }
-
         private void HandleInput(Vector3 screenPosition)
         {
-            Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+            // Cache the main camera
+            if (mainCam == null) return;
 
+            // Convert screen position to world position
+            Vector2 worldPosition = mainCam.ScreenToWorldPoint(screenPosition);
+
+            // Perform a 2D raycast to detect objects at the click position
             var hits = Physics2D.RaycastAll(worldPosition, Vector2.zero, Mathf.Infinity);
 
-            // Sort hits by Z position (assuming all objects have a Transform)
-            var sortedHits = hits.OrderByDescending(hit => hit.transform.position.z).ToArray();
+            GameObject clickedObject = null;
+            Screw.Screw foundScrew = null;
+            float highestZ = float.MinValue;
 
-            foreach (var hit in sortedHits)
+            foreach (var hit in hits)
             {
-                if (hit.collider != null)
-                {
-                    var clickedObject = hit.collider.gameObject;
+                if (hit.collider == null) continue;
 
-                    if (clickedObject.CompareTag("Player"))
+                var obj = hit.collider.gameObject;
+
+                // Only consider objects with the "Player" tag
+                if (obj.CompareTag("Player"))
+                {
+                    float z = obj.transform.position.z;
+
+                    // Prioritize the object with the highest Z position
+                    if (z > highestZ)
                     {
-                        var screw = clickedObject.GetComponent<Screw.Screw>();
-                        _screw.Add(screw);
-                        Debug.Log("Player clicked: " + clickedObject.name);
-                        // return; // Exit after the first valid click, if needed
+                        clickedObject = obj;
+                        highestZ = z;
                     }
                 }
             }
-            if (_screw.Count == 0) return;
-            var firstScrew = _screw.Last();
-            if (firstScrew == null) return;
-            onScrewClicked?.Invoke(firstScrew);
 
-            Debug.LogWarning("No valid 2D object was clicked.");
+            // If a valid object was found, process it
+            if (clickedObject != null)
+            {
+                foundScrew = clickedObject.GetComponent<Screw.Screw>();
+                if (foundScrew != null)
+                {
+                    _screw.Add(foundScrew);
+                    onScrewClicked?.Invoke(foundScrew);
+                }
+            }
         }
+
+
+        //private void HandleInput(Vector3 screenPosition)
+        //{
+        //    Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+
+        //    var hits = Physics2D.RaycastAll(worldPosition, Vector2.zero, Mathf.Infinity);
+
+        //    // Sort hits by Z position (assuming all objects have a Transform)
+        //    var sortedHits = hits.OrderByDescending(hit => hit.transform.position.z).ToArray();
+
+
+        //    foreach (var hit in sortedHits)
+        //    {
+        //        if (hit.collider != null)
+        //        {
+        //            var clickedObject = hit.collider.gameObject;
+
+        //            if (clickedObject.CompareTag("Player"))
+        //            {
+        //                var screw = clickedObject.GetComponent<Screw.Screw>();
+        //                _screw.Add(screw);
+        //                //Debug.Log("Player clicked: " + clickedObject.name);
+        //                // return; // Exit after the first valid click, if needed
+        //            }
+        //        }
+        //    }
+        //    if (_screw.Count == 0) return;
+        //    var firstScrew = _screw.Last();
+        //    if (firstScrew == null) return;
+        //    onScrewClicked?.Invoke(firstScrew);
+
+        //    //Debug.LogWarning("No valid 2D object was clicked.");
+        //}
 
 
 

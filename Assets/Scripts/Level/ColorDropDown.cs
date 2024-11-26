@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,3 +39,4 @@ public class ColorDropDown : MonoBehaviour
         // For example, use buttonIndex to select a color or perform an action.
     }
 }
+#endif

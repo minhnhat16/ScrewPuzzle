@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using UnityEngine;
@@ -592,3 +593,4 @@ public class GameObjectToLevelConverter : MonoBehaviour
         return false;
     }
 }
+#endif
