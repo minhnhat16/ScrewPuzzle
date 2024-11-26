@@ -1,20 +1,16 @@
-using System;
-using System.Drawing;
 using DG.Tweening;
 using Enums;
 using Level;
-using Managers;
-using Unity.Mathematics;
+using System;
+using System.Linq.Expressions;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
 using IEnumerator = System.Collections.IEnumerator;
 
 namespace Ingame.Screw
 {
-    public  class Screw : MonoBehaviour
-    {   
-        [SerializeField]  private ColorEnum color;
+    public class Screw : MonoBehaviour
+    {
+        [SerializeField] private ColorEnum color;
         [SerializeField] private bool isPartiallyVisible;
         [SerializeField] private bool isClicked;
         [SerializeField] protected int layerMask;
@@ -22,8 +18,8 @@ namespace Ingame.Screw
         [SerializeField] private bool isMultipleJoint;
         [SerializeField] protected CircleCollider2D _circleCollider2D;
         [SerializeField] private Rigidbody2D rb;
-        [SerializeField] protected SpriteRenderer render ;
-        [SerializeField] private SpriteRenderer cross ;
+        [SerializeField] protected SpriteRenderer render;
+        [SerializeField] private SpriteRenderer cross;
         [SerializeField] private LayerMask _layerMask;
         [SerializeField] protected HingeController hingeController;
         public HingeController HingeController
@@ -41,7 +37,7 @@ namespace Ingame.Screw
         {
             get => transform.position;
             set => transform.position = value;
-            
+
         }
 
         protected CircleCollider2D CircleCollider2D
@@ -55,24 +51,25 @@ namespace Ingame.Screw
             get => render;
             set => render = value;
         }
-        public ColorEnum Color {get{return color;}set{color = value;}}
+        public ColorEnum Color { get { return color; } set { color = value; } }
 
         public bool IsActionComplete { get; set; }
         // Start is called before the first frame update
-        public virtual void Start(){
-            isClicked  =false;
+        public virtual void Start()
+        {
+            isClicked = false;
             StartCoroutine(Init());
         }
 
         private void OnEnable()
-        { 
-           
+        {
+
         }
 
         public IEnumerator Init()
         {
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
-            yield return new WaitUntil(()=> bodyLayer !=null );
+            yield return new WaitUntil(() => bodyLayer != null);
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
             /*yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();*/
@@ -80,7 +77,7 @@ namespace Ingame.Screw
         public IEnumerator InitOnLevelMaker()
         {
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
-            yield return new WaitUntil(()=>bodyLayer !=null );
+            yield return new WaitUntil(() => bodyLayer != null);
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
             // yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             // SetScrewColor();
@@ -94,7 +91,8 @@ namespace Ingame.Screw
             get => layerMask;
             set => layerMask = value;
         }
-        public virtual void Awake(){
+        public virtual void Awake()
+        {
             // _color = (ColorEnum)System.Enum.Parse(typeof(ColorEnum),"Color");
             _transform = GetComponent<Transform>();
             Position = GetComponent<Transform>().position;
@@ -112,13 +110,13 @@ namespace Ingame.Screw
         {
             // Debug.LogError("Setting sorting order and layer");
             //if (string.Compare(layer, "Default") == 0) return;
-            render.sortingLayerName =layer; 
+            render.sortingLayerName = layer;
             cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
             cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
-            float z =  -0.1f * layerIndex + 1 ;
+            float z = 0.2f * (layerIndex + 1);
             //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
             transform.position = new Vector3(Position.x, Position.y, z);
         }
@@ -140,7 +138,7 @@ namespace Ingame.Screw
 
             // Tạo LayerMask để kiểm tra các lớp từ 0 đến 19, nhưng bỏ qua lớp của connectedBody
             LayerMask mask = 0;
-            
+
             for (int i = 10; i < connectedBodyLayer; i++) // Chỉ xét từ lớp 10 đến lớp 19
             {
                 mask |= (1 << i); // Dùng phép OR bit để thêm từng lớp vào LayerMask
@@ -173,7 +171,7 @@ namespace Ingame.Screw
         {
             //Debug.Log("Screw: Reset Click Flag After Delay after" + delay);
             yield return new WaitForSeconds(delay);  // Wait for the specified delay
-            isClicked = false;   
+            isClicked = false;
             CircleCollider2D.enabled = !isClicked;
             // Reset the flag
             //Debug.Log("Screw: Reset Click Flag After Delay Done" + isClicked);
@@ -184,22 +182,13 @@ namespace Ingame.Screw
         {
             if (isShaking) return;
             Tween t = render.transform.DOShakePosition(1f, new Vector3(0.15f, 0, 0)).SetEase(Ease.OutBounce);
-            t.OnPlay(() => isClicked = isShaking= true);
+            t.OnPlay(() => isClicked = isShaking = true);
             t.OnComplete(() =>
             {
                 render.transform.localPosition = Vector3.zero;
                 isClicked = isShaking = false;
             });
         }
-
-        // private IEnumerator CompleteAction()
-        // {
-        //     // Giả sử có một hành động nào đó
-        //     yield return new WaitForSeconds(1f);
-        //     IsActionComplete = true; // Hành động hoàn tất
-        //     Player.instance. = IsActionComplete;
-        // }
-
 
         private bool CheckTrueColorBox()
         {
@@ -263,9 +252,9 @@ namespace Ingame.Screw
         public void DoMoveScrewUp(Action callback)
         {
             var targetPos = render.transform.position;
-            targetPos+= new Vector3(0, 0.25f,0);
+            targetPos += new Vector3(0, 0.25f, 0);
             cross.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
-            render.transform.DOMove(targetPos, 0.5f).OnComplete(()=>callback?.Invoke());
+            render.transform.DOMove(targetPos, 0.5f).OnComplete(() => callback?.Invoke());
         }
         public virtual void FreeHinge()
         {
@@ -310,24 +299,42 @@ namespace Ingame.Screw
                     throw new ArgumentOutOfRangeException(nameof(color), color, null);
             }
         }
-        public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart,HingeConnection connection)
+        public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart, HingeConnection connection)
         {
+            // Spawn a new Hinge object from the pool
             HingeObject hinge = HingePool.Instance.pool.SpawnNonGravity();
             GameObject newHingeChild = hinge.gameObject;
+
+            // Set parent and position
             newHingeChild.transform.SetParent(transform);
             newHingeChild.transform.localPosition = connection.hingePosition;
-            //newHingeChild.transform.position = targetPart.transform.position;
 
-            // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
-            HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
-            newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-            hingeJoint.connectedBody = targetPart; // Kết nối hinge với đối tượng screw mục tiêu
-            // Lưu HingeJoint2D vào danh sách nếu cần
-            hingeController.HingeJoint2D.Add(hingeJoint);
-            hingeController.BodyConnect.Add(targetPart); // Thêm Rigidbody2D vào danh sách bodyConnect
+            // Check if HingeJoint2D exists, or create a new one if it doesn't
+            HingeJoint2D hingeJoint = newHingeChild.GetComponent<HingeJoint2D>();
+            if (hingeJoint == null)
+            {
+                hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
+            }
+
+            // Configure Rigidbody2D
+            Rigidbody2D hingeBody = newHingeChild.GetComponent<Rigidbody2D>();
+            if (hingeBody == null)
+            {
+                hingeBody = newHingeChild.AddComponent<Rigidbody2D>();
+            }
+            hingeBody.bodyType = RigidbodyType2D.Static;
+
+            // Configure the hinge joint
+            hingeJoint.connectedBody = targetPart;
             hingeJoint.autoConfigureConnectedAnchor = true;
+
+            // Add hinge joint and connected body to the hinge controller lists
+            hingeController.HingeJoint2D.Add(hingeJoint);
+            hingeController.BodyConnect.Add(targetPart);
+
             return hingeJoint;
         }
+
         public void Reset()
         {
             isClicked = false;

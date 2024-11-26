@@ -110,24 +110,40 @@ namespace UIScript
             return;
         }
         private void SetLevelSpriteByType(int id, LevelEnum type)
-        { 
+        {
+            // Get the sprite based on the level type
             var sprite = SpriteLibControl.Instance.GetSpriteByName($"level_{type.ToString()}");
             if (sprite == null) return;
             levelBG.sprite = sprite;
 
+            // Check if the level is locked
             bool isLockLevel = IsLockLevel(type);
+
             if (isLockLevel)
             {
-                imageIcon.gameObject.SetActive(true);
-                textLevel.gameObject.SetActive(false);
+                // Show imageIcon by adjusting its alpha or enabling its CanvasRenderer
+                imageIcon.color = new Color(imageIcon.color.r, imageIcon.color.g, imageIcon.color.b, 1); // Fully visible
+                imageIcon.raycastTarget = false;
+
+                // Hide textLevel by adjusting its alpha or disabling its CanvasRenderer
+                textLevel.color = new Color(textLevel.color.r, textLevel.color.g, textLevel.color.b, 0); // Fully transparent
+                textLevel.raycastTarget = false;
+
                 return;
             }
 
-            imageIcon.gameObject.SetActive(false);
-            textLevel.gameObject.SetActive(true);
+            // If not locked, show the text and hide the icon
+            imageIcon.color = new Color(imageIcon.color.r, imageIcon.color.g, imageIcon.color.b, 0); // Fully transparent
+            imageIcon.raycastTarget = true;
+
+            textLevel.color = new Color(textLevel.color.r, textLevel.color.g, textLevel.color.b, 1); // Fully visible
+            textLevel.raycastTarget = true;
+
+            // Set level text and add click listener
             SetLevelText(id);
             button.onClick.AddListener(() => OnLevelButtonClick(id));
         }
+
 
         private bool IsLockLevel(LevelEnum type)
         {

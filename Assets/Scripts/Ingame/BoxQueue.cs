@@ -232,11 +232,7 @@ namespace Ingame
                 }
             }
 
-            // Bắt đầu coroutine để căn chỉnh slot
-            if (alignCoroutine == null)
-            {
-                alignCoroutine = StartCoroutine(AlignSlots(slots));
-            }
+            StartAligningSlots(slots);
         }
 
 
@@ -368,27 +364,57 @@ namespace Ingame
                 callback?.Invoke(true);
             });
         }
+
+        public void StartAligningSlots(List<BoxSlot> slots)
+        {
+            if (alignCoroutine != null) StopCoroutine(alignCoroutine);
+            alignCoroutine = StartCoroutine(AlignSlots(slots));
+        }
+
         private IEnumerator AlignSlots(List<BoxSlot> slots)
         {
-            while (true)
-            {
-                // Lọc các slot đang active
-                var activeSlots = slots.Where(slot => slot.gameObject.activeSelf).ToList();
+            // Filter active slots only once before alignment
+            var activeSlots = slots.Where(slot => slot.gameObject.activeSelf).ToList();
+            if (activeSlots.Count == 0) yield break; // Exit if no active slots
 
-                if (activeSlots.Count > 0)
+            bool isAlignmentComplete = false;
+
+            while (!isAlignmentComplete)
+            {
+                isAlignmentComplete = true; // Assume alignment will complete this frame
+
+                // Update positions for active slots
+                for (int i = 0; i < activeSlots.Count; i++)
                 {
-                    // Cập nhật lại vị trí cho tất cả các slot đang active
-                    for (int i = 0; i < activeSlots.Count; i++)
+                    var slot = activeSlots[i];
+                    var targetPosition = CalculateCenteredPosition(i, activeSlots.Count);
+                    var currentPosition = slot.transform.position;
+
+                    // Smoothly move the slot to the target position
+                    var newPosition = Vector3.Lerp(currentPosition, targetPosition, 0.1f);
+                    slot.transform.position = newPosition;
+
+                    // Update screwBox position if applicable
+                    if (slot.screwBox != null && !slot.screwBox.isMoving && !slot.screwBox.IsBoxFull)
                     {
-                        var slot = activeSlots[i];
-                        var newPosition = CalculateCenteredPosition(i, activeSlots.Count);
-                        var pos = slot.transform.position = Vector3.Lerp(slot.transform.position, newPosition, 0.1f); // Smoothly transition to the new position
-                        if (slot.screwBox != null && !slot.screwBox.isMoving && !slot.screwBox.IsBoxFull) slot.screwBox.Position = pos;
+                        slot.screwBox.Position = newPosition;
+                    }
+
+                    // Check if the slot is close enough to its target position
+                    if (Vector3.Distance(newPosition, targetPosition) > 0.01f)
+                    {
+                        isAlignmentComplete = false; // Continue aligning if not yet completed
                     }
                 }
-                yield return null; // Chờ một khung hình trước khi kiểm tra lại
+
+                // Wait for the next frame
+                yield return null;
             }
+
+            // Reset coroutine reference when finished
+            alignCoroutine = null;
         }
+
         public void AddNewBoxSlot()
         {
             if (boxSlots.All(slot => slot.gameObject.activeSelf)) return;
@@ -398,6 +424,7 @@ namespace Ingame
             if (newBox != null)
             {
                 StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
+                StartAligningSlots(boxSlots);
             }
         }
         public void ReturnBoxToPool(ScrewBox box)

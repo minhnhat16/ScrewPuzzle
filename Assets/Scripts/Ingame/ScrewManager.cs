@@ -1,27 +1,26 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using PoolManager;
-using UnityEngine;
-using Ingame.Screw;
+﻿using PoolManager;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Ingame
 {
     public class ScrewManager : MonoBehaviour
     {
-       [SerializeField] private LayerMask layerMask;
-       [SerializeField] private List<Screw.Screw> _screws = new();
+        [SerializeField] private LayerMask layerMask;
+        [SerializeField] private List<Screw.Screw> _screws = new();
         public Dictionary<HingeJoint2D, BasePart> hingeConnections = new Dictionary<HingeJoint2D, BasePart>();
         public event Action<Screw.Screw> OnScrewRemoved;
         public LayerMask LayerMask
         {
-            get { return layerMask;}
+            get { return layerMask; }
             set { layerMask = value; }
         }
         private void Awake()
         {
-           
+
         }
 
         private void Start()
@@ -31,13 +30,13 @@ namespace Ingame
 
         public void AttachScrewsToBoard(BaseWoodBoard baseWoodBoard)
         {
-            
+
         }
 #if UNITY_EDITOR
 
         public void AppendScrew(ScrewLevelMaker screw)
         {
-            _screws.Add(screw); 
+            _screws.Add(screw);
         }
 #endif
         public List<Screw.Screw> GetScrews()
@@ -53,29 +52,28 @@ namespace Ingame
 
         public void RemoveScrew(Screw.Screw screw)
         {
-            var hingeJoints = screw.HingeController.HingeJoint2D;
-
-            foreach (var hinge in hingeJoints)
+            // Remove all hinge connections for the given screw
+            foreach (var hinge in screw.HingeController.HingeJoint2D)
             {
-                // Xóa liên kết giữa HingeJoint2D và BasePart
                 RemoveHingeConnection(hinge);
             }
 
-            // Kiểm tra trạng thái của các BasePart liên quan
-            var relatedParts = hingeConnections.Values.Distinct().ToList();
+            // Gather distinct related parts only once
+            var relatedParts = hingeConnections.Values.Distinct();
+
+            // Process related parts and handle their state
             foreach (var part in relatedParts)
             {
                 if (AreAllHingesRemoved(part))
                 {
-                   // Debug.Log($"All hinges for part {part.uniqueID} have been removed.");
-                    // Thực hiện logic bổ sung, ví dụ:
                     part.HandleNoHingesLeft();
                 }
             }
 
+            // Invoke the screw removal event after all operations
             OnScrewRemoved?.Invoke(screw);
-            //_screws.Remove(screw);
         }
+
 
 
         public bool AreAllHingesRemoved(BasePart part)
@@ -96,7 +94,7 @@ namespace Ingame
 
             ScrewPool.Instance.Pool.ReturnToPool(rdScrew);
             _screws.Remove(rdScrew);
-            Debug.LogWarning("Random Get One Screw"+  rdScrew);
+            Debug.LogWarning("Random Get One Screw" + rdScrew);
 
             return rdScrew;
         }
@@ -137,7 +135,7 @@ namespace Ingame
                 var part = hingeConnections[hinge];
                 hingeConnections.Remove(hinge);
 
-               // Debug.Log($"Hinge removed: {hinge} disconnected from {part.uniqueID}");
+                // Debug.Log($"Hinge removed: {hinge} disconnected from {part.uniqueID}");
                 part.HandleNoHingesLeft();
 
                 // Kiểm tra ngay khi xóa nếu part không còn liên kết

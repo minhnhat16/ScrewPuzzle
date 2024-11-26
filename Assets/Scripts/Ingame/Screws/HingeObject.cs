@@ -40,4 +40,10 @@ public class HingeObject : MonoBehaviour
         _hingeJoint2D = hingeJoint2D;
         _transform = transform;
     }
+
+    public void Reset()
+    {
+        HingeJoint2D.connectedBody = null;
+        position = Vector3.zero;
+    }
 }

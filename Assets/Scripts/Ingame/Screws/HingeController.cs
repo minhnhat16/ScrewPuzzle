@@ -88,18 +88,22 @@ namespace Ingame.Screw
                 HingePool.Instance.pool.ReturnToPool(hingeComp);
             }
             hingeJoint2D.Clear();
-
+            bodyConnect.Clear();
         }
         public virtual void ClearBody(Rigidbody2D body)
         {
             bodyConnect.Remove(body);
+            
         }
         public virtual void ClearBody()
         {
-            /*foreach(var body in bodyConnect)
+            if (TryGetComponent<HingeJoint2D>(out _))
             {
-                bod
-            }*/
+                foreach (var hingeJoint in GetComponents<HingeJoint2D>())
+                {
+                    Destroy(hingeJoint);
+                }
+            }
             bodyConnect.Clear();
         }
         internal void Reset()

@@ -15,7 +15,7 @@ using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame
 {
-    public class ScrewBox : FSMSystem
+    public class ScrewBox : MonoBehaviour
     {
         public BoxConfig config; // ScriptableObject chứa cấu hình cho CrewBox
         [SerializeField] private SpriteRenderer render;
@@ -369,6 +369,7 @@ namespace Ingame
 
         public void FindScrew()
         {
+            if (!enabled) return;
             //Debug.Log("Start Find Screw");
             StartCoroutine(FindScrewCoroutine());
         }
