@@ -2551,7 +2551,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3355454118572844204, guid: d83c947b5c503e843b0ad9f8ea19e9a6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -169.00006
+      value: -169
       objectReference: {fileID: 0}
     - target: {fileID: 3508250323642770808, guid: d83c947b5c503e843b0ad9f8ea19e9a6, type: 3}
       propertyPath: m_Spacing
@@ -8806,6 +8806,10 @@ PrefabInstance:
       propertyPath: total
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 8198550045546660738, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: prefab
+      value: 
+      objectReference: {fileID: 4357439213936722971, guid: 4129fbb70f242534a8457e2a628a7bb2, type: 3}
     - target: {fileID: 8199739139953667802, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_Name
       value: GameManager
