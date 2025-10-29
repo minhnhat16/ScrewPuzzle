@@ -84,7 +84,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
     public void DeSpawnGravity(T trans)
     {
         activeList.Remove(trans);
-        trans.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+        trans.GetComponent<Rigidbody2D>().linearVelocity = Vector3.zero;
         trans.GetComponent<Rigidbody2D>().gravityScale = 0;
         trans.gameObject.SetActive(false);
 

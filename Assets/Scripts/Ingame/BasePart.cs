@@ -101,7 +101,7 @@ namespace Ingame
             while (true)
             {
                 bool wasFalling = isFalling;
-                isFalling = body.velocity.y < -5;
+                isFalling = body.linearVelocity.y < -5;
 
                 // Nếu trạng thái thay đổi, kích hoạt sự kiện
                 if (isFalling != wasFalling)

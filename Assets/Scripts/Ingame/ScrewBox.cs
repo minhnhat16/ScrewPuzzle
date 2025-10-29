@@ -15,8 +15,8 @@ using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame
 {
-    public class ScrewBox : MonoBehaviour
-    {
+    public class ScrewBox : FSMSystem
+        {
         public BoxConfig config; // ScriptableObject chứa cấu hình cho CrewBox
         [SerializeField] private SpriteRenderer render;
         [SerializeField] private SpriteRenderer renderUpper;
