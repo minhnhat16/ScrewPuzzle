@@ -104,9 +104,7 @@ namespace Managers
             if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftControl))
             {
                 Reset();
-            }
-
-            ;
+            };
         }
 
         public void ActivateBG(bool isActive)
@@ -123,8 +121,6 @@ namespace Managers
         public IEnumerator InitIngameCoroutine(Action callback)
         {
             yield return new WaitForSeconds(0f);
-
-            // Callback when initialization is done
             callback?.Invoke();
         }
 

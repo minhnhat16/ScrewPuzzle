@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
+using UnityEngine.U2D;
 using Random = Unity.Mathematics.Random;
 
 namespace Ingame
@@ -185,14 +186,21 @@ namespace Ingame
             
         public  virtual void GenerateColliderFromSprite()
         {
-            // Use the sprite's texture to define the polygon's points
-            // This method is for auto-generating a polygon collider based on the sprite's shape
-            col.enabled = false; // Disable the collider temporarily to prevent issues
-            Destroy(col);        // Destroy the old collider
+            if (render == null || col== null)
+                return;
 
-            // Add and create a new PolygonCollider2D
-            col = gameObject.AddComponent<PolygonCollider2D>();
-            col.enabled = true;
+            var sprite = render.sprite;
+            // Xoá các path cũ
+            col.pathCount = sprite.GetPhysicsShapeCount();
+
+            // Copy physics shape từ sprite sang collider
+            List<Vector2> path = new List<Vector2>();
+            for (int i = 0; i < sprite.GetPhysicsShapeCount(); i++)
+            {
+                path.Clear();
+                sprite.GetPhysicsShape(i, path);
+                col.SetPath(i, path);
+            }
 
         }
         public void Reset()

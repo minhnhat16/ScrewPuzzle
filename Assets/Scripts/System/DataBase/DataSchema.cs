@@ -44,7 +44,7 @@ public class ItemInvent
 public class DailyItemData
 {
     public int day;
-    public IEDailyType currentType;
+    public DailyType currentType;
 }
 [Serializable]
 public class ItemData

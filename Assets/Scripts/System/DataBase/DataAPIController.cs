@@ -371,7 +371,7 @@ namespace System.DataBase
             {
                 DailyItemData dailyData = new();
                 dailyData.day = i;
-                dailyData.currentType = IEDailyType.Unavailable;
+                dailyData.currentType = DailyType.Unavailable;
                 newData.Add(dailyData);
             }
             dataModel.UpdateData(DataPath.DAILYLIST, newData, () =>
@@ -386,7 +386,7 @@ namespace System.DataBase
             DailyItemData dailyData = _dailyData[idDay];
             return dailyData;
         }
-        public void SetDailyData(int day, IEDailyType type)
+        public void SetDailyData(int day, DailyType type)
         {
             //Debug.Log($"SET DAILY DATA {day} + {type}");
             List<DailyItemData> _dailyData = GetAllDailyData();

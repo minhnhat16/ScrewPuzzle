@@ -74,11 +74,7 @@ public class LevelManager : MonoBehaviour
                 boxconfigsLevel.Add(boxConfig);
             }
         }
-        else
-        {
-            //Debug.LogError($"No BoxConfig assets found at path: {resourcePath}");
-        }
-
+  
         // Call the callback if it's not null
         callback?.Invoke();
     }
