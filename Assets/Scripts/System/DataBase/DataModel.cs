@@ -256,7 +256,7 @@ public class DataModel : MonoBehaviour
 
         newClearOnScrewInvent.type = ItemType.AddBox;
         newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
-        userData.itemInventory.magnetItem = newClearOnScrewInvent;
+        //userData.itemInventory.magnetItem = newClearOnScrewInvent;
        //leve
        LevelInfo levelInf = new();
        levelInf.expLevel = 0.0f;
@@ -328,7 +328,6 @@ public class DataModel : MonoBehaviour
 
         newClearOnScrewInvent.type = ItemType.AddBox;
         newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(),5);
-        userData.itemInventory.magnetItem = newClearOnScrewInvent;
         
         //player level
         LevelInfo levelInf = new();

@@ -1,11 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.U2D.Path;
 using UnityEngine;
-using Random = Unity.Mathematics.Random;
 
 namespace Ingame
 {
@@ -103,7 +99,7 @@ namespace Ingame
             while (true)
             {
                 bool wasFalling = isFalling;
-                isFalling = body.velocity.y < -5;
+                isFalling = body.linearVelocity.y < -5;
 
                 // Nếu trạng thái thay đổi, kích hoạt sự kiện
                 if (isFalling != wasFalling)

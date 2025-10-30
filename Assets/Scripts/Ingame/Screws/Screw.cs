@@ -317,13 +317,10 @@ namespace Ingame.Screw
             GameObject newHingeChild = hinge.gameObject;
             newHingeChild.transform.SetParent(transform);
             newHingeChild.transform.localPosition = connection.hingePosition;
-            //newHingeChild.transform.position = targetPart.transform.position;
 
-            // Tạo đối tượng HingeJoint2D mới và thêm vào đối tượng này
             HingeJoint2D hingeJoint = newHingeChild.AddComponent<HingeJoint2D>();
             newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             hingeJoint.connectedBody = targetPart; // Kết nối hinge với đối tượng screw mục tiêu
-            // Lưu HingeJoint2D vào danh sách nếu cần
             hingeController.HingeJoint2D.Add(hingeJoint);
             hingeController.BodyConnect.Add(targetPart); // Thêm Rigidbody2D vào danh sách bodyConnect
             hingeJoint.autoConfigureConnectedAnchor = true;

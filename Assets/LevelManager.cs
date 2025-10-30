@@ -25,7 +25,7 @@ public class LevelManager : MonoBehaviour
     public int currentLevelID;
     [SerializeField] private BaseLevelObject currentLevelObject;
     [SerializeField] private GameObject screwManagerPrefb;
-    [SerializeField] private ScrewManager ScrewManager;
+     public ScrewManager ScrewManager;
 
     public bool IsInitDone
     {
@@ -266,7 +266,7 @@ public class LevelManager : MonoBehaviour
                 Debug.Log($"Level data with ID {levelId} loaded.");
                 var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
                 Debug.Log($"Connected part id {connectedPart.uniqueID}");
-                screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>());
+                screw.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(),hingeConnection);
             }
 
             ScrewManager.AddScrew(screw);
