@@ -188,13 +188,13 @@ namespace Ingame.Board
             // Check if the dictionary already contains the part with the same uniqueID
             if (partDict.ContainsKey(part.uniqueID))
             {
-                Debug.Log("Part with ID " + part.uniqueID + " already exists. Skipping add.");
+                //Debug.Log("Part with ID " + part.uniqueID + " already exists. Skipping add.");
                 return; // Exit the method if part already exists
             }
 
             // Add the part to the dictionary if it doesn't exist
             partDict.TryAdd(part.uniqueID, part);
-            Debug.Log("Part with ID " + part.uniqueID + " added.");
+            //Debug.Log("Part with ID " + part.uniqueID + " added.");
         }
 
 

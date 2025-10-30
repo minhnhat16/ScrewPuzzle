@@ -9,14 +9,13 @@ namespace Ingame
         {
             base.OnEnable();
             onScrewBoxFull.AddListener(BoxFullInvoker);
-            spawnStartEvent.AddListener(SpawningStar);
             Transform = transform;
         }
         public override void Start()
         {
             // SetBoxColor(UnityEngine.Color.white);
         }
-        private void OnDisable()
+        public override void OnDisable()
         {
             onScrewBoxFull.RemoveListener(BoxFullInvoker);
 

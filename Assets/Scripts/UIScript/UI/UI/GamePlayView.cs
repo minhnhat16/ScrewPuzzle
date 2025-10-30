@@ -19,6 +19,8 @@ public class GamePlayView : BaseView
 
     [SerializeField] private RectTransform goldParent;
     [SerializeField] private RectTransform gemParent;
+
+    [SerializeField] private StarBottleFill starBottle;
     [SerializeField] private Text gold_lb;
     [SerializeField] private Text timeCouter;
     [SerializeField] private List<RectTransform> anchorTutorials;
@@ -47,6 +49,7 @@ public class GamePlayView : BaseView
     {
         addHoldBtn.onClick.AddListener(AddHoldItemClick);
         addBoxBtn.onClick.AddListener(AddBoxItemClick);
+        clearOneScrewBtn.onClick.AddListener(OneScrewClearClick);
         settingBtn.onClick.AddListener(SettingButton);
         //onNewPlayer.AddListener(OnNewPlayer);
     }
@@ -54,12 +57,16 @@ public class GamePlayView : BaseView
     {
         addHoldBtn.onClick.RemoveListener(AddHoldItemClick);
         addBoxBtn.onClick.RemoveListener(AddBoxItemClick);
+        clearOneScrewBtn.onClick.RemoveListener(OneScrewClearClick);
+
         //settingBtn.onClick.RemoveListener(SettingButton);
         //onNewPlayer.RemoveListener(OnNewPlayer);
     }
     public override void OnStartShowView()
     {
         base.OnStartShowView();
+        IngameController.Instance.onStarChange = starBottle.fillChange ;
+
         //expBar = GetComponentInChildren<ExperienceBar>();
         //expBar.Init();
         //StartCoroutine(GetItemFormData());
@@ -73,6 +80,7 @@ public class GamePlayView : BaseView
     public override void OnStartHideView()
     {
         base.OnStartHideView();
+        starBottle.Reset();
         //IngameController.instance.SaveCardListToSLots();
     }
     public override void Setup(ViewParam viewParam)

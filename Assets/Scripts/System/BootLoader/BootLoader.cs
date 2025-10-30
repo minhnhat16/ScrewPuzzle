@@ -3,7 +3,6 @@ using System.Collections;
 using System.DataBase;
 using Managers;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class BootLoader : MonoBehaviour
 {
@@ -70,7 +69,7 @@ public class BootLoader : MonoBehaviour
                     else
                     {
                         //Debug.Log("still in last day can't claim spin reward");
-                        //DialogManager.Instance.ShowDialog(DialogIndex.LabelChooseDialog);
+                        DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
                     }
                 });
             });

@@ -17,7 +17,7 @@ public class TwoHingeScrew : Screw
     // Start is called before the first frame update
     public override void FreeHinge()
     {
-        Debug.Log("FreeHinge in two hinge screw");
+        //Debug.Log("FreeHinge in two hinge screw");
         CircleCollider2D.isTrigger = true;
         hingeController.FreeHinges();
     }

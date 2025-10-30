@@ -26,14 +26,14 @@ namespace Ingame
         {
             mainCamera = Camera.main; // Get the main camera to convert screen coordinates to world coordinates
         }
-
+#if UNITY_EDITOR
         // Update is called once per frame
         void Update()
         {
             HandleMouseMovement();
         }
-
         // Detect click to start dragging
+
         private void OnMouseDown()
         {
             if (canMove && LevelMaker.instance.isEditPartPosition)
@@ -53,7 +53,6 @@ namespace Ingame
                 Debug.Log("Object clicked but cannot move due to the flag being disabled");
             }
         }
-
         // Detect mouse release to stop dragging
         private void OnMouseUp()
         {
@@ -83,5 +82,8 @@ namespace Ingame
             Debug.Log("Save invoked for object: " + gameObject.name);
             // Implement save logic here if necessary
         }
+#endif
+
     }
+
 }

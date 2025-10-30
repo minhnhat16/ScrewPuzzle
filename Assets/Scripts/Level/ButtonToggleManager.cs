@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 namespace Level
 {
+#if UNITY_EDITOR
     public class ButtonToggleManager : MonoBehaviour
     {
         public List<Button> buttons;
@@ -55,4 +56,5 @@ namespace Level
             _buttonStates[btn] = !isClicked;*/
         }
     }
+#endif
 }

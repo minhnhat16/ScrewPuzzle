@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using UnityEngine;
@@ -343,7 +344,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         Selection.activeObject = newConfig;
 
         return newConfig;
-        Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
+        //Debug.Log("Created new BoxConfig for level " + idLevel + " at path: " + path);
     }
 
     public void LoadLevel(int levelID)
@@ -401,7 +402,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
-
+                    partGameObject.name = partData.partName;
                     partComponent.Renderer.sprite = sprite;
                     if (TryHexToColor(partData.colorString, out Color color))
                     {
@@ -413,6 +414,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                         Debug.LogError("Invalid Hex Color String");
                     }
                     layerManager.AddPart(partComponent);
+                    partComponent.ResetAndReapplyPolygonCollider();
                     var partLayer = LayerMask.LayerToName(layerGameObject.layer);
                     partComponent.SetSortingLayer(partLayer);
                 }
@@ -588,3 +590,4 @@ public class GameObjectToLevelConverter : MonoBehaviour
         return false;
     }
 }
+#endif

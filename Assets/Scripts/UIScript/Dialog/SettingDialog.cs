@@ -76,6 +76,7 @@ public class SettingDialog : BaseDialog
         SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
+
         });
 
     }
@@ -86,9 +87,12 @@ public class SettingDialog : BaseDialog
        // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
+            Debug.Log($"HideDialog {dialogIndex} ");
+
             LevelManager.Instance.Reset();
             LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
             {
+                Debug.Log("Switch view mainscreenview ");
                 MainScreenViewParam param = new();
                 param.totalGold = GameManager.instance.GetPlayerGold();
                 ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);

@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using Enums;
 using Ingame.Screw;
@@ -194,3 +196,4 @@ public class ScrewLevelMaker : Screw
         ChangeScrewColorByEnum(Color);
     }
 }
+#endif

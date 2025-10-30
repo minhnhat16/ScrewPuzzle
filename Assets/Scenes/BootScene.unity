@@ -8506,6 +8506,10 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 5628473247090571762, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 5976155496508265377, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
@@ -8535,6 +8539,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6117300413568002575, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: m_Size.x
+      value: 5.915217
+      objectReference: {fileID: 0}
+    - target: {fileID: 6117300413568002575, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -8547,8 +8555,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6117300414487791906, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6117300414487791906, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.5
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6117300414487791907, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: totalWidth
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6117300414487791907, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: spriteRenderer
@@ -8732,7 +8748,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7030888435365032290, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: topAlignSpacing
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7030888435365032290, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: configRecords.Array.size
@@ -8790,6 +8806,10 @@ PrefabInstance:
       propertyPath: total
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 8198550045546660738, guid: bf583373d4dadd746a623228634a43ec, type: 3}
+      propertyPath: prefab
+      value: 
+      objectReference: {fileID: 4357439213936722971, guid: 4129fbb70f242534a8457e2a628a7bb2, type: 3}
     - target: {fileID: 8199739139953667802, guid: bf583373d4dadd746a623228634a43ec, type: 3}
       propertyPath: m_Name
       value: GameManager

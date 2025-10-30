@@ -18,11 +18,8 @@ public class PackMiniItem : MonoBehaviour
 
     public Text TextQuantity => textQuantity;
 
-    public PackMiniItem()
-    {
-    }
 
-    public PackMiniItem(int quantity, string spriteName)
+    public void Init(int quantity, string spriteName)
     {
         this.quantity = quantity;
         this.spriteName = spriteName;

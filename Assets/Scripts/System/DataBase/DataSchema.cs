@@ -32,6 +32,7 @@ public class LevelInfo
 {
     public int currentLevel;
     public float expLevel;
+    public int bonusCount;
     public List<LevelData> levelData;
 }
 [Serializable]
