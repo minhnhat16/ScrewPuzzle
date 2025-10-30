@@ -15,13 +15,13 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
     [SerializeField] private bool isInitDone;
+    public int currentLevelID;
 
     public Dictionary<string, Level.Level> Levels = new Dictionary<string, Level.Level>();
-    public List<BoxConfig> boxconfigsLevel = new List<BoxConfig>();
+    private List<BoxConfig> boxconfigsLevel = new List<BoxConfig>();
     public List<Level.Level> levelConfig = new List<Level.Level>();
     public Level.Level currentLevel;
 
-    public int currentLevelID;
     [SerializeField] private GameObject screwManagerPrefb;
     [SerializeField] private ScrewManager screwManager;
 
@@ -52,8 +52,10 @@ public class LevelManager : MonoBehaviour
 
     public void Init()
     {
-        StartCoroutine(LoadLevelOnFile());
-        StartCoroutine(LoadConfigFromFile(() => isInitDone = true));
+        isInitDone = false;
+        StartCoroutine(LoadConfigFromFile());
+        StartCoroutine(LoadLevelOnFile(() => isInitDone = true));
+
     }
 
     public IEnumerator LoadConfigFromFile(Action callback = null)
@@ -74,7 +76,7 @@ public class LevelManager : MonoBehaviour
                 boxconfigsLevel.Add(boxConfig);
             }
         }
-  
+        Debug.Log($"Loaded {boxconfigsLevel.Count} BoxConfig assets from {resourcePath}");
         // Call the callback if it's not null
         callback?.Invoke();
     }
@@ -104,6 +106,8 @@ public class LevelManager : MonoBehaviour
             Debug.LogError($"No GameObject assets found at path: {resourcePath}");
         }
 
+
+        Debug.Log("Load all config togame " + levels.Length);
         // Call the callback if it's not null
         callback?.Invoke();
     }
@@ -116,23 +120,25 @@ public class LevelManager : MonoBehaviour
         arrayScrew.ShowArrayScrew();
         Reset();
         arrayScrew.HoldAlignment();
-        LoadSceneManager.instance.LoadSceneByName("InGame", () =>
+
+
+        List<Func<IEnumerator>> preTasks = new List<Func<IEnumerator>>()
         {
-            Debug.LogWarning("Load scence done  ");
-
-            IngameController.Instance.Init(() =>
-                {
-                    StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
-                    {
-                        int userGold = GameManager.instance.GetPlayerGold();
-                        GamePlayViewParam param = new();
-                        param.totalGold = userGold;
-                        ViewManager.Instance.SwitchView(ViewIndex.GamePlayView, param);
-                    }));
-                });
-        });
+            () => IngameController.Instance.LoadIngameAssetCoroutine(),
+            () => TaskLoadObjectFromLevel(levelID),
+        };
+        LoadSceneManager.instance.LoadSceneByName("InGame", null, preTasks);
     }
-
+    public IEnumerator TaskLoadObjectFromLevel(int levelID)
+    {
+        yield return StartCoroutine(LoadGameObjectFromLevel(levelID, () =>
+          {
+              int userGold = GameManager.instance.GetPlayerGold();
+              GamePlayViewParam param = new();
+              param.totalGold = userGold;
+              ViewManager.Instance.SwitchView(ViewIndex.GamePlayView, param);
+          }));
+    }
     public Dictionary<int, int> GetScrewCountByColor()
     {
         Dictionary<int, int> screwColorDict = new Dictionary<int, int>();
@@ -211,6 +217,8 @@ public class LevelManager : MonoBehaviour
         yield return ActivateAllParts();
         //Debug.Log("Step 6 complete");
 
+
+        Debug.Log("Level loading complete.");   
         callback?.Invoke();
         //Debug.Log($"Level data with ID {levelId} loaded.");
     }
@@ -222,7 +230,6 @@ public class LevelManager : MonoBehaviour
         levelObject.transform.SetParent(transform);
         levelObject.transform.localPosition = Vector3.zero;
 
-        // Xóa các ??i t??ng c? trong levelObject
         var layerManager = levelObject.GetComponent<LayerManager>();
         foreach (Transform child in levelObject.transform)
         {
@@ -230,7 +237,6 @@ public class LevelManager : MonoBehaviour
             layerManager.ClearPartDict();
         }
 
-        // ??i cu?i frame ?? ??m b?o t?t c? ??i t??ng b? xóa
         yield return new WaitForEndOfFrame();
     }
     private Level.Level GetLevelData(int levelId)
@@ -359,7 +365,7 @@ public class LevelManager : MonoBehaviour
             }
 
             // Create the hinge connection
-            var hinge = screw.CreateHinge(connectedRigidBody,hingeConnection);
+            var hinge = screw.CreateHinge(connectedRigidBody, hingeConnection);
 
             // Add the hinge to the ScrewManager
             ScrewManager.AddHingeConnection(hinge, connectedPart);
@@ -413,7 +419,7 @@ public class LevelManager : MonoBehaviour
 
         if (hex.Length == 8)
         { // Check if it's in RRGGBBAA format
-            // Parse R, G, B, and A components
+          // Parse R, G, B, and A components
             if (ColorUtility.TryParseHtmlString("#" + hex, out color))
             {
                 return true;

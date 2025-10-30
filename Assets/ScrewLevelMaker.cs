@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
+using System.Collections;
 using Enums;
 using Ingame.Screw;
 using Level;
@@ -9,16 +10,17 @@ using UnityEngine;
 
 public class ScrewLevelMaker : Screw
 {
-    [SerializeField] private LevelMaker levelMaker; // Tham chiếu đến LevelMaker
     [SerializeField] private bool isHeld = false;
     [SerializeField] private bool isSelecting = false;
 
+
+    public LayerMask mask;
     private Camera _mainCamera;
 
     public override void Start()
     {
     }
-
+    
     public override void Awake()
     {
         base.Awake();
@@ -58,6 +60,15 @@ public class ScrewLevelMaker : Screw
         {
             OnMouseRelease();
         }
+    }
+
+    public IEnumerator InitOnLevelMaker()
+    {
+        string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
+        yield return new WaitUntil(() => bodyLayer != null);
+        SetSortingOrderAndLayer(sortingOrder, bodyLayer);
+        // yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
+        // SetScrewColor();
     }
 
     internal void ResetHinge()

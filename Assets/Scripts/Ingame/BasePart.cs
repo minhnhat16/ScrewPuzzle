@@ -186,10 +186,11 @@ namespace Ingame
             
         public  virtual void GenerateColliderFromSprite()
         {
-            if (render == null || col== null)
+            var sprite = render.sprite;
+
+            if (render == null || col== null || sprite == null)
                 return;
 
-            var sprite = render.sprite;
             // Xoá các path cũ
             col.pathCount = sprite.GetPhysicsShapeCount();
 

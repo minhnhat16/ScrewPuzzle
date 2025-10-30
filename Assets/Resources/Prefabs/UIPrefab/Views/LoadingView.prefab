@@ -127,8 +127,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44af74b7be5344046b6e2f93c78f2790, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeInTime: 1.5
-  fadeOutTIme: 0.5
   animator: {fileID: 7141116261213086309}
 --- !u!95 &7141116261213086309
 Animator:
@@ -204,6 +202,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewIndex: 1
   baseViewAnim: {fileID: 9027427711327286717}
+  loadingProgress: {fileID: 5882034344897412325}
+  loaddingText: {fileID: 45113048011630754}
 --- !u!1 &890847859272097428
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using PoolManager;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
-
+         public Dictionary<int,Screw.Screw> screwDict = new Dictionary<int, Screw.Screw>();
         public List<BasePart> Parts
         {
             get => parts;
@@ -26,6 +27,15 @@ namespace Ingame.Board
         [SerializeField] private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
         public LayerVisibilityController visibilityController;
         [SerializeField] private const int MaxVisibleLayers = 3;
+
+
+
+        public void OnEnable()
+        {
+          
+        }
+
+    
 
         private void Awake()
         {
@@ -86,16 +96,12 @@ namespace Ingame.Board
         {
             if (part == null) return;
 
-            // Check if the dictionary already contains the part with the same uniqueID
             if (partDict.ContainsKey(part.uniqueID))
             {
-                //Debug.Log("Part with ID " + part.uniqueID + " already exists. Skipping add.");
                 return; // Exit the method if part already exists
             }
 
-            // Add the part to the dictionary if it doesn't exist
             partDict.TryAdd(part.uniqueID, part);
-            //Debug.Log("Part with ID " + part.uniqueID + " added.");
         }
 
 
@@ -115,6 +121,16 @@ namespace Ingame.Board
         {
             if (!partDict.ContainsKey(uniqueId)) return;
             partDict.Remove(uniqueId);
+        }
+
+        public void ActiveLayer(int idLayer)
+        {
+            Debug.Log("Active layer " + idLayer);   
+            if (idLayer >= layers.Count) return;
+            for(int i = 0; i < layers.Count; i++)
+            {
+                layers[i].gameObject.SetActive(idLayer == i);
+            }
         }
 
         public void ClearPartDict()

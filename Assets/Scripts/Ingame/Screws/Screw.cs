@@ -14,7 +14,7 @@ namespace Ingame.Screw
         [SerializeField] private bool isPartiallyVisible;
         [SerializeField] private bool isClicked;
         [SerializeField] protected int layerMask;
-        [SerializeField] private int sortingOrder;
+        [SerializeField] internal int sortingOrder;
         [SerializeField] private bool isMultipleJoint;
         [SerializeField] protected CircleCollider2D _circleCollider2D;
         [SerializeField] private Rigidbody2D rb;
@@ -31,6 +31,7 @@ namespace Ingame.Screw
         [SerializeField] private bool isShaking;
 
         [SerializeField] private bool isMoving;
+        private string basePartLayerID;
 
         protected Transform _transform { get; set; }
         public Vector3 Position
@@ -74,14 +75,7 @@ namespace Ingame.Screw
             /*yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
             SetScrewColor();*/
         }
-        public IEnumerator InitOnLevelMaker()
-        {
-            string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
-            yield return new WaitUntil(() => bodyLayer != null);
-            SetSortingOrderAndLayer(sortingOrder, bodyLayer);
-            // yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
-            // SetScrewColor();
-        }
+
         public Screw()
         {
             IsActionComplete = false;
@@ -91,6 +85,8 @@ namespace Ingame.Screw
             get => layerMask;
             set => layerMask = value;
         }
+        public string BasePartLayerID { get => basePartLayerID; set => basePartLayerID = value; }
+
         public virtual void Awake()
         {
             // _color = (ColorEnum)System.Enum.Parse(typeof(ColorEnum),"Color");
@@ -106,10 +102,10 @@ namespace Ingame.Screw
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             cross.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
-        private void SetSortingOrderAndLayer(int order, string layer)
+        internal void SetSortingOrderAndLayer(int order, string layer)
         {
-            // Debug.LogError("Setting sorting order and layer");
-            //if (string.Compare(layer, "Default") == 0) return;
+
+            basePartLayerID = layer;
             render.sortingLayerName = layer;
             cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
@@ -169,12 +165,9 @@ namespace Ingame.Screw
         }
         public IEnumerator ResetClickFlagAfterDelay(float delay)
         {
-            //Debug.Log("Screw: Reset Click Flag After Delay after" + delay);
             yield return new WaitForSeconds(delay);  // Wait for the specified delay
             isClicked = false;
             CircleCollider2D.enabled = !isClicked;
-            // Reset the flag
-            //Debug.Log("Screw: Reset Click Flag After Delay Done" + isClicked);
         }
 
 

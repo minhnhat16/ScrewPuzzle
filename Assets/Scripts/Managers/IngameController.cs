@@ -205,8 +205,10 @@ namespace Managers
                 ActivateBG(playerInitDone);
 
             }));
-            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
+            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true))
+            //
             yield return new WaitUntil(() => playerInitDone);
+            Debug.Log("Player init done");  
             callback?.Invoke();
         }
 

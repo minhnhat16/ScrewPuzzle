@@ -27,7 +27,7 @@ public class LevelMaker : MonoBehaviour
     [SerializeField] InputField layerInputField;
     [SerializeField] InputField levelSaveInput;
     [SerializeField] Dropdown saveOptionDropDown;
-    
+    public DropDownLayer layerDropdown;
     
     [System.Serializable]   
     public class KeyEvent : UnityEvent { }
@@ -84,6 +84,7 @@ public class LevelMaker : MonoBehaviour
         InputManager.onKeyA += onKeyAPressed.Invoke;
         saveOptionDropDown.onValueChanged.AddListener(delegate { DropdownValueChanged(saveOptionDropDown); });
         // ... Đăng ký các phím còn lại
+
     }
 
    
@@ -96,6 +97,7 @@ public class LevelMaker : MonoBehaviour
         InputManager.onKey2 -= onKey2Pressed.Invoke;
         InputManager.onKeyA -= onKeyAPressed.Invoke;
         // ... Hủy đăng ký các phím còn lại
+
     }
 
     // Phương thức xử lý nhấn chuột vào screw
@@ -227,6 +229,8 @@ public class LevelMaker : MonoBehaviour
     {
         
     }
+
+  
     public void SetEditMode(EditMode mode)
     {
         isEditScrewPosition = (mode == EditMode.ScrewPosition);
@@ -273,6 +277,12 @@ public class LevelMaker : MonoBehaviour
     {
         TurnAllEditModeOff();
         SetEditMode(EditMode.PartColor);
+    }
+
+
+    private void OnValidate()
+    {
+        GameViewUtils.SetWidescreenTest();
     }
 }
 
