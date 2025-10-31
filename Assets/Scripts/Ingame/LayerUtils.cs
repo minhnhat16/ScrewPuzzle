@@ -1,5 +1,7 @@
+using DG.Tweening;
 using Ingame.Board;
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,17 +25,21 @@ namespace Ingame
                 SetLayerRecursively(child.gameObject, parentLayer);
             }
         }
-        public static void ActiveObjectInLayer(int level, LayerManager lm)
+        public static void ActiveObjectInLayer(bool isOn, int level, LayerManager lm)
         {
-            List<BasePart> parts = lm.Layers[level].parts;
+            Debug.Log("Screws in layer " + level);
+            if (level < 0 || level >= lm.Layers.Count) return;
+                List <BasePart> parts = lm.Layers[level].parts;
             List<string> idParts = parts.Where(p => p != null)
                                         .Select(p => p.uniqueID)
                                         .ToList();
             var idLayerTostring = LayerMask.LayerToName(level + 10);
-            List<Screw.Screw> screwsActives= lm.screwDict.Values.ToList().Where(s => s != null && s.BasePartLayerID == idLayerTostring).ToList();
-            foreach(var s in screwsActives)
+            List<Screw.Screw> screwsActives= lm.screwDict.GetValueOrDefault(level);
+            Debug.Log("Screws in layer " + level + ": " + (screwsActives != null ? screwsActives.Count.ToString() : "null"));
+            if (screwsActives == null) return;   
+            foreach (var s in screwsActives)
             {
-                s.gameObject.SetActive(false);
+                s.gameObject.SetActive(isOn);
             }
         }
 
@@ -52,6 +58,15 @@ namespace Ingame
                 SetLayerRecursively(child.gameObject, newLayer);
             }
         }
-
+        public static void FadeSprite(SpriteRenderer old,Sprite newSprite, float time = 0.5f)
+        {
+            // Fade out
+            old.DOFade(0f, time)
+                .OnComplete(() =>
+                {
+                    old.sprite = newSprite; // đổi sprite sau khi ẩn
+                    old.DOFade(1f, time); // fade in lại
+                });
+        }
     }
 }

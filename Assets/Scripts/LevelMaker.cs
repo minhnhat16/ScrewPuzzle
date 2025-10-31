@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using Ingame;
+using Ingame.Board;
 using Ingame.Screw;
 using Level;
 using UnityEngine;
@@ -21,6 +22,7 @@ public class LevelMaker : MonoBehaviour
     public bool isEditScrewPosition;
     public bool isSelectColorForScrew;
     public bool isEditHinge;
+    public bool isRemoveScrew;
     public bool isEditScrewColor;
     public int currentScrewColorID = 2;
     [SerializeField] InputField levelInputField;
@@ -70,7 +72,6 @@ public class LevelMaker : MonoBehaviour
         if (onKey0Pressed == null) onKey0Pressed = new KeyEvent();
         if (onKey1Pressed == null) onKey1Pressed = new KeyEvent();
         if (onKey2Pressed == null) onKey2Pressed = new KeyEvent();
-
         if (onKeyAPressed == null) onKeyAPressed = new KeyEvent();
         // ... Tương tự cho tất cả các phím khác
     }
@@ -182,6 +183,7 @@ public class LevelMaker : MonoBehaviour
 
     public void SaveLevel()
     {
+
         GetCurrentDropdownOption();
     }
     void DropdownValueChanged(Dropdown change)
@@ -238,6 +240,7 @@ public class LevelMaker : MonoBehaviour
         isEditHinge = (mode == EditMode.Hinge);
         isEditPartPosition = (mode == EditMode.PartPosition);
         isEditPartColor = (mode == EditMode.PartColor);
+        isRemoveScrew = (mode == EditMode.RemoveHinge);
     }
     public void TurnAllEditModeOff()
     {
@@ -280,6 +283,13 @@ public class LevelMaker : MonoBehaviour
     }
 
 
+    public void ClickOnRemoveHinge()
+    {
+        TurnAllEditModeOff();
+        SetEditMode(EditMode.RemoveHinge);
+    }
+
+
     private void OnValidate()
     {
         GameViewUtils.SetWidescreenTest();
@@ -292,6 +302,7 @@ public enum EditMode
     ScrewColor,
     Hinge,
     PartPosition,
-    PartColor
+    PartColor,
+    RemoveHinge
 }
 #endif

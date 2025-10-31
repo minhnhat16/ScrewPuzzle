@@ -85,7 +85,7 @@ namespace Ingame
         {
             Debug.LogWarning("Random Get One Screw");
 
-            var tempScrews = _screws.OrderBy(screw => screw.LayerMask).ToList();
+            var tempScrews = _screws.OrderBy(screw => screw.layerMask).ToList();
             int totalScrew = tempScrews.Count - 1;
             int ramdomIndex = Random.Range(0, totalScrew);
 

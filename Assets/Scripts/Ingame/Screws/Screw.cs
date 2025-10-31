@@ -13,7 +13,7 @@ namespace Ingame.Screw
         [SerializeField] private ColorEnum color;
         [SerializeField] private bool isPartiallyVisible;
         [SerializeField] private bool isClicked;
-        [SerializeField] protected int layerMask;
+         public int layerMask;
         [SerializeField] internal int sortingOrder;
         [SerializeField] private bool isMultipleJoint;
         [SerializeField] protected CircleCollider2D _circleCollider2D;
@@ -80,11 +80,7 @@ namespace Ingame.Screw
         {
             IsActionComplete = false;
         }
-        public int LayerMask
-        {
-            get => layerMask;
-            set => layerMask = value;
-        }
+      
         public string BasePartLayerID { get => basePartLayerID; set => basePartLayerID = value; }
 
         public virtual void Awake()

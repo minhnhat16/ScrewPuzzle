@@ -1,18 +1,19 @@
 #if UNITY_EDITOR
-using System;
-using System.Collections;
-using UnityEngine;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using ConfigFile;
 using Enums;
 using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
 using Level;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 using BoxConfig = ConfigFile.BoxConfig;
 using ColorUtility = UnityEngine.ColorUtility;
 
@@ -116,11 +117,13 @@ public class GameObjectToLevelConverter : MonoBehaviour
     }
     public Level.Level CreateLevelData(Level.Level newLevelData)
     {
+
         newLevelData.levelId = nextLevelId++;
 
         newLevelData.layers = new List<LayerData>();
-
-        var layers = levelObject.GetComponentsInChildren<BaseLayer>();
+        var layerManager= levelObject.GetComponent<LayerManager>();
+        layerManager.ActiveAllLayers();
+        var layers = levelObject.GetComponentsInChildren<BaseLayer>(true);
 
         int idLayer = 0;
         // Loop through all layers
@@ -132,7 +135,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
                 parts = new List<BodyPartScriptable>()
             };
 
-            var parts = layerTransform.GetComponentsInChildren<BasePart>();
+            var parts = layerTransform.GetComponentsInChildren<BasePart>(true);
             int partIndex = 0;
             string baseLayerName = LayerMask.LayerToName(layerTransform.gameObject.layer);
             // Loop through all parts in the current layer
@@ -355,10 +358,10 @@ public class GameObjectToLevelConverter : MonoBehaviour
     // ReSharper disable Unity.PerformanceAnalysis
     public IEnumerator LoadGameObjectFromLevel(int levelId)
     {
-        currentLoadedLevel = levelId;
-        // Clear existing GameObjects in levelObject to prepare for new loading
         var layerManager = levelObject.GetComponent<LayerManager>();
+        currentLoadedLevel = levelId;
         var baseLevel = levelObject.GetComponent<BaseLevelObject>();
+        // Clear existing GameObjects in levelObject to prepare for new loading
 
         foreach (Transform child in levelObject.transform)
         {
@@ -376,7 +379,6 @@ public class GameObjectToLevelConverter : MonoBehaviour
             yield break;
         }
 
-        int layerID = 1;
         BoxQueue.Instance.boxConfig = levelData.boxConfig;
         List<BaseLayer> listBaseLayer = new();
         // Loop through all layers in the level data
@@ -384,7 +386,7 @@ public class GameObjectToLevelConverter : MonoBehaviour
         {
             // Create a new GameObject for the layer
             GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero , Quaternion.identity);
-            var layerName = $"Layer {layerID++}";
+            var layerName = $"Layer {layerData.layerId+1}";
             layerGameObject.name = layerName;
             layerGameObject.transform.SetParent(levelObject.transform);
             layerGameObject.layer = LayerMask.NameToLayer(layerName);
@@ -419,6 +421,8 @@ public class GameObjectToLevelConverter : MonoBehaviour
                     partComponent.ResetAndReapplyPolygonCollider();
                     var partLayer = LayerMask.LayerToName(layerGameObject.layer);
                     partComponent.SetSortingLayer(partLayer);
+
+                    partComponent.gameObject.layer = layerGameObject.layer;
                 }
 
                 // Add a delay to visually see the progress or avoid blocking
@@ -437,6 +441,9 @@ public class GameObjectToLevelConverter : MonoBehaviour
         screwManager.transform.position = Vector3.zero;
         var screwTransform = screwManager.transform;
 
+        layerManager.screwDict = new Dictionary<int, List<Screw>>();
+
+
         // Load screws
         foreach (var screwData in levelData.screws)
         {
@@ -448,22 +455,35 @@ public class GameObjectToLevelConverter : MonoBehaviour
             var color = screwComponent.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
             screwComponent.ChangeScrewColorByEnum(color);
             // Handle hinge connections
-            Debug.Log($"Connected part id {screwData.idScrew}");
 
             foreach (var hingeConnection in screwData.hingeConnections)
             {
                // Debug.Log($"Level data with ID {levelId} loaded.");
                 var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
                 screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(),hingeConnection);
+
+                Debug.Log(
+                    $"Hinge connected to part {connectedPart.PartLayer()} at position {connectedPart.uniqueID   }");
+            }
+            var connection = screwData.hingeConnections.First();
+            var part = layerManager.GetPartByKey(connection.bodyPartUniqueID);
+            var partLayerID = part.PartLayer() - 10;
+
+            Debug.Log($"Part Layer ID: {partLayerID} + {part.PartLayer()}");
+            if (!layerManager.screwDict.ContainsKey(partLayerID))
+            {
+                layerManager.screwDict[partLayerID] = new List<Screw>();
             }
 
-
-            // Add a delay after each screw is loaded
-            yield return null; // Wait for one frame before loading the next screw.
+            if (!layerManager.screwDict[partLayerID].Contains(screwComponent))
+            {
+                layerManager.screwDict[partLayerID].Add(screwComponent);
+            }
+            yield return null; 
             StartCoroutine(screwComponent.InitOnLevelMaker());
 
         }
-
+        
         this.levelData = levelData;
         Debug.Log($"Level data with ID {levelId} loaded.");
     }

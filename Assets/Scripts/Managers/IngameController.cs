@@ -195,10 +195,7 @@ namespace Managers
 
         public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
-            //bool arrayScrewInitDone = false;
-            //bool boxQueueInitDone = false;
             bool playerInitDone = false;
-            /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
             StartCoroutine(LoadPlayer(() =>
             {
                 playerInitDone = true;

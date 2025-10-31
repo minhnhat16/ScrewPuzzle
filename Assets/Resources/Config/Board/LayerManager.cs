@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Ingame.Board
 {
@@ -11,7 +12,7 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
-         public Dictionary<int,Screw.Screw> screwDict = new Dictionary<int, Screw.Screw>();
+        public Dictionary<int, List<Screw.Screw>> screwDict = new();
         public List<BasePart> Parts
         {
             get => parts;
@@ -39,7 +40,6 @@ namespace Ingame.Board
 
         private void Awake()
         {
-
             visibilityController = GetComponent<LayerVisibilityController>();
         }
 
@@ -91,7 +91,7 @@ namespace Ingame.Board
             }
         }
 
-        
+     
         public void AddPart(BasePart part)
         {
             if (part == null) return;
@@ -123,16 +123,45 @@ namespace Ingame.Board
             partDict.Remove(uniqueId);
         }
 
+        /// <summary>
+        /// Activate a layer by its index
+        /// </summary>
+        /// <param name="idLayer"></param>
         public void ActiveLayer(int idLayer)
         {
-            Debug.Log("Active layer " + idLayer);   
             if (idLayer >= layers.Count) return;
+            layers[idLayer].gameObject.SetActive(true);
+        }
+        /// <summary>
+        /// Activeate only one layer by its index, deactivate others
+        /// </summary>
+        /// <param name="idLayer"></param>
+        public void ActivateSingleLayer(int idLayer)
+        {
+            idLayer--;
+            Debug.Log("Active layer " + idLayer);   
+            if (idLayer >= layers.Count || idLayer <0)
+            {
+                ActiveAllLayers();
+                return;
+            }
+            ;
             for(int i = 0; i < layers.Count; i++)
             {
                 layers[i].gameObject.SetActive(idLayer == i);
+                LayerUtils.ActiveObjectInLayer(idLayer == i,i, this);
+
+            }
+            int idScrewLayer = idLayer--;
+        }
+        public void ActiveAllLayers()
+        {
+            for (int i = 0; i < layers.Count; i++)
+            {
+                layers[i].gameObject.SetActive(true);
+                LayerUtils.ActiveObjectInLayer(true,i, this);
             }
         }
-
         public void ClearPartDict()
         {
             parts.Clear();

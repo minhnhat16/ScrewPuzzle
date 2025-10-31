@@ -25,7 +25,7 @@ public class DropDownLayer : MonoBehaviour
     {
         dropDown = GetComponent<Dropdown>();
         List<int> layerIndices = new List<int>();
-
+        layerIndices.Add(0);
         for (int i = 10; i < 27; i++)
         {
             string layerName = LayerMask.LayerToName(i);

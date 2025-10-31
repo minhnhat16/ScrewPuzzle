@@ -181,12 +181,12 @@ public class LevelManager : MonoBehaviour
     {
         currentLevelID = levelId;
 
-        //Debug.Log("Step 1: Initializing Level Object");
+       Debug.Log("Step 1: Initializing Level Object");
         // Step 1: Initialize Level Object
         yield return InitializeLevelObject();
         //Debug.Log("Step 1 complete");
 
-        //Debug.Log("Step 2: Retrieving Level Data");
+        Debug.Log("Step 2: Retrieving Level Data");
         // Step 2: Retrieve Level Data
         var levelData = GetLevelData(levelId);
         if (levelData == null)
@@ -197,22 +197,22 @@ public class LevelManager : MonoBehaviour
         currentLevel = levelData;
         //Debug.Log("Step 2 complete");
 
-        //Debug.Log("Step 3: Initializing Box Queue");
+        Debug.Log("Step 3: Initializing Box Queue");
         // Step 3: Load Box Configuration
         InitializeBoxQueue(levelData);
         //Debug.Log("Step 3 complete");
 
-        //Debug.Log("Step 4: Loading Layers");
+        Debug.Log("Step 4: Loading Layers");
         // Step 4: Load Layers
         yield return LoadLayers(levelData);
         //Debug.Log("Step 4 complete");
 
-        //Debug.Log("Step 5: Loading Screw Manager and Screws");
+        Debug.Log("Step 5: Loading Screw Manager and Screws");
         // Step 5: Load Screw Manager and Screws
         yield return LoadScrewManagerAndScrews(levelData);
         //Debug.Log("Step 5 complete");
 
-        //Debug.Log("Step 6: Activating All Parts");
+        Debug.Log("Step 6: Activating All Parts");
         // Step 6: Activate Parts
         yield return ActivateAllParts();
         //Debug.Log("Step 6 complete");
@@ -374,7 +374,7 @@ public class LevelManager : MonoBehaviour
         }
 
         ScrewManager.AddScrew(screw);
-        //Debug.Log("Screw added to ScrewManager");
+        //Debug.Log("Screw added to ScrewManager");s
         yield return screw.Init();
         //Debug.Log($"Screw initialization complete");
         yield return null;

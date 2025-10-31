@@ -22,8 +22,8 @@ namespace Ingame
 
         public virtual SpriteRenderer Renderer
         {
-            get => render;
-            set => render = value;
+            get => activeSprite;
+            set => activeSprite = value;
         }
 
         public virtual PolygonCollider2D Collider
@@ -34,9 +34,11 @@ namespace Ingame
 
         [SerializeField] private bool isFalling;
         [SerializeField] private Rigidbody2D body;
-        [SerializeField] private SpriteRenderer render;
-        [SerializeField] private SpriteRenderer outLine;
+        [SerializeField] private SpriteRenderer activeSprite;
+        [SerializeField] private Sprite inactiveSprite;
         [SerializeField] private PolygonCollider2D col;
+
+
         
         private Coroutine checkFallingRoutine;
         public bool IsFalling
@@ -44,13 +46,13 @@ namespace Ingame
             get => isFalling;
             private set => isFalling = value;
         }
-        public SpriteRenderer OutLine => outLine;
+        public Sprite OutLine => inactiveSprite;
 
         public Action OnStateChanged;
         public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
         {
             this.body = body;
-            this.render = renderer;
+            this.activeSprite = renderer;
             this.col = collider;
         }
         public int PartLayer()
@@ -61,8 +63,7 @@ namespace Ingame
         public void Awake()
         {
             body = GetComponent<Rigidbody2D>();
-            render = GetComponent<SpriteRenderer>();
-            outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
+            activeSprite = GetComponentInChildren<SpriteRenderer>();
             col = GetComponent<PolygonCollider2D>();
             // Assign a GUID if not already set
             if (string.IsNullOrEmpty(uniqueID))
@@ -82,8 +83,8 @@ namespace Ingame
             yield return new WaitForSeconds(0.125f);
             col = GetComponent<PolygonCollider2D>();
             col.pathCount = 0;
-            this.render = render;
-            col.SetPath(0, this.render.sprite.vertices);
+            this.activeSprite = render;
+            col.SetPath(0, this.activeSprite.sprite.vertices);
         }
 
     
@@ -150,20 +151,20 @@ namespace Ingame
         {
             //Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            if (render != null)
+            if (activeSprite != null)
             {
-                render.sortingLayerName = layerName;
+                activeSprite.sortingLayerName = layerName;
             }
 
-            if (outLine != null)
-            {
-                outLine.sortingLayerName = layerName; // Both sprites use the same sorting layer
-            }
+            //if (inactiveSprite != null)
+            //{
+            //    inactiveSprite.sortingLayerName = layerName; // Both sprites use the same sorting layer
+            //}
             
             //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            render.sortingOrder = 0;
-            outLine.sortingOrder = render.sortingOrder+1; 
+            activeSprite.sortingOrder = 0;
+            //inactiveSprite.sortingOrder = activeSprite.sortingOrder+1; 
         }
         private string GenerateUniqueID()
         {
@@ -186,9 +187,9 @@ namespace Ingame
             
         public  virtual void GenerateColliderFromSprite()
         {
-            var sprite = render.sprite;
+            var sprite = activeSprite.sprite;
 
-            if (render == null || col== null || sprite == null)
+            if (activeSprite == null || col== null || sprite == null)
                 return;
 
             // Xoá các path cũ
@@ -207,7 +208,7 @@ namespace Ingame
         public void Reset()
         {
             isFalling = false;
-            render.sprite = null;
+            activeSprite.sprite = null;
             
         }
     }

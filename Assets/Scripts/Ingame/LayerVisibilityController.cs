@@ -38,8 +38,8 @@ public class LayerVisibilityController : MonoBehaviour
                     if (part.Renderer != null)
                         part.Renderer.color = Color.white;
 
-                    if (part.OutLine != null)
-                        part.OutLine.color = Color.white;
+                    //if (part.OutLine != null)
+                    //    part.OutLine.color = Color.white;
                 }
             }
             else if (i < rePreviewMax)
@@ -53,8 +53,8 @@ public class LayerVisibilityController : MonoBehaviour
                     if (part.Renderer != null)
                         StartCoroutine(FadeToGray(part.Renderer, fadeDuration));
 
-                    if (part.OutLine != null)
-                        StartCoroutine(FadeToGray(part.OutLine, fadeDuration));
+                    //if (part.OutLine != null)
+                    //    StartCoroutine(FadeToGray(part.OutLine, fadeDuration));
                 }
             }
             else
