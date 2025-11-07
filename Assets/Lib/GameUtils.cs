@@ -6,4 +6,9 @@ public static class GameConstants
     public const string VIBRATION_SETTINGS_KEY = "VIBRATION_SETTINGS";
     public const string DAILY_REWARD_KEY = "DAILY_REWARD";
     public const string SPIN_DATA_KEY = "SPIN_DATA";
+
+
+
+    public const string SCREW_SPRITE_PATH = "GAMEPLAY/DINH";
+    public const string BOX_SPRITE_PATH = "GAMEPLAY/HOP";
 }

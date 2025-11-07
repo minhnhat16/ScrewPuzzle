@@ -2,18 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Ingame.Board
 {
-    public  class BaseLayer : MonoBehaviour
+    public class BaseLayer : MonoBehaviour
     {
         public LayerManager layerManager;
         [SerializeField] private Transform _transform;
         [SerializeField] private GameObject _gameObject;
-        public List<BasePart> parts;
-        [SerializeField] private int activePartCount = 0;
+        public List<BasePart> parts = new List<BasePart>();
+        [SerializeField] private int dropPart = 0;
         [SerializeField] private string layer;
+
+
+
         public Rigidbody2D ridBody;
+
+
+        public UnityEvent<bool, BasePart> onPartClear = new();
         public Transform Transform
         {
             get => _transform;
@@ -34,44 +41,72 @@ namespace Ingame.Board
 
         public int ActivePartCount
         {
-            get => activePartCount;
-            set => activePartCount = value;
+            get => dropPart;
+            set => dropPart = value;
         }
-       private void Awake()
-       {
-           _transform = GetComponent<Transform>();
-           _gameObject= _transform.gameObject;
-           GetAllPartsInLayer();
-       }
 
-       private void Start()
+
+
+        // Option 2: Call CheckAllPartActive via event (example event subscription)
+        // Uncomment and use if your BasePart class exposes an event when IsFalling changes.
+
+        private void OnEnable()
+        {
+            
+        }
+        private void OnDisable()
+        {
+            foreach (var part in parts)
+            {
+                part.OnStateChanged.RemoveListener(OnPartFallingChanged);
+            }
+        }
+
+        public void  RegisterPartListener()
+        {
+            foreach (var part in parts)
+            {
+                part.OnStateChanged.AddListener(OnPartFallingChanged);
+            }
+        }
+        private void OnPartFallingChanged(bool isFaling, BasePart part)
+        {
+            Debug.Log("Part falling changed: " + isFaling);
+            CheckAllPartActive(isFaling,part);
+        }
+
+
+        private void Awake()
+        {
+            _transform = GetComponent<Transform>();
+            _gameObject = _transform.gameObject;
+            GetAllPartsInLayer();
+        }
+
+        private void Start()
         {
             if (layerManager == null)
             {
                 layerManager = GetComponentInParent<LayerManager>();
             }
-            activePartCount = 0;
-            foreach (var part in parts)
-            {
-                part.OnStateChanged += CheckAllPartActive;
-                layer =  LayerMask.LayerToName(gameObject.layer);
-                part.SetSortingLayer(layer);
-            }
+            dropPart = 0;
         }
 
-        private void CheckAllPartActive()
+        private void CheckAllPartActive(bool isFall, BasePart part)
         {
-            activePartCount = 0;
-            foreach (var part in parts)
+            Debug.Log("Checck all part Active");
+
+            if (isFall)
             {
-                if (part.IsFalling)
-                {
-                    activePartCount++;
-                }
+                parts.Remove(part);
+
             }
 
-            if (activePartCount >= parts.Count)
+
+            if (parts.Count == 0)
             {
+
+                Debug.Log("Clear Layer " + gameObject.name);
                 ClearLayer();
             }
         }
@@ -80,12 +115,7 @@ namespace Ingame.Board
         {
             // Ẩn hoặc xóa layer này
             gameObject.SetActive(false);
-
-            // Thông báo cho LayerManager rằng layer này đã bị clear
-            if (layerManager != null)
-            {
-                layerManager.OnLayerCleared(this);
-            }
+            layerManager.OnLayerCleared(this);
         }
 
         private void GetAllPartsInLayer()
@@ -94,14 +124,15 @@ namespace Ingame.Board
             for (int i = 0; i < childCount; i++)
             {
                 var child = _transform.GetChild(i).GetComponent<BasePart>();
-                parts.Add(child);
+                if (child != null)
+                    parts.Add(child);
             }
         }
 
         public void Reset()
         {
             parts.Clear();
-            activePartCount = 0;
+            dropPart = 0;
             layer = "Layer 1";
         }
     }

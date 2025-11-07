@@ -48,7 +48,7 @@ namespace Ingame
         private void Start()
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-            coutHoldActive = 5;
+            coutHoldActive = 7;
             HoldAlignment();
         }
 

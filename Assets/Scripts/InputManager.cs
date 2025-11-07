@@ -12,11 +12,9 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
-        // Kiểm tra từng phím số từ 0 đến 9
         if (Input.GetKeyDown(KeyCode.Alpha0)) onKey0?.Invoke();
         if (Input.GetKeyDown(KeyCode.Alpha1)) onKey1?.Invoke();
         if (Input.GetKeyDown(KeyCode.Alpha2)) onKey2?.Invoke();
         if (Input.GetKeyDown(KeyCode.A)) onKeyA?.Invoke();
-        // ... Tương tự cho tất cả các phím ký tự
     }
 }

@@ -115,8 +115,10 @@ public class ScrewLevelMaker : Screw
             }
             if(LevelMaker.instance.isRemoveScrew)
             {
+                ResetHinge();
 
-               
+                GameObjectToLevelConverter.ins.RemoveScrew(this);
+                Destroy(gameObject);
             }
         }
         else
@@ -154,7 +156,7 @@ public class ScrewLevelMaker : Screw
         hingeController.HingeJoint2D.Add(hingeJoint);
         hingeController.BodyConnect.Add(targetBody); // Thêm Rigidbody2D vào danh sách bodyConnect
         hingeJoint.autoConfigureConnectedAnchor = true;
-        Debug.Log("Created hinge joint with: " + targetBody.name);
+        Debug.Log("Created hinge joint with: " + targetBody.name + ",layer : " + targetBody.gameObject.layer);
         isSelecting = false;
         ScrewChangeColorOnClick(true);
         TurnColliderIs(!isSelecting);

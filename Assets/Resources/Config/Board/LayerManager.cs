@@ -1,9 +1,8 @@
 using PoolManager;
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Ingame.Board
 {
@@ -27,8 +26,6 @@ namespace Ingame.Board
 
         [SerializeField] private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
         public LayerVisibilityController visibilityController;
-        [SerializeField] private const int MaxVisibleLayers = 3;
-
 
 
         public void OnEnable()
@@ -51,7 +48,7 @@ namespace Ingame.Board
             {
                 layerQueue.Enqueue(layer);
             }
-            //ApplyLayerVisibility(); // Thiết lập hiển thị layer ban đầu
+
         }
         private void GetChildrenInRange()
         {
@@ -74,12 +71,15 @@ namespace Ingame.Board
         public void OnLayerCleared(BaseLayer clearedLayer)
         {
             // Đảm bảo layer đã clear không còn trong danh sách
-            if (layers.Contains(clearedLayer))
-            {
-                layers.Remove(clearedLayer);
-            }
+            visibilityController.ShowNextLayer();
+
+            //if (layers.Contains(clearedLayer))
+            //{
+            //    Debug.Log("on layer clear" );
+            //    layers.Remove(clearedLayer);
+            //    visibilityController.layerQueue = this.layerQueue;
+            //}
             // Kiểm tra và cập nhật hiển thị các layer còn lại
-            visibilityController.ApplyLayerVisibility();
         }
 
         public IEnumerator ChangePartState()
@@ -110,6 +110,7 @@ namespace Ingame.Board
             foreach (var part in partDict)
             {
                 parts.Add(part.Value);
+
             }
         }
         public BasePart GetPartByKey(string uniqueId)
@@ -161,6 +162,14 @@ namespace Ingame.Board
                 layers[i].gameObject.SetActive(true);
                 LayerUtils.ActiveObjectInLayer(true,i, this);
             }
+        }
+        public void RemoveScrewOnDict(Screw.Screw screw,int layer)
+        {
+            layer -= 9;
+            screwDict.TryGetValue(layer, out List<Screw.Screw> listScrews);
+            Debug.Log("Remove screw on layer " + layer + " total screws " + (listScrews != null ? listScrews.Count.ToString() : "null"));
+            if(listScrews == null) return;
+            listScrews.Remove(screw);
         }
         public void ClearPartDict()
         {

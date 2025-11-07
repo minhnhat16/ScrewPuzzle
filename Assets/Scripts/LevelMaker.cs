@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections;
+using Enums;
 using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
@@ -24,7 +25,7 @@ public class LevelMaker : MonoBehaviour
     public bool isEditHinge;
     public bool isRemoveScrew;
     public bool isEditScrewColor;
-    public int currentScrewColorID = 2;
+    public ColorEnum currentScrewColorID = ColorEnum.Clear;
     [SerializeField] InputField levelInputField;
     [SerializeField] InputField layerInputField;
     [SerializeField] InputField levelSaveInput;
@@ -131,6 +132,8 @@ public class LevelMaker : MonoBehaviour
         var partScript = partChosen.GetComponent<BasePart>();
         var bodyPart = partScript.Body;
 
+        Debug.Log("Part layered selected: " + partChosen.layer);
+
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPosition.z = 0;
         HingeConnection hingeConnection = new HingeConnection()
@@ -149,13 +152,17 @@ public class LevelMaker : MonoBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-            // Check if the clicked object is a valid part
+            // Check if the clicked object is a valid part and is active
             if (hit.collider != null && hit.collider.CompareTag("Part"))
             {
-                return hit.collider.gameObject;
+                GameObject obj = hit.collider.gameObject;
+                if (obj.activeInHierarchy)
+                {
+                    return obj;
+                }
             }
         }
-        return null; 
+        return null;
     }
 
 

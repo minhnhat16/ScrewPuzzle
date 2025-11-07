@@ -20,7 +20,7 @@ namespace Ingame
 
         public float xRightCam;
         public float xLeftCam;
-        public int activeBoxCount = 2; // Số box mặc định mở
+        public int activeBoxCount = 5; // Số box mặc định mở
         [SerializeField] private float spacingBox = 10;
         [SerializeField] private float topAlignSpacing;
 
@@ -219,7 +219,7 @@ namespace Ingame
                 var slot = slots[i];
                 var pos = CalculateCenteredPosition(i, 4); // Tính vị trí ban đầu dựa trên số slot
 
-                if (i < 2)
+                if (i < activeBoxCount)
                 {
                     var box = SpawnBox();
                     slot.Initialize(pos, false, box);
