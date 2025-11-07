@@ -11,13 +11,12 @@ public class TwoHingeScrew : Screw
         // HingeJoint2D = GetComponent<HingeJoint2D>();
         CircleCollider2D = GetComponentInChildren<CircleCollider2D>();
         Renderer = GetComponentInChildren<SpriteRenderer>();
-        LayerMask = gameObject.layer;
         // _2ndhingeJoint2D = GetComponent<HingeJoint2D>();
     }
     // Start is called before the first frame update
     public override void FreeHinge()
     {
-        Debug.Log("FreeHinge in two hinge screw");
+        //Debug.Log("FreeHinge in two hinge screw");
         CircleCollider2D.isTrigger = true;
         hingeController.FreeHinges();
     }

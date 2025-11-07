@@ -32,6 +32,7 @@ public class LevelInfo
 {
     public int currentLevel;
     public float expLevel;
+    public int bonusCount;
     public List<LevelData> levelData;
 }
 [Serializable]
@@ -43,7 +44,7 @@ public class ItemInvent
 public class DailyItemData
 {
     public int day;
-    public IEDailyType currentType;
+    public DailyType currentType;
 }
 [Serializable]
 public class ItemData

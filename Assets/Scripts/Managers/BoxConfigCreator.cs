@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using ConfigFile;
 using UnityEditor;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace Managers
     {
         private static int idCounter = 1;  // Counter to keep track of the number of created assets
 
-        [MenuItem("Assets/Create/Config/BoxConfig with Auto ID")]
+     
         public static void CreateBoxConfigWithAutoID()
         {
             // Create a new instance of the BoxConfig asset
@@ -30,3 +31,4 @@ namespace Managers
         }
     }
 }
+#endif

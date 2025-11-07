@@ -18,7 +18,7 @@ namespace System
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject); // Optional: if you want this instance to persist across scenes
+                //DontDestroyOnLoad(gameObject); // Optional: if you want this instance to persist across scenes
             }
             else
             {
@@ -40,29 +40,29 @@ namespace System
             }
         }
 
-        private void OnGUI()
-        {
-            // Create a label and a text field for input
-            GUI.Label(new Rect(10, 10, 200, 20), "Enter Sprite Name:");
-            inputText = GUI.TextField(new Rect(10, 40, 200, 20), inputText);
+        //private void OnGUI()
+        //{
+        //    // Create a label and a text field for input
+        //    GUI.Label(new Rect(10, 10, 200, 20), "Enter Sprite Name:");
+        //    inputText = GUI.TextField(new Rect(10, 40, 200, 20), inputText);
 
-            // Create a button; when clicked, it retrieves the sprite by name
-            if (GUI.Button(new Rect(10, 70, 100, 30), "Get Sprite"))
-            {
-                displaySprite = GetSpriteByName(inputText);
-            }
+        //    // Create a button; when clicked, it retrieves the sprite by name
+        //    if (GUI.Button(new Rect(10, 70, 100, 30), "Get Sprite"))
+        //    {
+        //        displaySprite = GetSpriteByName(inputText);
+        //    }
 
-            // Display the sprite if found
-            if (displaySprite != null)
-            {
-                // Ensure the sprite has a texture to display
-                if (displaySprite.texture != null)
-                {
-                    // Display the sprite using its texture
-                    GUI.DrawTexture(new Rect(10, 110, 100, 100), displaySprite.texture);
-                }
-            }
-        }
+        //    // Display the sprite if found
+        //    if (displaySprite != null)
+        //    {
+        //        // Ensure the sprite has a texture to display
+        //        if (displaySprite.texture != null)
+        //        {
+        //            // Display the sprite using its texture
+        //            GUI.DrawTexture(new Rect(10, 110, 100, 100), displaySprite.texture);
+        //        }
+        //    }
+        //}
 
         public Sprite GetSpriteByName(string spriteName)
         {

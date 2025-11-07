@@ -39,7 +39,7 @@ namespace UIScript.Dialog
         {
             DialogManager.Instance.HideDialog(dialogIndex, () =>
             {
-                Debug.Log($"Hide this dialog {dialogIndex}");
+                //Debug.Log($"Hide this dialog {dialogIndex}");
                 IngameController.Instance.OnGameOver();
             });
         }

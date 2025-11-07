@@ -28,7 +28,7 @@ namespace Ingame
         {
             isContainingBox = box != null;  
             if (!isContainingBox) return;
-            Debug.LogError("Added box to slot" + box.name);
+            //Debug.LogError("Added box to slot" + box.name);
             screwBox = box;
         }
 

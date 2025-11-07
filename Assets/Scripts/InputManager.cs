@@ -16,9 +16,6 @@ public class InputManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha0)) onKey0?.Invoke();
         if (Input.GetKeyDown(KeyCode.Alpha1)) onKey1?.Invoke();
         if (Input.GetKeyDown(KeyCode.Alpha2)) onKey2?.Invoke();
-        // ... Tương tự cho tất cả các phím số
-
-        // Kiểm tra các phím ký tự từ A đến Z
         if (Input.GetKeyDown(KeyCode.A)) onKeyA?.Invoke();
         // ... Tương tự cho tất cả các phím ký tự
     }

@@ -1,12 +1,14 @@
+using Managers;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 namespace Ingame.Screw
 {
     public abstract class HingeController : MonoBehaviour
     {
-        [FormerlySerializedAs("_layer")][SerializeField] private LayerMask layer;
+        [FormerlySerializedAs("_layer")] [SerializeField] private LayerMask layer;
         [SerializeField] private List<Rigidbody2D> bodyConnect;
         [SerializeField] private List<HingeJoint2D> hingeJoint2D;
 
@@ -29,18 +31,24 @@ namespace Ingame.Screw
         }
 
 
-
-
+        
+       
         // Start is called before the first frame update
         public virtual void Start()
         {
-            InitHingeJoints();
+            var currentScene = SceneManager.GetActiveScene();
+
+            if (currentScene.name.CompareTo("LevelMaker") != 0)
+            {
+                InitHingeJoints();
+
+            }
         }
 
 
         public virtual void InitHingeJoints()
         {
-            for (int i = 0; i < hingeJoint2D.Count; i++)
+            for (int i  = 0; i < hingeJoint2D.Count; i++)
             {
                 if (bodyConnect.Count == 1)
                 {
@@ -52,9 +60,10 @@ namespace Ingame.Screw
 
         public string GetConnectedBodyRenderLayer(int index)
         {
-            if (bodyConnect[index] == null) return null;
+
+            if (bodyConnect.Count  <= 0) return null;
             var body = bodyConnect[index];
-            return body.gameObject.GetComponent<SpriteRenderer>().sortingLayerName;
+            return body.gameObject.GetComponentInChildren<SpriteRenderer>().sortingLayerName;
         }
         public virtual string GetStringBodyLayer(int index)
         {
@@ -70,15 +79,36 @@ namespace Ingame.Screw
         {
             for (int i = 0; i < hingeJoint2D.Count; i++)
             {
+                hingeJoint2D[i].connectedBody = null;   
                 var hinge = hingeJoint2D[i];
+                var crBodyConnect = hinge.connectedBody;
+                var hingeComp = hinge.GetComponent<HingeObject>();
                 hinge.connectedBody = null;
-                Destroy(hinge.gameObject);
+                ClearBody(crBodyConnect);
+                HingePool.Instance.pool.ReturnToPool(hingeComp);
             }
+            hingeJoint2D.Clear();
+            bodyConnect.Clear();
         }
-
+        public virtual void ClearBody(Rigidbody2D body)
+        {
+            bodyConnect.Remove(body);
+            
+        }
+        public virtual void ClearBody()
+        {
+            if (TryGetComponent<HingeJoint2D>(out _))
+            {
+                foreach (var hingeJoint in GetComponents<HingeJoint2D>())
+                {
+                    Destroy(hingeJoint);
+                }
+            }
+            bodyConnect.Clear();
+        }
         internal void Reset()
         {
-            FreeHinges();
+            ClearBody();
         }
     }
 }

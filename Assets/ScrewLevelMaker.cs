@@ -1,22 +1,24 @@
-using System;
+#if UNITY_EDITOR
+
+using System.Collections;
 using Enums;
+using Ingame.Board;
 using Ingame.Screw;
 using Level;
-using UnityEditor;
 using UnityEngine;
-
 public class ScrewLevelMaker : Screw
 {
-    [SerializeField] private LevelMaker levelMaker; // Tham chiếu đến LevelMaker
     [SerializeField] private bool isHeld = false;
     [SerializeField] private bool isSelecting = false;
 
+
+    public LayerMask mask;
     private Camera _mainCamera;
 
     public override void Start()
     {
     }
-
+    
     public override void Awake()
     {
         base.Awake();
@@ -30,17 +32,20 @@ public class ScrewLevelMaker : Screw
 
     private void ClickScrewEdit()
     {
-        // Detect Mouse Click when the mouse is over the screw
         if (Input.GetMouseButtonDown(0) &&
-            (LevelMaker.instance.isEditScrewPosition 
-             ||LevelMaker.instance.isEditScrewColor 
-             || LevelMaker.instance.isEditHinge))
+            (LevelMaker.instance.isEditScrewPosition
+             || LevelMaker.instance.isEditScrewColor
+             || LevelMaker.instance.isEditHinge
+             || LevelMaker.instance.isRemoveScrew))
         {
-            
-            RaycastHit2D hit = Physics2D.Raycast(_mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            Debug.Log("Mouse Button Down Detected");
+            int screwLayerMask = LayerMask.GetMask("Screw");
+            RaycastHit2D hit = Physics2D.Raycast(_mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, float.PositiveInfinity,screwLayerMask);
 
+            Debug.Log("Raycast hit: " + (hit.collider != null ? hit.collider.gameObject.name : "Nothing"));
             if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
+                Debug.Log("Screw object clicked: " + gameObject.name);
                 OnMouseClick(); // Trigger click only when mouse is over the screw object
             }
         }
@@ -58,6 +63,15 @@ public class ScrewLevelMaker : Screw
         }
     }
 
+    public IEnumerator InitOnLevelMaker()
+    {
+        string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
+        yield return new WaitUntil(() => bodyLayer != null);
+        SetSortingOrderAndLayer(sortingOrder, bodyLayer);
+        // yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
+        // SetScrewColor();
+    }
+
     internal void ResetHinge()
     {
         var allHinge = hingeController.HingeJoint2D;
@@ -71,6 +85,8 @@ public class ScrewLevelMaker : Screw
 
     private void OnMouseClick()
     {
+
+        Debug.Log("Screw clicked in Level Maker mode: " + isSelecting);
         if (!isSelecting)
         {
             if (LevelMaker.instance.isEditScrewPosition)
@@ -96,6 +112,11 @@ public class ScrewLevelMaker : Screw
             {
                 Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
                 ChangeScrewColorByEnum(Color);
+            }
+            if(LevelMaker.instance.isRemoveScrew)
+            {
+
+               
             }
         }
         else
@@ -170,6 +191,8 @@ public class ScrewLevelMaker : Screw
 
     private void OnMouseHold()
     {
+
+        Debug.Log("on mouse hold detected");
         if (!LevelMaker.instance.isEditScrewPosition) return;
         // Get the mouse position in world space
         Vector3 mousePosition = Input.mousePosition;
@@ -194,3 +217,4 @@ public class ScrewLevelMaker : Screw
         ChangeScrewColorByEnum(Color);
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -32,3 +33,4 @@ public class InputLevelMaker : MonoBehaviour, ISelectHandler, IDeselectHandler
         Debug.Log("Input entered: " + input);
     }
 }
+#endif

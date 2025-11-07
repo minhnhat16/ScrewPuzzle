@@ -1,6 +1,7 @@
 using Ingame;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.DataBase;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -16,6 +17,10 @@ namespace Managers
         [SerializeField] public bool isOnMagnet;
         [SerializeField] public bool isOnBomb;
         [SerializeField] private bool isGameOver;
+        [SerializeField] private bool itemJustInvoke;
+        [SerializeField] private bool itemPerforming;
+        [SerializeField] private int currentStar;
+        [SerializeField] private int totalStarInLevel;
 
         [SerializeField] private float exp_Current;
         [SerializeField] private Player player;
@@ -27,8 +32,7 @@ namespace Managers
         [HideInInspector] public UnityEvent<float> onExpChange;
         [HideInInspector] public UnityEvent<bool> onCompleteLevel;
         [HideInInspector] public UnityEvent<ItemType> onItemInvoke;
-        [SerializeField] private bool itemJustInvoke;
-        [SerializeField] private bool itemPerforming;
+       
         public bool isPause;
 
         public bool ItemPerforming
@@ -44,10 +48,13 @@ namespace Managers
         }
 
         public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
+        public UnityEvent<float> onStarChange = new();
+        public int CurrentStar { get => currentStar; set => currentStar = value; }
+        public int TotalStarInLevel { get => totalStarInLevel; set => totalStarInLevel = value; }
 
         private Coroutine inputCoroutine;
 
-        private void OnEnable()
+        private void OnEnable() 
         {
             onCompleteLevel.AddListener(CompleteLevel);
             onItemInvoke.AddListener(ItemIvoked);
@@ -70,7 +77,7 @@ namespace Managers
 
         private static void CompleteLevel(bool onComplete)
         {
-            Debug.Log("Level complete");
+            //Debug.Log("Level complete");
             int level = LevelManager.Instance.currentLevelID;
             int totalGold = GameManager.instance.GoldCalculation(level);
             DialogManager.Instance.HideAllDialog();
@@ -97,14 +104,12 @@ namespace Managers
             if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftControl))
             {
                 Reset();
-            }
-
-            ;
+            };
         }
 
         public void ActivateBG(bool isActive)
         {
-            Debug.Log("ActiveBG " +isActive);
+            //Debug.Log("ActiveBG " +isActive);
             bgRender.enabled = isActive ;
         }
 
@@ -116,8 +121,6 @@ namespace Managers
         public IEnumerator InitIngameCoroutine(Action callback)
         {
             yield return new WaitForSeconds(0f);
-
-            // Callback when initialization is done
             callback?.Invoke();
         }
 
@@ -192,18 +195,17 @@ namespace Managers
 
         public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
-            //bool arrayScrewInitDone = false;
-            //bool boxQueueInitDone = false;
             bool playerInitDone = false;
-            /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
             StartCoroutine(LoadPlayer(() =>
             {
                 playerInitDone = true;
                 ActivateBG(playerInitDone);
 
             }));
-            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
+            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true))
+            //
             yield return new WaitUntil(() => playerInitDone);
+            Debug.Log("Player init done");  
             callback?.Invoke();
         }
 
@@ -246,6 +248,10 @@ namespace Managers
 
         private void ClearOneScrew(Action callback)
         {
+            itemPerforming = true;
+            Debug.LogWarning("clear one screw");
+            var screw = LevelManager.Instance.ScrewManager.RandomGetOneScrew();
+            BoxQueue.Instance.onDeletOneScrew?.Invoke(screw);
             callback?.Invoke();
         }
 
@@ -256,6 +262,7 @@ namespace Managers
 
         public void GameEndInvoker(Action callback = null)
         {
+            isGameOver = true;
             itemPerforming = false;
             player.CanClick = false;
             ReviveDialogParam param = new ReviveDialogParam();
@@ -305,7 +312,14 @@ namespace Managers
                 yield return null;
             }
         }
+        public void StarChanging(int addedStar)
+        {
+            CurrentStar += addedStar;
+            float percentStart = (float)CurrentStar / (float)totalStarInLevel;
+            Debug.LogWarning($"Star Changing {percentStart}");
 
+            onStarChange?.Invoke(percentStart);
+        }
         public void OnRevive()
         {
             throw new NotImplementedException();
@@ -321,6 +335,17 @@ namespace Managers
             ArrayScrew.Instance.ClearAllScrewsOnArray();
             BoxQueue.Instance.Reset();
             LevelManager.Instance.LoadLevel(currentLevel);
+        }
+        public void ShuffleList<T>(List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, i + 1); // Unity's Random.Range
+                                                          // Swap elements
+                T temp = list[i];
+                list[i] = list[randomIndex];
+                list[randomIndex] = temp;
+            }
         }
     }
 }

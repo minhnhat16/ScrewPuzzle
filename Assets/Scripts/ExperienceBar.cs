@@ -92,16 +92,16 @@ public class ExperienceBar : MonoBehaviour
             yield break; // Stop the coroutine if max level is reached
         }
 
-        float startFillAmount = fill.fillAmount;
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            fill.fillAmount = Mathf.Lerp(startFillAmount, target / targetExp, elapsed / duration);
-            FillAmountToPercent(fill.fillAmount);
-            yield return null;
-        }
-        fill.fillAmount = target / targetExp;
+        //float startFillAmount = fill.fillAmount;
+        //float elapsed = 0f;
+        //while (elapsed < duration)
+        //{
+        //    elapsed += Time.deltaTime;
+        //    fill.fillAmount = Mathf.Lerp(startFillAmount, target / targetExp, elapsed / duration);
+        //    FillAmountToPercent(fill.fillAmount);
+        //    yield return null;
+        //}
+        //fill.fillAmount = target / targetExp;
     }
 
 

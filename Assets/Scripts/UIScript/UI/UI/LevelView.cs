@@ -12,9 +12,10 @@ namespace UIScript.UI.UI
     public class LevelView : BaseView
     {
         [SerializeField] private int currentLevel = 0;
-        [SerializeField] private List<BaseLevelItem> baseLevelItems;
-        [SerializeField]private List<LevelItem> levelItems;
+        [SerializeField] private List<BaseLevelItem> baseLevelItems = new(50);
+        [SerializeField]private List<LevelItem> levelItems = new(50);
         [SerializeField] private Button closeButton;
+        [SerializeField] private GridLayoutGroup layout;
         public override void OnStartShowView()
         {
             closeButton.onClick.AddListener(CloseView);
@@ -33,10 +34,10 @@ namespace UIScript.UI.UI
             if (param == null) return;
 
             LevelParam newParam = (LevelParam)param;
-
             currentLevel = newParam.currentLevel;
             baseLevelItems = newParam.listLevelItems;
             var orderLevelItems = baseLevelItems.OrderBy(item => item.IdLevel);
+            layout.enabled = false;
             InitListLevelItem(orderLevelItems.ToList());
         }
 
@@ -52,6 +53,7 @@ namespace UIScript.UI.UI
                 newItems.Add(levelOnPool);
             }
             levelItems = newItems;
+            layout.enabled = true;
         }
 
         private void CloseView()

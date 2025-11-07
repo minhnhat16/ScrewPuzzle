@@ -28,21 +28,6 @@ namespace UIScript.Dialog
             List<LevelItem>levelItemList = new();
             var waitUntil = new WaitUntil(()=> LevelManager.Instance.IsInitDone);
             var allLevelConfig = new List<Level.Level>(LevelManager.Instance.Levels.Values);
-            Debug.Log("Init new LEvel item");
-            /*var allLevelData = DataAPIController.instance.GetAl   lLevelData();*/
-            // foreach (var level in allLevelConfig)
-            // {
-            //     Debug.Log("Init new LEvel item");
-            //     LevelItem newItem = Instantiate(prefabLevelItem, transform);
-            //     /*var levelData = allLevelData[level.levelId];*/
-            //     newItem.Setup(level.levelId, false, 0);
-            //     listLevelItem.Add(newItem);
-            // }
-            /*for (int i = 0; i < 10; i++)
-            { 
-                LevelItem newItem = Instantiate(prefabLevelItem, grid.transform);
-            
-            }*/
         }
     }
 }

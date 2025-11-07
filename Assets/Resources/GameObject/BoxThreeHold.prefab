@@ -71,8 +71,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -33112529
-  m_SortingLayer: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: c04b765d77fa3774592099023443e531, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -137,7 +137,7 @@ Transform:
   m_GameObject: {fileID: 153449302129994269}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7379008511356133610}
@@ -168,9 +168,11 @@ MonoBehaviour:
   _transform: {fileID: 0}
   _anchor: {fileID: 0}
   position: {x: 0, y: 7, z: 0}
+  scale: {x: 0, y: 0, z: 0}
   _collider: {fileID: 6669458786455153824}
   isBoxFull: 0
   isAddingScrew: 0
+  totalHold: 0
   nextEmptyIndex: -1
   holdScrews:
   - {fileID: 3210943618005915090}
@@ -187,6 +189,9 @@ MonoBehaviour:
   squashDuration: 0.2
   initialPosition: {x: 0, y: 0, z: 0}
   isMoving: 0
+  spawnStartEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1188878866561535970
 GameObject:
   m_ObjectHideFlags: 0
@@ -288,8 +293,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -33112529
-  m_SortingLayer: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 3
   m_Sprite: {fileID: 21300000, guid: dd8d8d6482310ea49a1919e1c8d62761, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

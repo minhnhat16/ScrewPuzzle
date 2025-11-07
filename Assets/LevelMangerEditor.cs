@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
@@ -38,3 +38,4 @@ public class LevelManagerEditor : Editor
         }
     }
 }
+#endif

@@ -2,9 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.U2D.Path;
 using UnityEngine;
+using UnityEngine.U2D;
 using Random = Unity.Mathematics.Random;
 
 namespace Ingame
@@ -23,21 +22,23 @@ namespace Ingame
 
         public virtual SpriteRenderer Renderer
         {
-            get => renderer;
-            set => renderer = value;
+            get => activeSprite;
+            set => activeSprite = value;
         }
 
         public virtual PolygonCollider2D Collider
         {
-            get => collider;
-            set => collider = value;
+            get => col;
+            set => col = value;
         }
 
         [SerializeField] private bool isFalling;
         [SerializeField] private Rigidbody2D body;
-        [SerializeField] private SpriteRenderer renderer;
-        [SerializeField] private SpriteRenderer outLine;
-        [SerializeField] private PolygonCollider2D collider;
+        [SerializeField] private SpriteRenderer activeSprite;
+        [SerializeField] private Sprite inactiveSprite;
+        [SerializeField] private PolygonCollider2D col;
+
+
         
         private Coroutine checkFallingRoutine;
         public bool IsFalling
@@ -45,14 +46,14 @@ namespace Ingame
             get => isFalling;
             private set => isFalling = value;
         }
-        public SpriteRenderer OutLine => outLine;
+        public Sprite OutLine => inactiveSprite;
 
         public Action OnStateChanged;
         public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
         {
             this.body = body;
-            this.renderer = renderer;
-            this.collider = collider;
+            this.activeSprite = renderer;
+            this.col = collider;
         }
         public int PartLayer()
         {
@@ -62,9 +63,8 @@ namespace Ingame
         public void Awake()
         {
             body = GetComponent<Rigidbody2D>();
-            renderer = GetComponent<SpriteRenderer>();
-            outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
-            collider = GetComponent<PolygonCollider2D>();
+            activeSprite = GetComponentInChildren<SpriteRenderer>();
+            col = GetComponent<PolygonCollider2D>();
             // Assign a GUID if not already set
             if (string.IsNullOrEmpty(uniqueID))
             {
@@ -81,10 +81,10 @@ namespace Ingame
         public IEnumerator Init(SpriteRenderer render, Action callBack = null)
         {
             yield return new WaitForSeconds(0.125f);
-            collider = GetComponent<PolygonCollider2D>();
-            collider.pathCount = 0;
-            this.renderer = render;
-            collider.SetPath(0,renderer.sprite.vertices);
+            col = GetComponent<PolygonCollider2D>();
+            col.pathCount = 0;
+            this.activeSprite = render;
+            col.SetPath(0, this.activeSprite.sprite.vertices);
         }
 
     
@@ -103,7 +103,7 @@ namespace Ingame
             while (true)
             {
                 bool wasFalling = isFalling;
-                isFalling = body.velocity.y < -5;
+                isFalling = body.linearVelocity.y < -5;
 
                 // Nếu trạng thái thay đổi, kích hoạt sự kiện
                 if (isFalling != wasFalling)
@@ -139,32 +139,32 @@ namespace Ingame
 
             if (idLayer < 0 || idTargetLayer < 0)
             {
-                Debug.LogWarning($"Layer {idLayer} hoặc {idTargetLayer} không tồn tại.");
+                //Debug.LogWarning($"Layer {idLayer} hoặc {idTargetLayer} không tồn tại.");
                 return;
             }
 
             Physics2D.IgnoreLayerCollision(idLayer, idLayer, isIgnoring);
 
-            Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {idLayer} và {idTargetLayer}.");
+            //Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {idLayer} và {idTargetLayer}.");
         }
         public void SetSortingLayer(string layerName)
         {
-            Debug.Log("sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
+            //Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            if (renderer != null)
+            if (activeSprite != null)
             {
-                renderer.sortingLayerName = layerName;
+                activeSprite.sortingLayerName = layerName;
             }
 
-            if (outLine != null)
-            {
-                outLine.sortingLayerName = layerName; // Both sprites use the same sorting layer
-            }
+            //if (inactiveSprite != null)
+            //{
+            //    inactiveSprite.sortingLayerName = layerName; // Both sprites use the same sorting layer
+            //}
             
-            Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + renderer.sortingLayerName);
+            //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            renderer.sortingOrder = 0;
-            outLine.sortingOrder = renderer.sortingOrder+1; 
+            activeSprite.sortingOrder = 0;
+            //inactiveSprite.sortingOrder = activeSprite.sortingOrder+1; 
         }
         private string GenerateUniqueID()
         {
@@ -179,7 +179,7 @@ namespace Ingame
         public virtual void ResetAndReapplyPolygonCollider()
         {
             // Reset the collider by clearing all paths
-            collider.pathCount = 0;
+            col.pathCount = 0;
 
             // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
@@ -187,20 +187,28 @@ namespace Ingame
             
         public  virtual void GenerateColliderFromSprite()
         {
-            // Use the sprite's texture to define the polygon's points
-            // This method is for auto-generating a polygon collider based on the sprite's shape
-            collider.enabled = false; // Disable the collider temporarily to prevent issues
-            Destroy(collider);        // Destroy the old collider
+            var sprite = activeSprite.sprite;
 
-            // Add and create a new PolygonCollider2D
-            collider = gameObject.AddComponent<PolygonCollider2D>();
-            collider.enabled = true;
+            if (activeSprite == null || col== null || sprite == null)
+                return;
+
+            // Xoá các path cũ
+            col.pathCount = sprite.GetPhysicsShapeCount();
+
+            // Copy physics shape từ sprite sang collider
+            List<Vector2> path = new List<Vector2>();
+            for (int i = 0; i < sprite.GetPhysicsShapeCount(); i++)
+            {
+                path.Clear();
+                sprite.GetPhysicsShape(i, path);
+                col.SetPath(i, path);
+            }
 
         }
         public void Reset()
         {
             isFalling = false;
-            renderer.sprite = null;
+            activeSprite.sprite = null;
             
         }
     }

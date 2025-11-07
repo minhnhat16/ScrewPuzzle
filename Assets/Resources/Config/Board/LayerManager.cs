@@ -1,7 +1,9 @@
 using PoolManager;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Ingame.Board
 {
@@ -10,7 +12,7 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
-
+        public Dictionary<int, List<Screw.Screw>> screwDict = new();
         public List<BasePart> Parts
         {
             get => parts;
@@ -24,13 +26,21 @@ namespace Ingame.Board
         }
 
         [SerializeField] private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
-
-        public ApplyParentLayer applyParentLayer;
+        public LayerVisibilityController visibilityController;
         [SerializeField] private const int MaxVisibleLayers = 3;
+
+
+
+        public void OnEnable()
+        {
+          
+        }
+
+    
 
         private void Awake()
         {
-            applyParentLayer = GetComponent<ApplyParentLayer>();
+            visibilityController = GetComponent<LayerVisibilityController>();
         }
 
         private void Start()
@@ -55,7 +65,7 @@ namespace Ingame.Board
                 if (baseLayer != null)
                 {
                     layers.Add(baseLayer);
-                    applyParentLayer.ApplyLayerToChildren(child.gameObject);
+                    LayerUtils.ApplyParentLayer(child.gameObject);
                 }
             }
         }
@@ -69,7 +79,7 @@ namespace Ingame.Board
                 layers.Remove(clearedLayer);
             }
             // Kiểm tra và cập nhật hiển thị các layer còn lại
-            //ApplyLayerVisibility();
+            visibilityController.ApplyLayerVisibility();
         }
 
         public IEnumerator ChangePartState()
@@ -81,120 +91,17 @@ namespace Ingame.Board
             }
         }
 
-        void ApplyLayerVisibility()
-        {
-            // Đảm bảo hàng đợi không bị trống
-            if (layerQueue.Count == 0) return;
-
-            int activeLayerCount = 0;
-
-            // Kiểm tra các layer hiện tại trong hàng đợi
-            while (layerQueue.Count > 0)
-            {
-                BaseLayer currentLayer = layerQueue.Peek(); // Lấy layer đầu tiên từ queue nhưng không xoá
-
-                if (activeLayerCount <= 2)
-                {
-                    // Hiển thị các layer từ 0-2 với màu sắc gốc
-                    if (!currentLayer.GameObject.activeSelf)
-                    {
-                        currentLayer.GameObject.SetActive(true);
-                    }
-
-                    // Đảm bảo layer không bị fade nếu nằm trong khoảng từ 0-2
-                    var partsInLayer = currentLayer.parts;
-                    foreach (var part in partsInLayer)
-                    {
-                        if (part.Renderer != null)
-                        {
-                            StopAllCoroutines(); // Dừng tất cả coroutine fade nếu có
-                            part.Renderer.color = Color.white; // Khôi phục màu sắc gốc nếu có
-                        }
-                        if (part.OutLine != null)
-                        {
-                            StopAllCoroutines(); // Dừng tất cả coroutine fade nếu có
-                            part.OutLine.color = Color.white; // Khôi phục màu sắc gốc nếu có
-                        }
-                    }
-
-                    activeLayerCount++;
-                }
-                else if (activeLayerCount <= 5)
-                {
-                    // Fade dần các layer từ 3-5 sang màu xám
-                    if (currentLayer.GameObject.activeSelf)
-                    {
-                        var partsInLayer = currentLayer.parts;
-                        foreach (var part in partsInLayer)
-                        {
-                            if (part.Renderer != null)
-                            {
-                                StartCoroutine(FadeToGray(part.Renderer, 0.5f));
-                            }
-                            if (part.OutLine != null)
-                            {
-                                StartCoroutine(FadeToGray(part.OutLine, 0.5f));
-                            }
-                        }
-                    }
-
-                    activeLayerCount++;
-                }
-                else
-                {
-                    // Tắt các layer còn lại
-                    if (currentLayer.GameObject.activeSelf)
-                    {
-                        currentLayer.GameObject.SetActive(false);
-                    }
-                }
-
-                layerQueue.Dequeue(); // Xoá layer đã xử lý
-
-                // Nếu layer đã bị tắt, tiếp tục xử lý layer tiếp theo trong hàng đợi
-                if (layerQueue.Count > 0)
-                {
-                    ApplyLayerVisibility(); // Gọi lại để xử lý các layer còn lại
-                    break; // Dừng vòng lặp để tránh việc lặp vô tận
-                }
-            }
-        }
-        // Coroutine để làm mờ màu layer khi ẩn đi
-        IEnumerator FadeToGray(SpriteRenderer spriteRenderer, float duration)
-        {
-            // Bắt đầu với màu xám nhưng có alpha bằng 0 (trong suốt)
-            Color startColor = new Color(Color.gray.r, Color.gray.g, Color.gray.b, 0f);
-            Color endColor = new Color(Color.gray.r, Color.gray.g, Color.gray.b, 0.5f); ; // Màu xám với alpha = 1 (đầy đủ)
-
-            float elapsedTime = 0f;
-
-            // Lặp cho đến khi đạt thời gian fade
-            while (elapsedTime < duration)
-            {
-                // Thay đổi alpha và màu sắc dần dần từ trong suốt sang màu xám
-                spriteRenderer.color = Color.Lerp(startColor, endColor, elapsedTime / duration);
-                elapsedTime += Time.deltaTime;
-                yield return null;
-            }
-
-            // Đảm bảo spriteRenderer có màu xám đầy đủ sau khi hoàn tất
-            spriteRenderer.color = endColor;
-        }
-
+     
         public void AddPart(BasePart part)
         {
             if (part == null) return;
 
-            // Check if the dictionary already contains the part with the same uniqueID
             if (partDict.ContainsKey(part.uniqueID))
             {
-                Debug.Log("Part with ID " + part.uniqueID + " already exists. Skipping add.");
                 return; // Exit the method if part already exists
             }
 
-            // Add the part to the dictionary if it doesn't exist
             partDict.TryAdd(part.uniqueID, part);
-            Debug.Log("Part with ID " + part.uniqueID + " added.");
         }
 
 
@@ -216,6 +123,45 @@ namespace Ingame.Board
             partDict.Remove(uniqueId);
         }
 
+        /// <summary>
+        /// Activate a layer by its index
+        /// </summary>
+        /// <param name="idLayer"></param>
+        public void ActiveLayer(int idLayer)
+        {
+            if (idLayer >= layers.Count) return;
+            layers[idLayer].gameObject.SetActive(true);
+        }
+        /// <summary>
+        /// Activeate only one layer by its index, deactivate others
+        /// </summary>
+        /// <param name="idLayer"></param>
+        public void ActivateSingleLayer(int idLayer)
+        {
+            idLayer--;
+            Debug.Log("Active layer " + idLayer);   
+            if (idLayer >= layers.Count || idLayer <0)
+            {
+                ActiveAllLayers();
+                return;
+            }
+            ;
+            for(int i = 0; i < layers.Count; i++)
+            {
+                layers[i].gameObject.SetActive(idLayer == i);
+                LayerUtils.ActiveObjectInLayer(idLayer == i,i, this);
+
+            }
+            int idScrewLayer = idLayer--;
+        }
+        public void ActiveAllLayers()
+        {
+            for (int i = 0; i < layers.Count; i++)
+            {
+                layers[i].gameObject.SetActive(true);
+                LayerUtils.ActiveObjectInLayer(true,i, this);
+            }
+        }
         public void ClearPartDict()
         {
             parts.Clear();
