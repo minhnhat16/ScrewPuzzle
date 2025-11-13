@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ConfigFile;
 using ConfigFile;
+using NUnit.Framework;
 using UnityEngine;
 using Action = System.Action;
 
@@ -108,5 +110,10 @@ public class ConfigFileManager : MonoBehaviour
         yield return null;
         isDone = true;
         callback?.Invoke();
+    }
+
+    public List<LevelConfigRecord> GetAllLevelConfigs()
+    {
+        return levelConfig.GetAllRecord();
     }
 }

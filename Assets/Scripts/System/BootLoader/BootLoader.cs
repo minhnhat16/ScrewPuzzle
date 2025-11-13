@@ -69,7 +69,7 @@ public class BootLoader : MonoBehaviour
                     else
                     {
                         //Debug.Log("still in last day can't claim spin reward");
-                        DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
+                        //DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
                     }
                 });
             });

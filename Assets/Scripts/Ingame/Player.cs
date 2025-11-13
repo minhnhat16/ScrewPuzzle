@@ -1,4 +1,5 @@
-﻿using Managers;
+﻿using Ingame.Board;
+using Managers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -141,42 +142,6 @@ namespace Ingame
             }
         }
 
-
-        //private void HandleInput(Vector3 screenPosition)
-        //{
-        //    Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
-
-        //    var hits = Physics2D.RaycastAll(worldPosition, Vector2.zero, Mathf.Infinity);
-
-        //    // Sort hits by Z position (assuming all objects have a Transform)
-        //    var sortedHits = hits.OrderByDescending(hit => hit.transform.position.z).ToArray();
-
-
-        //    foreach (var hit in sortedHits)
-        //    {
-        //        if (hit.collider != null)
-        //        {
-        //            var clickedObject = hit.collider.gameObject;
-
-        //            if (clickedObject.CompareTag("Player"))
-        //            {
-        //                var screw = clickedObject.GetComponent<Screw.Screw>();
-        //                _screw.Add(screw);
-        //                //Debug.Log("Player clicked: " + clickedObject.name);
-        //                // return; // Exit after the first valid click, if needed
-        //            }
-        //        }
-        //    }
-        //    if (_screw.Count == 0) return;
-        //    var firstScrew = _screw.Last();
-        //    if (firstScrew == null) return;
-        //    onScrewClicked?.Invoke(firstScrew);
-
-        //    //Debug.LogWarning("No valid 2D object was clicked.");
-        //}
-
-
-
         private void ScrewClicked(Screw.Screw screw)
         {
             // Debug.LogWarning("Screw Clicked");
@@ -185,6 +150,8 @@ namespace Ingame
             // Start processing the queue if it's not already processing
             if (processCoroutine == null)
             {
+                var layermanager = LevelManager.Instance.layerManager;
+                layermanager.RemoveScrewOnDict(screw, screw.layerMask);
                 ArrayScrew.Instance.AddScrew(screw);
             }
         }

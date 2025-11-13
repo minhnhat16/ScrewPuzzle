@@ -305,7 +305,7 @@ public class DataModel : MonoBehaviour
         {
             DailyItemData dailyData = new DailyItemData();
             dailyData.day = i + 1;
-            IEDailyType iEDailyType = i == 0 ? IEDailyType.Available : IEDailyType.Unavailable;
+            DailyType iEDailyType = i == 0 ? DailyType.Available : DailyType.Unavailable;
             dailyData.currentType = iEDailyType;
             _dailyData.Add(dailyData);
         }
@@ -415,7 +415,7 @@ public class DataModel : MonoBehaviour
         {
             DailyItemData dailyData = new DailyItemData();
             dailyData.day = i + 1;
-            IEDailyType iEDailyType = i == 0 ? IEDailyType.Available : IEDailyType.Unavailable;
+            DailyType iEDailyType = i == 0 ? DailyType.Available : DailyType.Unavailable;
             dailyData.currentType = iEDailyType;
             _dailyData.Add(dailyData);
         }

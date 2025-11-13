@@ -16,7 +16,7 @@ public class DailyItem : MonoBehaviour
     public DailyReward itemName;
     public Text day_lb;
     public Text Amount_lb;
-    public IEDailyType currentType;
+    public DailyType currentType;
     public Button daily_btn;
     public float rotationSpeedFactor = 1.0f; // Default speed factor
     [HideInInspector] public UnityEvent<bool> onClickDailyItem = new();
@@ -41,7 +41,7 @@ public class DailyItem : MonoBehaviour
         //onRewardRemain.AddListener(DailyRemain);
     }
 
-    public void Init(IEDailyType type, int amount, int day, string spriteName, DailyReward itemName)
+    public void Init(DailyType type, int amount, int day, string spriteName, DailyReward itemName)
     {
         SwitchType(type);
         SetAmountLb(amount);
@@ -75,23 +75,23 @@ public class DailyItem : MonoBehaviour
         Amount_lb.text = amount.ToString();
     }
 
-    public virtual void SwitchType(IEDailyType type)
+    public virtual void SwitchType(DailyType type)
     {
         currentType = type;
         daily_btn.enabled = true;
         switch (type)
         {
-            case IEDailyType.Available:
+            case DailyType.Available:
                 SetCanBeClaim();
                 daily_btn.enabled = true;
                 Debug.LogWarning("ondaily reward available");
                 onRewardRemain?.Invoke(true);
                 break;
-            case IEDailyType.Unavailable:
+            case DailyType.Unavailable:
                 SetCantClaim();
                 //daily_btn.gameObject.SetActive(false);
                 break;
-            case IEDailyType.Claimed:
+            case DailyType.Claimed:
                 SetClaimed();
                 daily_btn.enabled = false;
                 Amount_lb.gameObject.SetActive(false);
@@ -178,7 +178,7 @@ public class DailyItem : MonoBehaviour
     {
         if (isClaim)
         {
-            SwitchType(IEDailyType.Claimed);
+            SwitchType(DailyType.Claimed);
             DataAPIController.instance.SetDailyData(day - 1, currentType);
             DataAPIController.instance.SetIsClaimTodayData(isClaim = true);
             DataAPIController.instance.SetTimeClaimItem(System.DateTime.Now);
@@ -189,7 +189,7 @@ public class DailyItem : MonoBehaviour
     public void CheckItemAvailable()
     {
         //Debug.Log("On Click Daily Item");
-        if (currentType == IEDailyType.Available)
+        if (currentType == DailyType.Available)
         {
             //Debug.Log("On Click Daily Item" + IEDailyType.Available);
             onClickDailyItem?.Invoke(true);

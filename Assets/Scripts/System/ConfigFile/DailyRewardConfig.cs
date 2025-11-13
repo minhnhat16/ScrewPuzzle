@@ -11,14 +11,14 @@ public class DailyRewardConfigRecord
     [SerializeField]
     private string spriteName;
     [SerializeField]
-    private IEDailyType type;
+    private DailyType type;
     [SerializeField]
     private DailyReward itemName;
     [SerializeField]
     private int totalItem;
     public int ID { get { return id; } }
     public string SpriteName { get { return spriteName; } }
-    public IEDailyType Type { get { return type; } }
+    public DailyType Type { get { return type; } }
     public DailyReward ItemName { get { return itemName; } }
     public int TotalItem { get { return totalItem; } }
 }

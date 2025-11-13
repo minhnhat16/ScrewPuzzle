@@ -14,5 +14,15 @@ public class LevelObjectPool : MonoBehaviour
         Instance = this;
         pool = new BY_Local_Pool<BaseLevelObject>(prefab, total, transform);
     }
+
+    public BaseLevelObject SpawnNonGravity()
+    {
+        return pool.SpawnNonGravity();
+    }
+
+    public void Despawn(BaseLevelObject obj)
+    {
+        pool.ReturnToPool(obj);
+    }
 }
     

@@ -1,18 +1,18 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
-using Random = Unity.Mathematics.Random;
-
+using UnityEngine.Events;
+using UnityEngine.Experimental.AI;
 namespace Ingame
 {
     public class BasePart : MonoBehaviour
     {
-        public string uniqueID; 
+        public string uniqueID;
         private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
         private List<HingeJoint> joints = new List<HingeJoint>();
-        
+
         public virtual Rigidbody2D Body
         {
             get => body;
@@ -21,8 +21,8 @@ namespace Ingame
 
         public virtual SpriteRenderer Renderer
         {
-            get => render;
-            set => render = value;
+            get => activeSprite;
+            set => activeSprite = value;
         }
 
         public virtual PolygonCollider2D Collider
@@ -33,23 +33,26 @@ namespace Ingame
 
         [SerializeField] private bool isFalling;
         [SerializeField] private Rigidbody2D body;
-        [SerializeField] private SpriteRenderer render;
-        [SerializeField] private SpriteRenderer outLine;
+        [SerializeField] private SpriteRenderer activeSprite;
+        [SerializeField] private Sprite inactiveSprite;
         [SerializeField] private PolygonCollider2D col;
-        
+
+
+
         private Coroutine checkFallingRoutine;
         public bool IsFalling
         {
             get => isFalling;
             private set => isFalling = value;
         }
-        public SpriteRenderer OutLine => outLine;
+        public Sprite OutLine => inactiveSprite;
 
-        public Action OnStateChanged;
+
+        public UnityEvent<bool,BasePart> OnStateChanged = new();
         public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
         {
             this.body = body;
-            this.render = renderer;
+            this.activeSprite = renderer;
             this.col = collider;
         }
         public int PartLayer()
@@ -60,20 +63,23 @@ namespace Ingame
         public void Awake()
         {
             body = GetComponent<Rigidbody2D>();
-            render = GetComponent<SpriteRenderer>();
-            outLine = transform.GetChild(0).GetComponent<SpriteRenderer>();
+            activeSprite = GetComponentInChildren<SpriteRenderer>();
             col = GetComponent<PolygonCollider2D>();
             // Assign a GUID if not already set
             if (string.IsNullOrEmpty(uniqueID))
             {
                 uniqueID = GenerateUniqueID();
             }
+
+            // Immediately evaluate falling state on Awake
+            UpdateFallingState();
         }
 
         // Start is called before the first frame update
         public void Start()
         {
-            StartFallingCheck(); 
+            // Ensure the checking coroutine is running (StartFallingCheck uses null-coalescing so it's safe)
+            StartFallingCheck();
         }
 
         public IEnumerator Init(SpriteRenderer render, Action callBack = null)
@@ -81,18 +87,45 @@ namespace Ingame
             yield return new WaitForSeconds(0.125f);
             col = GetComponent<PolygonCollider2D>();
             col.pathCount = 0;
-            this.render = render;
-            col.SetPath(0, this.render.sprite.vertices);
+            this.activeSprite = render;
+            col.SetPath(0, this.activeSprite.sprite.vertices);
         }
 
-    
+
         private void SetUpCollider()
         {
-            
+
         }
+
+        // Public helper to perform a single immediate falling-state check and fire event if changed.
+        public void UpdateFallingState()
+        {
+            bool wasFalling = isFalling;
+            if (body != null)
+            {
+                isFalling = body.linearVelocity.y < -5f;
+            }
+            else
+            {
+                isFalling = false;
+            }
+
+            if (isFalling != wasFalling)
+            {
+
+                Debug.Log("Falling " + isFalling);
+                OnStateChanged?.Invoke(isFalling,this);
+            }
+        }
+
         public void StartFallingCheck()
         {
-            checkFallingRoutine ??= StartCoroutine(CheckFalling());
+            Debug.Log($"[{name}] StartFallingCheck called. routine={checkFallingRoutine}");
+            if (checkFallingRoutine == null)
+            {
+                checkFallingRoutine = StartCoroutine(CheckFalling());
+                Debug.Log($"[{name}] Coroutine started!");
+            }
         }
 
         // Coroutine để kiểm tra trạng thái rơi
@@ -101,12 +134,14 @@ namespace Ingame
             while (true)
             {
                 bool wasFalling = isFalling;
-                isFalling = body.linearVelocity.y < -5;
+                isFalling = (body != null) && body.linearVelocity.y < -5f;
 
                 // Nếu trạng thái thay đổi, kích hoạt sự kiện
                 if (isFalling != wasFalling)
                 {
-                    OnStateChanged?.Invoke();
+
+                    Debug.Log("Falling " + isFalling);
+                    OnStateChanged?.Invoke(isFalling,this);
                 }
 
                 // Điều chỉnh thời gian chờ giữa các lần kiểm tra, có thể thay đổi thời gian cho phù hợp
@@ -129,7 +164,7 @@ namespace Ingame
             // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
             body.gravityScale = 1;
             body.bodyType = RigidbodyType2D.Dynamic;
-           
+
         }
 
         public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
@@ -149,20 +184,20 @@ namespace Ingame
         {
             //Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            if (render != null)
+            if (activeSprite != null)
             {
-                render.sortingLayerName = layerName;
+                activeSprite.sortingLayerName = layerName;
             }
 
-            if (outLine != null)
-            {
-                outLine.sortingLayerName = layerName; // Both sprites use the same sorting layer
-            }
-            
+            //if (inactiveSprite != null)
+            //{
+            //    inactiveSprite.sortingLayerName = layerName; // Both sprites use the same sorting layer
+            //}
+
             //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
-            render.sortingOrder = 0;
-            outLine.sortingOrder = render.sortingOrder+1; 
+            activeSprite.sortingOrder = 0;
+            //inactiveSprite.sortingOrder = activeSprite.sortingOrder+1; 
         }
         private string GenerateUniqueID()
         {
@@ -182,24 +217,32 @@ namespace Ingame
             // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
         }
-            
-        public  virtual void GenerateColliderFromSprite()
-        {
-            // Use the sprite's texture to define the polygon's points
-            // This method is for auto-generating a polygon collider based on the sprite's shape
-            col.enabled = false; // Disable the collider temporarily to prevent issues
-            Destroy(col);        // Destroy the old collider
 
-            // Add and create a new PolygonCollider2D
-            col = gameObject.AddComponent<PolygonCollider2D>();
-            col.enabled = true;
+        public virtual void GenerateColliderFromSprite()
+        {
+            var sprite = activeSprite.sprite;
+
+            if (activeSprite == null || col == null || sprite == null)
+                return;
+
+            // Xoá các path cũ
+            col.pathCount = sprite.GetPhysicsShapeCount();
+
+            // Copy physics shape từ sprite sang collider
+            List<Vector2> path = new List<Vector2>();
+            for (int i = 0; i < sprite.GetPhysicsShapeCount(); i++)
+            {
+                path.Clear();
+                sprite.GetPhysicsShape(i, path);
+                col.SetPath(i, path);
+            }
 
         }
         public void Reset()
         {
             isFalling = false;
-            render.sprite = null;
-            
+            activeSprite.sprite = null;
+
         }
     }
 }

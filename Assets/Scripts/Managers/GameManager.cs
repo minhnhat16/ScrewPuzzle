@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.DataBase;
 using DG.Tweening;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Managers
@@ -9,9 +10,9 @@ namespace Managers
     public class GameManager : MonoBehaviour
     {
         public static GameManager instance;
-        [SerializeField] private IngameController ingameController;
-        [SerializeField] private DayTimeController dayTimeController;
-       
+        public IngameController ingameController;
+        public DayTimeController dayTimeController;
+
         [SerializeField] private int languageID;
         [SerializeField] private int totalLevel;
         [SerializeField] private int trackLevelStart;
@@ -19,12 +20,12 @@ namespace Managers
         [SerializeField] private int playerGold;
         [SerializeField] private float popupDuration = 1;
         [SerializeField] private float starMoveDuration = 1;
-        [SerializeField] private Vector3 starScale = new(0.5f,0.5f);
+        [SerializeField] private Vector3 starScale = new(0.5f, 0.5f);
 
         [SerializeField] private bool isNewPlayer;
         public List<CardColorPallet> listCurrentCardColor;
         public UIRootControlScale UIRoot;
-        public int TrackLevelStart { get=> trackLevelStart; set => trackLevelStart = value; }
+        public int TrackLevelStart { get => trackLevelStart; set => trackLevelStart = value; }
         public bool IsNewPlayer { get => isNewPlayer; set => isNewPlayer = value; }
         public int TotalLevel { get => totalLevel; set => totalLevel = value; }
         public float PopupDuration { get => popupDuration; set => popupDuration = value; }
@@ -35,13 +36,15 @@ namespace Managers
         {
             if (instance == null) instance = this;
             DOTween.SetTweensCapacity(1000, 125);
+            ingameController = GetComponent<IngameController>();
+            dayTimeController = GetComponent<DayTimeController>();
         }
         // Start is called before the first frame update
         void Start()
         {
             UIRoot = GetComponentInParent<UIRootControlScale>();
-         
-           //DataTrigger.RegisterValueChange(DataPath.ALLLEVEL, OnLevelChange);
+
+            //DataTrigger.RegisterValueChange(DataPath.ALLLEVEL, OnLevelChange);
             //ingameController.gameObject.SetActive(false);
         }
         public void OnLevelChange(object newLevel)
@@ -80,12 +83,12 @@ namespace Managers
         }
         public void NextLevelCanUnlock(int levelCanUnlock)
         {
-    
+
 
         }
         public void SetupGameManager()
         {
-            dayTimeController = FindObjectOfType<DayTimeController>();
+            dayTimeController = FindFirstObjectByType<DayTimeController>();
             dayTimeController.enabled = true;
         }
         public void LoadIngameSence(Action callback)
@@ -106,7 +109,7 @@ namespace Managers
         {
             if (IsNewPlayer)
             {
-          
+
             }
         }
         public int GoldCalculation(int level)

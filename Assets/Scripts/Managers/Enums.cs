@@ -30,7 +30,7 @@ public enum SpinEnum
     Gem,
     Bonus,
 }
-public enum IEDailyType
+public enum DailyType
 {
     Available = 0,
     Unavailable = 1,

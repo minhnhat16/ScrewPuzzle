@@ -104,9 +104,7 @@ namespace Managers
             if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftControl))
             {
                 Reset();
-            }
-
-            ;
+            };
         }
 
         public void ActivateBG(bool isActive)
@@ -123,8 +121,6 @@ namespace Managers
         public IEnumerator InitIngameCoroutine(Action callback)
         {
             yield return new WaitForSeconds(0f);
-
-            // Callback when initialization is done
             callback?.Invoke();
         }
 
@@ -199,18 +195,17 @@ namespace Managers
 
         public IEnumerator LoadIngameAssetCoroutine(Action callback = null)
         {
-            //bool arrayScrewInitDone = false;
-            //bool boxQueueInitDone = false;
             bool playerInitDone = false;
-            /*StartCoroutine(LoadArrayScrew(() => boxQueueInitDone = true));*/
             StartCoroutine(LoadPlayer(() =>
             {
                 playerInitDone = true;
                 ActivateBG(playerInitDone);
 
             }));
-            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true));
+            //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true))
+            //
             yield return new WaitUntil(() => playerInitDone);
+            Debug.Log("Player init done");  
             callback?.Invoke();
         }
 

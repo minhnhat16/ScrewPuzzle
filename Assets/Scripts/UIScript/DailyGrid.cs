@@ -62,10 +62,10 @@ namespace UIScript
         }
         public void InvokeWhenHaveCurrentDaily()
         {
-            if (currentDaily != null && currentDaily.currentType == IEDailyType.Available) currentDaily.CheckItemAvailable();
+            if (currentDaily != null && currentDaily.currentType == DailyType.Available) currentDaily.CheckItemAvailable();
             else
             {
-                var item = _items.First(daily => daily.currentType == IEDailyType.Unavailable);
+                var item = _items.First(daily => daily.currentType == DailyType.Unavailable);
                 item.CheckItemAvailable();
             }
         }
@@ -74,7 +74,7 @@ namespace UIScript
         {
             //check daily in day seven is claimed;
             var lastDailyData = DataAPIController.instance.GetDailyData(6);
-            if (lastDailyData.currentType == IEDailyType.Claimed)
+            if (lastDailyData.currentType == DailyType.Claimed)
             {
                 DataAPIController.instance.SetNewDailyCircle();
             }
@@ -85,10 +85,10 @@ namespace UIScript
             int day = dailyRewardConfig.ID;
             //Debug.Log("Day" + day);
             DailyItemData dailyData = DataAPIController.instance.GetDailyData(day);
-            if (dailyData.currentType == IEDailyType.Available)
+            if (dailyData.currentType == DailyType.Available)
             {
                 //Debug.Log("AVAILABLE TO CLAIM");
-                dailyItem.Init(IEDailyType.Available, dailyRewardConfig.TotalItem, dailyRewardConfig.ID + 1, dailyRewardConfig.SpriteName, dailyRewardConfig.ItemName);
+                dailyItem.Init(DailyType.Available, dailyRewardConfig.TotalItem, dailyRewardConfig.ID + 1, dailyRewardConfig.SpriteName, dailyRewardConfig.ItemName);
                 currentDaily = dailyItem;
                 return dailyItem;
             }
@@ -108,7 +108,7 @@ namespace UIScript
             {
                 //Debug.Log($"daily item { _items[i].day} + type { _items[i].currentType} ");
 
-                if (_items[i].currentType == IEDailyType.Claimed && _items[i + 1].currentType == IEDailyType.Unavailable)
+                if (_items[i].currentType == DailyType.Claimed && _items[i + 1].currentType == DailyType.Unavailable)
                 {
                     //Debug.Log($"new day item id {_items[i + 1].day}");
                     return _items[i + 1];
@@ -140,7 +140,7 @@ namespace UIScript
                 StartCoroutine(NewDayCouroutine(() =>
                 {
                     //Debug.Log("CURRENT  DAY REWARD REMAIN"+ currentDaily.day);
-                    currentDaily.SwitchType(IEDailyType.Available);
+                    currentDaily.SwitchType(DailyType.Available);
                     int currentDay = currentDaily.day - 1;
                     DataAPIController.instance.SetDailyData(currentDay, currentDaily.currentType);
                     currentDaily.CheckItemAvailable();

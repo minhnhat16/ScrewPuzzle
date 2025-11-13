@@ -1,7 +1,9 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections;
+using Enums;
 using Ingame;
+using Ingame.Board;
 using Ingame.Screw;
 using Level;
 using UnityEngine;
@@ -21,13 +23,14 @@ public class LevelMaker : MonoBehaviour
     public bool isEditScrewPosition;
     public bool isSelectColorForScrew;
     public bool isEditHinge;
+    public bool isRemoveScrew;
     public bool isEditScrewColor;
-    public int currentScrewColorID = 2;
+    public ColorEnum currentScrewColorID = ColorEnum.Clear;
     [SerializeField] InputField levelInputField;
     [SerializeField] InputField layerInputField;
     [SerializeField] InputField levelSaveInput;
     [SerializeField] Dropdown saveOptionDropDown;
-    
+    public DropDownLayer layerDropdown;
     
     [System.Serializable]   
     public class KeyEvent : UnityEvent { }
@@ -70,7 +73,6 @@ public class LevelMaker : MonoBehaviour
         if (onKey0Pressed == null) onKey0Pressed = new KeyEvent();
         if (onKey1Pressed == null) onKey1Pressed = new KeyEvent();
         if (onKey2Pressed == null) onKey2Pressed = new KeyEvent();
-
         if (onKeyAPressed == null) onKeyAPressed = new KeyEvent();
         // ... Tương tự cho tất cả các phím khác
     }
@@ -84,6 +86,7 @@ public class LevelMaker : MonoBehaviour
         InputManager.onKeyA += onKeyAPressed.Invoke;
         saveOptionDropDown.onValueChanged.AddListener(delegate { DropdownValueChanged(saveOptionDropDown); });
         // ... Đăng ký các phím còn lại
+
     }
 
    
@@ -96,6 +99,7 @@ public class LevelMaker : MonoBehaviour
         InputManager.onKey2 -= onKey2Pressed.Invoke;
         InputManager.onKeyA -= onKeyAPressed.Invoke;
         // ... Hủy đăng ký các phím còn lại
+
     }
 
     // Phương thức xử lý nhấn chuột vào screw
@@ -128,6 +132,8 @@ public class LevelMaker : MonoBehaviour
         var partScript = partChosen.GetComponent<BasePart>();
         var bodyPart = partScript.Body;
 
+        Debug.Log("Part layered selected: " + partChosen.layer);
+
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPosition.z = 0;
         HingeConnection hingeConnection = new HingeConnection()
@@ -146,13 +152,17 @@ public class LevelMaker : MonoBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
-            // Check if the clicked object is a valid part
+            // Check if the clicked object is a valid part and is active
             if (hit.collider != null && hit.collider.CompareTag("Part"))
             {
-                return hit.collider.gameObject;
+                GameObject obj = hit.collider.gameObject;
+                if (obj.activeInHierarchy)
+                {
+                    return obj;
+                }
             }
         }
-        return null; 
+        return null;
     }
 
 
@@ -180,6 +190,7 @@ public class LevelMaker : MonoBehaviour
 
     public void SaveLevel()
     {
+
         GetCurrentDropdownOption();
     }
     void DropdownValueChanged(Dropdown change)
@@ -227,6 +238,8 @@ public class LevelMaker : MonoBehaviour
     {
         
     }
+
+  
     public void SetEditMode(EditMode mode)
     {
         isEditScrewPosition = (mode == EditMode.ScrewPosition);
@@ -234,6 +247,7 @@ public class LevelMaker : MonoBehaviour
         isEditHinge = (mode == EditMode.Hinge);
         isEditPartPosition = (mode == EditMode.PartPosition);
         isEditPartColor = (mode == EditMode.PartColor);
+        isRemoveScrew = (mode == EditMode.RemoveHinge);
     }
     public void TurnAllEditModeOff()
     {
@@ -274,6 +288,19 @@ public class LevelMaker : MonoBehaviour
         TurnAllEditModeOff();
         SetEditMode(EditMode.PartColor);
     }
+
+
+    public void ClickOnRemoveHinge()
+    {
+        TurnAllEditModeOff();
+        SetEditMode(EditMode.RemoveHinge);
+    }
+
+
+    private void OnValidate()
+    {
+        GameViewUtils.SetWidescreenTest();
+    }
 }
 
 public enum EditMode
@@ -282,6 +309,7 @@ public enum EditMode
     ScrewColor,
     Hinge,
     PartPosition,
-    PartColor
+    PartColor,
+    RemoveHinge
 }
 #endif

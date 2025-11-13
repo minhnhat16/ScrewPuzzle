@@ -11,7 +11,6 @@ public class TwoHingeScrew : Screw
         // HingeJoint2D = GetComponent<HingeJoint2D>();
         CircleCollider2D = GetComponentInChildren<CircleCollider2D>();
         Renderer = GetComponentInChildren<SpriteRenderer>();
-        LayerMask = gameObject.layer;
         // _2ndhingeJoint2D = GetComponent<HingeJoint2D>();
     }
     // Start is called before the first frame update

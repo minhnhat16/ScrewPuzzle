@@ -1,4 +1,5 @@
 ﻿using Unity.VisualScripting;
+using UnityEngine;
 
 namespace Enums
 {
@@ -8,9 +9,7 @@ namespace Enums
         Empty,
         Red,           
         Blue,
-        Yellow,  
         Gray,
-        Black,
         Magenta,
         White,
         Green,
@@ -18,5 +17,50 @@ namespace Enums
         Pink,
         Purple,
         Cyan,
+        Brown,
+    }
+
+    public static class ColorEnumExtensions
+    {
+        public static string ToColorString(this ColorEnum colorEnum)
+        {
+            return colorEnum.ToString();
+        }
+        public static Sprite ToScrewSprite(this ColorEnum colorEnum)
+        {
+            string path = $"{GameConstants.SCREW_SPRITE_PATH}/{colorEnum.ToColorString()}";
+            var sprite = Resources.Load<Sprite>($"{path}");
+
+
+            Debug.Assert(sprite != null, $"Sprite not found for color: {colorEnum.ToColorString()} at path: {path}");
+            return sprite;
+        }
+
+
+        public static Sprite ToBoxSprite(this ColorEnum colorEnum)
+        {
+            string path = $"{GameConstants.BOX_SPRITE_PATH}/{colorEnum.ToColorString()}";
+
+            var sprite = Resources.Load<Sprite>($"{path}");
+            return sprite;
+        }
+        public static Color ToColor(this ColorEnum colorEnum)
+        {
+            return colorEnum switch
+            {
+                ColorEnum.Clear or ColorEnum.Empty => Color.clear,
+                ColorEnum.Red => Color.red,
+                ColorEnum.Blue => Color.blue,
+                ColorEnum.Gray => Color.gray,
+                ColorEnum.Magenta => Color.magenta,
+                ColorEnum.White => Color.white,
+                ColorEnum.Green => Color.green,
+                ColorEnum.Orange => new Color(1f, 0.5f, 0f, 1f),// RGB for orange
+                ColorEnum.Pink => new Color(1f, 0.4f, 0.7f, 1f),// RGB for pink
+                ColorEnum.Purple => new Color(0.5f, 0f, 0.5f, 1f),// RGB for purple
+                ColorEnum.Cyan => Color.cyan,
+                _ => Color.clear,
+            };
+        }
     }
 }
