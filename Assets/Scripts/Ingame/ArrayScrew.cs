@@ -273,5 +273,9 @@ namespace Ingame
         {
             ShowArrayActive(5);
         }
+        private void OnValidate()
+        {
+            HoldAlignment();
+        }
     }
 }

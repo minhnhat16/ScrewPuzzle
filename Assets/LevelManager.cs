@@ -404,22 +404,23 @@ public class LevelManager : MonoBehaviour, IResetable
 
             //Debug.Log($"Hinge connection successfully created for part ID {hingeConnection.bodyPartUniqueID}");
         }
-
-
-        var lm = currentLevelObject.GetComponent<LayerManager>();
-
-        var partLayer = lm.GetPartByKey(screwData.hingeConnections[0].bodyPartUniqueID).PartLayer() - 10;
-        if (lm.screwDict.ContainsKey(partLayer))
+        if (currentLevelObject != null)
         {
-            lm.screwDict[partLayer].Add(screw);
-            Debug.Log("Appending key at " + partLayer + " screw" + screw.name);
-        }
+            var lm = currentLevelObject.GetComponent<LayerManager>();
 
-        ScrewManager.AddScrew(screw);
-        //Debug.Log("Screw added to ScrewManager");s
-        yield return screw.Init();
-        //Debug.Log($"Screw initialization complete");
-        yield return null;
+            var partLayer = lm.GetPartByKey(screwData.hingeConnections[0].bodyPartUniqueID).PartLayer() - 10;
+            if (lm.screwDict.ContainsKey(partLayer))
+            {
+                lm.screwDict[partLayer].Add(screw);
+                Debug.Log("Appending key at " + partLayer + " screw" + screw.name);
+            }
+
+            ScrewManager.AddScrew(screw);
+            //Debug.Log("Screw added to ScrewManager");s
+            yield return screw.Init();
+            //Debug.Log($"Screw initialization complete");
+            yield return null;
+        }
     }
 
     private IEnumerator ActivateAllParts()
