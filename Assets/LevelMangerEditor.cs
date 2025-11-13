@@ -24,7 +24,7 @@ public class LevelManagerEditor : Editor
 
             if (GUILayout.Button("Reset Level in Play Mode"))
             {
-                levelManager.Reset();
+                levelManager.OnReset();
             }
         }
         else

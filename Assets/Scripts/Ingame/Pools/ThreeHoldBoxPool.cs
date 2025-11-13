@@ -13,6 +13,13 @@ namespace Ingame.Pools
             Instance = this;
             pool = new BY_Local_Pool<BoxThreeHold>(prefab, total, transform);
         }
+
+        public BoxThreeHold Spawn()
+        {
+            return pool.SpawnNonGravity();
+        }
+
+
     }
 }
 

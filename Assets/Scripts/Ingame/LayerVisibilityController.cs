@@ -21,6 +21,8 @@ public class LayerVisibilityController : MonoBehaviour
 
     public float fadeDuration = 0.5f;
 
+    public int RePreviewMax { get => rePreviewMax; set => rePreviewMax = value; }
+
     internal void ApplyLayerVisibility()
     {
 
@@ -61,7 +63,7 @@ public class LayerVisibilityController : MonoBehaviour
                 LayerUtils.ActiveObjectInLayer(true, i, lm);
 
             }
-            else if (previewMax > i && i < rePreviewMax)
+            else if (previewMax > i && i < RePreviewMax)
             {
 
                 Debug.Log($"[VisibilityController] Re-previewing layer {i} to gray. Total Part {layer.parts.Count}");
@@ -105,9 +107,9 @@ public class LayerVisibilityController : MonoBehaviour
     {
         preViewMin = previewMax;
         previewMax += 1;
-        rePreviewMax += 1;
+        RePreviewMax += 1;
 
-        Debug.Log($"show next layer min: {preViewMin}, max {previewMax}, rePreviewMin {rePreviewMax}, layer queue {layerQueue.Count}");
+        Debug.Log($"show next layer min: {preViewMin}, max {previewMax}, rePreviewMin {RePreviewMax}, layer queue {layerQueue.Count}");
 
         ApplyLayerVisibility();
     }

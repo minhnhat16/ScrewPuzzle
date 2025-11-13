@@ -1,3 +1,6 @@
+using UnityEditor;
+using UnityEngine;
+
 public static class GameConstants
 {
     public const string PLAYER_DATA_KEY = "PLAYER_DATA";
@@ -11,4 +14,31 @@ public static class GameConstants
 
     public const string SCREW_SPRITE_PATH = "GAMEPLAY/DINH";
     public const string BOX_SPRITE_PATH = "GAMEPLAY/HOP";
+}
+
+public static class GameUtils
+{
+    public static void LogAndSelect(string message, GameObject go)
+    {
+        Debug.Log(message, go);                // message with context (clickable in Console)
+        if (go == null) return;
+        Selection.activeGameObject = go;       // select in Hierarchy / Inspector
+        EditorGUIUtility.PingObject(go);      // ping in Project/Hierarchy
+        // frame object in Scene view
+        if (SceneView.lastActiveSceneView != null)
+        {
+            // Fix: Frame expects a Bounds, not a GameObject.
+            Renderer renderer = go.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                SceneView.lastActiveSceneView.Frame(renderer.bounds, true);
+            }
+            else
+            {
+                // Fallback: frame the object's position with a small bounds
+                Bounds bounds = new Bounds(go.transform.position, Vector3.one);
+                SceneView.lastActiveSceneView.Frame(bounds, true);
+            }
+        }
+    }
 }

@@ -1,3 +1,4 @@
+using Ingame.Screw;
 using PoolManager;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,10 +31,10 @@ namespace Ingame.Board
 
         public void OnEnable()
         {
-          
+
         }
 
-    
+
 
         private void Awake()
         {
@@ -70,16 +71,7 @@ namespace Ingame.Board
         // Gọi khi một layer thực hiện hành động clear
         public void OnLayerCleared(BaseLayer clearedLayer)
         {
-            // Đảm bảo layer đã clear không còn trong danh sách
             visibilityController.ShowNextLayer();
-
-            //if (layers.Contains(clearedLayer))
-            //{
-            //    Debug.Log("on layer clear" );
-            //    layers.Remove(clearedLayer);
-            //    visibilityController.layerQueue = this.layerQueue;
-            //}
-            // Kiểm tra và cập nhật hiển thị các layer còn lại
         }
 
         public IEnumerator ChangePartState()
@@ -91,7 +83,7 @@ namespace Ingame.Board
             }
         }
 
-     
+
         public void AddPart(BasePart part)
         {
             if (part == null) return;
@@ -140,17 +132,17 @@ namespace Ingame.Board
         public void ActivateSingleLayer(int idLayer)
         {
             idLayer--;
-            Debug.Log("Active layer " + idLayer);   
-            if (idLayer >= layers.Count || idLayer <0)
+            Debug.Log("Active layer " + idLayer);
+            if (idLayer >= layers.Count || idLayer < 0)
             {
                 ActiveAllLayers();
                 return;
             }
             ;
-            for(int i = 0; i < layers.Count; i++)
+            for (int i = 0; i < layers.Count; i++)
             {
                 layers[i].gameObject.SetActive(idLayer == i);
-                LayerUtils.ActiveObjectInLayer(idLayer == i,i, this);
+                LayerUtils.ActiveObjectInLayer(idLayer == i, i, this);
 
             }
             int idScrewLayer = idLayer--;
@@ -160,16 +152,37 @@ namespace Ingame.Board
             for (int i = 0; i < layers.Count; i++)
             {
                 layers[i].gameObject.SetActive(true);
-                LayerUtils.ActiveObjectInLayer(true,i, this);
+                LayerUtils.ActiveObjectInLayer(true, i, this);
             }
         }
-        public void RemoveScrewOnDict(Screw.Screw screw,int layer)
+        public void RemoveScrewOnDict(Screw.Screw screw, int layer)
         {
             layer -= 9;
             screwDict.TryGetValue(layer, out List<Screw.Screw> listScrews);
             Debug.Log("Remove screw on layer " + layer + " total screws " + (listScrews != null ? listScrews.Count.ToString() : "null"));
-            if(listScrews == null) return;
+            if (listScrews == null) return;
             listScrews.Remove(screw);
+        }
+        public List<Screw.Screw> GetScrewByPart(BasePart part)
+        {
+            Debug.Log("part null: " +part.name);
+            if (part == null) return new List<Screw.Screw>();
+
+            int layer = part.PartLayer() - 10;
+
+            if (!screwDict.TryGetValue(layer, out var screwsInLayer) || screwsInLayer == null || screwsInLayer.Count == 0)
+            {
+                Debug.Log("Screw in layer ");
+                return new List<Screw.Screw>();
+
+            }
+
+            // Match any hinge connected body to the part's Rigidbody2D (safe null checks)
+            var result = screwsInLayer
+                .Where(s => s?.HingeController?.BodyConnect != null && s.HingeController.BodyConnect.Any(b => b == part.Body))
+                .ToList();
+
+            return result;
         }
         public void ClearPartDict()
         {

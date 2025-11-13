@@ -28,13 +28,13 @@ namespace Ingame
         {
             screw = null;
         }
-        public void AddScrew(Screw.Screw newScrew,Action<bool> callback = null)
+        public void AddScrew(Screw.Screw newScrew,bool isTele =false,Action<bool> callback = null)
         {
             if (!screw)
             {
                 screw = newScrew;
-                //Debug.Log("Dont  have screw" + index);
-                screw.DoMoveToHold(this);
+                GameUtils.LogAndSelect("Dont  have screw" + index,transf.parent.gameObject);
+                screw.DoMoveToHold(this, isTele);
                 callback?.Invoke(true);
             }
             else

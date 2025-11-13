@@ -249,20 +249,20 @@ public class DataModel : MonoBehaviour
         Dictionary<string, ItemData> newItemDict = new();
 
         ItemData newAddHoldInvent = new();
-        newAddHoldInvent.type = ItemType.AddHold;
-        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
+        newAddHoldInvent.type = ItemType.Magnet;
+        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 5);
         var key = newAddHoldInvent.type.ToString();
         newItemDict.Add(key, newAddHoldInvent);
 
         ItemData newAddBoxInvent = new();
-        newAddBoxInvent.type = ItemType.AddBox;
-        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
+        newAddBoxInvent.type = ItemType.Breaker;
+        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Breaker.ToString(), 5);
         key = newAddBoxInvent.type.ToString();
         newItemDict.Add(key, newAddBoxInvent);
 
         ItemData newClearOnScrewInvent = new();
-        newClearOnScrewInvent.type = ItemType.ClearOneScrew;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.ClearOneScrew.ToString(), 5);
+        newClearOnScrewInvent.type = ItemType.Drill;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Drill.ToString(), 5);
         key = newClearOnScrewInvent.type.ToString();
         newItemDict.Add(key, newClearOnScrewInvent);
 
@@ -364,20 +364,20 @@ public class DataModel : MonoBehaviour
         Dictionary<string, ItemData> newItemDict = new();
 
         ItemData newAddHoldInvent = new();
-        newAddHoldInvent.type = ItemType.AddHold;
-        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddHold.ToString(), 5);
+        newAddHoldInvent.type = ItemType.Magnet;
+        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 5);
         var key = newAddHoldInvent.type.ToString();
         newItemDict.Add(key, newAddHoldInvent);
 
         ItemData newAddBoxInvent = new();
-        newAddBoxInvent.type = ItemType.AddBox;
-        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.AddBox.ToString(), 5);
+        newAddBoxInvent.type = ItemType.Breaker;
+        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Breaker.ToString(), 5);
         key = newAddBoxInvent.type.ToString();
         newItemDict.Add(key, newAddBoxInvent);
 
         ItemData newClearOnScrewInvent = new();
-        newClearOnScrewInvent.type = ItemType.ClearOneScrew;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.ClearOneScrew.ToString(), 5);
+        newClearOnScrewInvent.type = ItemType.Drill;
+        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Drill.ToString(), 5);
         key = newClearOnScrewInvent.type.ToString();
         newItemDict.Add(key, newClearOnScrewInvent);
 

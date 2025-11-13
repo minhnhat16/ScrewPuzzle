@@ -133,6 +133,8 @@ public class ScrewLevelMaker : Screw
     }
     public void TurnColliderIs(bool isEnable)
     {
+
+        Debug.Log("Turn collider is "  + isEnable);
         CircleCollider2D.enabled = isEnable;
     }
     public  HingeJoint2D CreateHingeWithMousePos(Rigidbody2D targetBody, HingeConnection connection)

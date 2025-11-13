@@ -1,3 +1,4 @@
+using Ingame;
 using UnityEngine;
 
 namespace Level
@@ -5,9 +6,10 @@ namespace Level
     public class SpriteNameUpdater : MonoBehaviour
     {
         private SpriteChangeNotifier _spriteChangeNotifier;
-
+        private BasePart part;
         private void Start()
         {
+            part = GetComponent<BasePart>();
             // Get the SpriteChangeNotifier component and subscribe to the event
             _spriteChangeNotifier = GetComponent<SpriteChangeNotifier>();
 
@@ -28,6 +30,7 @@ namespace Level
             {
                 gameObject.name = newSprite.name; // Update the object's name to the sprite's name
                 Debug.Log("Object's name updated to: " + newSprite.name);
+                part.GenerateColliderFromSprite();  
             }
         }
     }

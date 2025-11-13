@@ -89,7 +89,7 @@ public class SettingDialog : BaseDialog
         {
             Debug.Log($"HideDialog {dialogIndex} ");
 
-            LevelManager.Instance.Reset();
+            LevelManager.Instance.OnReset();
             LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
             {
                 Debug.Log("Switch view mainscreenview ");

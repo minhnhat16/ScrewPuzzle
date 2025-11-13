@@ -48,7 +48,7 @@ namespace Ingame
 
         public void AddScrew(Screw.Screw screw)
         {
-           
+
             _screws.Add(screw);
         }
 
@@ -76,7 +76,53 @@ namespace Ingame
             OnScrewRemoved?.Invoke(screw);
         }
 
+        internal void RemoveScrew(List<Screw.Screw> screwList)
+        {
+            if (screwList == null || screwList.Count == 0) return;
 
+            // Normalize and dedupe input
+            var distinctScrews = screwList.Where(s => s != null).Distinct().ToList();
+            if (distinctScrews.Count == 0) return;
+
+            // Collect hinges and affected parts first
+            var hingesToRemove = new HashSet<HingeJoint2D>();
+            var affectedParts = new HashSet<BasePart>();
+            foreach (var screw in distinctScrews)
+            {
+                var hc = screw.HingeController;
+                if (hc == null) continue;
+
+                foreach (var hinge in hc.HingeJoint2D)
+                {
+                    if (hinge == null) continue;
+                    hingesToRemove.Add(hinge);
+                    if (hingeConnections.TryGetValue(hinge, out var part) && part != null)
+                        affectedParts.Add(part);
+                }
+            }
+
+            // Remove hinge connections
+            foreach (var hinge in hingesToRemove)
+            {
+                RemoveHingeConnection(hinge);
+            }
+
+            // Remove screws from internal list and notify
+            foreach (var screw in distinctScrews)
+            {
+                if (_screws.Contains(screw))
+                    _screws.Remove(screw);
+
+                OnScrewRemoved?.Invoke(screw);
+            }
+
+            // Final pass: ensure parts that lost all hinges are handled
+            foreach (var part in affectedParts)
+            {
+                if (AreAllHingesRemoved(part))
+                    part.HandleNoHingesLeft();
+            }
+        }
 
         public bool AreAllHingesRemoved(BasePart part)
         {
@@ -106,7 +152,7 @@ namespace Ingame
             var screwPool = ScrewPool.Instance;
             foreach (var screw in _screws)
             {
-                screw.Reset();
+                screw.OnReset();
                 screwPool.Pool.ReturnToPool(screw);
             }
         }
@@ -182,5 +228,7 @@ namespace Ingame
         {
             ReturnAllScrewToPool();
         }
+
+
     }
 }

@@ -521,7 +521,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         screwComp.ChangeScrewColorByEnum(screwComp.Color);
         StartCoroutine(screwComp.InitOnLevelMaker());
         int layerID = LevelMaker.instance.layerDropdown.Value();
-
+        layerID -= 1;
 
         Debug.Log("Screw Layer ID: " + layerID);
 

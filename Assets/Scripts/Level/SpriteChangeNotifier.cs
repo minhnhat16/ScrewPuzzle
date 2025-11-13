@@ -25,7 +25,6 @@ namespace Level
             {
                 _lastSprite = _spriteRenderer.sprite; // Update the last known sprite
 
-                // Trigger the event and pass the new sprite
                 OnSpriteChanged.Invoke(_spriteRenderer.sprite);
             }
         }

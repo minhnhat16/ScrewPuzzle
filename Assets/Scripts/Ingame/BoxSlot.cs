@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using UnityEngine;
 
 // For animations
@@ -7,6 +8,7 @@ namespace Ingame
 {
     public class BoxSlot : MonoBehaviour
     {
+       
         public ScrewBox screwBox; // Reference to the box
         public Vector3 initialPosition; // Position to move to
         public bool isLocked;
@@ -19,6 +21,7 @@ namespace Ingame
             /*screwBox.OnInit(position, locked);*/
         }
 
+
         public void ActivateBox()
         {
             gameObject.SetActive(true);
@@ -28,7 +31,6 @@ namespace Ingame
         {
             isContainingBox = box != null;  
             if (!isContainingBox) return;
-            //Debug.LogError("Added box to slot" + box.name);
             screwBox = box;
         }
 

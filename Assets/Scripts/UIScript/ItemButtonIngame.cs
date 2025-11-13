@@ -1,5 +1,3 @@
-using System.Transactions;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace UIScript
@@ -10,10 +8,7 @@ namespace UIScript
         {
             //Button = GetComponent<Button>();
             Button.onClick.AddListener(OnClick);
-            
-            //AddQuantityBtn = GetComponentInChildren<Button>();
             AddQuantityBtn.onClick.AddListener(OnAddQuantity);
-            
         }
         public override void OnClick()
         {   

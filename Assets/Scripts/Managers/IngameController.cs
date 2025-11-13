@@ -43,8 +43,8 @@ namespace Managers
 
         public float ExpCurrent
         {
-            get { return exp_Current; }
-            set { exp_Current = value; }
+                get { return exp_Current; }
+                set { exp_Current = value; }
         }
 
         public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
@@ -73,11 +73,13 @@ namespace Managers
                 StopCoroutine(inputCoroutine);
                 inputCoroutine = null;
             }
+
+            onItemInvoke.RemoveAllListeners();
         }
 
         private static void CompleteLevel(bool onComplete)
         {
-            //Debug.Log("Level complete");
+           Debug.Log("Level complete");
             int level = LevelManager.Instance.currentLevelID;
             int totalGold = GameManager.instance.GoldCalculation(level);
             DialogManager.Instance.HideAllDialog();
@@ -139,6 +141,7 @@ namespace Managers
         private void ItemIvoked(ItemType item)
         {
             itemJustInvoke = true;
+            ItemController.ins.IsHandlingItem = itemJustInvoke;
             StartCoroutine(ItemCoroutine(item));
         }
 
@@ -150,17 +153,16 @@ namespace Managers
 
             switch (itemType)
             {
-                case ItemType.AddHold:
-                    AddHold(() =>
-                    {
-
-                    });
+                case ItemType.Magnet:
+                    ClearAllScrewOnArray(null);
                     break;
-                case ItemType.AddBox:
+                case ItemType.Breaker:
                     AddBox(null);
                     break;
-                case ItemType.ClearOneScrew:
-                    ClearOneScrew(null);
+                case ItemType.Drill:
+                    AddHold(() =>
+                    {
+                    });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null);
@@ -293,23 +295,27 @@ namespace Managers
                 {
                     Debug.LogWarning("Key 1 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.AddBox);
+                    onItemInvoke.Invoke(ItemType.Breaker);
                 }
                 else if (Input.GetKey(KeyCode.Alpha2))
                 {
                     Debug.LogWarning("Key 2 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.AddHold);
+                    onItemInvoke.Invoke(ItemType.Magnet);
                 }
                 else if (Input.GetKey(KeyCode.Alpha3))
                 {
                     Debug.LogWarning("Key 3 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.ClearOneScrew);
+                    onItemInvoke.Invoke(ItemType.Drill);
                 }
-
-                // Chờ một khung hình trước khi kiểm tra tiếp
-                yield return null;
+                else if(Input.GetKey(KeyCode.Alpha4))
+                {
+                    itemJustInvoke= true;
+                    onItemInvoke.Invoke(ItemType.AddBox);
+                }    
+                    // Chờ một khung hình trước khi kiểm tra tiếp
+                    yield return null;
             }
         }
         public void StarChanging(int addedStar)
@@ -331,9 +337,9 @@ namespace Managers
             IsGameOver = true;
             int currentLevel = LevelManager.Instance.currentLevelID;
             Player.instance.CanClick = false;
-            LevelManager.Instance.Reset();
+            LevelManager.Instance.OnReset();
             ArrayScrew.Instance.ClearAllScrewsOnArray();
-            BoxQueue.Instance.Reset();
+            BoxQueue.Instance.OnReset();
             LevelManager.Instance.LoadLevel(currentLevel);
         }
         public void ShuffleList<T>(List<T> list)
