@@ -16,7 +16,7 @@ using Sequence = DG.Tweening.Sequence;
 namespace Ingame
 {
     public class ScrewBox : FSMSystem
-        {
+    {
         public BoxConfig config; // ScriptableObject chứa cấu hình cho CrewBox
         [SerializeField] private SpriteRenderer render;
         [SerializeField] private SpriteRenderer renderUpper;
@@ -100,11 +100,13 @@ namespace Ingame
             spawnStartEvent.RemoveAllListeners();
 
         }
-        public void OnInit(Vector3 position,ColorEnum color, bool isBoxFull,int totalHold)
+        public void OnInit(Vector3 position, ColorEnum color, bool isBoxFull, int totalHold)
         {
             this.color = color;
             this.Position = position;
             this.isBoxFull = isBoxFull;
+
+            BoxUtils.SetBoxColor(this, color);
         }
         public virtual void Start()
         {
@@ -128,7 +130,8 @@ namespace Ingame
             {
                 h.ClearScrewOnHold(); // should put reset here
                 //Debug.Log("reset hold screw " + h.Screw);
-            };
+            }
+            ;
 
         }
 
@@ -169,7 +172,7 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull) =>
             {
-               // spawnStartEvent?.Invoke(holdScrews.Count);
+                // spawnStartEvent?.Invoke(holdScrews.Count);
                 callback?.Invoke(boxFull);
             });
         }
@@ -361,10 +364,10 @@ namespace Ingame
         }
 
         // Hàm để thay đổi màu của CrewBox
-        public void SetBoxColor(Color newColor)
+        public void SetBoxColor(ColorEnum color)
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
-            render.material.color = newColor;
+            render.sprite = color.ToBoxSprite();
         }
 
         public void FindScrew()
@@ -379,7 +382,8 @@ namespace Ingame
             {
                 h.ClearScrewOnHold(); // should put reset here
                 //Debug.Log("reset hold screw " + h.Screw);
-            };
+            }
+            ;
         }
         public IEnumerator FindScrewCoroutine()
         {

@@ -1,19 +1,18 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
-using UnityEngine.U2D;
-using Random = Unity.Mathematics.Random;
-
+using UnityEngine.Events;
+using UnityEngine.Experimental.AI;
 namespace Ingame
 {
     public class BasePart : MonoBehaviour
     {
-        public string uniqueID; 
+        public string uniqueID;
         private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
         private List<HingeJoint> joints = new List<HingeJoint>();
-        
+
         public virtual Rigidbody2D Body
         {
             get => body;
@@ -39,7 +38,7 @@ namespace Ingame
         [SerializeField] private PolygonCollider2D col;
 
 
-        
+
         private Coroutine checkFallingRoutine;
         public bool IsFalling
         {
@@ -48,7 +47,8 @@ namespace Ingame
         }
         public Sprite OutLine => inactiveSprite;
 
-        public Action OnStateChanged;
+
+        public UnityEvent<bool,BasePart> OnStateChanged = new();
         public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
         {
             this.body = body;
@@ -70,12 +70,16 @@ namespace Ingame
             {
                 uniqueID = GenerateUniqueID();
             }
+
+            // Immediately evaluate falling state on Awake
+            UpdateFallingState();
         }
 
         // Start is called before the first frame update
         public void Start()
         {
-            StartFallingCheck(); 
+            // Ensure the checking coroutine is running (StartFallingCheck uses null-coalescing so it's safe)
+            StartFallingCheck();
         }
 
         public IEnumerator Init(SpriteRenderer render, Action callBack = null)
@@ -87,14 +91,41 @@ namespace Ingame
             col.SetPath(0, this.activeSprite.sprite.vertices);
         }
 
-    
+
         private void SetUpCollider()
         {
-            
+
         }
+
+        // Public helper to perform a single immediate falling-state check and fire event if changed.
+        public void UpdateFallingState()
+        {
+            bool wasFalling = isFalling;
+            if (body != null)
+            {
+                isFalling = body.linearVelocity.y < -5f;
+            }
+            else
+            {
+                isFalling = false;
+            }
+
+            if (isFalling != wasFalling)
+            {
+
+                Debug.Log("Falling " + isFalling);
+                OnStateChanged?.Invoke(isFalling,this);
+            }
+        }
+
         public void StartFallingCheck()
         {
-            checkFallingRoutine ??= StartCoroutine(CheckFalling());
+            Debug.Log($"[{name}] StartFallingCheck called. routine={checkFallingRoutine}");
+            if (checkFallingRoutine == null)
+            {
+                checkFallingRoutine = StartCoroutine(CheckFalling());
+                Debug.Log($"[{name}] Coroutine started!");
+            }
         }
 
         // Coroutine để kiểm tra trạng thái rơi
@@ -103,12 +134,14 @@ namespace Ingame
             while (true)
             {
                 bool wasFalling = isFalling;
-                isFalling = body.linearVelocity.y < -5;
+                isFalling = (body != null) && body.linearVelocity.y < -5f;
 
                 // Nếu trạng thái thay đổi, kích hoạt sự kiện
                 if (isFalling != wasFalling)
                 {
-                    OnStateChanged?.Invoke();
+
+                    Debug.Log("Falling " + isFalling);
+                    OnStateChanged?.Invoke(isFalling,this);
                 }
 
                 // Điều chỉnh thời gian chờ giữa các lần kiểm tra, có thể thay đổi thời gian cho phù hợp
@@ -131,7 +164,7 @@ namespace Ingame
             // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
             body.gravityScale = 1;
             body.bodyType = RigidbodyType2D.Dynamic;
-           
+
         }
 
         public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
@@ -160,7 +193,7 @@ namespace Ingame
             //{
             //    inactiveSprite.sortingLayerName = layerName; // Both sprites use the same sorting layer
             //}
-            
+
             //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
             activeSprite.sortingOrder = 0;
@@ -184,12 +217,12 @@ namespace Ingame
             // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
         }
-            
-        public  virtual void GenerateColliderFromSprite()
+
+        public virtual void GenerateColliderFromSprite()
         {
             var sprite = activeSprite.sprite;
 
-            if (activeSprite == null || col== null || sprite == null)
+            if (activeSprite == null || col == null || sprite == null)
                 return;
 
             // Xoá các path cũ
@@ -209,7 +242,7 @@ namespace Ingame
         {
             isFalling = false;
             activeSprite.sprite = null;
-            
+
         }
     }
 }

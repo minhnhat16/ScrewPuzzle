@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Ingame
@@ -25,17 +26,21 @@ namespace Ingame
                 SetLayerRecursively(child.gameObject, parentLayer);
             }
         }
-        public static void ActiveObjectInLayer(bool isOn, int level, LayerManager lm)
+
+        public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm)
         {
-            Debug.Log("Screws in layer " + level);
-            if (level < 0 || level >= lm.Layers.Count) return;
-                List <BasePart> parts = lm.Layers[level].parts;
+
+            if (layer < 0 || layer >= lm.Layers.Count) return;
+                List <BasePart> parts = lm.Layers[layer].parts;
             List<string> idParts = parts.Where(p => p != null)
                                         .Select(p => p.uniqueID)
                                         .ToList();
-            var idLayerTostring = LayerMask.LayerToName(level + 10);
-            List<Screw.Screw> screwsActives= lm.screwDict.GetValueOrDefault(level);
-            Debug.Log("Screws in layer " + level + ": " + (screwsActives != null ? screwsActives.Count.ToString() : "null"));
+            var idLayerTostring = LayerMask.LayerToName(layer + 10);
+            var listScrews = lm.screwDict.GetValueOrDefault(layer);
+
+            if (listScrews == null) return;
+            List<Screw.Screw> screwsActives= listScrews.Where(s => s!=null).ToList();
+            Debug.Log("Screws in layer " + layer + ": " + (screwsActives != null ? screwsActives.Count.ToString() : "null setting objects is:" +isOn));
             if (screwsActives == null) return;   
             foreach (var s in screwsActives)
             {

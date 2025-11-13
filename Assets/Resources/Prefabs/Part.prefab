@@ -79,9 +79,12 @@ MonoBehaviour:
   uniqueID: 
   isFalling: 0
   body: {fileID: 0}
-  activeSprite: {fileID: 0}
+  activeSprite: {fileID: 3305885524890713507}
   inactiveSprite: {fileID: 0}
   col: {fileID: 0}
+  OnStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!60 &3443628051376800410
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -171,7 +174,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3654897696587756919
 Transform:
   m_ObjectHideFlags: 0
@@ -231,7 +234,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 26e291fb089bfd6448f0db8a248ecb97, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 0.4660377, b: 0.4660377, a: 0.5686275}
   m_FlipX: 0
   m_FlipY: 0
@@ -239,7 +242,7 @@ SpriteRenderer:
   m_Size: {x: 0.96, y: 1.42}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &4621111858666557195
@@ -253,12 +256,12 @@ GameObject:
   - component: {fileID: 8303962688053854275}
   - component: {fileID: 8160175156728093057}
   m_Layer: 13
-  m_Name: Union 8 #3693
+  m_Name: Outline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8303962688053854275
 Transform:
   m_ObjectHideFlags: 0
@@ -318,7 +321,7 @@ SpriteRenderer:
   m_SortingLayerID: 1055203399
   m_SortingLayer: 13
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 61f0809ac42977d428bf42bb358baa25, type: 3}
+  m_Sprite: {fileID: -4646876343654227710, guid: 94580d8f31d8c3e42ae545fa2ecf6324, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -405,7 +408,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 46bcbad035bd841469f7b3df95766c79, type: 3}
+  m_Sprite: {fileID: -4646876343654227710, guid: 07cf162203c1e66439d2664c859237c7, type: 3}
   m_Color: {r: 1, g: 0.4660377, b: 0.4660377, a: 0.5686275}
   m_FlipX: 0
   m_FlipY: 0

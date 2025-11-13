@@ -13,13 +13,12 @@ namespace Ingame.Screw
         [SerializeField] private ColorEnum color;
         [SerializeField] private bool isPartiallyVisible;
         [SerializeField] private bool isClicked;
-         public int layerMask;
+        public int layerMask;
         [SerializeField] internal int sortingOrder;
         [SerializeField] private bool isMultipleJoint;
         [SerializeField] protected CircleCollider2D _circleCollider2D;
         [SerializeField] private Rigidbody2D rb;
         [SerializeField] protected SpriteRenderer render;
-        [SerializeField] private SpriteRenderer cross;
         [SerializeField] private LayerMask _layerMask;
         [SerializeField] protected HingeController hingeController;
         public HingeController HingeController
@@ -80,7 +79,7 @@ namespace Ingame.Screw
         {
             IsActionComplete = false;
         }
-      
+
         public string BasePartLayerID { get => basePartLayerID; set => basePartLayerID = value; }
 
         public virtual void Awake()
@@ -96,16 +95,16 @@ namespace Ingame.Screw
         public void ResetRender()
         {
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            cross.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            //cross.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
         internal void SetSortingOrderAndLayer(int order, string layer)
         {
 
             basePartLayerID = layer;
             render.sortingLayerName = layer;
-            cross.sortingLayerName = layer;
+           //cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
-            cross.sortingOrder = order + 2;
+           // cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
             float z = 0.2f * (layerIndex + 1);
@@ -138,12 +137,11 @@ namespace Ingame.Screw
 
 
             // Kiểm tra các Collider2D thuộc các lớp trong bán kính của CircleCollider2D
-            Collider2D[] overlappingColliders = Physics2D.OverlapCircleAll(CircleCollider2D.transform.position, CircleCollider2D.radius - 0.05f, mask);
+            Collider2D[] overlappingColliders = Physics2D.OverlapCircleAll(CircleCollider2D.transform.position, CircleCollider2D.radius - 0.1f, mask);
 
             // Nếu có đối tượng nào chặn, đưa ra cảnh báo và thực hiện hành động
             if (overlappingColliders.Length > 0)
             {
-                Debug.LogWarning("Screw bị chặn bởi một đối tượng, ngoại trừ connectedBody.");
                 ShakeScrew();  // Gọi hàm để tạo hiệu ứng rung (nếu có)
                 isClicked = false; // Reset flag để có thể click lần sau
                 ResetClickedFlag();
@@ -232,7 +230,7 @@ namespace Ingame.Screw
         {
             var targetPos = render.transform.position;
             targetPos -= new Vector3(0, 0.25f, 0);
-            cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
+           // cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
 
             render.transform.DOMove(targetPos, 0.5f).OnComplete(() => { isMoving = false; });
             _transform.SetParent(holdScrew.transform);
@@ -242,8 +240,14 @@ namespace Ingame.Screw
         {
             var targetPos = render.transform.position;
             targetPos += new Vector3(0, 0.25f, 0);
-            cross.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
-            render.transform.DOMove(targetPos, 0.5f).OnComplete(() => callback?.Invoke());
+           // cross.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
+            render.transform.DOMove(targetPos, 0.5f).OnComplete(() =>
+            {
+                hingeController.Reset();
+
+                transform.position = targetPos;
+                callback?.Invoke();
+            });
         }
         public virtual void FreeHinge()
         {
@@ -253,40 +257,11 @@ namespace Ingame.Screw
 
         public void ChangeScrewColor(UnityEngine.Color color)
         {
-            render.color = color;
         }
 
         public void ChangeScrewColorByEnum(ColorEnum color)
         {
-            switch (color)
-            {
-                case ColorEnum.Red:
-                    ChangeScrewColor(UnityEngine.Color.red);
-                    break;
-                case ColorEnum.Blue:
-                    ChangeScrewColor(UnityEngine.Color.blue);
-                    break;
-                case ColorEnum.Yellow:
-                    ChangeScrewColor(UnityEngine.Color.yellow);
-                    break;
-                case ColorEnum.Black:
-                    ChangeScrewColor(UnityEngine.Color.black);
-                    break;
-                case ColorEnum.Magenta:
-                    ChangeScrewColor(UnityEngine.Color.magenta);
-                    break;
-                case ColorEnum.White:
-                    ChangeScrewColor(UnityEngine.Color.white);
-                    break;
-                case ColorEnum.Gray:
-                    ChangeScrewColor(UnityEngine.Color.gray);
-                    break;
-                case ColorEnum.Green:
-                    ChangeScrewColor(UnityEngine.Color.green);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(color), color, null);
-            }
+            render.sprite = color.ToScrewSprite();
         }
         public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart, HingeConnection connection)
         {

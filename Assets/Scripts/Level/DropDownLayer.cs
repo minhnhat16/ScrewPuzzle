@@ -50,5 +50,8 @@ public class DropDownLayer : MonoBehaviour
     {
         dropDown.onValueChanged.RemoveListener(action);
     }
-
+    public int Value()
+    {
+        return dropDown.value;
+    }
 }

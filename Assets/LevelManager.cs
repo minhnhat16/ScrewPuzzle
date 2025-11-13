@@ -9,11 +9,13 @@ using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
+    public LayerManager layerManager;
     [SerializeField] private bool isInitDone;
     public int currentLevelID;
 
@@ -181,7 +183,7 @@ public class LevelManager : MonoBehaviour
     {
         currentLevelID = levelId;
 
-       Debug.Log("Step 1: Initializing Level Object");
+        Debug.Log("Step 1: Initializing Level Object");
         // Step 1: Initialize Level Object
         yield return InitializeLevelObject();
         //Debug.Log("Step 1 complete");
@@ -216,9 +218,11 @@ public class LevelManager : MonoBehaviour
         // Step 6: Activate Parts
         yield return ActivateAllParts();
         //Debug.Log("Step 6 complete");
+        this.layerManager = currentLevelObject.GetComponent<LayerManager>();
+        layerManager.visibilityController.ApplyLayerVisibility();
 
 
-        Debug.Log("Level loading complete.");   
+        Debug.Log("Level loading complete.");
         callback?.Invoke();
         //Debug.Log($"Level data with ID {levelId} loaded.");
     }
@@ -259,6 +263,8 @@ public class LevelManager : MonoBehaviour
         List<BaseLayer> listBaseLayer = new();
         var layerManager = currentLevelObject.GetComponent<LayerManager>();
 
+        var layerScrewsDict = new Dictionary<int, List<Screw>>();
+        var queue = new Queue<BaseLayer>();
         foreach (var layerData in levelData.layers)
         {
             var layerComponent = CreateLayer(layerID++);
@@ -266,12 +272,24 @@ public class LevelManager : MonoBehaviour
             {
                 yield return LoadPart(layerComponent, partData, layerManager);
             }
-
+            layerComponent.RegisterPartListener();
             listBaseLayer.Add(layerComponent);
+
+            queue.Enqueue(layerComponent);
+            Debug.Log($"Layer {layerData.layerId} loaded with {layerData.parts.Count} parts.");
+            layerScrewsDict.Add(layerData.layerId, new List<Screw>());
         }
+        layerManager.screwDict = layerScrewsDict;
+
+
+
+        Debug.Log($"All layers loaded. Total layers: {layerScrewsDict.Count}. Keys: {string.Join(", ", layerScrewsDict.Keys.Select(k => k.ToString()))}");
 
         layerManager.Layers = listBaseLayer;
         layerManager.CoverDictToList();
+        layerManager.visibilityController.layerQueue = queue;
+        Debug.Log("Applying layer visibility settings..." + listBaseLayer.Count);
+
     }
     private BaseLayer CreateLayer(int layerID)
     {
@@ -285,6 +303,8 @@ public class LevelManager : MonoBehaviour
     {
         var partComponent = PartPool.Instance.pool.SpawnNonGravity();
         var partGameObject = partComponent.gameObject;
+
+
         partComponent = partGameObject.GetComponent<BasePart>();
 
         if (partGameObject != null && partComponent != null)
@@ -304,10 +324,16 @@ public class LevelManager : MonoBehaviour
             {
                 partComponent.Renderer.color = color;
             }
-
+            partComponent.name = partData.partName;
             partComponent.GenerateColliderFromSprite();
-            partComponent.SetSortingLayer(LayerMask.LayerToName(partGameObject.layer));
+            partComponent.SetSortingLayer(partData.layer);
+            layerComponent.Parts.Add(partComponent);
+
+
         }
+
+        Debug.Log($"Loading part {partData.partName} at position {partData.partPosition}," +
+            $" and layer {partData.layer}, and real layer {partComponent.Renderer.sortingLayerName}");
 
         yield return null;
     }
@@ -371,6 +397,15 @@ public class LevelManager : MonoBehaviour
             ScrewManager.AddHingeConnection(hinge, connectedPart);
 
             //Debug.Log($"Hinge connection successfully created for part ID {hingeConnection.bodyPartUniqueID}");
+        }
+
+
+        var lm = currentLevelObject.GetComponent<LayerManager>();
+
+        var partLayer = lm.GetPartByKey(screwData.hingeConnections[0].bodyPartUniqueID).PartLayer() - 10;
+        if (lm.screwDict.ContainsKey(partLayer)){
+            lm.screwDict[partLayer].Add(screw);
+            Debug.Log("Appending key at " + partLayer + " screw" + screw.name);
         }
 
         ScrewManager.AddScrew(screw);

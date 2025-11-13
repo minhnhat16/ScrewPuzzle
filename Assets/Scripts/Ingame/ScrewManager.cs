@@ -11,6 +11,7 @@ namespace Ingame
     {
         [SerializeField] private LayerMask layerMask;
         [SerializeField] private List<Screw.Screw> _screws = new();
+
         public Dictionary<HingeJoint2D, BasePart> hingeConnections = new Dictionary<HingeJoint2D, BasePart>();
         public event Action<Screw.Screw> OnScrewRemoved;
         public LayerMask LayerMask
@@ -47,6 +48,7 @@ namespace Ingame
 
         public void AddScrew(Screw.Screw screw)
         {
+           
             _screws.Add(screw);
         }
 
