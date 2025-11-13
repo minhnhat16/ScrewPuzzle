@@ -39,7 +39,7 @@ namespace Ingame
             var listScrews = lm.screwDict.GetValueOrDefault(layer);
 
             if (listScrews == null) return;
-            List<Screw.Screw> screwsActives = listScrews.Where(s => s != null && s.gameObject.activeSelf).ToList();
+            List<Screw.Screw> screwsActives = listScrews.Where(s => s != null ).ToList();
             Debug.Log("Screws in layer " + layer + ": " + (screwsActives != null ? screwsActives.Count.ToString() : "null setting objects is:" + isOn));
             if (screwsActives == null) return;
             foreach (var s in screwsActives)

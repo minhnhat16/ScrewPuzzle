@@ -145,7 +145,7 @@ namespace Ingame
                         LevelManager.Instance.RemovePartItem(obj);
                     }
                     return;
-                }
+                }   
                 else
                 {
                     foundScrew = clickedObject.GetComponent<Screw.Screw>();
@@ -161,10 +161,8 @@ namespace Ingame
 
         private void ScrewClicked(Screw.Screw screw)
         {
-            // Debug.LogWarning("Screw Clicked");
             screwQueue.Enqueue(screw);
             _screw.Clear();
-            // Start processing the queue if it's not already processing
             if (processCoroutine == null)
             {
                 var layermanager = LevelManager.Instance.layerManager;

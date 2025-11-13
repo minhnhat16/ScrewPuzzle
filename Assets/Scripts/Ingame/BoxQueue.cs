@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -37,6 +38,7 @@ namespace Ingame
         public UnityEvent<bool> onCompleteClearBoxes = new();
         public UnityEvent<Screw.Screw> onDeletOneScrew = new();
         private Coroutine alignCoroutine;
+        public float leftBound ;
 
         public bool MovingBox { get => movingBox; set => movingBox = value; }
         private void OnEnable()
@@ -257,7 +259,7 @@ namespace Ingame
         {
             if (CameraMain.instance.GetCam() != null)
             {
-                float leftBoundary = CameraMain.instance.GetLeft();
+                float leftBoundary = CameraMain.instance.GetLeft() - this.leftBound;
                 float rightBoundary = CameraMain.instance.GetRight();
                 float topBoundary = CameraMain.instance.GetTop() - topAlignSpacing;
 
@@ -265,7 +267,7 @@ namespace Ingame
                 float width = rightBoundary - leftBoundary;
 
                 // Define a minimum spacing between the slots
-                float minSpacing = 1.5f; // Adjust this value to control how far apart boxes should be
+                float minSpacing = spacingBox; // Adjust this value to control how far apart boxes should be
 
                 // Calculate the maximum possible spacing based on the number of slots
                 float spacing = Mathf.Max(minSpacing, width / (totalActiveSlots + 1)); // Ensure spacing is never less than minSpacing
@@ -629,6 +631,12 @@ namespace Ingame
             {
                 box.Reset();
             }
+        }
+
+        private void OnValidate()
+        {
+            StartAligningSlots(this.boxSlots);
+
         }
     }
 }
