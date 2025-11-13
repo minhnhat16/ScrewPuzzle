@@ -299,7 +299,6 @@ public class LevelMaker : MonoBehaviour
 
     private void OnValidate()
     {
-        GameViewUtils.SetWidescreenTest();
     }
 }
 

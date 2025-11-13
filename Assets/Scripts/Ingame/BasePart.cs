@@ -34,6 +34,7 @@ namespace Ingame
         [SerializeField] private bool isFalling;
         [SerializeField] private Rigidbody2D body;
         [SerializeField] private SpriteRenderer activeSprite;
+        [SerializeField] private SpriteRenderer outline;
         [SerializeField] private Sprite inactiveSprite;
         [SerializeField] private PolygonCollider2D col;
 
@@ -45,7 +46,11 @@ namespace Ingame
             get => isFalling;
             private set => isFalling = value;
         }
-        public Sprite OutLine => inactiveSprite;
+        public SpriteRenderer OutLine
+        {
+            get => outline;
+            set => outline = value;
+        }
 
 
         public UnityEvent<bool,BasePart> OnStateChanged = new();
@@ -89,6 +94,8 @@ namespace Ingame
             col.pathCount = 0;
             this.activeSprite = render;
             col.SetPath(0, this.activeSprite.sprite.vertices);
+
+            gameObject.tag = "Part";
         }
 
 

@@ -141,7 +141,7 @@ public class DailyItem : MonoBehaviour
             case DailyReward.AddHold:
                 //Debug.Log("Reward: Bomb");
                 // Add logic for bomb reward
-                DataAPIController.instance.AddItemTotal(ItemType.AddHold, intAmount);
+                DataAPIController.instance.AddItemTotal(ItemType.Magnet, intAmount);
 
                 break;
             case DailyReward.GoldL:
@@ -157,14 +157,14 @@ public class DailyItem : MonoBehaviour
             case DailyReward.AddBox:
                 //Debug.Log("Reward: Magnet");
                 // Add logic for magnet reward
-                DataAPIController.instance.AddItemTotal(ItemType.AddBox, intAmount);
+                DataAPIController.instance.AddItemTotal(ItemType.Breaker, intAmount);
                 break;
             case DailyReward.Bonus:
                 //Debug.Log("Reward: Bonus");
                 // Add logic for bonus reward
-                DataAPIController.instance.AddItemTotal(ItemType.AddHold, 10);
-                DataAPIController.instance.AddItemTotal(ItemType.AddBox, 10);
-                DataAPIController.instance.AddItemTotal(ItemType.ClearOneScrew, 10);
+                DataAPIController.instance.AddItemTotal(ItemType.Magnet, 10);
+                DataAPIController.instance.AddItemTotal(ItemType.Breaker, 10);
+                DataAPIController.instance.AddItemTotal(ItemType.Drill, 10);
                 DataAPIController.instance.AddGold(1500, null);
                 //DataAPIController.instance.AddGem(20);
                 break;

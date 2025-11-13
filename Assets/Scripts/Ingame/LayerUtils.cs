@@ -31,7 +31,7 @@ namespace Ingame
         {
 
             if (layer < 0 || layer >= lm.Layers.Count) return;
-                List <BasePart> parts = lm.Layers[layer].parts;
+            List<BasePart> parts = lm.Layers[layer].parts;
             List<string> idParts = parts.Where(p => p != null)
                                         .Select(p => p.uniqueID)
                                         .ToList();
@@ -39,9 +39,9 @@ namespace Ingame
             var listScrews = lm.screwDict.GetValueOrDefault(layer);
 
             if (listScrews == null) return;
-            List<Screw.Screw> screwsActives= listScrews.Where(s => s!=null).ToList();
-            Debug.Log("Screws in layer " + layer + ": " + (screwsActives != null ? screwsActives.Count.ToString() : "null setting objects is:" +isOn));
-            if (screwsActives == null) return;   
+            List<Screw.Screw> screwsActives = listScrews.Where(s => s != null && s.gameObject.activeSelf).ToList();
+            Debug.Log("Screws in layer " + layer + ": " + (screwsActives != null ? screwsActives.Count.ToString() : "null setting objects is:" + isOn));
+            if (screwsActives == null) return;
             foreach (var s in screwsActives)
             {
                 s.gameObject.SetActive(isOn);
@@ -63,7 +63,7 @@ namespace Ingame
                 SetLayerRecursively(child.gameObject, newLayer);
             }
         }
-        public static void FadeSprite(SpriteRenderer old,Sprite newSprite, float time = 0.5f)
+        public static void FadeSprite(SpriteRenderer old, Sprite newSprite, float time = 0.5f)
         {
             // Fade out
             old.DOFade(0f, time)

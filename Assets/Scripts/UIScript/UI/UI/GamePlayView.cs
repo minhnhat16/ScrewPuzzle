@@ -117,9 +117,9 @@ public class GamePlayView : BaseView
 
     IEnumerator GetItemFormData()
     {
-        yield return new WaitUntil(() => DataAPIController.instance.GetItemData(ItemType.AddHold) is not null);
-        ItemData bombTotal = DataAPIController.instance.GetItemData(ItemType.AddHold);
-        ItemData magnetTotal = DataAPIController.instance.GetItemData(ItemType.ClearOneScrew);
+        yield return new WaitUntil(() => DataAPIController.instance.GetItemData(ItemType.Magnet) is not null);
+        ItemData bombTotal = DataAPIController.instance.GetItemData(ItemType.Magnet);
+        ItemData magnetTotal = DataAPIController.instance.GetItemData(ItemType.Drill);
         /*bomb_lb.text = $"{bombTotal.total}";
         magnet_lb.text = $"{magnetTotal.total}";
         magnet_lb.text = $"{magnetTotal.total}";*/
@@ -148,7 +148,7 @@ public class GamePlayView : BaseView
     {
         // Disable the button to avoid multiple clicks
         addHoldBtn.interactable = false;
-        var itemType = ItemType.AddHold;
+        var itemType = ItemType.Magnet;
         // Get the item data for the 'AddHold' item type
         var itemData = DataAPIController.instance.GetItemData(itemType);
 
@@ -182,7 +182,7 @@ public class GamePlayView : BaseView
     {
         // Disable the button to avoid multiple clicks
         addBoxBtn.interactable = false;
-        var itemType = ItemType.AddBox;
+        var itemType = ItemType.Breaker;
         // Get the item data for the 'AddHold' item type
         var itemData = DataAPIController.instance.GetItemData(itemType);
 
@@ -214,7 +214,7 @@ public class GamePlayView : BaseView
     {
         // Disable the button to avoid multiple clicks
         addBoxBtn.interactable = false;
-        var itemType = ItemType.ClearOneScrew;
+        var itemType = ItemType.Drill;
         // Get the item data for the 'AddHold' item type
         var itemData = DataAPIController.instance.GetItemData(itemType);
 

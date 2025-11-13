@@ -8,10 +8,10 @@ using IEnumerator = System.Collections.IEnumerator;
 
 namespace Ingame.Screw
 {
-    public class Screw : MonoBehaviour
+    public class Screw : MonoBehaviour,IResetable
     {
         [SerializeField] private ColorEnum color;
-        [SerializeField] private bool isPartiallyVisible;
+        [SerializeField] private bool isInHold;
         [SerializeField] private bool isClicked;
         public int layerMask;
         [SerializeField] internal int sortingOrder;
@@ -68,6 +68,7 @@ namespace Ingame.Screw
 
         public IEnumerator Init()
         {
+            IsInHold = false;
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
             yield return new WaitUntil(() => bodyLayer != null);
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
@@ -81,6 +82,7 @@ namespace Ingame.Screw
         }
 
         public string BasePartLayerID { get => basePartLayerID; set => basePartLayerID = value; }
+        public bool IsInHold { get => isInHold; set => isInHold = value; }
 
         public virtual void Awake()
         {
@@ -102,9 +104,9 @@ namespace Ingame.Screw
 
             basePartLayerID = layer;
             render.sortingLayerName = layer;
-           //cross.sortingLayerName = layer;
+            //cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
-           // cross.sortingOrder = order + 2;
+            // cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
             float z = 0.2f * (layerIndex + 1);
@@ -183,11 +185,27 @@ namespace Ingame.Screw
             //else put the screw to default queue
             return true;
         }
+        public virtual void DoMoveToHold(HoldScrew holdScrew, bool isTele)
+        {
+            isClicked = isMoving = true;
+            IsInHold = true;
+            if (isTele)
+            {
+                isClicked = isMoving = true;
+                IsInHold = true;
+                transform.localPosition = Vector3.zero;
+                _circleCollider2D.enabled = false;
+                FreeHinge();
+                _transform.SetParent(holdScrew.transform);
 
+                return;
+            }
+            DoMoveToHold(holdScrew);
+        }
         //further add move with DOTween
         public virtual void DoMoveToHold(HoldScrew holdScrew)
         {
-            isClicked = isMoving = true;
+
             DoMoveScrewUp(() =>
             {
                 _circleCollider2D.enabled = false;
@@ -214,10 +232,8 @@ namespace Ingame.Screw
 
             // Di chuyển render trước, đồng thời di chuyển cha
             sequence.Append(render.transform.DOJump(toPos, 2, 1, 0.5f, false));
-            sequence.Join(_transform.DOMove(toPos - offset, 0.5f)); // Di chuyển cha cùng với offset để giữ render ở đúng vị trí
             sequence.OnPlay(() => isMoving = true);
             // free joint to release wood and joint
-
             // Khi cả hai di chuyển xong
             sequence.OnComplete(() =>
             {
@@ -226,21 +242,30 @@ namespace Ingame.Screw
             });
         }
 
-        public virtual void MoveScrewDown(HoldScrew holdScrew)
+        public Tween MoveScrewDown(HoldScrew holdScrew)
         {
-            var targetPos = render.transform.position;
-            targetPos -= new Vector3(0, 0.25f, 0);
-           // cross.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360);
+            // target is 0.25 down from current render position
+            var targetPos = render.transform.position - new Vector3(0f, 0.25f, 0f);
 
-            render.transform.DOMove(targetPos, 0.5f).OnComplete(() => { isMoving = false; });
-            _transform.SetParent(holdScrew.transform);
+            // Build a sequence so rotation and move happen together and we can control callbacks
+            Sequence seq = DOTween.Sequence();
+            seq.Append(render.transform.DORotate(new Vector3(0f, 0f, -360f), 1f, RotateMode.FastBeyond360));
+            seq.Join(render.transform.DOMoveY(targetPos.y, 1f).SetEase(Ease.OutQuad));
+            seq.OnComplete(() =>
+            {
+                // parent the screw to the hold and stop movement flag
+                _transform.SetParent(holdScrew.transform);
+                isMoving = false;
+            });
 
+            return seq;
         }
         public void DoMoveScrewUp(Action callback)
         {
             var targetPos = render.transform.position;
             targetPos += new Vector3(0, 0.25f, 0);
-           // cross.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
+
+            render.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
             render.transform.DOMove(targetPos, 0.5f).OnComplete(() =>
             {
                 hingeController.Reset();
@@ -299,12 +324,11 @@ namespace Ingame.Screw
             return hingeJoint;
         }
 
-        public void Reset()
+        public void OnReset()
         {
             isClicked = false;
             color = ColorEnum.Clear;
             CircleCollider2D.enabled = true;
-            //Debug.Log("Reset screw");
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
             hingeController.Reset();

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -99,10 +100,10 @@ namespace Ingame
         {
             // Cache the main camera
             if (mainCam == null) return;
-
+            bool isHadlingItem = ItemController.ins.IsHandlingItem;
             // Convert screen position to world position
             Vector2 worldPosition = mainCam.ScreenToWorldPoint(screenPosition);
-
+            string tag = isHadlingItem ? "Part" : "Player";
             // Perform a 2D raycast to detect objects at the click position
             var hits = Physics2D.RaycastAll(worldPosition, Vector2.zero, Mathf.Infinity);
 
@@ -116,8 +117,9 @@ namespace Ingame
 
                 var obj = hit.collider.gameObject;
 
+
                 // Only consider objects with the "Player" tag
-                if (obj.CompareTag("Player"))
+                if (obj.CompareTag(tag))
                 {
                     float z = obj.transform.position.z;
 
@@ -133,12 +135,27 @@ namespace Ingame
             // If a valid object was found, process it
             if (clickedObject != null)
             {
-                foundScrew = clickedObject.GetComponent<Screw.Screw>();
-                if (foundScrew != null)
+
+                if (isHadlingItem)
                 {
-                    _screw.Add(foundScrew);
-                    onScrewClicked?.Invoke(foundScrew);
+                    var obj = clickedObject.GetComponent<BasePart>();
+                    if (obj)
+                    {
+                        ItemController.ins.IsHandlingItem = false;
+                        LevelManager.Instance.RemovePartItem(obj);
+                    }
+                    return;
                 }
+                else
+                {
+                    foundScrew = clickedObject.GetComponent<Screw.Screw>();
+                    if (foundScrew != null)
+                    {
+                        _screw.Add(foundScrew);
+                        onScrewClicked?.Invoke(foundScrew);
+                    }
+                }
+
             }
         }
 
@@ -156,6 +173,10 @@ namespace Ingame
             }
         }
 
+        private void PartClicked(BasePart part)
+        {
+            if (part == null) return;
 
+        }
     }
 }

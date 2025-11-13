@@ -78,7 +78,7 @@ namespace UIScript.Dialog
             data.levelStar = 3;
             data.levelID = currentLevel;
             data.isCompleted = true;
-            levelManager.Reset();
+            levelManager.OnReset();
             DataAPIController.instance.SaveNewLevelData(data, () =>
             {
                 SetButtonInteractAble(true);

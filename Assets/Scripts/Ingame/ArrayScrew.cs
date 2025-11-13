@@ -8,12 +8,12 @@ using UnityEngine;
 using UnityEngine.Events;
 namespace Ingame
 {
-    public class ArrayScrew : MonoBehaviour
+    public class ArrayScrew : MonoBehaviour, IResetable
     {
         public static ArrayScrew Instance;
         [SerializeField] private int coutHoldActive;
         [SerializeField] private float totalWidth;
-        [SerializeField] private SpriteRenderer spriteRenderer;
+        //[SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
         [SerializeField] private List<Screw.Screw> screws; // Mảng các HoldScrew (ô chứa screw)
         private Coroutine alignmentCoroutine;
@@ -47,13 +47,15 @@ namespace Ingame
 
         private void Start()
         {
-            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            //spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             coutHoldActive = 7;
             HoldAlignment();
         }
 
+
         public void SpawnNewHold()
         {
+            Debug.Log("Spawn new hold");
             coutHoldActive++;
             var hold = holdScrews.FirstOrDefault(hold => !hold.gameObject.activeSelf);
             if (hold == null) return;
@@ -63,12 +65,19 @@ namespace Ingame
         public void ShowArrayScrew()
         {
             coutHoldActive = 5;
-            spriteRenderer.enabled = true;
+            //spriteRenderer.enabled = true;
             for (int i = 0; i < coutHoldActive; i++)
             {
                 holdScrews[i].gameObject.SetActive(true);
             }
-            holdScrews[coutHoldActive].gameObject.SetActive(false);
+        }
+        public void ShowArrayActive(int activeCount)
+        {
+            coutHoldActive = activeCount;
+            for (int i = 0; i < holdScrews.Count; i++)
+            {
+                holdScrews[i].gameObject.SetActive(i < activeCount);
+            }
         }
         public void HoldAlignment()
         {
@@ -86,59 +95,50 @@ namespace Ingame
             var activeHolds = holdScrews.Where(hold => hold.gameObject.activeSelf).ToList();
             if (activeHolds.Count == 0) yield break;
 
-            // Calculate the width of the spriteRenderer (assumed to be the boundary container)
             float totalWidth = this.totalWidth;
-
-            // Minimum spacing between holds
-            float minSpacing = 0.25f; // Adjust this as needed for spacing between screws
-
-            // Calculate the spacing between active holds
+            float minSpacing = 0.25f;
             float spacing = Mathf.Max(minSpacing, totalWidth / (activeHolds.Count + 1));
 
-            // Calculate the starting X position (leftmost position)
-            float startX = spriteRenderer.bounds.min.x - minSpacing;
+            // ✅ Căn giữa
+            float totalOccupiedWidth = spacing * (activeHolds.Count - 1);
+            float startX = -totalOccupiedWidth / 2f;
 
-            // Duration of the movement (in seconds)
             float duration = 0.5f;
 
-            // Store initial positions for smooth transition
-            List<Vector3> initialPositions = activeHolds.Select(hold => hold.transform.localPosition).ToList();
+            List<Vector3> initialPositions = activeHolds.Select(h => h.transform.localPosition).ToList();
             List<Vector3> targetPositions = new List<Vector3>();
 
-            // Set target positions for each active hold
             for (int i = 0; i < activeHolds.Count; i++)
             {
-                var targetPosition = new Vector3(startX + spacing * (i + 1), activeHolds[i].transform.localPosition.y, activeHolds[i].transform.localPosition.z);
-                targetPositions.Add(targetPosition);
+                Vector3 localPos = activeHolds[i].transform.localPosition;
+                var targetPos = new Vector3(startX + spacing * i, localPos.y, localPos.z);
+                targetPositions.Add(targetPos);
             }
 
-            // Lerp the positions over time
-            float elapsedTime = 0f;
-            while (elapsedTime < duration)
+            float elapsed = 0f;
+            while (elapsed < duration)
             {
-                elapsedTime += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsedTime / duration);
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
 
                 for (int i = 0; i < activeHolds.Count; i++)
                 {
                     activeHolds[i].transform.localPosition = Vector3.Lerp(initialPositions[i], targetPositions[i], t);
                 }
 
-                yield return null; // Wait for the next frame
+                yield return null;
             }
 
-            // Ensure the final positions are applied
             for (int i = 0; i < activeHolds.Count; i++)
-            {
                 activeHolds[i].transform.localPosition = targetPositions[i];
-            }
 
             alignmentCoroutine = null;
         }
+
         // Hàm thêm Screw vào một ô trống trong holdScrew
-        private void ScrewFullEvent()   
+        private void ScrewFullEvent()
         {
-            
+
             IngameController.Instance.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
@@ -150,10 +150,10 @@ namespace Ingame
 
                 // Kiểm tra nếu tất cả các ô đều đầy
                 bool allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
-                if (allFull )
+                if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
-                    
+
                     yield return new WaitForSeconds(2f); // Chờ 2 giây để chắc chắn
 
                     // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
@@ -225,14 +225,14 @@ namespace Ingame
         {
             // Tìm box phù hợp cho screw
             var suitableBox = BoxQueue.Instance.FindSuitableBox(screw);
-
+            bool canAdd = false;
             if (suitableBox != null)
             {
                 // Thêm screw vào box phù hợp
-                BoxQueue.Instance.AddScrewToBox(screw, suitableBox);
-                return;
+                BoxQueue.Instance.AddScrewToBox(screw, suitableBox, out canAdd);
             }
-            holdScrew.AddScrew(screw, (onMoved) =>
+            if (canAdd) return;
+            holdScrew.AddScrew(screw, false,(onMoved) =>
             {
                 // Kiểm tra nếu tất cả holdScrew đã đầy
                 CheckIfHoldScrewsFull();
@@ -242,6 +242,7 @@ namespace Ingame
             screws.Add(screw);
             var screwMng = LevelManager.Instance.ScrewManager;
             screwMng.RemoveScrew(screw);
+
         }
 
         public void ClearAllScrewsOnArray()
@@ -254,7 +255,7 @@ namespace Ingame
         {
             foreach (var screw in screws)
             {
-                
+
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
                 yield return null;
             }
@@ -266,6 +267,11 @@ namespace Ingame
 
             }
             screws.Clear();
+        }
+
+        public void OnReset()
+        {
+            ShowArrayActive(5);
         }
     }
 }

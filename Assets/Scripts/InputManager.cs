@@ -2,13 +2,11 @@
 
 public class InputManager : MonoBehaviour
 {
-    // Tạo delegate để lắng nghe các sự kiện phím nhấn
     public delegate void KeyAction();
     public static event KeyAction onKey0;
     public static event KeyAction onKey1;
     public static event KeyAction onKey2;
     public static event KeyAction onKeyA;
-    // ... Tương tự cho tất cả các phím số và ký tự khác
 
     private void Update()
     {

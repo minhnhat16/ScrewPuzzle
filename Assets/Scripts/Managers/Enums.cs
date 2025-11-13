@@ -1,10 +1,11 @@
 
 public enum ItemType
 {
-   AddHold = 0,
-   AddBox = 1,
-   ClearOneScrew =2,
-   Gold = 3,
+   Magnet = 0,
+   Breaker = 1,
+   Drill =2,
+   AddBox = 3,
+   Gold = 4,
 }
 public enum Currency
 {

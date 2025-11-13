@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1957665761345039571}
-  - component: {fileID: 6508685874718984852}
   - component: {fileID: 3990346827129052022}
   - component: {fileID: 3443628051376800410}
+  - component: {fileID: 6508685874718984852}
   m_Layer: 10
   m_Name: Part
   m_TagString: Part
@@ -37,33 +37,6 @@ Transform:
   - {fileID: 3654897696587756919}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &6508685874718984852
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 501222740561122154}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!114 &3990346827129052022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,6 +53,7 @@ MonoBehaviour:
   isFalling: 0
   body: {fileID: 0}
   activeSprite: {fileID: 3305885524890713507}
+  outline: {fileID: 8160175156728093057}
   inactiveSprite: {fileID: 0}
   col: {fileID: 0}
   OnStateChanged:
@@ -158,6 +132,33 @@ PolygonCollider2D:
       - {x: 0.39999998, y: -0.275}
       - {x: 0.83, y: -0.275}
   m_UseDelaunayMesh: 0
+--- !u!50 &6508685874718984852
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501222740561122154}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1640164221571907669
 GameObject:
   m_ObjectHideFlags: 0

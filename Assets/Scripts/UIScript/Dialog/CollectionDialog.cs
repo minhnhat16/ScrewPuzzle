@@ -104,7 +104,7 @@ public class CollectionDialog : BaseDialog
         for (int i = 0; i < records.Count; i++)
         {
             string spriteName = records[i].iconName;
-            var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
+            var sprite = SpriteLibControl.Instance.GetSpriteByName(spriteName);
             bool isToggleOn = spriteName.CompareTo(crBackGround.name) == 0;
             Debug.Log($"Init BackGround Toggle Group id{i} and isToggleOn:{isToggleOn}");
             items[i].Init(i, sprite, isToggleOn,CollectionLable.BackGround);
@@ -120,7 +120,7 @@ public class CollectionDialog : BaseDialog
         for (int i = 0; i < records.Count; i++)
         {
             string spriteName = records[i].iconName;
-            var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
+            var sprite = SpriteLibControl.Instance.GetSpriteByName(spriteName);
             bool isToggleOn = spriteName.CompareTo(crBoardColor.name) == 0;
             Debug.Log($"Init Board Toggle Group id{i} and isToggleOn:{isToggleOn}");
 
@@ -137,7 +137,7 @@ public class CollectionDialog : BaseDialog
         for (int i = 0; i < records.Count; i++)
         {
             string spriteName = records[i].iconName;
-            var sprite = System.SpriteLibControl.Instance.GetSpriteByName(spriteName);
+            var sprite = SpriteLibControl.Instance.GetSpriteByName(spriteName);
             bool isToggleOn = spriteName.CompareTo(crScrewSkin.name) == 0;
             Debug.Log($"{i} and isToggleOn:{isToggleOn}");
 

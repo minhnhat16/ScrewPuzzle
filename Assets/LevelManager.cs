@@ -10,9 +10,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.AnimatedValues;
 using UnityEngine;
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : MonoBehaviour, IResetable
 {
     public static LevelManager Instance;
     public LayerManager layerManager;
@@ -120,7 +121,7 @@ public class LevelManager : MonoBehaviour
         var boxManager = BoxQueue.Instance;
         var arrayScrew = ArrayScrew.Instance;
         arrayScrew.ShowArrayScrew();
-        Reset();
+        OnReset();
         arrayScrew.HoldAlignment();
 
 
@@ -218,7 +219,8 @@ public class LevelManager : MonoBehaviour
         // Step 6: Activate Parts
         yield return ActivateAllParts();
         //Debug.Log("Step 6 complete");
-        this.layerManager = currentLevelObject.GetComponent<LayerManager>();
+
+
         layerManager.visibilityController.ApplyLayerVisibility();
 
 
@@ -231,6 +233,7 @@ public class LevelManager : MonoBehaviour
     {
         var levelObject = LevelObjectPool.Instance.pool.SpawnNonGravity();
         currentLevelObject = levelObject;
+        this.layerManager = currentLevelObject.GetComponent<LayerManager>();
         levelObject.transform.SetParent(transform);
         levelObject.transform.localPosition = Vector3.zero;
 
@@ -261,7 +264,6 @@ public class LevelManager : MonoBehaviour
     {
         int layerID = 1;
         List<BaseLayer> listBaseLayer = new();
-        var layerManager = currentLevelObject.GetComponent<LayerManager>();
 
         var layerScrewsDict = new Dictionary<int, List<Screw>>();
         var queue = new Queue<BaseLayer>();
@@ -285,8 +287,11 @@ public class LevelManager : MonoBehaviour
 
         Debug.Log($"All layers loaded. Total layers: {layerScrewsDict.Count}. Keys: {string.Join(", ", layerScrewsDict.Keys.Select(k => k.ToString()))}");
 
+
+
         layerManager.Layers = listBaseLayer;
         layerManager.CoverDictToList();
+        layerManager.visibilityController.RePreviewMax = listBaseLayer.Count;
         layerManager.visibilityController.layerQueue = queue;
         Debug.Log("Applying layer visibility settings..." + listBaseLayer.Count);
 
@@ -317,9 +322,10 @@ public class LevelManager : MonoBehaviour
             layerManager.AddPart(partComponent);
 
             partGameObject.layer = LayerMask.NameToLayer(layerComponent.name);
-            var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
+            var sprite = SpriteLibControl.Instance.GetSprite(partData.spriteName);
+            var outline = SpriteLibControl.Instance.GetSprite(partData.spriteName, true);
             partComponent.Renderer.sprite = sprite;
-
+            partComponent.OutLine.sprite = outline;
             if (TryHexToColor(partData.colorString, out Color color))
             {
                 partComponent.Renderer.color = color;
@@ -370,7 +376,7 @@ public class LevelManager : MonoBehaviour
         foreach (var hingeConnection in screwData.hingeConnections)
         {
             //Debug.Log($"Attempting to create hinge connection for part ID {hingeConnection.bodyPartUniqueID}");
-
+            if (currentLevelObject == null) continue;
             // Try to fetch the connected part
             var connectedPart = currentLevelObject.GetComponent<LayerManager>()?.GetPartByKey(hingeConnection.bodyPartUniqueID);
 
@@ -403,7 +409,8 @@ public class LevelManager : MonoBehaviour
         var lm = currentLevelObject.GetComponent<LayerManager>();
 
         var partLayer = lm.GetPartByKey(screwData.hingeConnections[0].bodyPartUniqueID).PartLayer() - 10;
-        if (lm.screwDict.ContainsKey(partLayer)){
+        if (lm.screwDict.ContainsKey(partLayer))
+        {
             lm.screwDict[partLayer].Add(screw);
             Debug.Log("Appending key at " + partLayer + " screw" + screw.name);
         }
@@ -433,7 +440,7 @@ public class LevelManager : MonoBehaviour
     {
         //Debug.Log($"Screw {removedScrew.name} has been removed. Handling additional logic...");
     }
-    public void Reset()
+    public void OnReset()
     {
         if (transform.childCount > 0)
         {
@@ -443,7 +450,7 @@ public class LevelManager : MonoBehaviour
         }
         BoxQueue.Instance.ClearConfigRecords();
         BoxQueue.Instance.ClearCurrentBoxes();
-        ArrayScrew.Instance.ClearAllScrewsOnArray();
+        ArrayScrew.Instance.OnReset();
         screwManager.Reset();
 
         currentLevelObject = null;
@@ -462,5 +469,25 @@ public class LevelManager : MonoBehaviour
         }
         //Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
         return false;
+    }
+
+    internal void RemovePart(BasePart bp)
+    {
+        List<Screw> screwList = new List<Screw>();
+        layerManager.RemovePart(bp.uniqueID);
+    }
+
+    public void RemovePartItem(BasePart bp)
+    {
+        List<Screw> listScrews = layerManager.GetScrewByPart(bp);
+        var boxQueue = BoxQueue.Instance; ;
+        Debug.Log("List screw " + listScrews.Count);
+
+        boxQueue.TryMoveScrewsGroupedByColor(listScrews);
+
+        layerManager.RemovePart(bp.uniqueID);
+
+
+        bp.gameObject.SetActive(false);
     }
 }
