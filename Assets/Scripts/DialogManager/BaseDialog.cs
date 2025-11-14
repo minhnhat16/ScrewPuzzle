@@ -6,6 +6,8 @@ public class BaseDialog : MonoBehaviour
     public DialogIndex dialogIndex;
     [SerializeField]private BaseDialogAnimation baseDialogAnim;
 
+    public BaseDialogAnimation BaseDialogAnim { get => baseDialogAnim; set => baseDialogAnim = value; }
+
     private void Awake()
     {
         baseDialogAnim = gameObject.GetComponentInChildren<BaseDialogAnimation>();

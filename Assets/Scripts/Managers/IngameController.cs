@@ -32,7 +32,7 @@ namespace Managers
         [HideInInspector] public UnityEvent<float> onExpChange;
         [HideInInspector] public UnityEvent<bool> onCompleteLevel;
         [HideInInspector] public UnityEvent<ItemType> onItemInvoke;
-       
+
         public bool isPause;
 
         public bool ItemPerforming
@@ -43,8 +43,8 @@ namespace Managers
 
         public float ExpCurrent
         {
-                get { return exp_Current; }
-                set { exp_Current = value; }
+            get { return exp_Current; }
+            set { exp_Current = value; }
         }
 
         public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
@@ -54,7 +54,7 @@ namespace Managers
 
         private Coroutine inputCoroutine;
 
-        private void OnEnable() 
+        private void OnEnable()
         {
             onCompleteLevel.AddListener(CompleteLevel);
             onItemInvoke.AddListener(ItemIvoked);
@@ -79,7 +79,7 @@ namespace Managers
 
         private static void CompleteLevel(bool onComplete)
         {
-           Debug.Log("Level complete");
+            Debug.Log("Level complete");
             int level = LevelManager.Instance.currentLevelID;
             int totalGold = GameManager.instance.GoldCalculation(level);
             DialogManager.Instance.HideAllDialog();
@@ -106,13 +106,14 @@ namespace Managers
             if (Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.LeftControl))
             {
                 Reset();
-            };
+            }
+            ;
         }
 
         public void ActivateBG(bool isActive)
         {
             //Debug.Log("ActiveBG " +isActive);
-            bgRender.enabled = isActive ;
+            bgRender.enabled = isActive;
         }
 
         public void Init(Action callback)
@@ -182,7 +183,7 @@ namespace Managers
         }
         internal void ResumeGame()
         {
-            Time.timeScale =1;
+            Time.timeScale = 1;
         }
         private void AddBox(Action callback)
         {
@@ -201,13 +202,14 @@ namespace Managers
             StartCoroutine(LoadPlayer(() =>
             {
                 playerInitDone = true;
+                player.IsInputLocked = false;
                 ActivateBG(playerInitDone);
 
             }));
             //StartCoroutine(LoadBoxManager(() => arrayScrewInitDone = true))
             //
             yield return new WaitUntil(() => playerInitDone);
-            Debug.Log("Player init done");  
+            Debug.Log("Player init done");
             callback?.Invoke();
         }
 
@@ -266,7 +268,7 @@ namespace Managers
         {
             isGameOver = true;
             itemPerforming = false;
-            player.CanClick = false;
+            player.IsInputLocked = true;
             ReviveDialogParam param = new ReviveDialogParam();
             param.isRevive = false;
             param.isHasAds = true;// set defaul allway true cus has none ads
@@ -309,13 +311,13 @@ namespace Managers
                     itemJustInvoke = true;
                     onItemInvoke.Invoke(ItemType.Drill);
                 }
-                else if(Input.GetKey(KeyCode.Alpha4))
+                else if (Input.GetKey(KeyCode.Alpha4))
                 {
-                    itemJustInvoke= true;
+                    itemJustInvoke = true;
                     onItemInvoke.Invoke(ItemType.AddBox);
-                }    
-                    // Chờ một khung hình trước khi kiểm tra tiếp
-                    yield return null;
+                }
+                // Chờ một khung hình trước khi kiểm tra tiếp
+                yield return null;
             }
         }
         public void StarChanging(int addedStar)
@@ -328,15 +330,35 @@ namespace Managers
         }
         public void OnRevive()
         {
-            throw new NotImplementedException();
+            player.IsInputLocked = false;
+            BoxQueue.Instance.UnlockedBox();
         }
-
+        public void ReturnToHome(DialogIndex dialogIndex)
+        {
+            // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
+            DialogManager.Instance.HideDialog(dialogIndex, () =>
+            {
+                Debug.Log($"HideDialog {dialogIndex} ");
+                LevelManager.Instance.OnReset();
+                LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
+                {
+                    Debug.Log("Switch view mainscreenview ");
+                    MainScreenViewParam param = new();
+                    param.totalGold = GameManager.instance.GetPlayerGold();
+                    ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
+                    /*  
+                    DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog, null, () =>
+                    {
+                    });*/
+                });
+            });
+        }
         public void OnGameOver()
         {
             // minuss 1 life heart
             IsGameOver = true;
             int currentLevel = LevelManager.Instance.currentLevelID;
-            Player.instance.CanClick = false;
+            Player.instance.IsInputLocked = true;
             LevelManager.Instance.OnReset();
             ArrayScrew.Instance.ClearAllScrewsOnArray();
             BoxQueue.Instance.OnReset();
@@ -347,7 +369,7 @@ namespace Managers
             for (int i = list.Count - 1; i > 0; i--)
             {
                 int randomIndex = UnityEngine.Random.Range(0, i + 1); // Unity's Random.Range
-                                                          // Swap elements
+                                                                      // Swap elements
                 T temp = list[i];
                 list[i] = list[randomIndex];
                 list[randomIndex] = temp;

@@ -197,7 +197,6 @@ namespace Ingame.Screw
                 _circleCollider2D.enabled = false;
                 FreeHinge();
                 _transform.SetParent(holdScrew.transform);
-
                 return;
             }
             DoMoveToHold(holdScrew);
@@ -232,6 +231,7 @@ namespace Ingame.Screw
 
             // Di chuyển render trước, đồng thời di chuyển cha
             sequence.Append(render.transform.DOJump(toPos, 2, 1, 0.5f, false));
+            sequence.Join(render.transform.DOScale(1.2f,0.4f));
             sequence.OnPlay(() => isMoving = true);
             // free joint to release wood and joint
             // Khi cả hai di chuyển xong
@@ -332,6 +332,7 @@ namespace Ingame.Screw
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
             hingeController.Reset();
+            ResetRender();
         }
     }
 }

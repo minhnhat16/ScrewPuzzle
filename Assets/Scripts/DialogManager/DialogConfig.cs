@@ -18,6 +18,8 @@ public enum DialogIndex
     CollectionDialog,
     SpecialDialog,
     AdsRemoveDialog,
+    QuitDialog,
+    MissionDialog,
 }
 
 public class DialogParam
@@ -143,7 +145,12 @@ public class SpecialDialogParam : DialogParam
 
 }
 
+public class MissionParam : DialogParam
+{
+    public int current;
+    public int target;
 
+}
 public class DialogConfig
 {
     public static DialogIndex[] dialogArray =
@@ -162,5 +169,8 @@ public class DialogConfig
         DialogIndex.CollectionDialog,
         DialogIndex.SpecialDialog,
         DialogIndex.AdsRemoveDialog,
+        DialogIndex.SpecialDialog,
+        DialogIndex.QuitDialog
+,       DialogIndex.MissionDialog
     };
 }

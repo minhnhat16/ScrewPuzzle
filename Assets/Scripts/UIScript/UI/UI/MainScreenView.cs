@@ -31,7 +31,6 @@ namespace UIScript.UI.UI
             dailyReward.onClick.AddListener(OnDailyReward);
             rateButton.onClick.AddListener(RateButton);
             playBtn.onClick.AddListener(OnPlayButton);
-            skinButton.onClick.AddListener(OnSkinButton);
             specialButton.onClick.AddListener(OnClickSpecialButton);
             settingButton.onClick.AddListener(OnClickSettingButton);
             adsRemover.onClick.AddListener(OnClickAdsRemover);
@@ -46,6 +45,7 @@ namespace UIScript.UI.UI
             dailyReward.onClick.RemoveListener(OnDailyReward);
             rateButton.onClick.RemoveListener(RateButton);
             playBtn.onClick.RemoveListener(OnPlayButton);
+            levelButton.onClick.RemoveAllListeners();
         }
         public override void OnStartShowView()
         {
@@ -92,16 +92,7 @@ namespace UIScript.UI.UI
         }
         private void OnSkinButton()
         {
-            CollectionDialogParam param = new()
-            {
-                collection = ConfigFileManager.Instance.CollectionConfig,
-                currentSkin = DataAPIController.instance.GetCurrentScrewData(),
-                currentBG = DataAPIController.instance.GetCurrentBackGroundData(),
-                currentBoard = DataAPIController.instance.GetCurrentBoardData(),
-                totalGold = GameManager.instance.GetPlayerGold(),
-            };
-
-            DialogManager.Instance.ShowDialog(DialogIndex.CollectionDialog, param, null);
+            
 
         }
 
@@ -135,7 +126,12 @@ namespace UIScript.UI.UI
         private void OnPlayButton()
         {
             int currentLevel = LevelManager.Instance.currentLevelID;
-            LevelManager.Instance.LoadLevel(currentLevel);
+          
+
+            LevelManager.Instance.LoadLevel(currentLevel, () =>
+            {
+                IngameController.Instance.PauseGame();
+            });
         }
 
         public void SpinView()
@@ -156,8 +152,11 @@ namespace UIScript.UI.UI
         }
         public void ShopButton()
         {
+
+            Debug.Log("Shop button on clicked");
             var param = new ShopViewParam();
             param.gold = gold;
+
             ViewManager.Instance.SwitchView(ViewIndex.ShopView, param);
         }
         private void OnClickAdsRemover()

@@ -11,16 +11,22 @@ namespace UIScript.Dialog
         [SerializeField] Button denyButton;
         [SerializeField] Button closeDialogButton;
         [SerializeField] GoldDisplay goldDisplay;
-
-
-
+        private void OnEnable()
+        {
+            acceptButton.onClick.AddListener(AcceptedWatch);
+            denyButton.onClick.AddListener(DenyWatch);
+        }
+        private void OnDisable()
+        {
+            acceptButton.onClick.RemoveListener(AcceptedWatch);
+            denyButton.onClick.RemoveListener(DenyWatch);
+        }
         public override void Setup(DialogParam param)
         {
             ReviveDialogParam newParam = (ReviveDialogParam)param;
             if (newParam == null) return;
             int userGold = newParam.totalGold;
-            acceptButton.onClick.AddListener(AcceptedWatch);
-            denyButton.onClick.AddListener(DenyWatch);
+           
             goldDisplay.SetGoldToLable(userGold);
             IngameController.Instance.PauseGame();
         }
@@ -47,12 +53,13 @@ namespace UIScript.Dialog
         private void AcceptedWatch()
         {
             DialogManager.Instance.HideDialog(dialogIndex);
-            
-            ZenSDK.instance.ShowVideoReward(onWatch =>
-            {
-                if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
-                else IngameController.Instance.OnGameOver();
-            });
+            IngameController.Instance.OnRevive();
+
+            //ZenSDK.instance.ShowVideoReward(onWatch =>
+            //{
+            //    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
+            //    else IngameController.Instance.OnGameOver();
+            //});
         }
     }
 }

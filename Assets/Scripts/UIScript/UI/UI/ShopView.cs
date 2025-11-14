@@ -20,8 +20,7 @@ namespace UIScript.UI.UI
         [SerializeField] private RectTransform packRect;
         [SerializeField] private RectTransform priceRect;
         [SerializeField] private Slider switchSlider;
-        [SerializeField] private List<ShopItem> shopItems;
-        [SerializeField] private List<PackItem> packItems;
+       // [SerializeField] private List<PackItem> packItems;
         [SerializeField] private Text lablePrice;
         [SerializeField] private Text lablePack;
         [SerializeField] private Text goldLable;
@@ -34,10 +33,10 @@ namespace UIScript.UI.UI
         {
             var ShopConfig = ConfigFileManager.Instance.PriceConfig.GetAllRecord();
             var shopItemConfigList = ShopConfig.Where(item => item.IdShop == 1).ToList();
-            LoadItemFromConfig(shopItemConfigList);
+           // LoadItemFromConfig(shopItemConfigList);
             
             var packItemConfigLists =  ConfigFileManager.Instance.PackConfig.GetAllRecord();
-            LoadPackFormConfig(packItemConfigLists);
+            //LoadPackFormConfig(packItemConfigLists);
             closeButton.onClick.AddListener(CloseButton);
         }
 
@@ -51,51 +50,51 @@ namespace UIScript.UI.UI
         public override void OnStartShowView()
         {
             switchSlider.value = 0;
-            ResetScrollPosition(priceRect);
-            ResetScrollPosition(packRect);
+            //ResetScrollPosition(priceRect);
+            //ResetScrollPosition(packRect);
             SliderValueChange();
         }
-        private void  LoadItemFromConfig(List<PriceConfigRecord>  shopItemConfigRecords)
-        {
-            int i = 0;
-            foreach (var shopItemConfig in shopItemConfigRecords)
-            {
-                var shopItem = ShopItemPool.Instance.Pool.SpawnNonGravityWithIndex(i++);
-                shopItem.Price = shopItemConfig.Price;
-                shopItem.Quantity = shopItemConfig.Amount;
-                shopItem.QuantityText.text = $"+{shopItem.Quantity}";
-                shopItem.BuyPriceText.text = $"+{shopItem.Quantity}";
-                var spriteImg = SpriteLibControl.Instance.GetSpriteByName(shopItemConfig.SpriteName);
-                shopItem.IconImage.sprite = spriteImg;
-                shopItem.IconImage.SetNativeSize();
-                shopItem.BuyButton.onClick.AddListener(()=>OnShopItemPurchase(shopItem)); 
-                //Debug.LogError($"shop item config init {i}  and shop item {shopItem ==null}");
-                shopItems.Add(shopItem);
-            }
-        }
-        private void  LoadPackFormConfig(List<PackConfigRecord>  shopItemConfigRecords)
-        {
-            int i = 0;
-            foreach (var packItemCR in shopItemConfigRecords)
-            {
-                var packItem = PackItemPool.Instance.Pool.SpawnNonGravityWithIndex(i++);
-                packItem.Price = packItemCR.Price;
-                packItem.RibbonText.text = packItemCR.RibbonText;
-                var ribbonSprite = SpriteLibControl.Instance.GetSpriteByName(packItemCR.RibbonColorName);
-                packItem.Ribon.sprite =ribbonSprite;
+        //private void  LoadItemFromConfig(List<PriceConfigRecord>  shopItemConfigRecords)
+        //{
+        //    int i = 0;
+        //    foreach (var shopItemConfig in shopItemConfigRecords)
+        //    {
+        //        var shopItem = ShopItemPool.Instance.Pool.SpawnNonGravityWithIndex(i++);
+        //        shopItem.Price = shopItemConfig.Price;
+        //        shopItem.Quantity = shopItemConfig.Amount;
+        //        shopItem.QuantityText.text = $"+{shopItem.Quantity}";
+        //        shopItem.BuyPriceText.text = $"+{shopItem.Quantity}";
+        //        var spriteImg = SpriteLibControl.Instance.GetSpriteByName(shopItemConfig.SpriteName);
+        //        shopItem.IconImage.sprite = spriteImg;
+        //        shopItem.IconImage.SetNativeSize();
+        //        shopItem.BuyButton.onClick.AddListener(()=>OnShopItemPurchase(shopItem)); 
+        //        //Debug.LogError($"shop item config init {i}  and shop item {shopItem ==null}");
+        //        shopItems.Add(shopItem);
+        //    }
+        //}
+        //private void  LoadPackFormConfig(List<PackConfigRecord>  shopItemConfigRecords)
+        //{
+        //    int i = 0;
+        //    foreach (var packItemCR in shopItemConfigRecords)
+        //    {
+        //        var packItem = PackItemPool.Instance.Pool.SpawnNonGravityWithIndex(i++);
+        //        packItem.Price = packItemCR.Price;
+        //        packItem.RibbonText.text = packItemCR.RibbonText;
+        //        var ribbonSprite = SpriteLibControl.Instance.GetSpriteByName(packItemCR.RibbonColorName);
+        //        packItem.Ribon.sprite =ribbonSprite;
 
-                packMiniItems[0].Init(packItemCR.QuantityItem1,packItemCR.IconItem1);
-                packMiniItems[1].Init(packItemCR.QuantityItem2,packItemCR.IconItem2);
-                packMiniItems[2].Init(packItemCR.QuantityItem3, packItemCR.IconItem3);
+        //        packMiniItems[0].Init(packItemCR.QuantityItem1,packItemCR.IconItem1);
+        //        packMiniItems[1].Init(packItemCR.QuantityItem2,packItemCR.IconItem2);
+        //        packMiniItems[2].Init(packItemCR.QuantityItem3, packItemCR.IconItem3);
 
-                packItem.MiniItemsDict = new ();
-                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem1, packMiniItems[0]);
-                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem2, packMiniItems[1]);
-                packItem.MiniItemsDict.TryAdd(packItemCR.IconItem3, packMiniItems[2]);
+        //        packItem.MiniItemsDict = new ();
+        //        packItem.MiniItemsDict.TryAdd(packItemCR.IconItem1, packMiniItems[0]);
+        //        packItem.MiniItemsDict.TryAdd(packItemCR.IconItem2, packMiniItems[1]);
+        //        packItem.MiniItemsDict.TryAdd(packItemCR.IconItem3, packMiniItems[2]);
                 
-                packItem.PurchaseButton.onClick.AddListener(()=>OnPackItemPurchase(packItem));
-            }
-        }
+        //        packItem.PurchaseButton.onClick.AddListener(()=>OnPackItemPurchase(packItem));
+        //    }
+        //}
         private void CloseButton()
         {
             MainScreenViewParam param = new MainScreenViewParam();
@@ -149,10 +148,10 @@ namespace UIScript.UI.UI
             lablePrice.gameObject.SetActive(isActive);
             lablePack.gameObject.SetActive(!isActive);
             
-            //set mini view active tương tự trên
+            ////set mini view active tương tự trên
             
-            priceRect.gameObject.SetActive(isActive);
-            packRect.gameObject.SetActive(!isActive);
+            //priceRect.gameObject.SetActive(isActive);
+            //packRect.gameObject.SetActive(!isActive);
 
         }
     }

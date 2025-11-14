@@ -9,11 +9,11 @@ namespace Ingame
     public class BoxSlot : MonoBehaviour
     {
        
-        public ScrewBox screwBox; // Reference to the box
+        public Box screwBox; // Reference to the box
         public Vector3 initialPosition; // Position to move to
         public bool isLocked;
         public bool isContainingBox;
-        public void Initialize(Vector3 position, bool locked, ScrewBox box = null)
+        public void Initialize(Vector3 position, bool locked, Box box = null)
         {
             initialPosition = position;
             isLocked = locked;
@@ -27,14 +27,14 @@ namespace Ingame
             gameObject.SetActive(true);
         }
 
-        public void AddBox(ScrewBox box)
+        public void AddBox(Box box)
         {
             isContainingBox = box != null;  
             if (!isContainingBox) return;
             screwBox = box;
         }
 
-        public bool CheckIsContainingThisBox(ScrewBox screwBox)
+        public bool CheckIsContainingThisBox(Box screwBox)
         {
             return this.screwBox == screwBox;
         }

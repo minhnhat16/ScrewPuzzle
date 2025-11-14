@@ -1,6 +1,6 @@
 ﻿namespace Ingame.ScrewBoxState
 {
-    public class CloseState : FSMState<ScrewBox>
+    public class CloseState : FSMState<Box>
     {
         
     }

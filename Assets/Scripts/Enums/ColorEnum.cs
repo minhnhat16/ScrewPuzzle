@@ -1,4 +1,5 @@
-﻿using Unity.VisualScripting;
+﻿using Unity.Jobs;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Enums
@@ -39,6 +40,7 @@ namespace Enums
 
         public static Sprite ToBoxSprite(this ColorEnum colorEnum)
         {
+            if(colorEnum == ColorEnum.Clear ) return null;
             string path = $"{GameConstants.BOX_SPRITE_PATH}/{colorEnum.ToColorString()}";
 
             var sprite = Resources.Load<Sprite>($"{path}");

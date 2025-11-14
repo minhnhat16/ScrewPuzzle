@@ -67,6 +67,11 @@ public class GamePlayView : BaseView
         base.OnStartShowView();
         IngameController.Instance.onStarChange = starBottle.fillChange ;
 
+
+        MissionParam param = new MissionParam();
+        param.target = 10;
+        param.current = 4;
+        DialogManager.Instance.ShowDialog(DialogIndex.MissionDialog, param, null);
         //expBar = GetComponentInChildren<ExperienceBar>();
         //expBar.Init();
         //StartCoroutine(GetItemFormData());
