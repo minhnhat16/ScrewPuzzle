@@ -17,6 +17,7 @@ public class DropDownLayer : MonoBehaviour
     {
         dropDown.onValueChanged.AddListener((action) =>
         {
+            GameObjectToLevelConverter.ins.UpdateScrewTotal();
             Debug.Log("On value change drop down layer " + action);
         });
     }

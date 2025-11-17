@@ -1,6 +1,6 @@
 ﻿namespace Ingame.ScrewBoxState
 {
-    public class InitState : FSMState<ScrewBox>
+    public class InitState : FSMState<Box>
     {
         
     }

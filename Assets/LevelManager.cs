@@ -365,12 +365,12 @@ public class LevelManager : MonoBehaviour, IResetable
         //Debug.Log($"Loading screw with ID color {screwData.idColor}");
         var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
         var screwGameObject = screw.gameObject;
+        screw.OnReset();
         screwGameObject.transform.SetParent(ScrewManager.transform);
         screwGameObject.transform.SetLocalPositionAndRotation(screwData.screwPosition, Quaternion.identity);
         //Debug.Log("Screw position set");
         screw.Color = (ColorEnum)screwData.idColor;
         screw.ChangeScrewColorByEnum(screw.Color);
-        screw.ResetRender();
         //Debug.Log("Screw color and render reset");
 
         foreach (var hingeConnection in screwData.hingeConnections)

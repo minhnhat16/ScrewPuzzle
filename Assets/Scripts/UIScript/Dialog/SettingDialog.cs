@@ -84,23 +84,10 @@ public class SettingDialog : BaseDialog
    
     public void HomeButton()
     {
-       // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
-        DialogManager.Instance.HideDialog(dialogIndex, () =>
+        DialogManager.Instance.ShowDialog(DialogIndex.QuitDialog);
+        DialogManager.Instance.HideDialog(this.dialogIndex, () =>
         {
-            Debug.Log($"HideDialog {dialogIndex} ");
 
-            LevelManager.Instance.OnReset();
-            LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
-            {
-                Debug.Log("Switch view mainscreenview ");
-                MainScreenViewParam param = new();
-                param.totalGold = GameManager.instance.GetPlayerGold();
-                ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
-                /*  
-                DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog, null, () =>
-                {
-                });*/
-            });
         });
     }
     public void MusicChange(bool isOn)

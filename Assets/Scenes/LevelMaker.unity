@@ -588,8 +588,8 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 1
   m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
@@ -609,6 +609,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   btnPrefab: {fileID: 4641674251807355726, guid: 45722dbcd4ec1324d91c8583c84dd173, type: 3}
   buttons: []
+  onTotalScrewChange:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &300224012
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6156,7 +6159,11 @@ MonoBehaviour:
   layerInputField: {fileID: 173011006}
   levelSaveInput: {fileID: 325389524}
   saveOptionDropDown: {fileID: 1188462965}
+  colorDropDown: {fileID: 251306383}
   layerDropdown: {fileID: 1111111034}
+  ontotalScrewChanged:
+    m_PersistentCalls:
+      m_Calls: []
   onKey0Pressed:
     m_PersistentCalls:
       m_Calls:
@@ -6312,6 +6319,7 @@ MonoBehaviour:
   onDeletOneScrew:
     m_PersistentCalls:
       m_Calls: []
+  leftBound: 0
 --- !u!1 &1572128155
 GameObject:
   m_ObjectHideFlags: 0

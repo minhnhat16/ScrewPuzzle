@@ -493,6 +493,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         }
         
         this.levelData = levelData;
+        UpdateScrewTotal();
         Debug.Log($"Level data with ID {levelId} loaded.");
     }
 
@@ -522,7 +523,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         StartCoroutine(screwComp.InitOnLevelMaker());
         int layerID = LevelMaker.instance.layerDropdown.Value();
         layerID -= 1;
-
+        UpdateScrewTotal();
         Debug.Log("Screw Layer ID: " + layerID);
 
         var list = lmanager.screwDict.GetValueOrDefault(layerID);
@@ -542,8 +543,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
 
         screw.transform.position = new Vector3(-5, 0, 0);
         screwManager.AppendScrew(screwComp);
-            
-       
+
     }
 
     public void SpawnPart()
@@ -635,9 +635,21 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         return false;
     }
 
+    public int GetScrewTotal(ColorEnum color)
+    {
+        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        return screwManager.GetScrewTotalByColor(color);
+    }
+
+    public void UpdateScrewTotal()
+    {
+        var dropDown = LevelMaker.instance.colorDropDown;
+        dropDown.UpdateAllScrewTotal();
+    }
     internal void RemoveScrew(ScrewLevelMaker screwLevelMaker)
     {
         screwLevelMaker.ResetHinge();
+       
         lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.layerMask);
         Destroy(screwLevelMaker.gameObject);
     }

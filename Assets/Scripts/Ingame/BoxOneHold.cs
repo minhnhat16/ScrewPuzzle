@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Ingame
 {
-    public class BoxOneHold : ScrewBox
+    public class BoxOneHold : Box
     {
         public override void OnEnable()
         {

@@ -6,6 +6,7 @@ using System.Linq;
 using PoolManager;
 using UnityEngine;
 using UnityEngine.Events;
+using Enums;
 namespace Ingame
 {
     public class ArrayScrew : MonoBehaviour, IResetable
@@ -96,7 +97,7 @@ namespace Ingame
             if (activeHolds.Count == 0) yield break;
 
             float totalWidth = this.totalWidth;
-            float minSpacing = 0.25f;
+            float minSpacing = 0.7f;
             float spacing = Mathf.Max(minSpacing, totalWidth / (activeHolds.Count + 1));
 
             // ✅ Căn giữa
@@ -210,7 +211,6 @@ namespace Ingame
             else
             {
                 // Nếu không có holdScrew trống, reset trạng thái của screw
-                Debug.LogWarning("No empty holdScrew available to hold the screw.");
                 screw.ResetClickedFlag();
             }
         }
@@ -269,13 +269,19 @@ namespace Ingame
             screws.Clear();
         }
 
+        public ColorEnum GetMostestColorInArray()
+        {
+            var t = screws.Max(screw => screw.Color);
+            return t;
+        }
+
         public void OnReset()
         {
             ShowArrayActive(5);
         }
-        private void OnValidate()
-        {
-            HoldAlignment();
-        }
+        //private void OnValidate()
+        //{
+        //    HoldAlignment();
+        //}
     }
 }

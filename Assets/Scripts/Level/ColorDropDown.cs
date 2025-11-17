@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class ColorDropDown : MonoBehaviour
@@ -12,19 +13,39 @@ public class ColorDropDown : MonoBehaviour
 
     [SerializeField]
     private GameObject btnPrefab;
-    public List<Button> buttons = new List<Button>();
+    public List<BtnColor> buttons = new List<BtnColor>();
     // Start is called before the first frame update
+
+    public UnityEvent<int, ColorEnum> onTotalScrewChange = new();
+    public void OnEnable()
+    {
+        onTotalScrewChange.AddListener(ChangeTotalScrew);
+    }
     void Start()
     {
+        onTotalScrewChange = LevelMaker.instance.ontotalScrewChanged;
         InitButtons();
     }
 
     // Update is called once per frame
-    void Update()
+    public void ChangeTotalScrew(int total, ColorEnum color)
     {
 
+        Debug.Log("Change total screw " + total);
+        var btn = buttons.FirstOrDefault(b => b.Color == color);
+        btn.SetColorTotal(total);
     }
 
+    public void UpdateAllScrewTotal()
+    {
+        for (int i = 0; i < buttons.Count; i++)
+        {
+
+            var btn = buttons[i];
+            int total = GameObjectToLevelConverter.ins.GetScrewTotal(btn.Color);
+            btn.SetColorTotal(total);
+        }
+    }
     void InitButtons()
     {
         var sprites = Resources.LoadAll<Sprite>(GameConstants.SCREW_SPRITE_PATH);
@@ -41,10 +62,14 @@ public class ColorDropDown : MonoBehaviour
 
 
             ColorEnum s = (ColorEnum)System.Enum.Parse(typeof(ColorEnum), sprites[i].name);
-            buttons.Add(btnObj.GetComponent<Button>());
+            var btn = btnObj.GetComponent<BtnColor>();
+            btn.Color = s;
+            buttons.Add(btn);
+
             btnObj.GetComponent<Button>().onClick.AddListener(() => OnButtonClicked(s));
         }
     }
+
 
     void OnButtonClicked(ColorEnum buttonIndex)
     {

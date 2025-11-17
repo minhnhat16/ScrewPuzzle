@@ -47,16 +47,16 @@ public class SpriteLibControl : MonoBehaviour
     private void LoadAllSprites()
     {
         // Load tất cả thư mục cấp 1 trong HINH (1,2,...)
-        UnityEngine.Object[] layerFolders = UnityEngine.Resources.LoadAll("HINH");
+        UnityEngine.Object[] layerFolders = UnityEngine.Resources.LoadAll("Sprites/HINH");
         // Nhưng vì Unity không load thư mục, ta chỉ cần gọi riêng 2 nhánh: a và b
 
         for (int i = 1; i <= 10; i++) // ví dụ 10 layer
         {
-            Sprite[] groupA = UnityEngine.Resources.LoadAll<Sprite>($"HINH/{i}/a");
+            Sprite[] groupA = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/a");
             foreach (var s in groupA)
                 spriteDict[s.name] = s;
 
-            Sprite[] groupB = UnityEngine.Resources.LoadAll<Sprite>($"HINH/{i}/b");
+            Sprite[] groupB = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/b");
             foreach (var s in groupB)
                 outLineDict[s.name] = s;
         }

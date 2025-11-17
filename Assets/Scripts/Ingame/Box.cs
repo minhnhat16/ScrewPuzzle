@@ -18,7 +18,7 @@ using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame
 {
-    public class ScrewBox : FSMSystem, IResetable
+    public class Box : FSMSystem, IResetable
     {
         public BoxConfig config; // ScriptableObject chứa cấu hình cho CrewBox
         [SerializeField] private SpriteRenderer render;
@@ -59,8 +59,8 @@ namespace Ingame
          public UnityEvent<bool> onScrewBoxFull;
         [SerializeField] private ColorEnum color;
         public BoxSlot boxSlot;
+        private bool isLocked;
 
-      
         public bool IsBoxFull
         {
             get => isBoxFull;
@@ -88,6 +88,8 @@ namespace Ingame
             set => transform.position = value;
         }
         public int TotalHold { get => totalHold; set => totalHold = value; }
+        public bool IsLocked { get => isLocked; set => isLocked = value; }
+
         public void Awake()
         {
             scale = transform.localScale;
@@ -148,13 +150,19 @@ namespace Ingame
         }
         public void SetIsLocked(bool isLocked)
         {
-            string path = $"{GameConstants.BOX_SPRITE_PATH}/box_them";
-
-            var sprite = Resources.Load<Sprite>($"{path}");
-            renderUpper.sprite = sprite;
-            renderUpper.transform.localPosition = Vector2.zero;
-            renderUpper.enabled = !isLocked;
-            render.sprite = ColorEnumExtensions.ToBoxSprite(ColorEnum.Brown);
+            this.isLocked = isLocked;
+          
+            if (IsLocked)
+            {
+                string path = $"{GameConstants.BOX_SPRITE_PATH}/box_them";
+                var sprite = Resources.Load<Sprite>($"{path}");
+                renderUpper.sprite = sprite;
+                renderUpper.transform.localPosition = Vector2.zero;
+                renderUpper.enabled = IsLocked;
+                render.sprite = ColorEnumExtensions.ToBoxSprite(ColorEnum.Brown);
+                render.enabled = !IsLocked;
+            }
+           
         }
 
         public void OnClickCollider()
@@ -184,7 +192,6 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull) =>
             {
-                // spawnStartEvent?.Invoke(holdScrews.Count);
                 callback?.Invoke(boxFull);
             });
         }
@@ -518,13 +525,7 @@ namespace Ingame
 
         public void OnReset()
         {
-            if (holdScrews.Count !=0)
-            {
-                foreach (var h in holdScrews)
-                {
-                    if (!h.IsEmpty()) holdScrews.Remove(h);
-                }
-            }
+            holdScrews.RemoveAll(h => !h.IsEmpty());
             SetIsLocked(false);
         }
     }

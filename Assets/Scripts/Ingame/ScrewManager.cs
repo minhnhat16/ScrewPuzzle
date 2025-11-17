@@ -1,4 +1,5 @@
-﻿using PoolManager;
+﻿using Enums;
+using PoolManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace Ingame
 
         public void AppendScrew(ScrewLevelMaker screw)
         {
+
             _screws.Add(screw);
         }
 #endif
@@ -123,7 +125,13 @@ namespace Ingame
                     part.HandleNoHingesLeft();
             }
         }
-
+        public int GetScrewTotalByColor(ColorEnum color)
+        {
+            var screws = GetComponentsInChildren<Screw.Screw>();
+            var listColor = screws.Where(s => s.Color == color).ToList();  
+            int total = listColor.Count;
+            return total;
+        }
         public bool AreAllHingesRemoved(BasePart part)
         {
             // Kiểm tra xem part có còn trong hingeConnections hay không

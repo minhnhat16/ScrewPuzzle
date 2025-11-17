@@ -1,161 +1,60 @@
 ﻿using Ingame.Board;
 using Managers;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Ingame
 {
-    public class Player : MonoBehaviour
+    public class Player : BaseInputHandler
     {
         public static Player instance;
-        [SerializeField] private float clickCooldown = 0.5f; // Cooldown time between clicks
-        [SerializeField] private bool canClick;        // Flag to check if the player can click
 
-        public bool CanClick
-        {
-            get => canClick;
-            set => canClick = value;
-        }
-        [SerializeField] private Screw.Screw CurrentScrew;
-        [SerializeField] private Camera mainCam;
         [SerializeField] private List<Screw.Screw> _screw;
         [SerializeField] private Queue<Screw.Screw> screwQueue;
-        [HideInInspector] public UnityEvent onPlayerClick = new();  // Custom event for player clicks
-        [HideInInspector] public UnityEvent<Screw.Screw> onScrewClicked;
-        private Coroutine inputCoroutine;
-        private Coroutine processCoroutine;
-        private void OnEnable()
+
+        public UnityEvent<Screw.Screw> onScrewClicked = new();
+
+        protected override void Awake()
         {
-            if (onScrewClicked != null)
-            {
-                onScrewClicked.RemoveListener(ScrewClicked);
-                onScrewClicked.AddListener(ScrewClicked);
-            }
-
-            inputCoroutine ??= StartCoroutine(WaitForInput());
-        }
-
-        private void OnDisable()
-        {
-            if (onScrewClicked != null)
-            {
-                onScrewClicked.RemoveListener(ScrewClicked);
-            }
-            if (inputCoroutine != null)
-            {
-                StopCoroutine(inputCoroutine);
-                inputCoroutine = null;
-            }
-
-            if (processCoroutine != null)
-            {
-                StopCoroutine(processCoroutine);
-                processCoroutine = null;
-            }
-        }
-
-        private void Awake()
-        {
+            base.Awake();
             instance = this;
-            canClick = true;
-            CurrentScrew = null;
-        }
-
-        private void Start()
-        {
-            mainCam = Camera.main;
             screwQueue = new Queue<Screw.Screw>();
+            _screw = new List<Screw.Screw>();
         }
 
-        private IEnumerator WaitForInput()
+        protected override void OnEnable()
         {
-            yield return new WaitUntil(() => IngameController.Instance != null);
-            while (true)
-            {
-                if (!IngameController.Instance.isPause)
-                {
-#if UNITY_EDITOR || UNITY_STANDALONE    
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        HandleInput(Input.mousePosition);
-                    }
-#elif UNITY_ANDROID || UNITY_IOS
-                if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-                {
-                    HandleInput(Input.GetTouch(0).position);
-                }
-#endif
-                }
-
-
-                yield return null;
-            }
+            base.OnEnable();
+            onScrewClicked.AddListener(ScrewClicked);
         }
-        private void HandleInput(Vector3 screenPosition)
+
+        protected override void OnDisable()
         {
-            // Cache the main camera
-            if (mainCam == null) return;
-            bool isHadlingItem = ItemController.ins.IsHandlingItem;
-            // Convert screen position to world position
-            Vector2 worldPosition = mainCam.ScreenToWorldPoint(screenPosition);
-            string tag = isHadlingItem ? "Part" : "Player";
-            // Perform a 2D raycast to detect objects at the click position
-            var hits = Physics2D.RaycastAll(worldPosition, Vector2.zero, Mathf.Infinity);
+            onScrewClicked.RemoveListener(ScrewClicked);
+            base.OnDisable();
+        }
 
-            GameObject clickedObject = null;
-            Screw.Screw foundScrew = null;
-            float highestZ = float.MinValue;
+        protected override void HandleInput(Vector3 screenPos)
+        {
+            bool isHandlingItem = ItemController.ins.IsHandlingItem;
 
-            foreach (var hit in hits)
+            if (isHandlingItem)
             {
-                if (hit.collider == null) continue;
-
-                var obj = hit.collider.gameObject;
-
-
-                // Only consider objects with the "Player" tag
-                if (obj.CompareTag(tag))
+                var part = PickAtScreenPos<BasePart>(screenPos, "Part");
+                if (part != null)
                 {
-                    float z = obj.transform.position.z;
-
-                    // Prioritize the object with the highest Z position
-                    if (z > highestZ)
-                    {
-                        clickedObject = obj;
-                        highestZ = z;
-                    }
+                    ItemController.ins.IsHandlingItem = false;
+                    LevelManager.Instance.RemovePartItem(part);
                 }
+                return;
             }
 
-            // If a valid object was found, process it
-            if (clickedObject != null)
+            var screw = PickAtScreenPos<Screw.Screw>(screenPos, "Player");
+            if (screw != null)
             {
-
-                if (isHadlingItem)
-                {
-                    var obj = clickedObject.GetComponent<BasePart>();
-                    if (obj)
-                    {
-                        ItemController.ins.IsHandlingItem = false;
-                        LevelManager.Instance.RemovePartItem(obj);
-                    }
-                    return;
-                }   
-                else
-                {
-                    foundScrew = clickedObject.GetComponent<Screw.Screw>();
-                    if (foundScrew != null)
-                    {
-                        _screw.Add(foundScrew);
-                        onScrewClicked?.Invoke(foundScrew);
-                    }
-                }
-
+                _screw.Add(screw);
+                onScrewClicked?.Invoke(screw);
             }
         }
 
@@ -163,18 +62,10 @@ namespace Ingame
         {
             screwQueue.Enqueue(screw);
             _screw.Clear();
-            if (processCoroutine == null)
-            {
-                var layermanager = LevelManager.Instance.layerManager;
-                layermanager.RemoveScrewOnDict(screw, screw.layerMask);
-                ArrayScrew.Instance.AddScrew(screw);
-            }
-        }
 
-        private void PartClicked(BasePart part)
-        {
-            if (part == null) return;
-
+            var layermanager = LevelManager.Instance.layerManager;
+            layermanager.RemoveScrewOnDict(screw, screw.layerMask);
+            ArrayScrew.Instance.AddScrew(screw);
         }
     }
 }

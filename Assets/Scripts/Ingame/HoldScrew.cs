@@ -33,13 +33,11 @@ namespace Ingame
             if (!screw)
             {
                 screw = newScrew;
-                GameUtils.LogAndSelect("Dont  have screw" + index,transf.parent.gameObject);
                 screw.DoMoveToHold(this, isTele);
                 callback?.Invoke(true);
             }
             else
             {
-                Debug.Log("All ready have screw" + index);
                 callback?.Invoke(true);
             }
         }

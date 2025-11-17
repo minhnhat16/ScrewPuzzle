@@ -1,6 +1,6 @@
 ﻿namespace Ingame.ScrewBoxState
 {
-    public class IdleState : FSMState<ScrewBox>
+    public class IdleState : FSMState<Box>
     {
         public override void OnEnter()
         {
