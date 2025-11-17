@@ -10,37 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
-  m_Name: Level_7
+  m_Name: Level_42
   m_EditorClassIdentifier: 
-  levelId: 7
+  levelId: 42
   totalColorInLevel: 0
   layer: 0
-  boxConfig: {fileID: 11400000, guid: 5188ea5b43be5f244a3e8b967d269b4d, type: 2}
-  screws:
-  - idScrew: 0
-    idColor: 3
-    screwPosition: {x: -3.236755, y: 0.81125855, z: 3.4}
-    hingeConnections:
-    - hingePosition: {x: 3.7086096, y: -3.4768212, z: 0.4000001}
-      bodyPartUniqueID: 8843
-      bodyPartHingePosition: {x: -3.2238185, y: -1.0547575, z: 0}
-  - idScrew: 1
-    idColor: 3
-    screwPosition: {x: 3.1870866, y: -0.43046355, z: 3.4000244}
-    hingeConnections:
-    - hingePosition: {x: 0.033111572, y: 0, z: 0.4000001}
-      bodyPartUniqueID: 4645
-      bodyPartHingePosition: {x: -3.2238164, y: -1.0887828, z: 0}
-    - hingePosition: {x: -9.039736, y: -1.1920524, z: 0.4000244}
-      bodyPartUniqueID: 8843
-      bodyPartHingePosition: {x: -3.2238185, y: -1.0547575, z: 0}
-  - idScrew: 2
-    idColor: 3
-    screwPosition: {x: -1.3824501, y: -1.0596023, z: 3.4}
-    hingeConnections:
-    - hingePosition: {x: -3.9403992, y: 3.7086089, z: 0.4000001}
-      bodyPartUniqueID: 8843
-      bodyPartHingePosition: {x: -3.2238185, y: -1.0547575, z: 0}
+  boxConfig: {fileID: 11400000, guid: 529a36cfcbfdd63419332c78717071f5, type: 2}
+  screws: []
   layers:
   - layerId: 0
     parts:

@@ -16,206 +16,71 @@ MonoBehaviour:
   totalColorInLevel: 0
   layer: 0
   boxConfig: {fileID: 11400000, guid: 51f9e0256c3b983499a73a1bd17a1504, type: 2}
-  screws:
-  - idScrew: 0
-    idColor: 2
-    screwPosition: {x: -0.6210391, y: 2.0635633, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.6210391, y: -0.06356335, z: 0}
-      bodyPartUniqueID: 3011
-      bodyPartHingePosition: {x: 0, y: 2, z: 0}
-    - hingePosition: {x: 0.6210391, y: -0.06356335, z: 0}
-      bodyPartUniqueID: 3011
-      bodyPartHingePosition: {x: 0, y: 2, z: 0}
-  - idScrew: 1
-    idColor: 2
-    screwPosition: {x: -0.56139845, y: 0.035784245, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.55139846, y: -0.055784244, z: 0}
-      bodyPartUniqueID: 7950
-      bodyPartHingePosition: {x: -0.01, y: -0.02, z: 0}
-    - hingePosition: {x: 0.55139846, y: -0.055784244, z: 0}
-      bodyPartUniqueID: 7950
-      bodyPartHingePosition: {x: -0.01, y: -0.02, z: 0}
-  - idScrew: 2
-    idColor: 3
-    screwPosition: {x: 0.51213163, y: 0.0059640408, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.48786837, y: -0.0059640408, z: 0}
-      bodyPartUniqueID: 3202
-      bodyPartHingePosition: {x: 1, y: 0, z: 0}
-    - hingePosition: {x: 0.48786837, y: -0.0059640408, z: 0}
-      bodyPartUniqueID: 3202
-      bodyPartHingePosition: {x: 1, y: 0, z: 0}
-  - idScrew: 3
-    idColor: 3
-    screwPosition: {x: 0.6612333, y: -1.902534, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.21876669, y: 0.562534, z: 0}
-      bodyPartUniqueID: 1511
-      bodyPartHingePosition: {x: 0.88, y: -1.34, z: 0}
-    - hingePosition: {x: 0.21876669, y: 0.562534, z: 0}
-      bodyPartUniqueID: 1511
-      bodyPartHingePosition: {x: 0.88, y: -1.34, z: 0}
-  - idScrew: 4
-    idColor: 3
-    screwPosition: {x: -0.59121877, y: -2.0814557, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.59121877, y: 0.08145571, z: 0}
-      bodyPartUniqueID: 9762
-      bodyPartHingePosition: {x: 0, y: -2, z: 0}
-    - hingePosition: {x: 0.59121877, y: 0.08145571, z: 0}
-      bodyPartUniqueID: 9762
-      bodyPartHingePosition: {x: 0, y: -2, z: 0}
-  - idScrew: 5
-    idColor: 4
-    screwPosition: {x: 1.0190773, y: -0.6202617, z: 0}
-    hingeConnections:
-    - hingePosition: {x: -0.019077301, y: 0.6202617, z: 0}
-      bodyPartUniqueID: 3202
-      bodyPartHingePosition: {x: 1, y: 0, z: 0}
-    - hingePosition: {x: -0.019077301, y: 0.6202617, z: 0}
-      bodyPartUniqueID: 3202
-      bodyPartHingePosition: {x: 1, y: 0, z: 0}
-  - idScrew: 6
-    idColor: 4
-    screwPosition: {x: -1.1279832, y: -0.6202617, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.12798321, y: 0.6202617, z: 0}
-      bodyPartUniqueID: 5048
-      bodyPartHingePosition: {x: -1, y: 0, z: 0}
-    - hingePosition: {x: 0.12798321, y: 0.6202617, z: 0}
-      bodyPartUniqueID: 5048
-      bodyPartHingePosition: {x: -1, y: 0, z: 0}
-  - idScrew: 7
-    idColor: 6
-    screwPosition: {x: -0.054453745, y: -0.5904415, z: 0}
-    hingeConnections:
-    - hingePosition: {x: 0.044453748, y: 0.57044154, z: 0}
-      bodyPartUniqueID: 7950
-      bodyPartHingePosition: {x: -0.01, y: -0.02, z: 0}
-  - idScrew: 8
-    idColor: 2
-    screwPosition: {x: 0.50776273, y: 1.8781066, z: -0.2}
-    hingeConnections:
-    - hingePosition: {x: 0.36223727, y: -0.5981066, z: 0.2}
-      bodyPartUniqueID: 8544
-      bodyPartHingePosition: {x: 0.87, y: 1.28, z: 0}
-    - hingePosition: {x: 0.36223727, y: -0.5981066, z: 0.2}
-      bodyPartUniqueID: 8544
-      bodyPartHingePosition: {x: 0.87, y: 1.28, z: 0}
-    - hingePosition: {x: -0.50776273, y: 0.121893406, z: 0.2}
-      bodyPartUniqueID: 3011
-      bodyPartHingePosition: {x: 0, y: 2, z: 0}
-  - idScrew: 9
-    idColor: 5
-    screwPosition: {x: -1.0828172, y: 0.7157606, z: -0.2}
-    hingeConnections:
-    - hingePosition: {x: 0.24281722, y: 0.6642394, z: 0.2}
-      bodyPartUniqueID: 3880
-      bodyPartHingePosition: {x: -0.84, y: 1.38, z: 0}
-  - idScrew: 10
-    idColor: 5
-    screwPosition: {x: 0.9665829, y: 0.7463485, z: -0.2}
-    hingeConnections:
-    - hingePosition: {x: 0.033417106, y: -0.7463485, z: 0.2}
-      bodyPartUniqueID: 3202
-      bodyPartHingePosition: {x: 1, y: 0, z: 0}
-  - idScrew: 11
-    idColor: 5
-    screwPosition: {x: 0.14070511, y: -1.333639, z: -0.2}
-    hingeConnections:
-    - hingePosition: {x: 0.7392949, y: -0.0063610077, z: 0.2}
-      bodyPartUniqueID: 1511
-      bodyPartHingePosition: {x: 0.88, y: -1.34, z: 0}
+  screws: []
   layers:
   - layerId: 0
     parts:
     - idBodyPart: 0
-      partName: 3011
-      spriteName: 1 (12)
+      partName: 5133
+      spriteName: Shape 52_0
       layer: Layer 1
-      colorString: E3C1AAA8
-      partPosition: {x: 0, y: 2, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      colorString: 4C69A080
+      partPosition: {x: -3.81, y: -3.38, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
       partRotation: {x: -0, y: -0, z: -0, w: 1}
     - idBodyPart: 1
-      partName: 3202
-      spriteName: 1 (12)
+      partName: 4293
+      spriteName: Shape 52 copy_0
       layer: Layer 1
-      colorString: E3C1AAA8
-      partPosition: {x: 1, y: 0, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: -0.7071068, w: 0.7071068}
+      colorString: 4E6CA280
+      partPosition: {x: -0.85, y: -2.18, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
     - idBodyPart: 2
-      partName: 5048
-      spriteName: 1 (12)
+      partName: 5253
+      spriteName: Shape 52 copy 2_0
       layer: Layer 1
-      colorString: E3C1AAA8
-      partPosition: {x: -1, y: 0, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
-    - idBodyPart: 3
-      partName: 9762
-      spriteName: 1 (12)
-      layer: Layer 1
-      colorString: E3C1AAA8
-      partPosition: {x: 0, y: -2, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: 1, w: 0}
+      colorString: 4465A080
+      partPosition: {x: 2.42, y: -3.37, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
   - layerId: 1
     parts:
     - idBodyPart: 0
-      partName: 8544
-      spriteName: 1 (21)
+      partName: 4760
+      spriteName: Shape 53_0
       layer: Layer 2
-      colorString: E3C1AAA8
-      partPosition: {x: 0.87, y: 1.28, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: -0.5735764, w: 0.8191521}
-    - idBodyPart: 1
-      partName: 6181
-      spriteName: 1 (21)
-      layer: Layer 2
-      colorString: E3C1AAA8
-      partPosition: {x: -0.94, y: -1.36, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: -0.6427876, w: 0.7660445}
+      colorString: C6383580
+      partPosition: {x: -0.54, y: -1.01, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
   - layerId: 2
     parts:
     - idBodyPart: 0
-      partName: 3880
-      spriteName: 1 (46)
+      partName: 4939
+      spriteName: Rounded Rectangle 15_0
       layer: Layer 3
-      colorString: E3C1AAA8
-      partPosition: {x: -0.84, y: 1.38, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: -0.15696824, w: 0.98760366}
-    - idBodyPart: 1
-      partName: 1511
-      spriteName: 1 (46)
-      layer: Layer 3
-      colorString: E3C1AAA8
-      partPosition: {x: 0.88, y: -1.34, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: 0.6203601, w: 0.7843172}
-  - layerId: 3
-    parts:
-    - idBodyPart: 0
-      partName: 7950
-      spriteName: 1 (46)
-      layer: Layer 4
-      colorString: E3C1AAA8
-      partPosition: {x: -0.01, y: -0.02, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
-      partRotation: {x: -0, y: -0, z: -0.008106151, w: 0.99996716}
-  - layerId: 4
-    parts:
-    - idBodyPart: 0
-      partName: 3260
-      spriteName: 1 (28)
-      layer: Layer 5
-      colorString: E3C1AAA8
-      partPosition: {x: 0.05, y: 0.03, z: 0}
-      partLocalScale: {x: 0.8720049, y: 0.8720049, z: 0.8720049}
+      colorString: B1753780
+      partPosition: {x: -0.65, y: 1.24, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
       partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 1
+      partName: 3465
+      spriteName: Polygon 5 copy_0
+      layer: Layer 3
+      colorString: 4DA54980
+      partPosition: {x: 1.11, y: 1.73, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 2
+      partName: 1281
+      spriteName: Polygon 5_0
+      layer: Layer 3
+      colorString: 4DA74C80
+      partPosition: {x: -2.76, y: 2.13, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+  - layerId: 3
+    parts: []
+  - layerId: 4
+    parts: []
