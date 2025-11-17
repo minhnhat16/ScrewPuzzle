@@ -17,10 +17,14 @@ MonoBehaviour:
   layer: 0
   boxConfig: {fileID: 11400000, guid: 00c09909c0c28d343904d8c9088ef6d0, type: 2}
   screws: []
+  boxConfig: {fileID: 11400000, guid: 00c09909c0c28d343904d8c9088ef6d0, type: 2}
+  screws: []
   layers:
   - layerId: 0
     parts:
     - idBodyPart: 0
+      partName: 3404
+      spriteName: Shape 38_0
       partName: 3404
       spriteName: Shape 38_0
       layer: Layer 1
@@ -43,6 +47,8 @@ MonoBehaviour:
     - idBodyPart: 0
       partName: 7701
       spriteName: Shape 36_0
+      partName: 7701
+      spriteName: Shape 36_0
       layer: Layer 2
       colorString: A75D5580
 <<<<<<< Updated upstream
@@ -61,6 +67,8 @@ MonoBehaviour:
   - layerId: 2
     parts:
     - idBodyPart: 0
+      partName: 3536
+      spriteName: Shape 35_0
       partName: 3536
       spriteName: Shape 35_0
       layer: Layer 3
