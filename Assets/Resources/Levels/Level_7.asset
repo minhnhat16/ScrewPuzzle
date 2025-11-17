@@ -16,6 +16,7 @@ MonoBehaviour:
   totalColorInLevel: 0
   layer: 0
   boxConfig: {fileID: 11400000, guid: 5188ea5b43be5f244a3e8b967d269b4d, type: 2}
+<<<<<<< Updated upstream
   screws:
   - idScrew: 0
     idColor: 3
@@ -41,10 +42,14 @@ MonoBehaviour:
     - hingePosition: {x: -3.9403992, y: 3.7086089, z: 0.4000001}
       bodyPartUniqueID: 8843
       bodyPartHingePosition: {x: -3.2238185, y: -1.0547575, z: 0}
+=======
+  screws: []
+>>>>>>> Stashed changes
   layers:
   - layerId: 0
     parts:
     - idBodyPart: 0
+<<<<<<< Updated upstream
       partName: 8843
       spriteName: Ellipse 1_0
       layer: Layer 1
@@ -98,11 +103,19 @@ MonoBehaviour:
       layer: Layer 1
       colorString: D47A2C80
       partPosition: {x: -2.0669856, y: 2.6709187, z: 0}
+=======
+      partName: 5124
+      spriteName: Shape 42_0
+      layer: Layer 1
+      colorString: DE631880
+      partPosition: {x: -2.86, y: 0.26, z: 0}
+>>>>>>> Stashed changes
       partLocalScale: {x: 1, y: 1, z: 1}
       partRotation: {x: -0, y: -0, z: -0, w: 1}
   - layerId: 1
     parts:
     - idBodyPart: 0
+<<<<<<< Updated upstream
       partName: 3566
       spriteName: Layer 14_0
       layer: Layer 2
@@ -117,10 +130,19 @@ MonoBehaviour:
       colorString: DA7D2D80
       partPosition: {x: -2.466, y: 0.5327, z: 0}
       partLocalScale: {x: 0.9745, y: 1.0161113, z: 0.9745}
+=======
+      partName: 2809
+      spriteName: Shape 43_0
+      layer: Layer 2
+      colorString: BF313280
+      partPosition: {x: -2.84, y: 1.37, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+>>>>>>> Stashed changes
       partRotation: {x: -0, y: -0, z: -0, w: 1}
   - layerId: 2
     parts:
     - idBodyPart: 0
+<<<<<<< Updated upstream
       partName: 2408
       spriteName: Layer 12_0
       layer: Layer 3
@@ -154,5 +176,62 @@ MonoBehaviour:
       layer: Layer 5
       colorString: 5E438680
       partPosition: {x: 1.1299881, y: 0.4933544, z: 0}
+=======
+      partName: 9618
+      spriteName: Shape 44 copy 2_0
+      layer: Layer 3
+      colorString: F1810480
+      partPosition: {x: -4.05, y: 3.33, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 1
+      partName: 9310
+      spriteName: Shape 44 copy_0
+      layer: Layer 3
+      colorString: F1810480
+      partPosition: {x: -1.682, y: 3.337, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 2
+      partName: 4617
+      spriteName: Shape 45_0
+      layer: Layer 3
+      colorString: DC1D3980
+      partPosition: {x: -0.56, y: -1.22, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+  - layerId: 3
+    parts:
+    - idBodyPart: 0
+      partName: 1477
+      spriteName: Shape 44 copy 2-1_0
+      layer: Layer 4
+      colorString: F1810480
+      partPosition: {x: -4.04, y: 3.35, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 1
+      partName: 7845
+      spriteName: Shape 44_0
+      layer: Layer 4
+      colorString: F1810480
+      partPosition: {x: -1.68, y: 3.327, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 2
+      partName: 7047
+      spriteName: Shape 46 copy_0
+      layer: Layer 4
+      colorString: 3D994680
+      partPosition: {x: -2.83, y: -2.15, z: 0}
+      partLocalScale: {x: 1, y: 1, z: 1}
+      partRotation: {x: -0, y: -0, z: -0, w: 1}
+    - idBodyPart: 3
+      partName: 7688
+      spriteName: Shape 46_0
+      layer: Layer 4
+      colorString: 3A984680
+      partPosition: {x: 1.42, y: -2.19, z: 0}
+>>>>>>> Stashed changes
       partLocalScale: {x: 1, y: 1, z: 1}
       partRotation: {x: -0, y: -0, z: -0, w: 1}
