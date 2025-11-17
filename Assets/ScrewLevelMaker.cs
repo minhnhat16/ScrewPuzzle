@@ -111,6 +111,9 @@ public class ScrewLevelMaker : Screw
             if (LevelMaker.instance.isEditScrewColor)
             {
                 Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
+
+
+                GameObjectToLevelConverter.ins.UpdateScrewTotal();
                 ChangeScrewColorByEnum(Color);
             }
             if(LevelMaker.instance.isRemoveScrew)

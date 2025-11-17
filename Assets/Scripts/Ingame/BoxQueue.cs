@@ -230,7 +230,7 @@ namespace Ingame
         {
             var list = boxesStack.ToList();                 // Copy sang list
             list.Reverse();                                 // Stack order → list order
-
+            list.OrderByDescending(b => b.holdScrews.Count);
             var box = list.FirstOrDefault(predicate);
             if (box == null) return null;
 
@@ -300,6 +300,7 @@ namespace Ingame
             movingBox = true;
             screwBox.CloseBox((complete) =>
             {
+                Debug.Log("Closed box");
                 screwBoxes.Remove(screwBox);
                 if (screwBoxes.Count == 0)
                 {
@@ -317,11 +318,16 @@ namespace Ingame
             {
                 targetPos = currentSlot.transform.position;
                 box = SpawnBox();
+                box.gameObject.SetActive(false);
+                box.Position = new Vector3(CameraMain.instance.GetLeft() - 10, 0);
             }
             else
             {
                 targetPos = new Vector3(CameraMain.instance.GetLeft() - 10, 0);
                 box = PopBoxByPredicate(predicate);
+                box.transform.position = targetPos;
+                box.gameObject.SetActive(true);
+                Debug.Log($"box object spawn {box.Color} and isActive {box.isActiveAndEnabled}");
                 box.Position = targetPos;
             }
             ;
@@ -332,7 +338,6 @@ namespace Ingame
 
                 return null;
             }
-            box.gameObject.SetActive(true);
             box.transform.position = targetPos;
             box.ClearScrewOnHold();
 
@@ -503,6 +508,7 @@ namespace Ingame
                 callback?.Invoke(false);
                 yield break;
             }
+            newBox.gameObject.SetActive(true);
             newBox.Position = toPos + new Vector3(CameraMain.instance.GetLeft() - 1, 0);
             newBox.isMoving = true;
             slot.AddBox(newBox);
@@ -628,7 +634,7 @@ namespace Ingame
         public void UnlockedBox()
         {
             var slot = boxSlots.FirstOrDefault(s => s.screwBox != null && s.screwBox.IsLocked);
-
+            Debug.Log("unlock box");
             if (slot == null)
             {
                 Debug.LogWarning("[UnlockedBox] No locked slot found!");
@@ -645,14 +651,18 @@ namespace Ingame
             var color = ArrayScrew.Instance.GetMostestColorInArray();
             boxUnlock.SetActive(false);
 
+
             CloseAndRemoveBox(boxUnlock, () =>
             {
-                var newBox = TrySpawnNewBox(slot, (b => b.Color==color));
+                var newBox = TrySpawnNewBox(slot, (b => b.Color == color));
+                Debug.Log("try spawn new box " + newBox);
                 AddHidingScrewToBox(newBox);
 
                 if (newBox != null)
-                    StartCoroutine(MoveAndHandleBox(newBox, slot));
+                    StartCoroutine(MoveAndHandleBox(newBox, slot)); 
             });
+
+            
         }
         public void AddNewBoxSlot()
         {

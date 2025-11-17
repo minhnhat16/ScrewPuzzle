@@ -192,7 +192,6 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull) =>
             {
-                // spawnStartEvent?.Invoke(holdScrews.Count);
                 callback?.Invoke(boxFull);
             });
         }

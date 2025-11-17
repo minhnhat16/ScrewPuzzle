@@ -30,8 +30,13 @@ public class LevelMaker : MonoBehaviour
     [SerializeField] InputField layerInputField;
     [SerializeField] InputField levelSaveInput;
     [SerializeField] Dropdown saveOptionDropDown;
+
+    public ColorDropDown colorDropDown;
     public DropDownLayer layerDropdown;
-    
+
+
+
+    public UnityEvent<int, ColorEnum> ontotalScrewChanged = new();
     [System.Serializable]   
     public class KeyEvent : UnityEvent { }
 

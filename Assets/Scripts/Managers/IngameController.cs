@@ -274,11 +274,11 @@ namespace Managers
             param.isHasAds = true;// set defaul allway true cus has none ads
             param.totalGold = GameManager.instance.GetPlayerGold();
             // ZenSDK.instance.IsVideoRewardReady();
-            Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
+           // Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
 
             DialogManager.Instance.ShowDialog(DialogIndex.ReviveDialog, param, () =>
             {
-                Debug.LogWarning("SHOW DIALOG REVIVE DIALOG");
+               // Debug.LogWarning("SHOW DIALOG REVIVE DIALOG");
                 //if accepted watch ads invoke no reset level
                 // else return and reset current level, -1 heart
             });
