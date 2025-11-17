@@ -89,6 +89,7 @@ namespace UIScript
 
         private void SetLevelText(int id)
         {
+            id++;
             textLevel.text = id.ToString();
         }
 

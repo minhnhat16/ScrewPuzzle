@@ -148,7 +148,7 @@ public class SettingDialog : BaseDialog
 
     private void SetupButton(bool isMainScreen)
     {
-        language_dr.gameObject.SetActive(isMainScreen);
+        //language_dr.gameObject.SetActive(isMainScreen);
         homeButton.gameObject.SetActive(!isMainScreen);
     }
 

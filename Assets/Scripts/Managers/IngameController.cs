@@ -375,5 +375,14 @@ namespace Managers
                 list[randomIndex] = temp;
             }
         }
+
+        internal void ShowAddBox()
+        {
+            ReviveDialogParam param = new();
+            param.isRevive = false;
+            param.isHasAds = true;
+            DialogManager.Instance.ShowDialog(DialogIndex.ReviveDialog,param);
+
+        }
     }
 }

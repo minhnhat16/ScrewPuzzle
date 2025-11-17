@@ -188,12 +188,12 @@ namespace Ingame
             BoxQueue.Instance.DeactivateAndMoveQueue(this);
         }
 
-        public void CloseBox(Action<bool> callback)
+        public void CloseBox(float time = 0.5f,Action<bool> callback = null)
         {
             DoUpperBoxMove((boxFull) =>
             {
                 callback?.Invoke(boxFull);
-            });
+            }, time);
         }
 
         private void TunOffScrews()
@@ -205,7 +205,7 @@ namespace Ingame
                 ScrewPool.Instance.Pool.ReturnToPool(t.Screw);
             }
         }
-        private void DoUpperBoxMove(Action<bool> callback)
+        private void DoUpperBoxMove(Action<bool> callback, float time = 0.5f)
         {
             Sequence mySequence = DOTween.Sequence();
             renderUpper.enabled = true;
@@ -214,7 +214,7 @@ namespace Ingame
             // Debug trước khi sử dụng giá trị này
             //Debug.Log("Total Hold Screws: " + totalHold);
 
-            mySequence.Append(renderUpper.transform.DOLocalMoveY(0, 0.5f)
+            mySequence.Append(renderUpper.transform.DOLocalMoveY(0, time)
                 .SetEase(Ease.InCirc).OnComplete(() =>
                 {
                     //Debug.Log("OnComplete: TunOffScrews & SpawningStar");
@@ -222,12 +222,12 @@ namespace Ingame
                     spawnStartEvent?.Invoke(totalHold);
                     //Debug.Log($"Processing Hold Screw at { totalHold}");
                 }))
-                .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f), 0.5f, 1)
+                .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f),time, 1)
                     .SetEase(Ease.InBack).OnComplete(() =>
                     {
                         callback.Invoke(true);
                     }))
-                .Append(transform.DOMove(new Vector3(10, 10, 0), 2f, false)
+                .Append(transform.DOMove(new Vector3(10, 10, 0), time * 4, false)
                     .SetEase(Ease.OutBounce)).OnComplete(() =>
                     {
                         Reset();
@@ -261,7 +261,10 @@ namespace Ingame
                 var star = StarPool.Instance.pool.SpawnNonGravity();
                 star.SetStarPos(hold.transform.position);
 
-                Vector3 newPosition = new Vector3(CameraMain.instance.GetTop(), CameraMain.instance.GetRight());
+                Vector3 newPosition = new(CameraMain.instance.GetTop(), CameraMain.instance.GetRight());
+
+
+                Debug.Log("Position target " + newPosition);
                 Vector3 starScale = GameManager.instance.StarScale;
 
                 star.PopingStar(starScale, newPosition, () =>
@@ -474,6 +477,9 @@ namespace Ingame
                 //Debug.Log("All screw holes are now filled!");
                 onScrewBoxFull?.Invoke(true); // Ensure the event is only invoked once
             }
+
+
+            Debug.Log("Next empty index " + nextEmptyIndex);
         }
 
         // Hàm để thay đổi màu của CrewBox

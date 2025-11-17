@@ -82,8 +82,7 @@ public abstract class BaseInputHandler : MonoBehaviour
             if (requiredTag != null && !obj.CompareTag(requiredTag))
                 continue;
 
-            T comp = obj.GetComponent<T>();
-            if (comp == null) continue;
+            if (!obj.TryGetComponent<T>(out var comp)) continue;
 
             float z = obj.transform.position.z;
 

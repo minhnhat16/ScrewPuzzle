@@ -55,6 +55,15 @@ namespace Ingame
             {
                 _screw.Add(screw);
                 onScrewClicked?.Invoke(screw);
+                return;
+            }
+
+            var box = PickAtScreenPos<BoxThreeHold>(screenPos, "Player");
+
+            Debug.Log("is box null" + box);
+            if (box != null)
+            {
+                IngameController.Instance.ShowAddBox();
             }
         }
 

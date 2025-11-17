@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 4938592310049592548}
   m_Layer: 0
   m_Name: BoxTwoHold
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -149,14 +149,6 @@ MonoBehaviour:
   isAddingScrew: 0
   totalHold: 0
   nextEmptyIndex: -1
-  holdScrews:
-  - {fileID: 6447386579902760840}
-  - {fileID: 613152964507097631}
-  onScrewBoxFull:
-    m_PersistentCalls:
-      m_Calls: []
-  color: 0
-  boxSlot: {fileID: 0}
   animator: {fileID: 0}
   moveDuration: 1
   squashAmount: 0.9
@@ -166,6 +158,14 @@ MonoBehaviour:
   spawnStartEvent:
     m_PersistentCalls:
       m_Calls: []
+  holdScrews:
+  - {fileID: 6447386579902760840}
+  - {fileID: 613152964507097631}
+  onScrewBoxFull:
+    m_PersistentCalls:
+      m_Calls: []
+  color: 0
+  boxSlot: {fileID: 0}
 --- !u!1 &5541034772552445944
 GameObject:
   m_ObjectHideFlags: 0

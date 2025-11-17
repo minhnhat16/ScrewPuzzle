@@ -7,6 +7,8 @@ namespace UIScript.Dialog
 {
     public class ReviveDialog : BaseDialog
     {
+
+        ReviveDialogParam param;
         [SerializeField] Button acceptButton;
         [SerializeField] Button denyButton;
         [SerializeField] Button closeDialogButton;
@@ -24,17 +26,14 @@ namespace UIScript.Dialog
         public override void Setup(DialogParam param)
         {
             ReviveDialogParam newParam = (ReviveDialogParam)param;
+            this.param = newParam;
             if (newParam == null) return;
             int userGold = newParam.totalGold;
-           
+
             goldDisplay.SetGoldToLable(userGold);
             IngameController.Instance.PauseGame();
         }
-        public override void OnStartHideDialog()
-        {
-            IngameController.Instance.ResumeGame();
 
-        }
         public override void OnEndHideDialog()
         {
             IngameController.Instance.ResumeGame();
@@ -46,7 +45,10 @@ namespace UIScript.Dialog
             DialogManager.Instance.HideDialog(dialogIndex, () =>
             {
                 //Debug.Log($"Hide this dialog {dialogIndex}");
-                IngameController.Instance.OnGameOver();
+                if (param.isRevive)
+                {
+                    IngameController.Instance.OnGameOver();
+                }
             });
         }
 

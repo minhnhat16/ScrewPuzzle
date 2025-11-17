@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.Events;
@@ -295,10 +296,10 @@ namespace Ingame
             return Vector3.zero;
         }
 
-        private void CloseAndRemoveBox(Box screwBox, Action onComplete)
+        private void CloseAndRemoveBox(Box screwBox,float time = 0.5f, Action onComplete = null)
         {
             movingBox = true;
-            screwBox.CloseBox((complete) =>
+            screwBox.CloseBox(time,(complete) =>
             {
                 Debug.Log("Closed box");
                 screwBoxes.Remove(screwBox);
@@ -359,7 +360,7 @@ namespace Ingame
         {
             var currentSlot = boxSlots.Find((boxSlot) => boxSlot.CheckIsContainingThisBox(screwBox));
 
-            CloseAndRemoveBox(screwBox, () =>
+            CloseAndRemoveBox(screwBox, 0.5f,() =>
             {
                 Debug.Log("Close and remove box" + currentSlot);
                 var newBox = TrySpawnNewBox(currentSlot);
@@ -371,11 +372,11 @@ namespace Ingame
             });
         }
 
-        private IEnumerator MoveAndHandleBox(Box newBox, BoxSlot currentSlot)
+        private IEnumerator MoveAndHandleBox(Box newBox, BoxSlot currentSlot,float time = 0.5f )
         {
             var isMoveBoxDone = false;
             MovingBox = true;
-            yield return StartCoroutine(MoveToSlot(newBox, currentSlot, (boxDone) =>
+            yield return StartCoroutine(MoveToSlot(newBox, currentSlot,time , (boxDone) =>
             {
                 isMoveBoxDone = boxDone;
             }));
@@ -417,7 +418,8 @@ namespace Ingame
             // 1) Try active boxes first
             var activeCandidate = screwBoxes
                 .Where(box => BasePredicate(box) && box.gameObject != null && box.gameObject.activeInHierarchy)
-                .OrderByDescending(box => box.isActiveAndEnabled)
+                .OrderByDescending(box => box.isActiveAndEnabled )
+                 .ThenByDescending(box => box.NextEmptyIndex)
                 .FirstOrDefault();
 
             if (activeCandidate != null)
@@ -430,6 +432,7 @@ namespace Ingame
             var inactiveCandidate = screwBoxes
                 .Where(box => BasePredicate(box) && (box.gameObject == null || !box.gameObject.activeInHierarchy))
                 .OrderByDescending(box => box.NextEmptyIndex)
+                 .ThenByDescending(box => box.NextEmptyIndex)
                 .FirstOrDefault();
 
             return inactiveCandidate;
@@ -496,9 +499,9 @@ namespace Ingame
             if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(isComplete);
         }
 
-        private IEnumerator MoveToSlot(Box newBox, BoxSlot slot, Action<bool> callback = null)
+        private IEnumerator MoveToSlot(Box newBox, BoxSlot slot,float time = 0.5f, Action<bool> callback = null)
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(time);
             var toPos = slot.transform.position;
 
             // Safety
@@ -515,7 +518,7 @@ namespace Ingame
 
             // Candidates for this box color
 
-            var t = newBox.transform.DOMove(toPos, 1f).SetEase(Ease.OutCirc);
+            var t = newBox.transform.DOMove(toPos, time).SetEase(Ease.OutCirc);
             t.OnStart(() =>
             {
                 AddHidingScrewToBox(newBox);
@@ -652,14 +655,19 @@ namespace Ingame
             boxUnlock.SetActive(false);
 
 
-            CloseAndRemoveBox(boxUnlock, () =>
+            
+            CloseAndRemoveBox(boxUnlock,0.01f, () =>
             {
-                var newBox = TrySpawnNewBox(slot, (b => b.Color == color));
+                Box newBox;
+                if (color == ColorEnum.Clear)
+                    newBox = TrySpawnNewBox(slot);
+                else
+                 newBox = TrySpawnNewBox(slot, (b => b.Color == color));
                 Debug.Log("try spawn new box " + newBox);
                 AddHidingScrewToBox(newBox);
 
                 if (newBox != null)
-                    StartCoroutine(MoveAndHandleBox(newBox, slot)); 
+                    StartCoroutine(MoveAndHandleBox(newBox, slot,0)); 
             });
 
             

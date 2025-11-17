@@ -60,8 +60,11 @@ namespace Ingame
             coutHoldActive++;
             var hold = holdScrews.FirstOrDefault(hold => !hold.gameObject.activeSelf);
             if (hold == null) return;
-            hold.gameObject.SetActive(true);  // Activate the new hold
-            HoldAlignment();
+            hold.gameObject.SetActive(true);
+
+            HoldAlignment(() =>
+            {
+            });
         }
         public void ShowArrayScrew()
         {
@@ -80,7 +83,7 @@ namespace Ingame
                 holdScrews[i].gameObject.SetActive(i < activeCount);
             }
         }
-        public void HoldAlignment()
+        public void HoldAlignment(Action callback = null)
         {
             if (holdScrews.Count == 0) return;
 
@@ -88,10 +91,10 @@ namespace Ingame
             {
                 StopCoroutine(alignmentCoroutine);
             }
-            alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine());
+            alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine(0,callback));
         }
 
-        private IEnumerator HoldAlignmentCoroutine()
+        private IEnumerator HoldAlignmentCoroutine(float duration = 0.5f,Action callBack = null)
         {
             var activeHolds = holdScrews.Where(hold => hold.gameObject.activeSelf).ToList();
             if (activeHolds.Count == 0) yield break;
@@ -104,7 +107,6 @@ namespace Ingame
             float totalOccupiedWidth = spacing * (activeHolds.Count - 1);
             float startX = -totalOccupiedWidth / 2f;
 
-            float duration = 0.5f;
 
             List<Vector3> initialPositions = activeHolds.Select(h => h.transform.localPosition).ToList();
             List<Vector3> targetPositions = new List<Vector3>();
@@ -134,6 +136,7 @@ namespace Ingame
                 activeHolds[i].transform.localPosition = targetPositions[i];
 
             alignmentCoroutine = null;
+            callBack?.Invoke();
         }
 
         // Hàm thêm Screw vào một ô trống trong holdScrew
@@ -271,6 +274,10 @@ namespace Ingame
 
         public ColorEnum GetMostestColorInArray()
         {
+            if (screws.Count == 0)
+            {
+                return ColorEnum.Clear;
+            }
             var t = screws.Max(screw => screw.Color);
             return t;
         }
