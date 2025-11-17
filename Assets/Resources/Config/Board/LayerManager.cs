@@ -157,7 +157,6 @@ namespace Ingame.Board
         }
         public void RemoveScrewOnDict(Screw.Screw screw, int layer)
         {
-            layer -= 9;
             screwDict.TryGetValue(layer, out List<Screw.Screw> listScrews);
             Debug.Log("Remove screw on layer " + layer + " total screws " + (listScrews != null ? listScrews.Count.ToString() : "null"));
             if (listScrews == null) return;

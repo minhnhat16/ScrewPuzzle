@@ -72,8 +72,7 @@ namespace Ingame.Screw
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
             yield return new WaitUntil(() => bodyLayer != null);
             SetSortingOrderAndLayer(sortingOrder, bodyLayer);
-            /*yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
-            SetScrewColor();*/
+          
         }
 
         public Screw()

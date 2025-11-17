@@ -409,6 +409,7 @@ public class LevelManager : MonoBehaviour, IResetable
             var lm = currentLevelObject.GetComponent<LayerManager>();
 
             var partLayer = lm.GetPartByKey(screwData.hingeConnections[0].bodyPartUniqueID).PartLayer() - 10;
+            screw.sortingOrder = partLayer;
             if (lm.screwDict.ContainsKey(partLayer))
             {
                 lm.screwDict[partLayer].Add(screw);

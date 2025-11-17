@@ -64,7 +64,9 @@ namespace Ingame
             _screw.Clear();
 
             var layermanager = LevelManager.Instance.layerManager;
-            layermanager.RemoveScrewOnDict(screw, screw.layerMask);
+
+
+            layermanager.RemoveScrewOnDict(screw, screw.sortingOrder);
             ArrayScrew.Instance.AddScrew(screw);
         }
     }

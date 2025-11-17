@@ -27,7 +27,7 @@ namespace Ingame
             }
         }
 
-        public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm)
+        public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm, bool isInactive = false)
         {
 
             if (layer < 0 || layer >= lm.Layers.Count) return;
@@ -39,7 +39,7 @@ namespace Ingame
             var listScrews = lm.screwDict.GetValueOrDefault(layer);
 
             if (listScrews == null) return;
-            List<Screw.Screw> screwsActives = listScrews.Where(s => s != null ).ToList();
+            List<Screw.Screw> screwsActives = listScrews.Where(s => s != null).ToList();
             if (screwsActives == null) return;
             foreach (var s in screwsActives)
             {
