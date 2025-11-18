@@ -114,8 +114,8 @@ namespace UIScript.UI.UI
 
         public override void OnInit(Action callback = null)
         {
-            levelPanel.Init(callback);
-
+            levelPanel?.Init(callback);
+            base.OnInit(callback);
         }
         public void SetLevelPanelIs(bool isOn)
         {
@@ -135,7 +135,6 @@ namespace UIScript.UI.UI
         {
             ///Debug.Log("View SPin Button");
 
-            ViewManager.Instance.SwitchView(ViewIndex.CollectionView);
         }
 
         private void OnClickSettingButton()

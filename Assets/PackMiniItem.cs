@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class PackMiniItem : MonoBehaviour
 {
-    [SerializeField] private Sprite icon;
-    [SerializeField] private int quantity;
-    [SerializeField] private string spriteName;
+    [SerializeField] private Image icon;
+    private int quantity;
+    private string spriteName;
     [SerializeField] private Text textQuantity;
 
-    public Sprite Icon => icon;
+    public Image Icon => icon;
 
     public int Quantity => quantity;
 
@@ -19,9 +19,10 @@ public class PackMiniItem : MonoBehaviour
     public Text TextQuantity => textQuantity;
 
 
-    public void Init(int quantity, string spriteName)
+    public void Init(int quantity, Sprite sprite)
     {
         this.quantity = quantity;
-        this.spriteName = spriteName;
+        this.icon.sprite = sprite; 
+
     }
 }

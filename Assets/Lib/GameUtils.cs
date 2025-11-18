@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using UIScript;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,7 +20,10 @@ public static class GameConstants
 
     public static string COMMON_PACK = "Prefabs/UIPrefab/BluePack.prefab";
     internal static string BOX_CONFIGS = "Assets/Resources/Config/BoxConfigs/BoxLevel";
+    internal static string EPIC_PACK = "Prefabs/UIPrefab/PinkPack.prefab";
+    internal static string RARE_PACK = "Prefabs/UIPrefab/OrangePack.prefab";
 }
+
 
 public static class GameUtils
 {
@@ -54,4 +58,6 @@ public static class GameUtils
         string formatted = string.Format(culture, "{0:N0}", amount);
         return $"{formatted} {currencyCode}";
     }
+
+   
 }

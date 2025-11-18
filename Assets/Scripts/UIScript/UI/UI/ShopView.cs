@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using ConfigFile;
 using Managers;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
@@ -25,26 +26,62 @@ namespace UIScript.UI.UI
 
         public override void OnInit(Action callback)
         {
-            base.OnInit(callback);
+            StartCoroutine(InitView(callback));
         }
 
 
         IEnumerator InitView(Action callback = null)
         {
+            var config = ConfigFileManager.Instance.PackConfig.GetAllRecord();
+            var packs = config.Where(p => p.Id == PackEnum.Pack).ToList();
+            yield return new WaitForSeconds(1f);
+            InitPack(packs, callback);
+        }
 
-            yield return null;
+        public void InitPack(List<PackConfigRecord> packes, Action callback = null)
+        {
+            if (packes == null || packes.Count == 0)
+                return;
+
+            var commonPack = Resources.Load<PackItem>(GameConstants.COMMON_PACK);
+            var rarePack = Resources.Load<PackItem>(GameConstants.RARE_PACK);
+            var epicPack = Resources.Load<PackItem>(GameConstants.EPIC_PACK);
+
+            for (int i = 0; i < packes.Count; i++)
+            {
+                PackConfigRecord packConfig = packes[i];
+                PackItem prefabToSpawn = null;
+
+                switch (packConfig.Pack)
+                {
+                    case PackType.Common:
+                        prefabToSpawn = commonPack;
+                        break;
+
+                    case PackType.Rare:
+                        prefabToSpawn = rarePack;
+                        break;
+
+                    case PackType.Epic:
+                        prefabToSpawn = epicPack;
+                        break;
+
+                    default:
+                        Debug.LogWarning("Unknown pack type: " + packConfig.Pack);
+                        continue;
+                }
+                if (prefabToSpawn != null)
+                {
+                    PackItem newPack = GameObject.Instantiate(prefabToSpawn, packRectTransform);
+                    newPack.Init(packConfig);
+                    Debug.Log("Spawned pack: " + newPack.name);
+                }
+            }
+
             callback?.Invoke();
         }
 
-        public void InitPack(List<PackConfigRecord> packes, Action callback = null) {
-            if (packes.Count < 0) return;
-
-            var commonPack = Resources.Load<PackItem>(GameConstants.COMMON_PACK);
-            for (int i = 0; i < packes.Count; i++) { 
-            
-            }
-        }
     }
- 
+
 }
 

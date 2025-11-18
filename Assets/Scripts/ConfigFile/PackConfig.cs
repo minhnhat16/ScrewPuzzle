@@ -13,6 +13,12 @@ namespace ConfigFile
         [SerializeField] private long price;
 
         [SerializeField] List<ShopItemRecord> items;
+
+        public PackEnum Id { get => id; set => id = value; }
+        public PackType Pack { get => pack; set => pack = value; }
+        public string Name { get => name; set => name = value; }
+        public long Price { get => price; set => price = value; }
+        public List<ShopItemRecord> Items { get => items; set => items = value; }
     }
 
     public class PackConfig : BYDataTable<PackConfigRecord>

@@ -23,29 +23,29 @@ public class LableChooseDialog : BaseDialog
     public UnityEvent<Lable> onClickedCollection = new();
     private void OnEnable()
     {
-       /* btn_Setting.onClick.AddListener(SettingDialogButton);
-        onClickedRate = lableList[0].onChooseLable;
-        onClickedHome = lableList[1].onChooseLable;
-        onClickedSpin = lableList[2].onChooseLable;
-        onClickedCollection = lableList[3].onChooseLable;
-        onClickedRate.AddListener(RateClicked);
-        onClickedHome.AddListener(HomeClicked);
-        onClickedSpin.AddListener(SpinClicked);
-        onClickedCollection.AddListener(CollectionClicked);
-        DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, (data) =>
-        {
-            if (data == null) return;
-            CurrencyWallet newData = data as CurrencyWallet;
-            gold = newData.amount;
-            gold_lb.text = GameManager.instance.DevideCurrency(gold);
-        });
-        DataTrigger.RegisterValueChange(DataPath.GEMINVENT, (data) =>
-        {
-            if (data == null) return;
-            CurrencyWallet newData = data as CurrencyWallet;
-            gem = newData.amount;
-            gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        });*/
+        /* btn_Setting.onClick.AddListener(SettingDialogButton);
+         onClickedRate = lableList[0].onChooseLable;
+         onClickedHome = lableList[1].onChooseLable;
+         onClickedSpin = lableList[2].onChooseLable;
+         onClickedCollection = lableList[3].onChooseLable;
+         onClickedRate.AddListener(RateClicked);
+         onClickedHome.AddListener(HomeClicked);
+         onClickedSpin.AddListener(SpinClicked);
+         onClickedCollection.AddListener(CollectionClicked);
+         DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, (data) =>
+         {
+             if (data == null) return;
+             CurrencyWallet newData = data as CurrencyWallet;
+             gold = newData.amount;
+             gold_lb.text = GameManager.instance.DevideCurrency(gold);
+         });
+         DataTrigger.RegisterValueChange(DataPath.GEMINVENT, (data) =>
+         {
+             if (data == null) return;
+             CurrencyWallet newData = data as CurrencyWallet;
+             gem = newData.amount;
+             gem_lb.text = GameManager.instance.DevideCurrency(gem);
+         });*/
     }
     private void OnDisable()
     {
@@ -57,37 +57,37 @@ public class LableChooseDialog : BaseDialog
     }
     public override void OnStartShowDialog()
     {
-/*        base.OnStartShowDialog();
-        gold = DataAPIController.instance.GetGold();
-        gem = DataAPIController.instance.GetGem();
-        gold_lb.text = GameManager.instance.DevideCurrency(gold);
-        gem_lb.text = GameManager.instance.DevideCurrency(gem);
-        currentTab = lableList[1];
-        if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
-        {
-            Debug.Log("MainScreenView");
-            GetLable(Lable.Home).OnButtonClicked();
-            var view = ViewManager.Instance.currentView as MainScreenView;
-            view.SetLevelPanelIs(true);
-        }
-        else if (ViewManager.Instance.currentView.viewIndex == ViewIndex.CollectionView)
-        {
-            Debug.Log("CollectionView   ");
-            GetLable(Lable.Collection).OnButtonClicked();
-        }
-        else
-        {
-            GetLable(Lable.Home).OnButtonClicked();
-            //var view = ViewManager.Instance.currentView as MainScreenView;
-            //view.SetLevelPanelIs(true);
-        }*/
+        /*        base.OnStartShowDialog();
+                gold = DataAPIController.instance.GetGold();
+                gem = DataAPIController.instance.GetGem();
+                gold_lb.text = GameManager.instance.DevideCurrency(gold);
+                gem_lb.text = GameManager.instance.DevideCurrency(gem);
+                currentTab = lableList[1];
+                if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
+                {
+                    Debug.Log("MainScreenView");
+                    GetLable(Lable.Home).OnButtonClicked();
+                    var view = ViewManager.Instance.currentView as MainScreenView;
+                    view.SetLevelPanelIs(true);
+                }
+                else if (ViewManager.Instance.currentView.viewIndex == ViewIndex.CollectionView)
+                {
+                    Debug.Log("CollectionView   ");
+                    GetLable(Lable.Collection).OnButtonClicked();
+                }
+                else
+                {
+                    GetLable(Lable.Home).OnButtonClicked();
+                    //var view = ViewManager.Instance.currentView as MainScreenView;
+                    //view.SetLevelPanelIs(true);
+                }*/
     }
     void HomeClicked(Lable lable)
     {
         if (lable != Lable.Home) return;
         SwitchButtonChose(lable);
         Debug.Log("home clicked");
-        if(ViewManager.Instance.currentView.viewIndex != ViewIndex.MainScreenView) ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
+        if (ViewManager.Instance.currentView.viewIndex != ViewIndex.MainScreenView) ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
 
     }
     void RateClicked(Lable lable)
@@ -97,17 +97,17 @@ public class LableChooseDialog : BaseDialog
         DialogManager.Instance.ShowDialog(DialogIndex.RateDialog, null, () =>
         {
             if (ViewManager.Instance.currentView.viewIndex != ViewIndex.MainScreenView) return;
-           var main =  (MainScreenView)ViewManager.Instance.currentView;
-            main.SetLevelPanelIs(false); 
+            var main = (MainScreenView)ViewManager.Instance.currentView;
+            main.SetLevelPanelIs(false);
         });
     }
     void SpinClicked(Lable lable)
     {
         if (lable != Lable.Spin) return;
         SwitchButtonChose(lable);
-        DialogManager.Instance.ShowDialog(DialogIndex.SpinDialog,null, () =>
+        DialogManager.Instance.ShowDialog(DialogIndex.SpinDialog, null, () =>
         {
-            if(ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
+            if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
             {
                 var main = ViewManager.Instance.currentView as MainScreenView;
                 main.SetLevelPanelIs(false);
@@ -121,19 +121,14 @@ public class LableChooseDialog : BaseDialog
         SwitchButtonChose(lable);
         CollectionParam param = new();
         param.totalCard = ConfigFileManager.Instance.ColorConfig.GetAllRecord().Count;
-        if (ViewManager.Instance.currentView.viewIndex != ViewIndex.CollectionView)
-        {
-            ViewManager.Instance.SwitchView(ViewIndex.CollectionView,param);
-        }
-
-        }
+    }
     void SwitchButtonChose(Lable lable)
     {
-      /* foreach(var tab in lableList)
-        {
-            if (tab.type != lable) tab.OnButtonUnchose();
-            //else tab.OnButtonClicked();
-        }*/
+        /* foreach(var tab in lableList)
+          {
+              if (tab.type != lable) tab.OnButtonUnchose();
+              //else tab.OnButtonClicked();
+          }*/
     }
     LableTab GetLable(Lable lable)
     {

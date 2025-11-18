@@ -6,6 +6,7 @@ using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
 using Level;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -80,8 +81,7 @@ public class LevelMaker : MonoBehaviour
         if (onKey2Pressed == null) onKey2Pressed = new KeyEvent();
         if (onKeyAPressed == null) onKeyAPressed = new KeyEvent();
         if (onKeyBPressed == null) onKeyBPressed = new KeyEvent();
-    
-        // ... Tương tự cho tất cả các phím khác
+        
     }
 
     private void OnEnable()

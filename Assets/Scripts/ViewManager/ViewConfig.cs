@@ -11,7 +11,6 @@ public enum ViewIndex
     DailyView = 5,
     WardrobeView = 6,   
     ShopView = 7,
-    CollectionView = 8,
 }
 
 public class ViewParam { }
@@ -57,9 +56,7 @@ public class ViewConfig
         ViewIndex.GamePlayView,
         ViewIndex.DailyView,
         ViewIndex.LevelView,
-
         ViewIndex.ShopView,
-        ViewIndex.CollectionView,
 
     };
 }

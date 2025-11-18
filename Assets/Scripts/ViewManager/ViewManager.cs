@@ -14,22 +14,22 @@ public class ViewManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-       canvas = GetComponent<Canvas>();
+        canvas = GetComponent<Canvas>();
+        LoadingView loadingView = GetComponentInChildren<LoadingView>();
+        dicView.Add(ViewIndex.LoadingView, loadingView);
     }
 
-    IEnumerator Start() 
+    IEnumerator Start()
     {
         yield return new WaitForSeconds(0.1f);
         foreach (ViewIndex viewIndex in ViewConfig.viewArray)
         {
+            if(dicView.ContainsKey(viewIndex))  continue;
             string viewName = viewIndex.ToString();
-    
             GameObject view = Instantiate(Resources.Load("Prefabs/UIPrefab/Views/" + viewName, typeof(GameObject))) as GameObject;
             view.transform.SetParent(anchorView, false);
             view.GetComponent<BaseView>().Init();
             dicView.Add(viewIndex, view.GetComponent<BaseView>());
-            //canvas.worldCamera = CameraMain.instance.main;
-            //Debug.Log(viewName);
             yield return new WaitForSeconds(0.5f);
 
         }
@@ -63,4 +63,4 @@ public class ViewManager : MonoBehaviour
             callback?.Invoke();
         });
     }
-}   
+}

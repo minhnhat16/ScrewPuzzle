@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class BaseView : MonoBehaviour
@@ -16,17 +17,18 @@ public class BaseView : MonoBehaviour
 
     public void Init()
     {
-        OnInit();
-        gameObject.SetActive(false);
-
-
+        OnInit(() =>
+        {
+            gameObject.SetActive(false);
+        });
     }
 
     public virtual void Setup(ViewParam viewParam) { 
        if(viewParam == null ) return;
     }
-    public virtual void OnInit() { }
-    public virtual void OnInit(Action callback = null) { }
+    public virtual void OnInit(Action callback = null) {
+        callback?.Invoke();
+    }
 
 
     public void ShowViewAnimation(Action callback)
