@@ -16,6 +16,9 @@ public static class GameConstants
 
     public const string SCREW_SPRITE_PATH = "GAMEPLAY/DINH";
     public const string BOX_SPRITE_PATH = "GAMEPLAY/HOP";
+
+    public static string COMMON_PACK = "Prefabs/UIPrefab/BluePack.prefab";
+    internal static string BOX_CONFIGS = "Assets/Resources/Config/BoxConfigs/BoxLevel";
 }
 
 public static class GameUtils

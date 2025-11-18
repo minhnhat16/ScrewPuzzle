@@ -58,7 +58,7 @@ public class LevelMaker : MonoBehaviour
     public KeyEvent onKeyBPressed;
     public KeyEvent onKeyCPressed;
 
-   
+
     // ... tương tự cho các phím khác
     #endregion
 
@@ -79,6 +79,8 @@ public class LevelMaker : MonoBehaviour
         if (onKey1Pressed == null) onKey1Pressed = new KeyEvent();
         if (onKey2Pressed == null) onKey2Pressed = new KeyEvent();
         if (onKeyAPressed == null) onKeyAPressed = new KeyEvent();
+        if (onKeyBPressed == null) onKeyBPressed = new KeyEvent();
+    
         // ... Tương tự cho tất cả các phím khác
     }
 
@@ -89,6 +91,7 @@ public class LevelMaker : MonoBehaviour
         InputManager.onKey1 += onKey1Pressed.Invoke;
         InputManager.onKey2 += onKey2Pressed.Invoke;
         InputManager.onKeyA += onKeyAPressed.Invoke;
+        InputManager.onKeyB += onKeyBPressed.Invoke;
         saveOptionDropDown.onValueChanged.AddListener(delegate { DropdownValueChanged(saveOptionDropDown); });
         // ... Đăng ký các phím còn lại
 
@@ -103,6 +106,7 @@ public class LevelMaker : MonoBehaviour
         InputManager.onKey1 -= onKey1Pressed.Invoke;
         InputManager.onKey2 -= onKey2Pressed.Invoke;
         InputManager.onKeyA -= onKeyAPressed.Invoke;
+        InputManager.onKeyB -= onKeyBPressed.Invoke;    
         // ... Hủy đăng ký các phím còn lại
 
     }
@@ -244,7 +248,8 @@ public class LevelMaker : MonoBehaviour
         
     }
 
-  
+
+    [SerializeField]
     public void SetEditMode(EditMode mode)
     {
         isEditScrewPosition = (mode == EditMode.ScrewPosition);
@@ -302,6 +307,11 @@ public class LevelMaker : MonoBehaviour
     }
 
 
+
+    public void RemoveAllScrew()
+    {
+
+    }
     private void OnValidate()
     {
     }

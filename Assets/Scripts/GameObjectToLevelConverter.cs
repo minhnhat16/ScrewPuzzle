@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using ConfigFile;
 using Enums;
 using Ingame;
@@ -190,7 +190,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             foreach (var hinge in hinges)
             {
                 var pos = hinge.transform.localPosition;
-                var body = $"{screw.HingeController.BodyConnect[idBody].GetComponent<BasePart>().uniqueID}";
+                var body = $"{screw.HingeController.BodyConnect[idBody]?.GetComponent<BasePart>().uniqueID}";
                 var hingPos = hinge.connectedBody.transform.localPosition;
                 HingeConnection hingeConnection = new HingeConnection()
                 {
@@ -325,7 +325,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         var records = CalculateScrewsDivisibleBy3AndSpawnBoxes(level);
 
         // Define the path and generate the name with the counter (idLevel)
-        string path = "Assets/Resources/Config/BoxLevel" + idLevel + ".asset";
+        string path = GameConstants.BOX_CONFIGS+ idLevel + ".asset";
 
         // Check if a BoxConfig asset already exists at the path
         BoxConfig existingConfig = AssetDatabase.LoadAssetAtPath<BoxConfig>(path);
@@ -633,6 +633,18 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         }
         Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
         return false;
+    }
+
+    public void RemoveAllScrew()
+    {
+        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        var screws = screwManager.GetScrews();
+        foreach (var s in screws) {
+            var sm = s as ScrewLevelMaker;
+            RemoveScrew(sm);
+            Destroy(sm);
+        }
+    
     }
 
     public int GetScrewTotal(ColorEnum color)

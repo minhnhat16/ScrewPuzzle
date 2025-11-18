@@ -5,6 +5,7 @@ using Enums;
 using Ingame.Board;
 using Ingame.Screw;
 using Level;
+using Unity.Jobs;
 using UnityEngine;
 public class ScrewLevelMaker : Screw
 {
@@ -18,7 +19,7 @@ public class ScrewLevelMaker : Screw
     public override void Start()
     {
     }
-    
+
     public override void Awake()
     {
         base.Awake();
@@ -40,7 +41,7 @@ public class ScrewLevelMaker : Screw
         {
             Debug.Log("Mouse Button Down Detected");
             int screwLayerMask = LayerMask.GetMask("Screw");
-            RaycastHit2D hit = Physics2D.Raycast(_mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, float.PositiveInfinity,screwLayerMask);
+            RaycastHit2D hit = Physics2D.Raycast(_mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, float.PositiveInfinity, screwLayerMask);
 
             Debug.Log("Raycast hit: " + (hit.collider != null ? hit.collider.gameObject.name : "Nothing"));
             if (hit.collider != null && hit.collider.gameObject == gameObject)
@@ -75,7 +76,7 @@ public class ScrewLevelMaker : Screw
     internal void ResetHinge()
     {
         var allHinge = hingeController.HingeJoint2D;
-        foreach(var hinge in allHinge)
+        foreach (var hinge in allHinge)
         {
             Destroy(hinge.gameObject);
         }
@@ -94,16 +95,16 @@ public class ScrewLevelMaker : Screw
                 isHeld = LevelMaker.instance.isEditScrewPosition;
                 return;
             }
-    
+
             if (LevelMaker.instance.isEditHinge)
             {
-                
+                if (hingeController.HingeJoint2D.Count > 0) return;
                 ScrewChangeColorOnClick(isSelecting);
                 isHeld = true; // Đánh dấu screw là đang được giữ
                 LevelMaker.instance.OnScrewClicked(); // Gọi phương thức từ LevelMaker
                 isSelecting = true; // Bật chế độ chọn
                 Debug.Log("Selected screw. Now select another object.");
-                 TurnColliderIs(!isSelecting);
+                TurnColliderIs(!isSelecting);
                 LevelMaker.instance.ChosePartCoroutine(this);
                 return;
             }
@@ -116,10 +117,9 @@ public class ScrewLevelMaker : Screw
                 GameObjectToLevelConverter.ins.UpdateScrewTotal();
                 ChangeScrewColorByEnum(Color);
             }
-            if(LevelMaker.instance.isRemoveScrew)
+            if (LevelMaker.instance.isRemoveScrew)
             {
                 ResetHinge();
-
                 GameObjectToLevelConverter.ins.RemoveScrew(this);
                 Destroy(gameObject);
             }
@@ -132,15 +132,17 @@ public class ScrewLevelMaker : Screw
 
     public void ScrewChangeColorOnClick(bool isSelected)
     {
-        ChangeScrewColorByEnum(isSelected ? Color: ColorEnum.Green);
+        ColorEnum color;
+        color = Color == ColorEnum.Green ? ColorEnum.Red : ColorEnum.Green;
+        ChangeScrewColorByEnum(isSelected ? Color : color);
     }
     public void TurnColliderIs(bool isEnable)
     {
 
-        Debug.Log("Turn collider is "  + isEnable);
+        Debug.Log("Turn collider is " + isEnable);
         CircleCollider2D.enabled = isEnable;
     }
-    public  HingeJoint2D CreateHingeWithMousePos(Rigidbody2D targetBody, HingeConnection connection)
+    public HingeJoint2D CreateHingeWithMousePos(Rigidbody2D targetBody, HingeConnection connection)
     {
         Debug.Log($"try to add new hing: mousepos {connection.hingePosition} ");
         GameObject newHingeChild = new()
@@ -167,7 +169,7 @@ public class ScrewLevelMaker : Screw
         TurnColliderIs(!isSelecting);
         return hingeJoint;
     }
-    public override HingeJoint2D CreateHinge(Rigidbody2D targetScrew,HingeConnection connection)
+    public override HingeJoint2D CreateHinge(Rigidbody2D targetScrew, HingeConnection connection)
     {
         Debug.Log("try to add new hinge " + targetScrew == null);
         GameObject newHingeChild = new()

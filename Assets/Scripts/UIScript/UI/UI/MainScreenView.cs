@@ -60,10 +60,7 @@ namespace UIScript.UI.UI
             SetLevelPanelIs(false);
 
         }
-        public override void OnInit()
-        {
-            base.OnInit();
-        }
+    
         public override void Setup(ViewParam viewParam)
         {
             base.Setup(viewParam);
@@ -115,7 +112,7 @@ namespace UIScript.UI.UI
             DialogManager.Instance.ShowDialog(DialogIndex.RateDialog);
         }
 
-        public override void OnInit(Action callback)
+        public override void OnInit(Action callback = null)
         {
             levelPanel.Init(callback);
 

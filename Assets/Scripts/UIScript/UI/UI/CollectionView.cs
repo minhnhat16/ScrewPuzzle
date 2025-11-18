@@ -8,7 +8,7 @@ public class CollectionView : BaseView
     [SerializeField] private Image fill_collection;
     [SerializeField] private Button returnBtn;
 
-    public override void OnInit()
+    public override void OnInit(Action callback = null)
     {   
         base.OnInit();
         //collection = GetComponentInChildren<CollectionCards>();
