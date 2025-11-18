@@ -156,13 +156,14 @@ public class GamePlayView : BaseView
         var itemType = ItemType.Magnet;
         // Get the item data for the 'AddHold' item type
         var itemData = DataAPIController.instance.GetItemData(itemType);
-
+        var itemConfig = ConfigFileManager.Instance.GetItemConfig(itemType);
         // If the total amount of the item is 0 or less, show confirmation dialog
         if (itemData.total <= 0)
         {
             AddItemDialogParam param = new AddItemDialogParam
             {
-                ItemType = itemType
+                ItemType = itemType,
+                detail = itemConfig.Detail,
             };
 
             // Show the item confirmation dialog

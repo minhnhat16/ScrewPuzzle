@@ -16,143 +16,33 @@ namespace UIScript.UI.UI
 {
     public class ShopView : BaseView
     {
-        [SerializeField] private int gold;
-        [SerializeField] private RectTransform packRect;
-        [SerializeField] private RectTransform priceRect;
-        [SerializeField] private Slider switchSlider;
-       // [SerializeField] private List<PackItem> packItems;
-        [SerializeField] private Text lablePrice;
-        [SerializeField] private Text lablePack;
-        [SerializeField] private Text goldLable;
-        
-        [SerializeField] private Button closeButton;
-        [SerializeField] private List<PackMiniItem> packMiniItems;
+        [SerializeField] private Text txt_gold;
+        [SerializeField] private Text txt_ticket;
 
-        // [SerializeField] private List<PackItem> packItems;
-        public override void OnInit()
+        [SerializeField] private RectTransform packRectTransform;
+        [SerializeField] private RectTransform coinRectTransform;
+        [SerializeField] private RectTransform ticketRectTransform;
+
+        public override void OnInit(Action callback)
         {
-            var ShopConfig = ConfigFileManager.Instance.PriceConfig.GetAllRecord();
-            var shopItemConfigList = ShopConfig.Where(item => item.IdShop == 1).ToList();
-           // LoadItemFromConfig(shopItemConfigList);
+            base.OnInit(callback);
+        }
+
+
+        IEnumerator InitView(Action callback = null)
+        {
+
+            yield return null;
+            callback?.Invoke();
+        }
+
+        public void InitPack(List<PackConfigRecord> packes, Action callback = null) {
+            if (packes.Count < 0) return;
+
+            var commonPack = Resources.Load<PackItem>(GameConstants.COMMON_PACK);
+            for (int i = 0; i < packes.Count; i++) { 
             
-            var packItemConfigLists =  ConfigFileManager.Instance.PackConfig.GetAllRecord();
-            //LoadPackFormConfig(packItemConfigLists);
-            closeButton.onClick.AddListener(CloseButton);
-        }
-
-      
-        public override void Setup(ViewParam param)
-        {
-            var newParam = (ShopViewParam)param;
-            gold = newParam.gold;
-            goldLable.text = GameManager.instance.DevideCurrency(gold) ;
-        }
-        public override void OnStartShowView()
-        {
-            switchSlider.value = 0;
-            //ResetScrollPosition(priceRect);
-            //ResetScrollPosition(packRect);
-            SliderValueChange();
-        }
-        //private void  LoadItemFromConfig(List<PriceConfigRecord>  shopItemConfigRecords)
-        //{
-        //    int i = 0;
-        //    foreach (var shopItemConfig in shopItemConfigRecords)
-        //    {
-        //        var shopItem = ShopItemPool.Instance.Pool.SpawnNonGravityWithIndex(i++);
-        //        shopItem.Price = shopItemConfig.Price;
-        //        shopItem.Quantity = shopItemConfig.Amount;
-        //        shopItem.QuantityText.text = $"+{shopItem.Quantity}";
-        //        shopItem.BuyPriceText.text = $"+{shopItem.Quantity}";
-        //        var spriteImg = SpriteLibControl.Instance.GetSpriteByName(shopItemConfig.SpriteName);
-        //        shopItem.IconImage.sprite = spriteImg;
-        //        shopItem.IconImage.SetNativeSize();
-        //        shopItem.BuyButton.onClick.AddListener(()=>OnShopItemPurchase(shopItem)); 
-        //        //Debug.LogError($"shop item config init {i}  and shop item {shopItem ==null}");
-        //        shopItems.Add(shopItem);
-        //    }
-        //}
-        //private void  LoadPackFormConfig(List<PackConfigRecord>  shopItemConfigRecords)
-        //{
-        //    int i = 0;
-        //    foreach (var packItemCR in shopItemConfigRecords)
-        //    {
-        //        var packItem = PackItemPool.Instance.Pool.SpawnNonGravityWithIndex(i++);
-        //        packItem.Price = packItemCR.Price;
-        //        packItem.RibbonText.text = packItemCR.RibbonText;
-        //        var ribbonSprite = SpriteLibControl.Instance.GetSpriteByName(packItemCR.RibbonColorName);
-        //        packItem.Ribon.sprite =ribbonSprite;
-
-        //        packMiniItems[0].Init(packItemCR.QuantityItem1,packItemCR.IconItem1);
-        //        packMiniItems[1].Init(packItemCR.QuantityItem2,packItemCR.IconItem2);
-        //        packMiniItems[2].Init(packItemCR.QuantityItem3, packItemCR.IconItem3);
-
-        //        packItem.MiniItemsDict = new ();
-        //        packItem.MiniItemsDict.TryAdd(packItemCR.IconItem1, packMiniItems[0]);
-        //        packItem.MiniItemsDict.TryAdd(packItemCR.IconItem2, packMiniItems[1]);
-        //        packItem.MiniItemsDict.TryAdd(packItemCR.IconItem3, packMiniItems[2]);
-                
-        //        packItem.PurchaseButton.onClick.AddListener(()=>OnPackItemPurchase(packItem));
-        //    }
-        //}
-        private void CloseButton()
-        {
-            MainScreenViewParam param = new MainScreenViewParam();
-            param.totalGold = GameManager.instance.GetPlayerGold();
-            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
-        }
-
-        private void OnShopItemPurchase(ShopItem shopItem)
-        {
-            // Your purchase logic here
-            Debug.Log($"Purchased {shopItem.Quantity} of item costing {shopItem.Price}");
-        }
-        private void OnPackItemPurchase(PackItem shopItem)
-        {
-            // Your purchase logic here
-            Debug.Log($"Purchased {shopItem.ItemIcon} of item costing {shopItem.Price}");
-        }
-
-        private void LoadShopItem(List<PriceConfigRecord>  packItemConfigRecords)
-        {
-       
-        }
-
-        public void SliderValueChange()
-        {
-            float value = switchSlider.value;
-            bool valueBool = value < 1 ; // 0 là view price 1 là view pack
-            SwitchMiniView(valueBool); // hàm set mini view cho price và pack
-        }
-
-        public void ResetScrollPosition(RectTransform scrollView)
-        {
-            ScrollRect scrollRect = scrollView.GetComponent<ScrollRect>();
-            if (scrollRect != null)
-            {
-                // To reset to the top
-                scrollRect.verticalNormalizedPosition = 1f;
-
-                // To reset to the bottom, set to 0f
-                // scrollRect.verticalNormalizedPosition = 0f;
             }
-            else
-            {
-                Debug.LogWarning("ScrollRect component not found on lablePack.");
-            }
-
-        }
-        public void SwitchMiniView(bool isActive =false)
-        {
-            //set hiển thij label trên switch, chỉ có 1 cái được active 
-            lablePrice.gameObject.SetActive(isActive);
-            lablePack.gameObject.SetActive(!isActive);
-            
-            ////set mini view active tương tự trên
-            
-            //priceRect.gameObject.SetActive(isActive);
-            //packRect.gameObject.SetActive(!isActive);
-
         }
     }
  

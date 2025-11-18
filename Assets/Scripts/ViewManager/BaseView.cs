@@ -17,8 +17,8 @@ public class BaseView : MonoBehaviour
     public void Init()
     {
         OnInit();
-        //Debug.LogError($"on init {viewIndex}");
         gameObject.SetActive(false);
+
 
     }
 
@@ -26,8 +26,7 @@ public class BaseView : MonoBehaviour
        if(viewParam == null ) return;
     }
 
-    public virtual void OnInit() { }
-    public virtual void OnInit(Action callback) { }
+    public virtual void OnInit(Action callback = null) { }
 
 
     public void ShowViewAnimation(Action callback)

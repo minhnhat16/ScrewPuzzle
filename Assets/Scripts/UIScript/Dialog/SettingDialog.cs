@@ -11,14 +11,9 @@ public class SettingDialog : BaseDialog
     [SerializeField] private bool isSFXOn;
     [SerializeField] private bool isVibOn;
     [SerializeField] private bool isMainScreen;
-
-
-    [SerializeField] private Image musicOn;
-    [SerializeField] private Image musicOff;
-    [SerializeField] private Image sfxOn;
-    [SerializeField] private Image sfxOff;
-    [SerializeField] private Image vibOn;
-    [SerializeField] private Image vibOff;
+    [SerializeField] private CustomToggle tg_music;
+    [SerializeField] private CustomToggle tg_soundSfx;
+    [SerializeField] private CustomToggle tg_soundVib;
 
     [SerializeField] private Dropdown language_dr;
 
@@ -28,35 +23,42 @@ public class SettingDialog : BaseDialog
 
     [SerializeField] private Text titleLB;
     [SerializeField] RectTransform below;
-    [HideInInspector]
-    public UnityEvent<bool> musicEvent = new UnityEvent<bool>();
-    [HideInInspector]
-    public UnityEvent<bool> sfxEvent = new UnityEvent<bool>();
-    [HideInInspector]
-    public UnityEvent<bool> vibEvent = new UnityEvent<bool>();
+
     private void OnEnable()
     {
-        musicEvent.AddListener(MusicChange);
-        sfxEvent.AddListener(SFXChange);
-        homeButton.onClick.AddListener(HomeButton);
-        //language_dr.onValueChanged.AddListener(OnDropdownValueChanged);
-    }
 
- 
+        homeButton.onClick.AddListener(HomeButton);
+
+        tg_music.m_Toggle.onValueChanged.AddListener(SettingMusic);
+        tg_soundSfx.m_Toggle.onValueChanged.AddListener(SettingSFX);
+    }
     private void OnDisable()
     {
-        musicEvent.RemoveListener(MusicChange);
-        sfxEvent.RemoveListener(SFXChange);
-
+        homeButton.onClick.RemoveAllListeners();
+        tg_music.m_Toggle.onValueChanged.RemoveListener(SettingMusic);
+        tg_soundSfx.m_Toggle.onValueChanged.RemoveListener(SettingSFX);
     }
+    private void SettingSFX(bool value)
+    {
+        SoundManager.instance.SettingSFXVolume(value);
+    }
+
+    private void SettingMusic(bool value)
+    {
+        SoundManager.instance.SettingMusicVolume(value);
+    }
+
+
     public override void Setup(DialogParam dialogParam)
     {
-        SettingParam param = (SettingParam)dialogParam ;
+        SettingParam param = (SettingParam)dialogParam;
         int userGold = param.totalGold;
         bool isMainScreen = param.isMainScreen;
         SetupButton(isMainScreen);
         goldDisplay.SetGoldToLable(userGold);
         SetupPauseGame(isMainScreen);
+        tg_music.m_Toggle.isOn = true;
+        tg_soundSfx.m_Toggle.isOn = true;
         //isMainScreen = param.isMainScreen;
         //        below.gameObject.SetActive(!param.isMainScreen);
     }
@@ -81,7 +83,7 @@ public class SettingDialog : BaseDialog
 
     }
 
-   
+
     public void HomeButton()
     {
         DialogManager.Instance.ShowDialog(DialogIndex.QuitDialog);
@@ -90,59 +92,15 @@ public class SettingDialog : BaseDialog
 
         });
     }
-    public void MusicChange(bool isOn)
-    {
-        //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
-        //Debug.Log("MUSIC CHANGED" + isOn);
-        SoundManager.instance.musicSetting = isOn;
-        SoundManager.instance.SettingMusicVolume(isOn);
-        if (isOn)
-        {
 
-            musicOn.gameObject.SetActive(true);
-            musicOff.gameObject.SetActive(false);
-        }
-        else
-        {
-            musicOn.gameObject.SetActive(false);
-            musicOff.gameObject.SetActive(true);
-        }
-    }
-    public void SFXChange(bool isOn)
-    {
-        //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
-        //Debug.Log("SFX CHANGED" + isOn);
-        SoundManager.instance.sfxSetting = isOn;
-        //SoundManager.instance.SettingSFXVolume(isOn);
-        if (isOn)
-        {   
-            sfxOn.gameObject.SetActive(true);
-            sfxOff.gameObject.SetActive(false);
-        }
-        else
-        {
-            sfxOn.gameObject.SetActive(false);
-            sfxOff.gameObject.SetActive(true);
-        }
-    }
-    public void OnMusicChanged()
-    {
-        isMusicOn = !isMusicOn;
-        //Debug.Log("OnMusicChanged" + isMusicOn);
-        musicEvent?.Invoke(isMusicOn);
-    }
-    public void OnSFXChanged()
-    {
-        isSFXOn = !isSFXOn;
-        sfxEvent?.Invoke(isSFXOn);
-    }
+
     public void CloseBtn()
     {
-       // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+        // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         //Debug.Log("Close button on " + this.dialogIndex);
         DialogManager.Instance.HideDialog(dialogIndex, () =>
         {
-            
+
         });
     }
 

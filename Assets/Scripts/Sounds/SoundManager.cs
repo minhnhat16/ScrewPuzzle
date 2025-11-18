@@ -387,7 +387,7 @@ public class SoundManager : MonoBehaviour
             audioSource.volume = 1f;
         }
         else
-        {
+        {   
             //Debug.Log("mute music");
             audioSource.volume = 0f;
         }

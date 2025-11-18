@@ -1,3 +1,5 @@
+﻿using System;
+using System.Globalization;
 using UnityEditor;
 using UnityEngine;
 
@@ -40,5 +42,13 @@ public static class GameUtils
                 SceneView.lastActiveSceneView.Frame(bounds, true);
             }
         }
+    }
+
+
+    public static string FormatPrice(long amount, string currencyCode = "VND")
+    {
+        var culture = new CultureInfo("vi-VN"); // vùng Việt Nam
+        string formatted = string.Format(culture, "{0:N0}", amount);
+        return $"{formatted} {currencyCode}";
     }
 }

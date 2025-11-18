@@ -129,6 +129,8 @@ namespace UIScript.Dialog
 
         private void SetTutorialDetail(string detail)
         {
+
+            Debug.Log(detail);
             tutorial_lb.text = detail.ToUpper();
         }
         private void SetPriceLb(string price)

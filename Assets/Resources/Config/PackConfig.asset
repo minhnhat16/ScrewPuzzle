@@ -14,62 +14,174 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   records:
   - id: 0
-    idItem: 1
-    price: 2000
-    ribbonText: ads pack
-    iconName: 09_ADS pack_icon
-    ribbonColorName: 01_Blue ribbon_pack
-    iconItem1: 07_No ads icon
-    quantityItem1: 1
-    iconItem2: Price_coin 3
-    quantityItem2: 100000
-    iconItem3: null
-    quantityItem3: 0
+    pack: 0
+    name: "G\xF3i V\xE9"
+    price: 39000
+    items:
+    - id: 5
+      name: Ticket
+      quantity: 10
+  - id: 0
+    pack: 0
+    name: "G\xF3i Kh\u1EDFi \u0110\u1ED9ng"
+    price: 24000
+    items:
+    - id: 4
+      name: 
+      quantity: 600
+    - id: 0
+      name: 
+      quantity: 1
+    - id: 1
+      name: 
+      quantity: 1
+    - id: 2
+      name: 
+      quantity: 1
+  - id: 0
+    pack: 1
+    name: "G\xF3i \u0110\u1EB7t Bi\u1EC7t"
+    price: 27900
+    items:
+    - id: 4
+      name: 
+      quantity: 1000
+    - id: 0
+      name: 
+      quantity: 5
+    - id: 1
+      name: 
+      quantity: 5
+    - id: 2
+      name: 
+      quantity: 5
+  - id: 0
+    pack: 1
+    name: "G\xF3i \u0110\u1EB7t Bi\u1EC7t"
+    price: 27900
+    items:
+    - id: 4
+      name: 
+      quantity: 6000
+    - id: 0
+      name: 
+      quantity: 10
+    - id: 1
+      name: 
+      quantity: 10
+    - id: 2
+      name: 
+      quantity: 10
+  - id: 0
+    pack: 1
+    name: "G\xF3i Si\xEAu C\u1EA5p"
+    price: 982000
+    items:
+    - id: 4
+      name: 
+      quantity: 15000
+    - id: 0
+      name: 
+      quantity: 36
+    - id: 1
+      name: 
+      quantity: 36
+    - id: 2
+      name: 
+      quantity: 36
   - id: 1
-    idItem: 1
-    price: 3000
-    ribbonText: big pack
-    iconName: 08_Super pack_icon
-    ribbonColorName: 01_Blue ribbon_pack
-    iconItem1: 04_unscrew icon
-    quantityItem1: 10
-    iconItem2: Price_coin 4
-    quantityItem2: 15000
-    iconItem3: null
-    quantityItem3: 0
+    pack: 0
+    name: 0
+    price: 73000
+    items:
+    - id: 5
+      name: 
+      quantity: 10
+  - id: 1
+    pack: 0
+    name: 0
+    price: 147000
+    items:
+    - id: 5
+      name: 
+      quantity: 30
+  - id: 1
+    pack: 0
+    name: 0
+    price: 601000
+    items:
+    - id: 5
+      name: 
+      quantity: 75
+  - id: 1
+    pack: 0
+    name: 0
+    price: 1200000
+    items:
+    - id: 5
+      name: 
+      quantity: 150
+  - id: 1
+    pack: 2
+    name: 0
+    price: 1250000
+    items:
+    - id: 5
+      name: 
+      quantity: 300
+  - id: 1
+    pack: 2
+    name: 0
+    price: 1250000
+    items:
+    - id: 5
+      name: 
+      quantity: 500
   - id: 2
-    idItem: 1
-    price: 4000
-    ribbonText: super pack
-    iconName: 08_Super pack_icon
-    ribbonColorName: 02_ Red ribbon_pack
-    iconItem1: 05_replay icon
-    quantityItem1: 10
-    iconItem2: Price_coin 5
-    quantityItem2: 15000
-    iconItem3: null
-    quantityItem3: 0
-  - id: 3
-    idItem: 1
-    price: 5000
-    ribbonText: mega pack
-    iconName: 10_Mega pack_icon
-    ribbonColorName: 02_ Red ribbon_pack
-    iconItem1: 06_undo icon
-    quantityItem1: 10
-    iconItem2: Price_coin 6
-    quantityItem2: 15000
-    iconItem3: null
-    quantityItem3: 0
-  - id: 4
-    idItem: 1
-    price: 6000
-    ribbonText: super mega pack
-    iconName: 10_Mega pack_icon
-    ribbonColorName: 03_ Purple ribbon_pack
-    iconItem1: 05_replay icon
-    quantityItem1: 10
-    iconItem2: 06_undo icon
-    quantityItem2: 10
-    iconItem3: Price_coin 3
-    quantityItem3: 500000
+    pack: 0
+    name: 0
+    price: -1
+    items:
+    - id: 4
+      name: 
+      quantity: 200
+  - id: 2
+    pack: 0
+    name: 0
+    price: 49000
+    items:
+    - id: 4
+      name: 
+      quantity: 600
+  - id: 2
+    pack: 0
+    name: 0
+    price: 147000
+    items:
+    - id: 4
+      name: 
+      quantity: 2000
+  - id: 2
+    pack: 0
+    name: 0
+    price: 393000
+    items:
+    - id: 4
+      name: 
+      quantity: 5000
+  - id: 2
+    pack: 2
+    name: 0
+    price: 737000
+    items:
+    - id: 4
+      name: 
+      quantity: 10000
+  - id: 2
+    pack: 2
+    name: 0
+    price: 1250000
+    items:
+    - id: 4
+      name: 
+      quantity: 30000

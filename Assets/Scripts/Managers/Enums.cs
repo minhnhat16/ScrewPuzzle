@@ -6,6 +6,14 @@ public enum ItemType
    Drill =2,
    AddBox = 3,
    Gold = 4,
+   Ticket = 5,
+}
+
+public enum PackType
+{
+    Common,
+    Rare,
+    Epic,
 }
 public enum Currency
 {
@@ -82,7 +90,12 @@ public enum SizeAmoutGold
    XL = 20,
 }
 
-
+public enum PackEnum
+{
+    Pack,
+    Ticket,
+    Coin,
+}
 public enum TutorialEnum
 {
     StepOne = 1,

@@ -116,4 +116,9 @@ public class ConfigFileManager : MonoBehaviour
     {
         return levelConfig.GetAllRecord();
     }
+
+    internal ItemConfigRecord GetItemConfig(ItemType itemType)
+    {
+        return ItemConfig.GetRecordByKeySearch(itemType);
+    }
 }

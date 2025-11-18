@@ -1,35 +1,19 @@
 using UnityEngine;
 
+
 [System.Serializable]
 public class PriceConfigRecord
 {
-    [SerializeField] private int id;
 
-
-    [SerializeField] private int idShop;
-    [SerializeField] private int idItem;
+    [SerializeField] private PackEnum type;
+    [SerializeField] private ItemType idItem;
     [SerializeField] private int price;
     [SerializeField] private int amount;
     [SerializeField] private bool available;
 
     [SerializeField] private string spriteName;
     [SerializeField] private bool moneyPaid;
-
-    public int Id
-    {
-        get => id;
-    }
-
-    public int IdShop
-    {
-        get => idShop;
-    }
-
-    public int IdItem
-    {
-        get => idItem;
-    }
-
+ 
     public int Price
     {
         get => price;

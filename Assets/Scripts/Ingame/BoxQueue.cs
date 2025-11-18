@@ -494,7 +494,7 @@ namespace Ingame
         }
         private void OnLastBoxClearScrew()
         {
-
+            Debug.Log("on last box clear screw");
             bool isComplete = onCompleteClearBoxes != null && IngameController.Instance.IsGameOver;
             if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(isComplete);
         }

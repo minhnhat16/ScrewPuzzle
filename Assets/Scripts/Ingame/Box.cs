@@ -129,7 +129,9 @@ namespace Ingame
             renderUpper.enabled = false;
 
             var renderGObj = render.gameObject;
-
+            TunOffScrews();
+            color= ColorEnum.Empty;
+            renderUpper.color = Color.ToColor();
             renderGObj.SetActive(true);
             renderGObj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             foreach (var h in holdScrews)
@@ -158,11 +160,18 @@ namespace Ingame
                 var sprite = Resources.Load<Sprite>($"{path}");
                 renderUpper.sprite = sprite;
                 renderUpper.transform.localPosition = Vector2.zero;
+                renderUpper.color = ColorEnum.White.ToColor();
+                renderUpper.transform.localScale = Vector2.one;
                 renderUpper.enabled = IsLocked;
                 render.sprite = ColorEnumExtensions.ToBoxSprite(ColorEnum.Brown);
                 render.enabled = !IsLocked;
             }
-           
+            else
+            {
+                renderUpper.transform.localScale = Vector2.one * 3.5f;
+
+            }
+
         }
 
         public void OnClickCollider()
@@ -209,7 +218,9 @@ namespace Ingame
         {
             Sequence mySequence = DOTween.Sequence();
             renderUpper.enabled = true;
-
+            var color= ColorEnumExtensions.ToColor(this.color);
+            color.a = 0.4f;
+            renderUpper.color = color;
             int totalHold = holdScrews.Count;
             // Debug trước khi sử dụng giá trị này
             //Debug.Log("Total Hold Screws: " + totalHold);
@@ -218,7 +229,7 @@ namespace Ingame
                 .SetEase(Ease.InCirc).OnComplete(() =>
                 {
                     //Debug.Log("OnComplete: TunOffScrews & SpawningStar");
-                    TunOffScrews();
+                    //TunOffScrews();
                     spawnStartEvent?.Invoke(totalHold);
                     //Debug.Log($"Processing Hold Screw at { totalHold}");
                 }))
@@ -231,6 +242,7 @@ namespace Ingame
                     .SetEase(Ease.OutBounce)).OnComplete(() =>
                     {
                         Reset();
+
                         gameObject.SetActive(false);
                     });
         }
