@@ -50,7 +50,7 @@ public class SpriteLibControl : MonoBehaviour
         UnityEngine.Object[] layerFolders = UnityEngine.Resources.LoadAll("Sprites/HINH");
         // Nhưng vì Unity không load thư mục, ta chỉ cần gọi riêng 2 nhánh: a và b
 
-        for (int i = 1; i <= 10; i++) // ví dụ 10 layer
+        for (int i = 1; i <= 40; i++) // ví dụ 10 layer
         {
             Sprite[] groupA = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/a");
             foreach (var s in groupA)
