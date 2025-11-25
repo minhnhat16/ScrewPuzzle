@@ -94,7 +94,7 @@ public class LableChooseDialog : BaseDialog
     {
         if (lable != Lable.Rate) return;
         SwitchButtonChose(lable);
-        DialogManager.Instance.ShowDialog(DialogIndex.RateDialog, null, () =>
+        DialogManager.ins.ShowDialog(DialogIndex.RateDialog, null, () =>
         {
             if (ViewManager.Instance.currentView.viewIndex != ViewIndex.MainScreenView) return;
             var main = (MainScreenView)ViewManager.Instance.currentView;
@@ -105,7 +105,7 @@ public class LableChooseDialog : BaseDialog
     {
         if (lable != Lable.Spin) return;
         SwitchButtonChose(lable);
-        DialogManager.Instance.ShowDialog(DialogIndex.SpinDialog, null, () =>
+        DialogManager.ins.ShowDialog(DialogIndex.SpinDialog, null, () =>
         {
             if (ViewManager.Instance.currentView.viewIndex == ViewIndex.MainScreenView)
             {
@@ -120,7 +120,7 @@ public class LableChooseDialog : BaseDialog
         if (lable != Lable.Collection) return;
         SwitchButtonChose(lable);
         CollectionParam param = new();
-        param.totalCard = ConfigFileManager.Instance.ColorConfig.GetAllRecord().Count;
+      //  param.totalCard = ConfigFileManager.Instance.ColorConfig.GetAllRecord().Count;
     }
     void SwitchButtonChose(Lable lable)
     {
@@ -139,16 +139,16 @@ public class LableChooseDialog : BaseDialog
         SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         SettingParam param = new();
         param.isMainScreen = true;
-        DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param, null);
+        DialogManager.ins.ShowDialog(DialogIndex.SettingDialog, param, null);
     }
     public void DailyDialogButton()
     {
         SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
-        DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog, null);
+        DialogManager.ins.ShowDialog(DialogIndex.DailyRewardDialog, null);
 
     }
     public void PauseDialogOff()
     {
-        DialogManager.Instance.HideDialog(DialogIndex.SettingDialog);
+        DialogManager.ins.HideDialog(DialogIndex.SettingDialog);
     }
 }

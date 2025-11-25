@@ -3,6 +3,7 @@ using Managers;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace Ingame
 {
@@ -18,7 +19,7 @@ namespace Ingame
         protected override void Awake()
         {
             base.Awake();
-            instance = this;
+            instance =this;
             screwQueue = new Queue<Screw.Screw>();
             _screw = new List<Screw.Screw>();
         }
@@ -37,7 +38,11 @@ namespace Ingame
 
         protected override void HandleInput(Vector3 screenPos)
         {
+
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
             bool isHandlingItem = ItemController.ins.IsHandlingItem;
+
 
             if (isHandlingItem)
             {
@@ -45,7 +50,7 @@ namespace Ingame
                 if (part != null)
                 {
                     ItemController.ins.IsHandlingItem = false;
-                    LevelManager.Instance.RemovePartItem(part);
+                    LevelManager.ins.RemovePartItem(part);
                 }
                 return;
             }
@@ -63,7 +68,7 @@ namespace Ingame
             Debug.Log("is box null" + box);
             if (box != null)
             {
-                IngameController.Instance.ShowAddBox();
+                IngameController.ins.ShowAddBox();
             }
         }
 
@@ -72,7 +77,7 @@ namespace Ingame
             screwQueue.Enqueue(screw);
             _screw.Clear();
 
-            var layermanager = LevelManager.Instance.layerManager;
+            var layermanager = LevelManager.ins.layerManager;
 
 
             layermanager.RemoveScrewOnDict(screw, screw.sortingOrder);

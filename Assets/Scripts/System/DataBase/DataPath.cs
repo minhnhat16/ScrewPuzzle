@@ -12,7 +12,7 @@ public class DataPath
     public const string ITEMDICT = "itemInventory/itemDict";
     public const string WALLETINVENT = "wallet";
     public const string GOLDINVENT = "wallet/goldWallet";
-    public const string GEMINVENT = "wallet/gemWallet";
+    public const string TICKET = "wallet/ticketWallet";
     public const string DAILYDATA = "dailyData";
     public const string ISDAILYCLAIM = DAILYDATA + "/isClaimToday";
     public const string DAILYTIMECLAIMED = DAILYDATA + "/timeClaimed";
@@ -21,7 +21,8 @@ public class DataPath
     public const string SPINDATA = "spinData";
     public const string ISSPIN =  SPINDATA +"/isSpin";
     public const string TIMESPIN = SPINDATA+ "/timeSpin";
-    internal static readonly string NEWPLAYER = "userInfo/isNewPlayer";
+    public const string NEWPLAYER = "userInfo/isNewPlayer";
+    public const string MISSION_PROGRESS = "missions";
     public const string CRBACKGROUND = "collectionData/currentBG";
     public const string CRBOARDCOLOR = "collectionData/currentBoard";
     public const string CRSCREWCOLOR = "collectionData/currentScrew";

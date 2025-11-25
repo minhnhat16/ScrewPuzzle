@@ -10,8 +10,6 @@ public class SpriteLibControl : MonoBehaviour
     private Dictionary<string, Sprite> spriteDict = new();
 
     private Dictionary<string, Sprite> outLineDict = new();
-    private string inputText = ""; // Holds the input text for sprite name
-    private Sprite displaySprite = null; // Sprite to display
 
     private void Awake()
     {
@@ -29,7 +27,7 @@ public class SpriteLibControl : MonoBehaviour
     private void Start()
     {
 
-        LoadAllSprites();
+        LoadAllPartSprites();
         // Initialize the sprite dictionary
         foreach (var sprite in sprites)
         {
@@ -43,8 +41,7 @@ public class SpriteLibControl : MonoBehaviour
 
     }
 
-
-    private void LoadAllSprites()
+    private void LoadAllPartSprites()
     {
         // Load tất cả thư mục cấp 1 trong HINH (1,2,...)
         UnityEngine.Object[] layerFolders = UnityEngine.Resources.LoadAll("Sprites/HINH");

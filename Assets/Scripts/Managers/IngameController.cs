@@ -4,15 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Runtime.CompilerServices;
+using UIScript.Dialog;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace Managers
 {
-    public class IngameController : MonoBehaviour
+    public class IngameController : SingletonMono<IngameController>
     {
-        public static IngameController Instance;
         public string playerLevel;
         [SerializeField] public bool isOnMagnet;
         [SerializeField] public bool isOnBomb;
@@ -21,6 +22,7 @@ namespace Managers
         [SerializeField] private bool itemPerforming;
         [SerializeField] private int currentStar;
         [SerializeField] private int totalStarInLevel;
+        internal int requireCount = 3;
 
         [SerializeField] private float exp_Current;
         [SerializeField] private Player player;
@@ -51,8 +53,12 @@ namespace Managers
         public UnityEvent<float> onStarChange = new();
         public int CurrentStar { get => currentStar; set => currentStar = value; }
         public int TotalStarInLevel { get => totalStarInLevel; set => totalStarInLevel = value; }
+        public UnityEvent OnRainbowGoalCompleted { get; internal set; }
 
         private Coroutine inputCoroutine;
+
+
+        private SideMission currentMission;
 
         private void OnEnable()
         {
@@ -80,18 +86,13 @@ namespace Managers
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
-            int level = LevelManager.Instance.currentLevelID;
+            int level = LevelManager.ins.currentLevelID;
             int totalGold = GameManager.instance.GoldCalculation(level);
             WinParam param = new();
-            param.totalGold = GameManager.instance.GetPlayerGold();
-            DialogManager.Instance.ShowDialog(DialogIndex.WinDialog);
+            param.totalGold = DataAPIController.instance.GetGold();
+            DialogManager.ins.ShowDialog(DialogIndex.WinDialog);
         }
 
-
-        private void Awake()
-        {
-            Instance = this;
-        }
 
         private void Start()
         {
@@ -150,6 +151,8 @@ namespace Managers
             Debug.Log("Item couroutine " + itemType);
             itemJustInvoke = false;
 
+
+            DataAPIController.instance.MinusItemByOne(itemType);
             switch (itemType)
             {
                 case ItemType.Magnet:
@@ -164,7 +167,7 @@ namespace Managers
                     });
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(itemType), itemType, null);
+                    break;
             }
         }
 
@@ -185,7 +188,7 @@ namespace Managers
         }
         private void AddBox(Action callback)
         {
-            BoxQueue.Instance.AddNewBoxSlot();
+            BoxQueue.ins.AddNewBoxSlot();
             callback?.Invoke();
         }
 
@@ -252,8 +255,8 @@ namespace Managers
         {
             itemPerforming = true;
             Debug.LogWarning("clear one screw");
-            var screw = LevelManager.Instance.ScrewManager.RandomGetOneScrew();
-            BoxQueue.Instance.onDeletOneScrew?.Invoke(screw);
+            var screw = LevelManager.ins.ScrewManager.RandomGetOneScrew();
+            BoxQueue.ins.onDeletOneScrew?.Invoke(screw);
             callback?.Invoke();
         }
 
@@ -267,16 +270,22 @@ namespace Managers
             isGameOver = true;
             itemPerforming = false;
             player.IsInputLocked = true;
-            ReviveDialogParam param = new ReviveDialogParam();
-            param.isRevive = false;
+            ReviveDialogParam param = new();
+            param.isRevive = true;
             param.isHasAds = true;// set defaul allway true cus has none ads
-            param.totalGold = GameManager.instance.GetPlayerGold();
+            param.totalGold = DataAPIController.instance.GetGold();
             // ZenSDK.instance.IsVideoRewardReady();
-           // Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
-
-            DialogManager.Instance.ShowDialog(DialogIndex.ReviveDialog, param, () =>
+            // Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
+            int activeBoxCount = BoxQueue.ins.activeBoxCount;
+            if (activeBoxCount >= 2)
             {
-               // Debug.LogWarning("SHOW DIALOG REVIVE DIALOG");
+                DialogManager.ins.ShowDialog(DialogIndex.LoseDialog);
+                return;
+            }
+
+            DialogManager.ins.ShowDialog(DialogIndex.ReviveDialog, param, () =>
+            {
+                // Debug.LogWarning("SHOW DIALOG REVIVE DIALOG");
                 //if accepted watch ads invoke no reset level
                 // else return and reset current level, -1 heart
             });
@@ -329,16 +338,16 @@ namespace Managers
         public void OnRevive()
         {
             player.IsInputLocked = false;
-            BoxQueue.Instance.UnlockedBox();
+            BoxQueue.ins.UnlockedBox();
         }
         public void ReturnToHome(DialogIndex dialogIndex)
         {
             // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
-            DialogManager.Instance.HideDialog(dialogIndex, () =>
+            DialogManager.ins.HideDialog(dialogIndex, () =>
             {
                 Debug.Log($"HideDialog {dialogIndex} ");
-                LevelManager.Instance.OnReset();
-                LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
+                LevelManager.ins.OnReset();
+                LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
                 {
                     Debug.Log("Switch view mainscreenview ");
                     MainScreenViewParam param = new();
@@ -355,12 +364,12 @@ namespace Managers
         {
             // minuss 1 life heart
             IsGameOver = true;
-            int currentLevel = LevelManager.Instance.currentLevelID;
+            int currentLevel = LevelManager.ins.currentLevelID;
             Player.instance.IsInputLocked = true;
-            LevelManager.Instance.OnReset();
+            LevelManager.ins.OnReset();
             ArrayScrew.Instance.ClearAllScrewsOnArray();
-            BoxQueue.Instance.OnReset();
-            LevelManager.Instance.LoadLevel(currentLevel);
+            BoxQueue.ins.OnReset();
+            LevelManager.ins.LoadLevel(currentLevel);
         }
         public void ShuffleList<T>(List<T> list)
         {
@@ -379,8 +388,24 @@ namespace Managers
             ReviveDialogParam param = new();
             param.isRevive = false;
             param.isHasAds = true;
-            DialogManager.Instance.ShowDialog(DialogIndex.ReviveDialog,param);
+            DialogManager.ins.ShowDialog(DialogIndex.ReviveDialog, param);
 
         }
+
+        public void SetSideMission(SideMission mission)
+        {
+            currentMission = mission;
+
+            if (mission != null)
+            {
+                MissionParam param = new MissionParam();
+                param.SideMission = mission;
+                param.current = 0;
+                param.target = mission.requiredCount;
+                DialogManager.ins.ShowDialog(DialogIndex.MissionDialog, param);
+            }
+
+        }
+
     }
 }

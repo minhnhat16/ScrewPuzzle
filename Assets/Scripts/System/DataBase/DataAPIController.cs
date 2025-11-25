@@ -1,4 +1,6 @@
+﻿using ConfigFile;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace System.DataBase
@@ -24,7 +26,7 @@ namespace System.DataBase
                 isInitDone = true;
                 callback();
             });
-            Debug.Log("==========> BOOT PROCESS SUCCESS <==========");
+            Debug.Log("==========> BOOT DATA DONE <==========");
         }
 
         public bool IsNewPlayer()
@@ -42,25 +44,25 @@ namespace System.DataBase
         }
         #region CURRRENCY
         public CurrencyWallet GetWalletByType(Currency currency)
-         {
+        {
             if (currency == Currency.Gold)
             {
                 var wallet = GetGoldWallet();
                 return wallet;
             }
-            else if (currency == Currency.Gem)
+            else if (currency == Currency.Ticket)
             {
-                var wallet = GetGemWallet();
+                var wallet = GetTicketWallet();
                 return wallet;
             }
             return null;
         }
 
-        public void MinusGoldWallet(int minus, Action<bool> callback)
+        public void MinusGoldWallet(long minus, Action<bool> callback)
         {
             var goldWallet = GetGoldWallet();
             goldWallet.amount -= minus;
-            SaveGold(goldWallet, callback);
+            SaveGold(goldWallet.amount, callback);
         }
 
 
@@ -169,19 +171,19 @@ namespace System.DataBase
         {
             return dataModel.ReadData<CurrencyWallet>(DataPath.GOLDINVENT);
         }
-        public CurrencyWallet GetGemWallet()
+        public CurrencyWallet GetTicketWallet()
         {
-            return dataModel.ReadData<CurrencyWallet>(DataPath.GEMINVENT);
+            return dataModel.ReadData<CurrencyWallet>(DataPath.TICKET);
         }
-        public int GetGold()
+        public long GetGold()
         {
             CurrencyWallet goldWallet = dataModel.ReadData<CurrencyWallet>(DataPath.GOLDINVENT);
             return goldWallet.amount;
         }
-        public int GetGem()
+        public long GetTicket()
         {
-            CurrencyWallet gemWallet = dataModel.ReadData<CurrencyWallet>(DataPath.GEMINVENT);
-            return gemWallet.amount;
+            CurrencyWallet ticketWallet = dataModel.ReadData<CurrencyWallet>(DataPath.TICKET);
+            return ticketWallet.amount;
         }
 
         /*public void SetLevel(int playerLevel, Action callback)
@@ -194,40 +196,37 @@ namespace System.DataBase
             });
         }*/
 
-        public void AddGold(int add, Action<bool> callback)
+
+        public void AddGold(long gold, Action<bool> callback = null)
         {
-            CurrencyWallet gold = GetGoldWallet();
-            gold.amount += add;
+            CurrencyWallet goldWallet = GetGoldWallet();
+            goldWallet.amount += gold;
             SaveGold(gold, callback);
-            //TODO : ADD TRIGGER FOR GOLD AND GEM
         }
-        public void SaveGold(CurrencyWallet gold, Action<bool> callback)
+        public void SaveGold(long gold, Action<bool> callback = null)
         {
-            dataModel.UpdateData(DataPath.GOLDINVENT, gold, () =>
+            var goldWallet = GetGoldWallet();
+            goldWallet.amount = gold;
+            dataModel.UpdateData(DataPath.GOLDINVENT, goldWallet, () =>
             {
-                //Debug.Log("gold amount" + gold.amount);
-                if (callback != null) callback.Invoke(true);
+                callback?.Invoke(true);
                 return;
             });
 
         }
-        /* public void AddGem(int add)
-         {
-             CurrencyWallet gem = GetGemWallet();
-             gem.amount += add;
-             SaveGem(gem, null);
-         }
-         public void SaveGem(CurrencyWallet gem, Action<bool> callback)
-         {
-             dataModel.UpdateData(DataPath.GEMINVENT, gem, () =>
-             {
-                 callback?.Invoke(true);
-                 DataTrigger.TriggerValueChange(DataPath.GEMINVENT, gem);
-                 return;
-             });
-             callback?.Invoke(false);
+        public void SaveTicket(long amount, Action<bool> callback = null)
+        {
+            var ticketWallet = GetTicketWallet();
+            ticketWallet.amount = amount;
+            dataModel.UpdateData(DataPath.TICKET, ticketWallet, () =>
+            {
+                callback?.Invoke(true);
+                DataTrigger.TriggerValueChange(DataPath.TICKET, ticketWallet);
+                return;
+            });
+            callback?.Invoke(false);
 
-         }*/
+        }
         #endregion
 
         #region daytimedata
@@ -281,7 +280,7 @@ namespace System.DataBase
             };
             //Debug.Log("DATA === SAVE ITEMDATA");
             string subPath = SubPathForItem(type);
-            dataModel.UpdateData(subPath, itemData, () =>
+            dataModel.UpdateDataDictionary<ItemData>(DataPath.ITEMDICT, type.ToString(), itemData, () =>
             {
                 return;
             });
@@ -290,7 +289,7 @@ namespace System.DataBase
 
         private static string SubPathForItem(ItemType type)
         {
-            return DataPath.ITEM + $"/{char.ToLower(type.ToString()[0]) + type.ToString().Substring(1)}";
+            return DataPath.ITEMDICT + $"/{char.ToLower(type.ToString()[0]) + type.ToString().Substring(1)}";
         }
 
         public bool GetSpinData()
@@ -416,5 +415,89 @@ namespace System.DataBase
             levelsData.Add(data);
             dataModel.UpdateData(DataPath.ALLLEVEL, levelsData, callback);
         }
+
+        internal void AddItemByConfig(List<ShopItemRecord> items)
+        {
+            ItemType type;
+            foreach (ShopItemRecord item in items)
+            {
+                type = item.Id;
+                int quantity = item.Quantity;
+                AddItemTotal(type, quantity);
+            }
+        }
+
+        internal void MinusItemByOne(ItemType itemType)
+        {
+            var itemData = GetItemData(itemType);
+            if (itemData == null) return;
+
+            itemData.total--;
+            SetItemTotal(itemType, itemData.total);
+        }
+
+
+        #region Mission Data
+
+        public MissionProgress GetMissionProgress(int missionId)
+        {
+            // Đọc toàn bộ dictionary
+            var missions = dataModel.ReadData<Dictionary<string, MissionProgress>>(DataPath.MISSION_PROGRESS);
+
+            // Nếu root null → tạo mới
+            if (missions == null)
+            {
+                missions = new Dictionary<string, MissionProgress>();
+                dataModel.UpdateData(DataPath.MISSION_PROGRESS, missions);
+            }
+
+            // Đọc mission theo key
+            var mission = dataModel.ReadDictionary<MissionProgress>(DataPath.MISSION_PROGRESS, missionId.ToKey());
+
+            // Nếu chưa có → tạo nhiệm vụ mới
+            if (mission == null)
+            {
+                mission = new MissionProgress
+                {
+                    missionId = missionId,
+                    current = 0,
+                    state = MissionState.InProgress,   // ✔ đúng trạng thái cho new mission
+                };
+
+                missions.Add(missionId.ToKey(), mission);
+                dataModel.UpdateData(DataPath.MISSION_PROGRESS, missions);
+            }
+
+            return mission;
+        }
+
+        public void UpdateMissionProgress(MissionProgress missionProgress, Action callback = null)
+        {
+            dataModel.UpdateDataDictionary(DataPath.MISSION_PROGRESS, missionProgress.missionId.ToKey(), missionProgress, callback);
+        }
+        public void AddMissionProgress(int missionId, int amount = 1, Action callback = null)
+        {
+            var mission = dataModel.ReadDictionary<MissionProgress>(DataPath.MISSION_PROGRESS, missionId.ToKey());
+
+            if (mission == null) return;
+
+            mission.current += amount;
+
+            dataModel.UpdateDataDictionary(DataPath.MISSION_PROGRESS, missionId.ToKey(), mission, callback);
+        }
+
+        public void CompleteMission(int missionId, Action callback = null)
+        {
+
+
+            var mission = dataModel.ReadDictionary<MissionProgress>(DataPath.MISSION_PROGRESS, missionId.ToKey());
+            if (mission == null) return;
+
+            mission.state = MissionState.Completed;
+
+            dataModel.UpdateDataDictionary(DataPath.MISSION_PROGRESS, missionId.ToKey(), mission, callback);
+
+        }
+        #endregion
     }
 }

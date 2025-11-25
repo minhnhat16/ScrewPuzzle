@@ -1,26 +1,29 @@
-using ConfigFile;
+﻿using ConfigFile;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 
 namespace UIScript
 {
     public class PackItem : MonoBehaviour
     {
-        [SerializeField] private float time;
-        [SerializeField] private float price;
-        [SerializeField] private int amount;
-        [SerializeField] private Text amountText;
-        [SerializeField] private Text ribbonText;
-        [SerializeField] private Text priceText;
-        [SerializeField] private Dictionary<string, PackMiniItem> miniItemsDict;
-        [SerializeField] private Button purchaseButton;
-        [SerializeField] private Image itemIcon;
-        [SerializeField] private Image ribon;
+        private float time;
+        private float price;
+        private int amount;
+        [SerializeField] internal Text amountText;
+        [SerializeField] internal Text ribbonText;
+        [SerializeField] internal Text priceText;
+        [SerializeField] internal Dictionary<string, PackMiniItem> miniItemsDict;
+        [SerializeField] internal Button purchaseButton;
+        [SerializeField] internal Image itemIcon;
+        [SerializeField] internal Image ribon;
 
         [SerializeField]
-        private readonly RectTransform itemContainer;
+        private RectTransform itemContainer;
 
 
         public GameObject itemPrefab;
@@ -35,6 +38,10 @@ namespace UIScript
         public Button PurchaseButton1 { get => purchaseButton; set => purchaseButton = value; }
         public Image ItemIcon1 { get => itemIcon; set => itemIcon = value; }
         public Image Ribon1 { get => ribon; set => ribon = value; }
+        public RectTransform ItemContainer { get => itemContainer; set => itemContainer = value; }
+
+        public Action<PackConfigRecord> OnBuyClicked;
+        internal PackConfigRecord packData;
 
         public PackItem()
         {
@@ -56,23 +63,42 @@ namespace UIScript
 
         }
 
-        public void Init(PackConfigRecord packConfig)
+        public virtual void Init(PackConfigRecord packConfig)
         {
+            this.packData = packConfig;
+            purchaseButton.onClick.RemoveAllListeners();
+            purchaseButton.onClick.AddListener(() =>
+            {
+
+                Debug.Log("Pack item on clicked");
+                OnBuyClicked?.Invoke(packData);
+            });
             // Set pack title + price
-            ribbonText.text = packConfig.Name;
+            if(ribbonText != null)  ribbonText.text = packConfig.Name;
             priceText.text = GameUtils.FormatPrice(packConfig.Price);
 
             // Clear old items
-            foreach (Transform child in itemContainer)
-                Destroy(child.gameObject);
+            foreach (Transform child in ItemContainer)
+                child.gameObject.SetActive(false);
 
+            var itemConfig = packConfig.Items;
+            if (itemConfig.Count < 2)
+            {
+                var item = itemConfig.FirstOrDefault();
+                PackMiniItem miniItem;
+                miniItem = Instantiate(itemPrefab, ItemContainer).GetComponent<PackMiniItem>();
+                Sprite sprite = SpriteLibControl.Instance.GetSpriteByName(item.Id.ToString());
+                miniItem.Init(item.Id, item.Quantity, sprite);
+                return;
+            }
             // Spawn each item inside the bundle
             foreach (var item in packConfig.Items)
             {
-              
-                var miniItem = Instantiate(itemPrefab, itemContainer).GetComponent<PackMiniItem>();
-               Sprite sprite =   SpriteLibControl.Instance.GetSpriteByName(miniItem.name);
-                miniItem.Init(item.Quantity, sprite);
+                PackMiniItem miniItem;
+                miniItem = Instantiate(itemPrefab, ItemContainer).GetComponent<PackMiniItem>();
+                miniItem.rectTransform.sizeDelta = Vector2.one * GameConstants.MINI_SIZE;
+                Sprite sprite = SpriteLibControl.Instance.GetSpriteByName(item.Id.ToString());
+                miniItem.Init(item.Id, item.Quantity, sprite);
             }
         }
     }

@@ -52,7 +52,7 @@ public class BreakDialog : BaseDialog
         UpdateTimerDisplay(0);  // Ensure display shows 00:00 when finished
         if(timeRemaining <= 0)
         {
-            DialogManager.Instance.HideDialog(dialogIndex, () =>
+            DialogManager.ins.HideDialog(dialogIndex, () =>
             {
 
                 DataAPIController.instance.AddGold(reward, (isDone) =>

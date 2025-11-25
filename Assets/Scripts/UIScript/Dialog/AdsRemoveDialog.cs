@@ -29,7 +29,7 @@ public class AdsRemoveDialog : BaseDialog
         isPaid = param.isPaid;
         price = param.price;
         currency = param.currency;
-        int userGold = param.totalGold;
+        long userGold = param.totalGold;
 
         goldDisplay.SetGoldToLable(userGold);
         SetPriceLabel(price, currency);
@@ -53,17 +53,11 @@ public class AdsRemoveDialog : BaseDialog
     }
     public void AddItemAfterPurchasing(bool isSuccess)
     {
-        if (!isSuccess) return; // and notify to player
-        isPaid = true;
-        var items = _shopItem;
-        foreach (ShopItem item in items)
-        {
-            DataAPIController.instance.AddItemTotal(item.Type, item.Quantity);
-        }
+        
     }
     public void CloseDialog()
     {
-        DialogManager.Instance.HideDialog(dialogIndex);
+        DialogManager.ins.HideDialog(dialogIndex);
     }
 
 }

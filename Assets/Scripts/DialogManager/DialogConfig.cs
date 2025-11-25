@@ -20,6 +20,8 @@ public enum DialogIndex
     AdsRemoveDialog,
     QuitDialog,
     MissionDialog,
+    NotifyDialog,
+    QuestDialog,
 }
 
 public class DialogParam
@@ -60,15 +62,15 @@ public class BuyConfirmDialogParam : DialogParam
 }
 public class SettingParam : DialogParam
 {
-    public int totalGold;
+    public long totalGold;
     public bool isMainScreen;
     public string title;
 }
 
 public class DailyParam : DialogParam
 {
-    int currenReward;
-    public int totalGold;
+    short currenReward;
+    public long totalGold;
 
     public DailyData data;
     public DailyRewardConfig config;
@@ -76,34 +78,29 @@ public class DailyParam : DialogParam
 
 public class RateParam : DialogParam
 {
-    public int totalGold;
+    public long totalGold;
 
 }
 
-public class PickCardParam : DialogParam
-{
-    public CardColorPallet premium;
-    public CardColorPallet free;
-}
 
 public class ReviveDialogParam : DialogParam
 {
     public bool isRevive;
     public bool isHasAds;
-    public int totalGold;
+    public long totalGold;
 }
 public class WinParam : DialogParam
 {
     public int level;
     public int gold;
-    public int totalGold;
+    public long totalGold;
     public int reward;
     public float score;
     public ItemType typeReward;
 }
 public class AddItemDialogParam : DialogParam
 {
-    public int totalGold;
+    public long totalGold;
     public ItemType ItemType;
     public bool IsAdsAvailable;
     public int ItemPrice;
@@ -111,12 +108,12 @@ public class AddItemDialogParam : DialogParam
 }
 public class CollectionDialogParam : DialogParam
 {
-    public int totalGold;
+    public long totalGold;
     public CollectionConfig collection;
     public ScrewSkinData currentSkin;
     public BackGroundData currentBG;
     public BoardColorData currentBoard;
-    public List<ScrewSkinData> skinData;    
+    public List<ScrewSkinData> skinData;
     public List<BackGroundData> backGround;
     public List<BoardColorData> BoardColor;
 
@@ -128,7 +125,7 @@ public class AdsRemoveParam : DialogParam
 
     public float price;
     public string currency;
-    public int totalGold;
+    public long totalGold;
 
 }
 public class SpecialDialogParam : DialogParam
@@ -139,17 +136,29 @@ public class SpecialDialogParam : DialogParam
     public string time;
     public float price;
     public string currency;
-    public int totalGold;
+    public long totalGold;
 
     public List<ShopItem> specialItems;
 
 }
+public class NotifyDialog : DialogParam
+{
 
+    public string message;
+    public string header;
+}
 public class MissionParam : DialogParam
 {
     public int current;
     public int target;
+    public SideMission SideMission;
+    public MissionParam() { }
 
+}
+
+public class LoseParam : DialogParam
+{
+    public bool isAdAvailable;
 }
 public class DialogConfig
 {
@@ -171,6 +180,7 @@ public class DialogConfig
         DialogIndex.AdsRemoveDialog,
         DialogIndex.SpecialDialog,
         DialogIndex.QuitDialog
-,       DialogIndex.MissionDialog
+,       DialogIndex.MissionDialog,
+        DialogIndex.QuestDialog,
     };
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +19,9 @@ public class UserData
     public SpinData spinData;
     [SerializeField]
     public CollectionData collectionData;
+
+    [SerializeField]
+    public Dictionary<string,MissionProgress> missions;
 }
 [Serializable]
 public class UserInfo
@@ -57,7 +60,7 @@ public class ItemData
 public class Wallet
 {
     public CurrencyWallet goldWallet;
-    public CurrencyWallet gemWallet;
+    public CurrencyWallet ticketWallet;
 }
 public class DailyData
 {
@@ -70,7 +73,7 @@ public class DailyData
 public class CurrencyWallet
 {
     public Currency currency;
-    public int amount;
+    public long amount;
 }
 [Serializable]
 public class SpinData
@@ -104,6 +107,10 @@ public class CollectionData
     public Dictionary<string, BoardColorData> boardColorDict;
     [SerializeField]
     public Dictionary<string, ScrewSkinData> screwColorDict;
+
+    [SerializeField]
+
+    public Dictionary<string, MissionProgress> missions = new();
 }
 [Serializable]
 public class ScrewSkinData
@@ -131,3 +138,32 @@ public class BoardColorData
     [SerializeField]
     public string name;
 }
+
+[Serializable]
+public class MissionProgress
+{
+    [SerializeField]
+    public int missionId;
+
+    [SerializeField]
+    public int current;
+
+    [SerializeField]
+    public int target;
+
+    [SerializeField]
+    public MissionState state;
+
+    [SerializeField]
+    public long startTimestamp;
+
+    [SerializeField]
+    public bool rewardClaimed;
+
+    [SerializeField]
+    public int stage;
+
+    [SerializeField]
+    public string extra;
+}
+

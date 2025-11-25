@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1140177797095442937}
   - component: {fileID: 259342687494062329}
-  - component: {fileID: 9155885250194735145}
+  - component: {fileID: 8516764959006111020}
   m_Layer: 0
   m_Name: StarBox
   m_TagString: Untagged
@@ -25,6 +25,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2387994631555852560}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
@@ -32,7 +33,6 @@ Transform:
   m_Children:
   - {fileID: 5712724501177601185}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &259342687494062329
 SpriteRenderer:
@@ -51,6 +51,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -72,9 +75,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1867890477
-  m_SortingLayer: 17
-  m_SortingOrder: 5
+  m_SortingLayerID: 932230883
+  m_SortingLayer: 18
+  m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: 4424dda84344cd94489735f2f7bdfdbc, type: 3}
   m_Color: {r: 1, g: 0.8616718, b: 0, a: 1}
   m_FlipX: 0
@@ -86,7 +89,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &9155885250194735145
+--- !u!114 &8516764959006111020
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,18 +98,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 2387994631555852560}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49ab7eb6e85048d49bddf46e5a00069d, type: 3}
+  m_Script: {fileID: 11500000, guid: da72685ea167bfc4f8d8d8e736fd66ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tf: {fileID: 0}
+  tf: {fileID: 1140177797095442937}
   pos: {x: 0, y: 0, z: 0}
-  render: {fileID: 0}
-  particle: {fileID: 0}
+  render: {fileID: 259342687494062329}
+  particle: {fileID: 5712724501177601187}
 --- !u!1001 &6582875893010574719
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 1140177797095442937}
     m_Modifications:
     - target: {fileID: 1449242179815436896, guid: 052d5f6cf7d3ebc44bba49fbe653f9a8, type: 3}
@@ -234,9 +238,17 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 052d5f6cf7d3ebc44bba49fbe653f9a8, type: 3}
 --- !u!4 &5712724501177601185 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1449242181322416606, guid: 052d5f6cf7d3ebc44bba49fbe653f9a8, type: 3}
+  m_PrefabInstance: {fileID: 6582875893010574719}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &5712724501177601187 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 1449242181322416604, guid: 052d5f6cf7d3ebc44bba49fbe653f9a8, type: 3}
   m_PrefabInstance: {fileID: 6582875893010574719}
   m_PrefabAsset: {fileID: 0}

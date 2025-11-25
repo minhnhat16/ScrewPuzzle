@@ -27,9 +27,9 @@ public class MissionDialog : BaseDialog
     }
     public override void HideDialog()
     {
-        DialogManager.Instance.HideDialog(this.dialogIndex, () =>
+        DialogManager.ins.HideDialog(this.dialogIndex, () =>
         {
-            IngameController.Instance.ResumeGame();
+            IngameController.ins.ResumeGame();
         });
     }
     public override void Setup(DialogParam dialogParam)

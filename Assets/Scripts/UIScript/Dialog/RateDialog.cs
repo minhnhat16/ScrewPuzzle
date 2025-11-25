@@ -18,7 +18,7 @@ public class RateDialog : BaseDialog
     }
     public void CloseButton()
     {
-        DialogManager.Instance.HideDialog(dialogIndex, () =>
+        DialogManager.ins.HideDialog(dialogIndex, () =>
         {
             //Debug.Log("CloseButton");
           //  DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
@@ -33,7 +33,7 @@ public class RateDialog : BaseDialog
     }
     public void ReMindLaterBtn()
     {
-        DialogManager.Instance.HideDialog(this.dialogIndex, () =>
+        DialogManager.ins.HideDialog(this.dialogIndex, () =>
         {
             //Debug.Log("ReMindLaterBtn");
         });

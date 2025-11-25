@@ -64,4 +64,9 @@ public class CameraMain : MonoBehaviour
     {
         return main.transform.position.y - height * 0.5f;
     }
+
+    public Vector3 GetTopRight()
+    {
+        return new Vector3(GetRight(),GetTop());
+    }
 }

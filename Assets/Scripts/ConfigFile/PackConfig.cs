@@ -11,7 +11,7 @@ namespace ConfigFile
         [SerializeField] private PackType pack;
         [SerializeField] private string name;
         [SerializeField] private long price;
-
+        [SerializeField] private Currency currencyType;
         [SerializeField] List<ShopItemRecord> items;
 
         public PackEnum Id { get => id; set => id = value; }
@@ -19,6 +19,7 @@ namespace ConfigFile
         public string Name { get => name; set => name = value; }
         public long Price { get => price; set => price = value; }
         public List<ShopItemRecord> Items { get => items; set => items = value; }
+        public Currency CurrencyType { get => currencyType; set => currencyType = value; }
     }
 
     public class PackConfig : BYDataTable<PackConfigRecord>

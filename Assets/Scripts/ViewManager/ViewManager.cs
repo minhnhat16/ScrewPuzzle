@@ -15,11 +15,12 @@ public class ViewManager : MonoBehaviour
     {
         Instance = this;
         canvas = GetComponent<Canvas>();
-        LoadingView loadingView = GetComponentInChildren<LoadingView>();
+        LoadingView loadingView = GetComponentInChildren<LoadingView>(true);
+        Debug.Log("loading view " + loadingView);   
         dicView.Add(ViewIndex.LoadingView, loadingView);
     }
 
-    IEnumerator Start()
+    public IEnumerator Init()
     {
         yield return new WaitForSeconds(0.1f);
         foreach (ViewIndex viewIndex in ViewConfig.viewArray)
@@ -36,7 +37,6 @@ public class ViewManager : MonoBehaviour
     }
     public void SwitchView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
-        //Debug.Log("Switch View" + newView);
         if (currentView != null)
         {
             currentView.HideViewAnimation(() =>
@@ -47,20 +47,36 @@ public class ViewManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Show Next View");
             ShowNextView(newView, viewParam, callback);
         }
     }
 
     private void ShowNextView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
-        //Debug.Log("Show Next View");
         currentView = dicView[newView];
         currentView.gameObject.SetActive(true);
+        //Debug.Log("Show Next View call back " + currentView);
+
         currentView.Setup(viewParam);
         currentView.ShowViewAnimation(() =>
         {
             callback?.Invoke();
         });
+    }
+
+
+    public Vector3 UIToWorld(RectTransform uiObj, Camera worldCam)
+    {
+        var uiCam = this.canvas.worldCamera;
+        Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(uiCam, uiObj.position);
+
+        screenPos.z = Mathf.Abs(worldCam.transform.position.z);
+
+        return worldCam.ScreenToWorldPoint(screenPos);
+    }
+
+    public T GetUIObject<T>(BaseView targetView) where T : Component
+    {
+        return targetView.GetComponentInChildren<T>(true);
     }
 }

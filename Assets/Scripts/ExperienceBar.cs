@@ -47,7 +47,7 @@ public class ExperienceBar : MonoBehaviour
         SetLevelLable(currentLevel);
         currentExp = GetCurrentExp();
         yield return new WaitUntil(() => ConfigFileManager.Instance != null);
-        record = ConfigFileManager.Instance.LevelConfig.GetAllRecord(); // change with config file 
+        record = ConfigFileManager.Instance.GetConfig<LevelConfig>().GetAllRecord(); // change with config file 
         // yield return new WaitUntil(predicate: () => IngameController.instance.gameObject.activeInHierarchy);
         int index = currentLevel - 1;
         targetExp = record[index].Experience;

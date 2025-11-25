@@ -40,7 +40,6 @@ public class SpinCircle : MonoBehaviour
 
     private void OnEnable()
     {
-        spinConfig = ConfigFileManager.Instance.SpinConfig;
         onComplete.AddListener(CircleSpinComplete);
     }
 
@@ -64,7 +63,7 @@ public class SpinCircle : MonoBehaviour
     public void  SpawnObjectsInCircle()
     {
 
-        spinConfig = ConfigFileManager.Instance.SpinConfig;
+        spinConfig = ConfigFileManager.Instance.GetConfig<SpinConfig>();
         var allSpinConfig = spinConfig.GetAllRecord();
         for (int i = 0; i < _items.Count; i++)
         {
@@ -155,7 +154,7 @@ public class SpinCircle : MonoBehaviour
 
     void OnRewarded()
     {
-        DialogManager.Instance.HideDialog(DialogIndex.SpinDialog);
+        DialogManager.ins.HideDialog(DialogIndex.SpinDialog);
         DataAPIController.instance.SetSpinData(isSpinned: true);
     }
 }

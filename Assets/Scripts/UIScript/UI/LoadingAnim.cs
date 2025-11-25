@@ -24,11 +24,14 @@ public class LoadingAnim : BaseViewAnimation
     }
     public void ShowAnim()
     {
+        Debug.Log("show anim loading");
+
         callback?.Invoke();
     }
 
     public void HideAnim()
     {
+        Debug.Log("hide anim loading");
         callback?.Invoke();
     }
 }

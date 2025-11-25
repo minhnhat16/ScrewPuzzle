@@ -1,32 +1,41 @@
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DialogManager : MonoBehaviour
+public class DialogManager : SingletonMono<DialogManager>
 {
-    public static DialogManager Instance;
     public Transform anchorDialog;
     public Dictionary<DialogIndex, BaseDialog> dicDialog = new Dictionary<DialogIndex, BaseDialog>();
     private List<BaseDialog> dialogShowed = new List<BaseDialog>();
     public List<BaseDialog> dialogList = new List<BaseDialog>();
-    private void Awake()
+
+    private void Start()
     {
-        Instance = this;
-
-
-       dialogList = GetComponentsInChildren<BaseDialog>(true).ToList();  
+        PaymentManager.ins.OnPaymentCompleted += OnPaymentDone;
     }
 
-    IEnumerator Start()
+
+    public override void Awake()
+    {
+        base.Awake();
+        dialogList = GetComponentsInChildren<BaseDialog>(true).ToList();
+    }
+
+    public IEnumerator Init()
     {
         yield return new WaitForSeconds(0.4f);
 
         for (int i = 0; i < dialogList.Count; i++)
         {
-            dialogList[i].GetComponent<BaseDialog>().Init();
+            BaseDialog dialog = dialogList[i].GetComponent<BaseDialog>();
+
+            // ⭐ chạy init async
+            yield return dialog.Init();
+
+            // ⭐ chỉ add khi init xong 100%
             dicDialog.Add(dialogList[i].dialogIndex, dialogList[i]);
         }
     }
@@ -72,5 +81,26 @@ public class DialogManager : MonoBehaviour
         }
         dialogShowed.Clear();
     }
-  
+
+
+
+    private void OnPaymentDone(PaymentResult result)
+    {
+        if (result.success)
+        {
+            DialogManager.ins.ShowDialog(DialogIndex.BuyConfirmDialog, new NotifyDialog()
+            {
+                header = "Completed",
+                message = result.message
+            });
+        }
+        else
+        {
+            DialogManager.ins.ShowDialog(DialogIndex.BuyConfirmDialog, new NotifyDialog()
+            {
+                header = "Failed",
+                message = result.message
+            });
+        }
+    }
 }

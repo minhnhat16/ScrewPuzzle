@@ -33,7 +33,7 @@ public class SpecialDialog : BaseDialog
         currentTime = param.time;
         currency = param.currency;
         _shopItem = param.specialItems;
-        int userGold = param.totalGold;
+        long userGold = param.totalGold;
         goldDisplay.SetGoldToLable(userGold);
         SetPriceLabel(price, currency);
         SetTimeCounter(currentTime);
@@ -61,16 +61,10 @@ public class SpecialDialog : BaseDialog
     }
     public void AddItemAfterPurchasing(bool isSuccess)
     {
-        if (!isSuccess) return; // and notify to player
-        isPaid = true;
-        var items = _shopItem;
-        foreach(ShopItem item in items)
-        {
-            DataAPIController.instance.AddItemTotal(item.Type,item.Quantity);
-        }
+        
     }
     public void CloseDialog()
     {
-        DialogManager.Instance.HideDialog(dialogIndex);
+        DialogManager.ins.HideDialog(dialogIndex);
     }
 }

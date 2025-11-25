@@ -8,87 +8,125 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Jobs;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 
 namespace Ingame
 {
-    public class BoxQueue : MonoBehaviour, IResetable
+    public class BoxQueue : SingletonMono<BoxQueue>, IResetable
     {
-        public static BoxQueue Instance;
 
+        [Header("Box Settings")]
+        public bool hasSpecialBox;
 
-        [SerializeField] private bool movingBox; public float xRightCam;
+        [SerializeField] private bool movingBox;
+        public float xRightCam;
         public float xLeftCam;
-        public int activeBoxCount = 5; // Số box mặc định mở
+        public int activeBoxCount = 5;
         [SerializeField] private float spacingBox = 10;
         [SerializeField] private float topAlignSpacing;
-
-        public Stack ConfigStack = new Stack();
-        public BoxConfig boxConfig;
-        public List<BoxConfigRecord> configRecords = new List<BoxConfigRecord>();
-        public List<Box> screwBoxes = new List<Box>(); // Initialize to avoid null reference
-        public Stack<Box> boxesStack = new Stack<Box>();
-
-
-        public List<Screw.Screw> hidingScrews;
-        [SerializeField] private List<BoxSlot> boxSlots;
-        public UnityEvent<bool> onCompleteClearBoxes = new();
-        public UnityEvent<Screw.Screw> onDeletOneScrew = new();
-        private Coroutine alignCoroutine;
         public float leftBound;
 
-        public bool MovingBox { get => movingBox; set => movingBox = value; }
+        [Header("Config / Data")]
+        public Stack<BoxConfigRecord> ConfigStack = new Stack<BoxConfigRecord>();
+        public BoxConfig boxConfig;
+        public List<BoxConfigRecord> configRecords = new List<BoxConfigRecord>();
+        public List<Box> screwBoxes = new List<Box>();
+        public Stack<Box> boxesStack = new Stack<Box>();
+
+        [Header("Runtime")]
+        public List<Screw.Screw> hidingScrews;
+        [SerializeField] private List<BoxSlot> boxSlots;
+        [SerializeField] private List<Box> rainbowBoxes;
+        private Coroutine alignCoroutine;
+
+        [Header("Events")]
+        public UnityEvent<bool> onCompleteClearBoxes = new();
+        public UnityEvent<Screw.Screw> onDeletOneScrew = new();
+        public UnityEvent<Box> boxFullEvent = new();
+
+        public bool MovingBox
+        {
+            get => movingBox;
+            set => movingBox = value;
+        }
+
+        #region Unity
         private void OnEnable()
         {
-            onDeletOneScrew.AddListener(RecalculatingBox);
+            if (onDeletOneScrew != null)
+                onDeletOneScrew.AddListener(RecalculatingBox);
         }
-        private void Awake()
+
+        private void OnDisable()
         {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject); // Hủy game object nếu instance khác tồn tại
-                return;
-            }
-            Instance = this;
+            if (onDeletOneScrew != null)
+                onDeletOneScrew.RemoveListener(RecalculatingBox);
         }
 
         private void Start()
         {
             hidingScrews = new List<Screw.Screw>();
-            var currentScene = SceneManager.GetActiveScene();
-            if (currentScene.name.CompareTo("LevelMaker") != 0)
-            {
-                onCompleteClearBoxes = IngameController.Instance.onCompleteLevel;
-                topAlignSpacing = CameraMain.instance.GetTop() + 7.2f;
-            }
 
+            var currentScene = SceneManager.GetActiveScene();
+            if (!currentScene.name.Equals("LevelMaker"))
+            {
+                onCompleteClearBoxes = IngameController.ins.onCompleteLevel;
+            }
         }
+
+        #endregion
+
+        #region Init
 
         public void Init()
         {
             StartCoroutine(InitCoroutine());
+            Debug.Log("top align spacing " + topAlignSpacing);
         }
 
         private IEnumerator InitCoroutine()
         {
             yield return new WaitUntil(() => CameraMain.instance.GetCam() != null);
             yield return new WaitUntil(() => configRecords.Count != 0);
+
             InitAndShuffleColor();
             InitBoxes();
-            InitBoxSlots(this.boxSlots);
-            yield return new WaitForSeconds(0.1f);
+            InitBoxSlots(boxSlots);
 
+
+            yield return new WaitForSeconds(0.1f);
         }
+
+        public void InitRainbowBoxes(int count = 1)
+        {
+            rainbowBoxes.Clear();
+
+            for (int i = 0; i < count; i++)
+            {
+                var box = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
+                box.SetActive(true);
+                box.SetIsLocked(false);
+                box.SetBoxColor(ColorEnum.Rainbow);
+
+                // Vị trí khác nhau (gom ở phía trên)
+                var pos = CameraMain.instance.GetTopRight();
+                pos.x -= 2f + (i * 2.5f);
+                pos.y -= 5f;
+                box.transform.position = pos;
+
+                box.isMoving = false;
+                rainbowBoxes.Add(box);
+            }
+        }
+
 
         public void LoadBoxConfigRecord(BoxConfig boxConfig)
         {
             this.boxConfig = boxConfig;
-            Debug.Log("Load box config record" + boxConfig == null);
+            Debug.Log("Load box config record, null? " + (boxConfig == null));
+
             var allRecord = boxConfig.GetAllRecord();
             configRecords.AddRange(allRecord);
         }
@@ -96,434 +134,394 @@ namespace Ingame
         public void ClearConfigRecords()
         {
             configRecords.Clear();
+            ConfigStack.Clear();
         }
 
         public void ClearCurrentBoxes()
         {
             foreach (var box in screwBoxes.ToList())
             {
-                box.SetActive(false);
-                screwBoxes.Remove(box);
+                if (box != null)
+                    box.SetActive(false);
             }
+
+            screwBoxes.Clear();
             boxesStack.Clear();
         }
+
         private void InitAndShuffleColor()
         {
-            //if (configRecords == null) return;
+            var threeHoldList = configRecords.Where(r => r.NumberOfScrewHoles == 3).ToList();
+            var twoHoldList = configRecords.Where(r => r.NumberOfScrewHoles == 2).ToList();
+            var oneHoldList = configRecords.Where(r => r.NumberOfScrewHoles == 1).ToList();
 
-            List<BoxConfigRecord> threeHoldList = configRecords.Where(record => record.NumberOfScrewHoles == 3).ToList();
-            List<BoxConfigRecord> twoHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.NumberOfScrewHoles == 2).ToList();
-            List<BoxConfigRecord> oneHoldList = configRecords.Where(boxConfigRecord => boxConfigRecord.NumberOfScrewHoles == 1).ToList();
-
-            // Ensure no adjacent items in threeHoldList have the same color
+            // tránh 2 box 3-hole liền kề cùng màu
             for (int i = 1; i < threeHoldList.Count; i++)
             {
                 if (threeHoldList[i].BoxColor == threeHoldList[i - 1].BoxColor)
                 {
-                    // If two adjacent items have the same color, find a different color to swap
                     int swapIndex = i + 1;
-                    while (swapIndex < threeHoldList.Count && threeHoldList[swapIndex].BoxColor == threeHoldList[i].BoxColor)
+                    while (swapIndex < threeHoldList.Count &&
+                           threeHoldList[swapIndex].BoxColor == threeHoldList[i].BoxColor)
                     {
                         swapIndex++;
                     }
 
                     if (swapIndex < threeHoldList.Count)
                     {
-                        // Swap the items
-                        (threeHoldList[i], threeHoldList[swapIndex]) = (threeHoldList[swapIndex], threeHoldList[i]);
+                        (threeHoldList[i], threeHoldList[swapIndex]) =
+                            (threeHoldList[swapIndex], threeHoldList[i]);
                     }
                 }
             }
 
-            // Combine lists with twoHoldList and oneHoldList always at the end
-            List<BoxConfigRecord> finalList = new List<BoxConfigRecord>();
+            var finalList = new List<BoxConfigRecord>();
             finalList.AddRange(threeHoldList);
             finalList.AddRange(twoHoldList);
             finalList.AddRange(oneHoldList);
 
-            int totalStar = threeHoldList.Count * 3 + twoHoldList.Count * 2 + oneHoldList.Count;
-            IngameController.Instance.TotalStarInLevel = totalStar;
+            int totalStar = threeHoldList.Count * 3 +
+                            twoHoldList.Count * 2 +
+                            oneHoldList.Count;
+
+            IngameController.ins.TotalStarInLevel = totalStar;
+
             configRecords = finalList;
-            ConfigStack = new Stack(configRecords);
+            ConfigStack = new Stack<BoxConfigRecord>(configRecords);
         }
 
         private void InitBoxes()
         {
-            for (int i = 0; i < configRecords.Count; i++)
+            screwBoxes.Clear();
+            boxesStack.Clear();
+
+            while (ConfigStack.Count > 0)
             {
-                var config = (BoxConfigRecord)ConfigStack.Pop();
-                var isLocked = i < activeBoxCount;
+                var config = ConfigStack.Pop();
                 var color = config.BoxColor;
-                Box box;
-                var leftCamPos = CameraMain.instance.GetLeft();
+                Box box = null;
+                float leftCamPos = CameraMain.instance.GetLeft();
+
                 switch (config.NumberOfScrewHoles)
                 {
                     case 1:
                         box = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
                         box.OnInit(Vector2.one * leftCamPos, color, false, config.NumberOfScrewHoles);
-                        box.SetActive(false);
-                        screwBoxes.Add(box);
                         break;
+
                     case 2:
                         box = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
                         box.OnInit(Vector3.left * leftCamPos, color, false, config.NumberOfScrewHoles);
-                        box.SetActive(false);
-                        screwBoxes.Add(box);
                         break;
+
                     case 3:
+                    default:
                         box = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
                         box.OnInit(Vector3.left * leftCamPos, color, false, config.NumberOfScrewHoles);
-                        box.SetActive(false);
-                        screwBoxes.Add(box);
                         break;
-
-
                 }
 
+                box.SetActive(false);
+                screwBoxes.Add(box);
             }
 
-            IngameController.Instance.ShuffleList(screwBoxes);
-            var oderByHoldNumber = screwBoxes.OrderBy(box => box.holdScrews.Count);
-            boxesStack = new Stack<Box>(oderByHoldNumber);
+            IngameController.ins.ShuffleList(screwBoxes);
+            var order = screwBoxes.OrderBy(b => b.holdScrews.Count);
+            boxesStack = new Stack<Box>(order);
         }
+
+        #endregion
+
+        #region Box Stack helpers
+
         private void RecalculatingBox(Screw.Screw clearedScrew)
         {
+            if (clearedScrew == null || boxesStack.Count == 0)
+                return;
+
             var listBox = boxesStack.ToList();
-            var boxSameColor = listBox.FirstOrDefault((box) => box.Color == clearedScrew.Color);
+            var boxSameColor = listBox.FirstOrDefault(b => b.Color == clearedScrew.Color);
             if (boxSameColor == null) return;
-            var idCrBox = listBox.IndexOf(boxSameColor);
+
+            int index = listBox.IndexOf(boxSameColor);
             var color = boxSameColor.Color;
-            var totalHold = boxSameColor.TotalHold;
+            int totalHold = boxSameColor.TotalHold;
+
             switch (totalHold)
             {
                 case 1:
-                    listBox.RemoveAt(idCrBox);
+                    listBox.RemoveAt(index);
                     break;
+
                 case 2:
-                    var boxOneHold = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
-                    boxOneHold.OnInit(Vector3.left * 5, color, false, --totalHold);
-                    boxOneHold.gameObject.SetActive(false);
-                    listBox.RemoveAt(idCrBox);
-                    listBox[idCrBox] = boxOneHold;
+                    var boxOne = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
+                    boxOne.OnInit(Vector3.left * 5, color, false, 1);
+                    boxOne.gameObject.SetActive(false);
+                    listBox[index] = boxOne;
                     break;
+
                 case 3:
-                    var boxTwoHold = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
-                    boxTwoHold.OnInit(Vector3.left * 5, color, false, --totalHold);
-                    boxTwoHold.gameObject.SetActive(false);
-                    listBox.RemoveAt(idCrBox);
-                    listBox[idCrBox] = boxTwoHold;
+                    var boxTwo = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
+                    boxTwo.OnInit(Vector3.left * 5, color, false, 2);
+                    boxTwo.gameObject.SetActive(false);
+                    listBox[index] = boxTwo;
                     break;
             }
-            IngameController.Instance.TotalStarInLevel--;
-            IngameController.Instance.ShuffleList(screwBoxes);
-            var oderByHoldNumber = listBox.OrderBy(box => box.holdScrews.Count);
-            boxesStack = new Stack<Box>(oderByHoldNumber);
-            screwBoxes = oderByHoldNumber.ToList();
+
+            IngameController.ins.TotalStarInLevel--;
+
+            var ordered = listBox.OrderBy(b => b.holdScrews.Count).ToList();
+            boxesStack = new Stack<Box>(ordered);
+            screwBoxes = ordered;
         }
+
         private Box SpawnBox()
         {
             if (boxesStack.Count == 0) return null;
-            //Debug.Log("SpawnBox");
-            var box = boxesStack.Pop();
-            return box;
+            return boxesStack.Pop();
         }
+
         private Box PopBoxByPredicate(Func<Box, bool> predicate)
         {
-            var list = boxesStack.ToList();                 // Copy sang list
-            list.Reverse();                                 // Stack order → list order
-            list.OrderByDescending(b => b.holdScrews.Count);
-            var box = list.FirstOrDefault(predicate);
+            var list = boxesStack.ToList();
+            list.Reverse();
+
+            var ordered = list.OrderByDescending(b => b.holdScrews.Count).ToList();
+            var box = ordered.FirstOrDefault(predicate);
             if (box == null) return null;
 
-            list.Remove(box);                               // Xóa khỏi danh sách
-
-            boxesStack = new Stack<Box>(list);              // Build stack mới
+            ordered.Remove(box);
+            boxesStack = new Stack<Box>(ordered);
             return box;
         }
+
+        #endregion
+
+        #region BoxSlots & Align
+
         private void InitBoxSlots(List<BoxSlot> slots)
         {
-            for (int i = 0; i < 4; i++)
+            if (slots == null || slots.Count == 0) return;
+
+            for (int i = 0; i < 4 && i < slots.Count; i++)
             {
                 var slot = slots[i];
-                var pos = CalculateCenteredPosition(i, 4); // Tính vị trí ban đầu dựa trên số slot
+                var pos = CalculateCenteredPosition(i, 4);
 
                 if (i < activeBoxCount)
                 {
                     var box = SpawnBox();
+                    if (box == null) continue;
+
                     slot.Initialize(pos, false, box);
                     box.SetActive(true);
                     box.SetIsLocked(false);
+
                     StartCoroutine(MoveToSlot(box, slot));
                 }
                 else
                 {
-                    var box = ThreeHoldBoxPool.Instance.Spawn();
-                    box.SetIsLocked(true);
-                    box.SetActive(true);
-                    slot.Initialize(pos, true, box);
-                    StartCoroutine(MoveToSlot(box, slot));
+                    var lockBox = ThreeHoldBoxPool.Instance.Spawn();
+                    lockBox.SetIsLocked(true);
+                    lockBox.SetActive(true);
+
+                    slot.Initialize(pos, true, lockBox);
+                    StartCoroutine(MoveToSlot(lockBox, slot));
                 }
             }
 
             StartAligningSlots(slots);
         }
 
-
         private Vector3 CalculateCenteredPosition(int index, int totalActiveSlots)
         {
-            if (CameraMain.instance.GetCam() != null)
+            if (CameraMain.instance.GetCam() == null)
             {
-                float leftBoundary = CameraMain.instance.GetLeft() - this.leftBound;
-                float rightBoundary = CameraMain.instance.GetRight();
-                float topBoundary = CameraMain.instance.GetTop() - topAlignSpacing;
-
-                // Calculate the total width available between the left and right boundaries
-                float width = rightBoundary - leftBoundary;
-
-                // Define a minimum spacing between the slots
-                float minSpacing = spacingBox; // Adjust this value to control how far apart boxes should be
-
-                // Calculate the maximum possible spacing based on the number of slots
-                float spacing = Mathf.Max(minSpacing, width / (totalActiveSlots + 1)); // Ensure spacing is never less than minSpacing
-
-                // Calculate the X position of the current slot
-                float xPosition = leftBoundary + (spacing * (index + 1)); // Index starts at 0, add 1 to offset the first slot
-
-                return new Vector3(xPosition, topBoundary, 0);
+                Debug.Log("Camera is null");
+                return Vector3.zero;
             }
 
-            Debug.Log("Camera is null");
-            return Vector3.zero;
+            float leftBoundary = CameraMain.instance.GetLeft() - leftBound;
+            float rightBoundary = CameraMain.instance.GetRight();
+            float topBoundary = CameraMain.instance.GetTop() - topAlignSpacing;
+
+            float width = rightBoundary - leftBoundary;
+            float minSpacing = spacingBox;
+            float spacing = Mathf.Max(minSpacing, width / (totalActiveSlots + 1));
+
+            float x = leftBoundary + spacing * (index + 1);
+            return new Vector3(x, topBoundary, 0);
         }
 
-        private void CloseAndRemoveBox(Box screwBox,float time = 0.5f, Action onComplete = null)
+        public void StartAligningSlots(List<BoxSlot> slots)
         {
+            if (slots == null || slots.Count == 0) return;
+
+            if (alignCoroutine != null)
+                StopCoroutine(alignCoroutine);
+
+            alignCoroutine = StartCoroutine(AlignSlots(slots));
+        }
+
+        private IEnumerator AlignSlots(List<BoxSlot> slots)
+        {
+            var activeSlots = slots.Where(s => s.gameObject.activeSelf).ToList();
+            if (activeSlots.Count == 0) yield break;
+
+            bool done = false;
+
+            while (!done)
+            {
+                done = true;
+
+                for (int i = 0; i < activeSlots.Count; i++)
+                {
+                    var slot = activeSlots[i];
+                    var target = CalculateCenteredPosition(i, activeSlots.Count);
+                    var current = slot.transform.position;
+
+                    var newPos = Vector3.Lerp(current, target, 0.1f);
+                    slot.transform.position = newPos;
+
+                    if (slot.screwBox != null && !slot.screwBox.isMoving && !slot.screwBox.IsBoxFull)
+                        slot.screwBox.Position = newPos;
+
+                    if (Vector3.Distance(newPos, target) > 0.01f)
+                        done = false;
+                }
+
+                yield return null;
+            }
+
+            alignCoroutine = null;
+        }
+
+        #endregion
+
+        #region Box lifecycle
+
+        private void CloseAndRemoveBox(Box screwBox, float time = 0.5f, Action onComplete = null)
+        {
+            if (screwBox == null)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+
             movingBox = true;
-            screwBox.CloseBox(time,(complete) =>
+
+            screwBox.CloseBox(time, _ =>
             {
                 Debug.Log("Closed box");
                 screwBoxes.Remove(screwBox);
-                if (screwBoxes.Count == 0)
+
+                if (screwBoxes.Count == 0 && rainbowBoxes.Count <0)
                 {
                     OnLastBoxClearScrew();
                 }
+
                 onComplete?.Invoke();
             });
         }
 
         private Box TrySpawnNewBox(BoxSlot currentSlot, Func<Box, bool> predicate = null)
         {
-            Box box = null;
-            Vector3 targetPos;
+            if (currentSlot == null)
+            {
+                Debug.LogError("[TrySpawnNewBox] Slot is null");
+                return null;
+            }
+
+            Box box;
+            Vector3 spawnPos;
+
             if (predicate == null)
             {
-                targetPos = currentSlot.transform.position;
+                spawnPos = new Vector3(CameraMain.instance.GetLeft() - 10,
+                                       currentSlot.transform.position.y,
+                                       0);
                 box = SpawnBox();
+                if (box == null) return null;
+
                 box.gameObject.SetActive(false);
-                box.Position = new Vector3(CameraMain.instance.GetLeft() - 10, 0);
             }
             else
             {
-                targetPos = new Vector3(CameraMain.instance.GetLeft() - 10, 0);
+                spawnPos = new Vector3(CameraMain.instance.GetLeft() - 10,
+                                       currentSlot.transform.position.y,
+                                       0);
                 box = PopBoxByPredicate(predicate);
-                box.transform.position = targetPos;
+                if (box == null) return null;
+
                 box.gameObject.SetActive(true);
-                Debug.Log($"box object spawn {box.Color} and isActive {box.isActiveAndEnabled}");
-                box.Position = targetPos;
             }
-            ;
 
-            if (box == null || currentSlot == null)
-            {
-                Debug.LogError("Error: new box or slot is null" + box + " or " + currentSlot);
-
-                return null;
-            }
-            box.transform.position = targetPos;
+            box.transform.position = spawnPos;
+            box.Position = spawnPos;
             box.ClearScrewOnHold();
-
-            var freeSlots = 3;
-            Debug.Log("free slot " + freeSlots);
-            if (freeSlots <= 0) return box;
-
-            var pendingForColor = hidingScrews
-                .Where(s => s != null && s.Color == box.Color)
-                .Take(freeSlots)
-                .ToList();
-            if (pendingForColor.Count == 0) return box;
-
-            int countScrew = box.holdScrews.Where(s => s.Screw != null).Count();
 
             return box;
         }
+
         public void DeactivateAndMoveQueue(Box screwBox)
         {
-            var currentSlot = boxSlots.Find((boxSlot) => boxSlot.CheckIsContainingThisBox(screwBox));
+            if (screwBox == null) return;
 
-            CloseAndRemoveBox(screwBox, 0.5f,() =>
+            var currentSlot = boxSlots.Find(slot => slot.CheckIsContainingThisBox(screwBox));
+
+            CloseAndRemoveBox(screwBox, 0.5f, () =>
             {
-                Debug.Log("Close and remove box" + currentSlot);
+                Debug.Log("Close and remove box " + currentSlot);
+
+                MissionManager.ins.OnRainbowBoxClosed(screwBox);
                 var newBox = TrySpawnNewBox(currentSlot);
-                AddHidingScrewToBox(newBox);
                 if (newBox != null)
                 {
+                    AddHidingScrewToBox(newBox);
                     StartCoroutine(MoveAndHandleBox(newBox, currentSlot));
                 }
             });
         }
 
-        private IEnumerator MoveAndHandleBox(Box newBox, BoxSlot currentSlot,float time = 0.5f )
+        private IEnumerator MoveAndHandleBox(Box newBox, BoxSlot currentSlot, float time = 0.5f)
         {
-            var isMoveBoxDone = false;
+            if (newBox == null || currentSlot == null) yield break;
+
+            bool isDone = false;
             MovingBox = true;
-            yield return StartCoroutine(MoveToSlot(newBox, currentSlot,time , (boxDone) =>
+
+            yield return StartCoroutine(MoveToSlot(newBox, currentSlot, time, ok =>
             {
-                isMoveBoxDone = boxDone;
+                isDone = ok;
             }));
-            yield return new WaitUntil(() => isMoveBoxDone == true);
 
-        }
-        public void AddScrewToBox(Screw.Screw screw, Box box, out bool canAdd)
-        {
-            canAdd = false;
-            if (!box.IsAddingScrew)
-            {
-
-                Debug.Log("Adding screw to box");
-                box.AddScrew(screw, out canAdd);
-                var screwMng = LevelManager.Instance.ScrewManager;
-                screwMng.RemoveScrew(screw); // Xóa screw khỏi danh sách quản lý
-            }
-            else
-            {
-                Debug.LogWarning($"Box {box.name} is currently adding a screw.");
-            }
-        }
-        public void AddMultipleScrew(List<Screw.Screw> screwList, Box box, bool isTele)
-        {
-            if (box.IsAddingScrew) return;
-            box.AddScrew(screwList, isTele);
-        }
-        public Box FindSuitableBox(Screw.Screw screw, bool allowFallbackToInactive = true)
-        {
-            if (screw == null) return null;
-
-            // Common base predicate
-            bool BasePredicate(Box box) =>
-                box != null &&
-                box.Color == screw.Color &&
-                !box.isMoving &&
-                !box.IsBoxFull;
-
-            // 1) Try active boxes first
-            var activeCandidate = screwBoxes
-                .Where(box => BasePredicate(box) && box.gameObject != null && box.gameObject.activeInHierarchy)
-                .OrderByDescending(box => box.isActiveAndEnabled )
-                 .ThenByDescending(box => box.NextEmptyIndex)
-                .FirstOrDefault();
-
-            if (activeCandidate != null)
-                return activeCandidate;
-
-            // 2) Fallback to inactive boxes if allowed
-            if (!allowFallbackToInactive)
-                return null;
-
-            var inactiveCandidate = screwBoxes
-                .Where(box => BasePredicate(box) && (box.gameObject == null || !box.gameObject.activeInHierarchy))
-                .OrderByDescending(box => box.NextEmptyIndex)
-                 .ThenByDescending(box => box.NextEmptyIndex)
-                .FirstOrDefault();
-
-            return inactiveCandidate;
+            yield return new WaitUntil(() => isDone);
         }
 
-        public bool TryMoveScrewsGroupedByColor(List<Screw.Screw> screws, bool includeInactive = false)
-        {
-            if (screws == null || screws.Count == 0) return false;
-
-            // Normalize and dedupe input
-            var distinct = screws.Where(s => s != null).Distinct().ToList();
-            if (distinct.Count == 0) return false;
-
-            // Group screws by color
-            var groups = distinct.GroupBy(s => s.Color);
-
-            int totalMoved = 0;
-
-            foreach (var group in groups)
-            {
-                var color = group.Key;
-                var groupList = group.ToList();
-
-                // Find a suitable box for this color
-                var box = FindSuitableBox(groupList[0], includeInactive);
-                if (box == null)
-                {
-                    AddToHidingList(groupList);
-                    Debug.Log($"BoxQueue: No suitable box found for color {color}. Skipping {groupList.Count} screws.");
-                    continue;
-                }
-
-                var freeHold = box.holdScrews.FindAll(h => h.IsEmpty());
-                int freeSlots = freeHold.Count;
-                var toMove = groupList;
-                if (freeSlots > 0 && groupList.Count > freeSlots)
-                {
-                    toMove = groupList.Take(freeSlots).ToList();
-                }
-                else if (freeSlots <= 0)
-                {
-                    GameUtils.LogAndSelect($"Box {box.name} is full for color {color}. Skipping.", box.gameObject);
-                    continue;
-                }
-
-                // Move the screws into the box
-                AddMultipleScrew(toMove, box, false);
-                totalMoved += toMove.Count;
-
-                // If some screws in the group were not moved (box filled), they remain in 'distinct' — caller can handle fallback
-                if (toMove.Count < groupList.Count)
-                {
-                    Debug.Log($"Moved {toMove.Count} of {groupList.Count} screws into box {box.name} for color {color} (box filled).");
-                }
-            }
-
-            Debug.Log($"TryMoveScrewsGroupedByColor: moved {totalMoved} screws grouped by color.");
-            return totalMoved > 0;
-        }
-        private void OnLastBoxClearScrew()
-        {
-            Debug.Log("on last box clear screw");
-            bool isComplete = onCompleteClearBoxes != null && IngameController.Instance.IsGameOver;
-            if (onCompleteClearBoxes != null) onCompleteClearBoxes.Invoke(isComplete);
-        }
-
-        private IEnumerator MoveToSlot(Box newBox, BoxSlot slot,float time = 0.5f, Action<bool> callback = null)
+        private IEnumerator MoveToSlot(Box newBox, BoxSlot slot, float time = 0.5f, Action<bool> callback = null)
         {
             yield return new WaitForSeconds(time);
-            var toPos = slot.transform.position;
 
-            // Safety
             if (newBox == null)
             {
                 Debug.LogWarning("MoveToSlot called with null newBox");
                 callback?.Invoke(false);
                 yield break;
             }
+
+            var toPos = slot.transform.position;
+
             newBox.gameObject.SetActive(true);
             newBox.Position = toPos + new Vector3(CameraMain.instance.GetLeft() - 1, 0);
             newBox.isMoving = true;
-            slot.AddBox(newBox);
 
-            // Candidates for this box color
+            slot.AddBox(newBox);
 
             var t = newBox.transform.DOMove(toPos, time).SetEase(Ease.OutCirc);
             t.OnStart(() =>
             {
                 AddHidingScrewToBox(newBox);
             });
-            t.OnUpdate(() => { });
             t.OnComplete(() =>
             {
                 newBox.isMoving = MovingBox = false;
@@ -531,166 +529,13 @@ namespace Ingame
                 callback?.Invoke(true);
             });
         }
-        public void AddHidingScrewToBox(Box newBox)
-        {
-            List<Screw.Screw> hinding = hidingScrews
-                .Where(h => h != null && h.Color == newBox.Color)
-                .Take(3)
-                .ToList();
 
-            if (hinding.Count > 0)
-            {
-                AddMultipleScrew(hinding, newBox, true);
-            }
-            hinding.ForEach(h => { hidingScrews.Remove(h); });
-        }
-
-        public void StartAligningSlots(List<BoxSlot> slots)
-        {
-            if (alignCoroutine != null) StopCoroutine(alignCoroutine);
-            alignCoroutine = StartCoroutine(AlignSlots(slots));
-        }
-
-        private IEnumerator AlignSlots(List<BoxSlot> slots)
-        {
-            // Filter active slots only once before alignment
-            var activeSlots = slots.Where(slot => slot.gameObject.activeSelf).ToList();
-            if (activeSlots.Count == 0) yield break; // Exit if no active slots
-
-            bool isAlignmentComplete = false;
-
-            while (!isAlignmentComplete)
-            {
-                isAlignmentComplete = true; // Assume alignment will complete this frame
-
-                // Update positions for active slots
-                for (int i = 0; i < activeSlots.Count; i++)
-                {
-                    var slot = activeSlots[i];
-                    var targetPosition = CalculateCenteredPosition(i, activeSlots.Count);
-                    var currentPosition = slot.transform.position;
-
-                    // Smoothly move the slot to the target position
-                    var newPosition = Vector3.Lerp(currentPosition, targetPosition, 0.1f);
-                    slot.transform.position = newPosition;
-
-                    // Update screwBox position if applicable
-                    if (slot.screwBox != null && !slot.screwBox.isMoving && !slot.screwBox.IsBoxFull)
-                    {
-                        slot.screwBox.Position = newPosition;
-                    }
-
-                    // Check if the slot is close enough to its target position
-                    if (Vector3.Distance(newPosition, targetPosition) > 0.01f)
-                    {
-                        isAlignmentComplete = false; // Continue aligning if not yet completed
-                    }
-                }
-
-                // Wait for the next frame
-                yield return null;
-            }
-
-            // Reset coroutine reference when finished
-            alignCoroutine = null;
-        }
-        public void AddToHidingList(List<Screw.Screw> screws)
-        {
-            if (screws == null || screws.Count == 0) return;
-
-            foreach (var screwItem in screws)
-            {
-                hidingScrews.Add(screwItem);
-                if (screwItem != null && screwItem.gameObject != null)
-                    screwItem.gameObject.SetActive(false);
-            }
-
-            // Summary: total count
-            int total = hidingScrews.Count;
-
-            // Breakdown by color (safely handle null entries)
-            var breakdown = hidingScrews
-                .Where(s => s != null)
-                .GroupBy(s => s.Color)
-                .Select(g => $"{g.Key}:{g.Count()}")
-                .ToList();
-
-            // Full list with index -> color (or "null")
-            var indexed = hidingScrews
-                .Select((s, i) => $"{i}:{(s == null ? "null" : s.Color.ToString())}")
-                .ToList();
-
-            Debug.Log($"[HidingScrews] Total={total}; Breakdown=[{string.Join(", ", breakdown)}]; Items=[{string.Join(", ", indexed)}]");
-        }
-        public void RemoveToHidingList(List<Screw.Screw> screws)
-        {
-            foreach (var screwItem in screws)
-            {
-                hidingScrews.Remove(screwItem);
-            }
-        }
-
-        public int IdexLockedBox()
-        {
-            return screwBoxes.FindIndex(b => b.IsLocked);
-        }
-        public void UnlockedBox()
-        {
-            var slot = boxSlots.FirstOrDefault(s => s.screwBox != null && s.screwBox.IsLocked);
-            Debug.Log("unlock box");
-            if (slot == null)
-            {
-                Debug.LogWarning("[UnlockedBox] No locked slot found!");
-                return;
-            }
-
-            var boxUnlock = slot.screwBox;
-
-            if (boxUnlock == null)
-            {
-                Debug.LogWarning("[UnlockedBox] Slot found but screwBox is NULL");
-                return;
-            }
-            var color = ArrayScrew.Instance.GetMostestColorInArray();
-            boxUnlock.SetActive(false);
-
-
-            
-            CloseAndRemoveBox(boxUnlock,0.01f, () =>
-            {
-                Box newBox;
-                if (color == ColorEnum.Clear)
-                    newBox = TrySpawnNewBox(slot);
-                else
-                 newBox = TrySpawnNewBox(slot, (b => b.Color == color));
-                Debug.Log("try spawn new box " + newBox);
-                AddHidingScrewToBox(newBox);
-
-                if (newBox != null)
-                    StartCoroutine(MoveAndHandleBox(newBox, slot,0)); 
-            });
-
-            
-        }
-        public void AddNewBoxSlot()
-        {
-            if (boxSlots.All(slot => slot.gameObject.activeSelf)) return;
-            var newBoxSlot = boxSlots.First(slot => !slot.gameObject.activeSelf);
-            newBoxSlot.gameObject.SetActive(true);
-
-
-            ColorEnum colorActiveInArray = ArrayScrew.Instance.GetMostestColorInArray();
-            var newBox = TrySpawnNewBox(newBoxSlot, b => b.Color == colorActiveInArray);
-            if (newBox != null)
-            {
-                StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
-                StartAligningSlots(boxSlots);
-            }
-        }
         public void ReturnBoxToPool(Box box)
         {
-            int totalhold = box.holdScrews.Count;
-            switch (totalhold)
+            if (box == null) return;
+
+            int totalHold = box.holdScrews.Count;
+            switch (totalHold)
             {
                 case 1:
                     OneHoldBoxPool.Instance.pool.ReturnToPool(box as BoxOneHold);
@@ -703,21 +548,310 @@ namespace Ingame
                     break;
             }
         }
+
+        #endregion
+
+        #region Add screw & hiding
+
+        public void AddScrewToBox(Screw.Screw screw, Box box, out bool canAdd)
+        {
+            canAdd = false;
+            if (screw == null || box == null) return;
+
+            if (box.IsAddingScrew)
+            {
+                Debug.LogWarning($"Box {box.name} is currently adding a screw.");
+                return;
+            }
+
+            box.AddScrew(screw, out canAdd);
+
+            if (canAdd)
+            {
+                var screwMng = LevelManager.ins.ScrewManager;
+                screwMng.RemoveScrew(screw);
+            }
+        }
+
+        public void AddMultipleScrew(List<Screw.Screw> screwList, Box box, bool isTele)
+        {
+            if (box == null || screwList == null || screwList.Count == 0) return;
+            if (box.IsAddingScrew) return;
+
+            box.AddScrew(screwList, isTele);
+        }
+
+        public void AddHidingScrewToBox(Box newBox)
+        {
+            if (newBox == null || hidingScrews == null || hidingScrews.Count == 0)
+                return;
+
+            var hinding = hidingScrews
+                .Where(h => h != null && h.Color == newBox.Color)
+                .Take(3)
+                .ToList();
+
+            if (hinding.Count > 0)
+            {
+                AddMultipleScrew(hinding, newBox, true);
+            }
+
+            foreach (var h in hinding)
+            {
+                hidingScrews.Remove(h);
+            }
+        }
+
+        public void AddToHidingList(List<Screw.Screw> screws)
+        {
+            if (screws == null || screws.Count == 0) return;
+
+            foreach (var screwItem in screws)
+            {
+                hidingScrews.Add(screwItem);
+                if (screwItem != null && screwItem.gameObject != null)
+                    screwItem.gameObject.SetActive(false);
+            }
+
+            int total = hidingScrews.Count;
+
+            var breakdown = hidingScrews
+                .Where(s => s != null)
+                .GroupBy(s => s.Color)
+                .Select(g => $"{g.Key}:{g.Count()}")
+                .ToList();
+
+            var indexed = hidingScrews
+                .Select((s, i) => $"{i}:{(s == null ? "null" : s.Color.ToString())}")
+                .ToList();
+
+            Debug.Log($"[HidingScrews] Total={total}; Breakdown=[{string.Join(", ", breakdown)}]; Items=[{string.Join(", ", indexed)}]");
+        }
+
+        public void RemoveToHidingList(List<Screw.Screw> screws)
+        {
+            if (screws == null) return;
+
+            foreach (var screwItem in screws)
+            {
+                hidingScrews.Remove(screwItem);
+            }
+        }
+
+        #endregion
+
+        #region Find box / move grouped
+
+        public Box FindSuitableBox(Screw.Screw screw, bool allowFallbackToInactive = true)
+        {
+            if (screw == null) return null;
+
+            if (screw.Color == ColorEnum.Rainbow)
+            {
+                return rainbowBoxes
+                    .Where(box => box != null && !box.IsBoxFull)
+                    .OrderByDescending(box => box.NextEmptyIndex)
+                    .FirstOrDefault();
+            }
+
+            bool BasePredicate(Box box) =>
+                box != null &&
+                box.Color == screw.Color &&
+                !box.isMoving &&
+                !box.IsBoxFull;
+
+            var activeCandidate = screwBoxes
+                .Where(box => BasePredicate(box) && box.gameObject != null && box.gameObject.activeInHierarchy)
+                .OrderByDescending(box => box.isActiveAndEnabled)
+                .ThenByDescending(box => box.NextEmptyIndex)
+                .FirstOrDefault();
+
+            if (activeCandidate != null)
+                return activeCandidate;
+
+            if (!allowFallbackToInactive)
+                return null;
+
+            var inactiveCandidate = screwBoxes
+                .Where(box => BasePredicate(box) && (box.gameObject == null || !box.gameObject.activeInHierarchy))
+                .OrderByDescending(box => box.NextEmptyIndex)
+                .ThenByDescending(box => box.NextEmptyIndex)
+                .FirstOrDefault();
+
+            return inactiveCandidate;
+        }
+
+        public bool TryMoveScrewsGroupedByColor(List<Screw.Screw> screws, bool includeInactive = false)
+        {
+            if (screws == null || screws.Count == 0) return false;
+
+            var distinct = screws.Where(s => s != null).Distinct().ToList();
+            if (distinct.Count == 0) return false;
+
+            var groups = distinct.GroupBy(s => s.Color);
+            int totalMoved = 0;
+
+            foreach (var group in groups)
+            {
+                var color = group.Key;
+                var groupList = group.ToList();
+
+                var box = FindSuitableBox(groupList[0], includeInactive);
+                if (box == null)
+                {
+                    AddToHidingList(groupList);
+                    Debug.Log($"BoxQueue: No suitable box found for color {color}. Skipping {groupList.Count} screws.");
+                    continue;
+                }
+
+                var freeHold = box.holdScrews.Where(h => h.IsEmpty()).ToList();
+                int freeSlots = freeHold.Count;
+
+                List<Screw.Screw> toMove = groupList;
+                if (freeSlots > 0 && groupList.Count > freeSlots)
+                {
+                    toMove = groupList.Take(freeSlots).ToList();
+                }
+                else if (freeSlots <= 0)
+                {
+                    GameUtils.LogAndSelect($"Box {box.name} is full for color {color}. Skipping.", box.gameObject);
+                    continue;
+                }
+
+                AddMultipleScrew(toMove, box, false);
+                totalMoved += toMove.Count;
+
+                if (toMove.Count < groupList.Count)
+                {
+                    Debug.Log($"Moved {toMove.Count} of {groupList.Count} screws into box {box.name} for color {color} (box filled).");
+                }
+            }
+
+            Debug.Log($"TryMoveScrewsGroupedByColor: moved {totalMoved} screws grouped by color.");
+            return totalMoved > 0;
+        }
+
+        #endregion
+
+        #region Unlock / new slot / reset
+
+        private void OnLastBoxClearScrew()
+        {
+            Debug.Log("on last box clear screw");
+            bool isComplete = onCompleteClearBoxes != null && IngameController.ins.IsGameOver;
+            onCompleteClearBoxes?.Invoke(isComplete);
+        }
+
+        //public bool CanAddRainbowScrew(Box box)
+        //{
+        //    return box == rainbowBox;
+        //}
+
+        public int IdexLockedBox()
+        {
+            return screwBoxes.FindIndex(b => b.IsLocked);
+        }
+
+        public void UnlockedBox()
+        {
+            var slot = boxSlots.FirstOrDefault(s => s.screwBox != null && s.screwBox.IsLocked);
+            Debug.Log("unlock box");
+
+            if (slot == null)
+            {
+                Debug.LogWarning("[UnlockedBox] No locked slot found!");
+                return;
+            }
+
+            var boxUnlock = slot.screwBox;
+            if (boxUnlock == null)
+            {
+                Debug.LogWarning("[UnlockedBox] Slot found but screwBox is NULL");
+                return;
+            }
+
+            var color = ArrayScrew.Instance.GetMostestColorInArray();
+            boxUnlock.SetActive(false);
+
+            CloseAndRemoveBox(boxUnlock, 0.01f, () =>
+            {
+                Box newBox;
+                if (color == ColorEnum.Clear)
+                    newBox = TrySpawnNewBox(slot);
+                else
+                    newBox = TrySpawnNewBox(slot, b => b.Color == color);
+
+                Debug.Log("try spawn new box " + newBox);
+                AddHidingScrewToBox(newBox);
+
+                if (newBox != null)
+                    StartCoroutine(MoveAndHandleBox(newBox, slot, 0));
+            });
+        }
+
+        public void AddNewBoxSlot()
+        {
+            if (boxSlots.All(slot => slot.gameObject.activeSelf)) return;
+
+            var newBoxSlot = boxSlots.First(slot => !slot.gameObject.activeSelf);
+            newBoxSlot.gameObject.SetActive(true);
+
+            ColorEnum colorActiveInArray = ArrayScrew.Instance.GetMostestColorInArray();
+            Box newBox = null;
+
+            if (colorActiveInArray != ColorEnum.Clear)
+            {
+                newBox = TrySpawnNewBox(newBoxSlot, b => b.Color == colorActiveInArray);
+            }
+
+            if (newBox == null)
+            {
+                newBox = TrySpawnNewBox(newBoxSlot);
+            }
+
+            if (newBox != null)
+            {
+                StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
+                StartAligningSlots(boxSlots);
+            }
+            else
+            {
+                Debug.LogWarning("[AddNewBoxSlot] No box available to spawn.");
+            }
+        }
+
         public void OnReset()
         {
             ThreeHoldBoxPool.Instance.pool.DeSpawnAll();
             TwoHoldBoxPool.Instance.pool.DeSpawnAll();
             OneHoldBoxPool.Instance.pool.DeSpawnAll();
+
             foreach (var box in screwBoxes)
             {
-                box.Reset();
+                if (box != null)
+                    box.Reset();
             }
+
+            screwBoxes.Clear();
+            boxesStack.Clear();
+            hidingScrews?.Clear();
+            foreach (var rb in rainbowBoxes)
+            {
+                if (rb != null) rb.Reset();
+            }
+
+            rainbowBoxes.Clear();
         }
 
-        //private void OnValidate()
-        //{
-        //    StartAligningSlots(this.boxSlots);
+        internal void RemoveBoxByColor(ColorEnum color, int requiredCount)
+        {
+            var listedBox = screwBoxes
+                .Where(b => b != null && b.Color == color)
+                .Take(requiredCount)
+                .ToList();
+            screwBoxes.RemoveAll(b => listedBox.Contains(b));
+        }
 
-        //}
+        #endregion
     }
 }

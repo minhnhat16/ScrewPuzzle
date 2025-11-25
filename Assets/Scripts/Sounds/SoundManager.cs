@@ -60,7 +60,7 @@ public class SoundManager : MonoBehaviour
 
     public void Init()
     {
-        soundFactory = ConfigFileManager.Instance.SoundFactory;
+        soundFactory = ConfigFileManager.Instance.GetConfig<SoundFactory>();
         sfxTimerDictionary = new Dictionary<SFX, float>();
         sfxTimerDespawnDictionary = new Dictionary<SFX, float>();
 

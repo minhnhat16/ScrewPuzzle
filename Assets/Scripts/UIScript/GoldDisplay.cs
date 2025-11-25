@@ -24,7 +24,7 @@ public class GoldDisplay : MonoBehaviour
         param.gold = GameManager.instance.GetPlayerGold();
         ViewManager.Instance.SwitchView(ViewIndex.ShopView,param);
     }
-    public void SetGoldToLable(int gold)
+    public void SetGoldToLable(long gold)
     {
         goldLB.text = GameManager.instance.DevideCurrency(gold);
     }

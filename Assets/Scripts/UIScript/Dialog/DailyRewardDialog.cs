@@ -1,4 +1,5 @@
 using Managers;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Profiling;
@@ -31,7 +32,7 @@ namespace UIScript.Dialog
             onClickClaim.RemoveListener(ClickClaimReward);
             onClickAds.RemoveListener(OnClickAdsReward);
         }
-        public override void OnInit()
+        public override void OnInit(Action callback)
         {
             //Debug.Log("ON DAILY DIALOG INIT");
             // claimBtn.SetButtonEvent(onClickClaim, onClickAds);
@@ -80,7 +81,7 @@ namespace UIScript.Dialog
         }
         private void CloseButton()
         {
-            DialogManager.Instance.HideDialog(dialogIndex);
+            DialogManager.ins.HideDialog(dialogIndex);
         }
         public void SetupGoldLable(int gold)
         {
@@ -114,7 +115,7 @@ namespace UIScript.Dialog
         }
         public void QuitButton()
         {
-            DialogManager.Instance.HideDialog(dialogIndex, () =>
+            DialogManager.ins.HideDialog(dialogIndex, () =>
             {
 
                 //Debug.Log("quit button callback");

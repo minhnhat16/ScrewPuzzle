@@ -13,7 +13,6 @@ namespace Ingame.Board
         [SerializeField] private GameObject _gameObject;
         public List<BasePart> parts = new List<BasePart>();
         [SerializeField] private int dropPart = 0;
-        [SerializeField] private string layer;
 
 
 
@@ -133,7 +132,6 @@ namespace Ingame.Board
         {
             parts.Clear();
             dropPart = 0;
-            layer = "Layer 1";
         }
     }
 }

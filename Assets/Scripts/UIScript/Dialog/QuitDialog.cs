@@ -14,11 +14,11 @@ public class QuitDialog : BaseDialog
     {
         _btnContinue.onClick.AddListener(() =>
         {
-            DialogManager.Instance.HideAllDialog();
-            IngameController.Instance.ResumeGame();
+            DialogManager.ins.HideAllDialog();
+            IngameController.ins.ResumeGame();
         });
         _quitBtn.onClick.AddListener(() => {
-            IngameController.Instance.ReturnToHome(this.dialogIndex);
+            IngameController.ins.ReturnToHome(this.dialogIndex);
         });
     }
     public void OnDisable()

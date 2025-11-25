@@ -171,31 +171,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewIndex: 3
   baseViewAnim: {fileID: 2573468095368960386}
-  anchor: {fileID: 0}
+  anchor: {fileID: 6305079544184862236}
   isShowingBreak: 0
-  _changeGold: 0
-  gold: 0
-  gem: 0
-  breakCounter: 300
   goldParent: {fileID: 0}
   gemParent: {fileID: 0}
-  starBottle: {fileID: 4272520079612824245}
+  starBottle: {fileID: 4557719831591224391}
   gold_lb: {fileID: 0}
   timeCouter: {fileID: 0}
   anchorTutorials: []
   settingBtn: {fileID: 2356599892372868593}
-  addBoxBtn: {fileID: 245049636290343181}
-  addHoldBtn: {fileID: 3366624737606681490}
-  clearOneScrewBtn: {fileID: 5040419919795980799}
+  addBoxBtn: {fileID: 7687151871829557268}
+  addHoldBtn: {fileID: 5147631838438306443}
+  clearOneScrewBtn: {fileID: 3187285783911594214}
   goldDisplay: {fileID: 5501978874361486185}
-  isNewPlayer: 0
   magnetItemEvent:
     m_PersistentCalls:
       m_Calls: []
   bombItemEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  onNewPlayer:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &2384524033119609890
@@ -432,7 +424,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5781968690498702487}
-  - component: {fileID: 4272520079612824245}
+  - component: {fileID: 4557719831591224391}
   m_Layer: 5
   m_Name: StarBottleFill
   m_TagString: Untagged
@@ -461,7 +453,7 @@ RectTransform:
   m_AnchoredPosition: {x: 425, y: 823}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &4272520079612824245
+--- !u!114 &4557719831591224391
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -470,7 +462,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4663683584371966201}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dca8c92d4a513f749bc3000a657d1e70, type: 3}
+  m_Script: {fileID: 11500000, guid: 0914d35492962294c9bac742f5b9291f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   imgBackground: {fileID: 1262906871270384044}
@@ -611,7 +603,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 57de8ff5bac500f458e3756abfe2f82c, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 2
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
@@ -771,15 +763,15 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
---- !u!114 &5040419919795980799 stripped
+--- !u!114 &3187285783911594214 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+  m_CorrespondingSourceObject: {fileID: 1489354272125344265, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
   m_PrefabInstance: {fileID: 4075964754769617647}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 6549ed4364f3f92469222f0249d37b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &7143192487445175261 stripped
@@ -897,15 +889,15 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
   m_PrefabInstance: {fileID: 6042476324711753858}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3366624737606681490 stripped
+--- !u!114 &5147631838438306443 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+  m_CorrespondingSourceObject: {fileID: 1489354272125344265, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
   m_PrefabInstance: {fileID: 6042476324711753858}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 6549ed4364f3f92469222f0249d37b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &6250137780767730351
@@ -1134,19 +1126,19 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
---- !u!114 &245049636290343181 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
-  m_PrefabInstance: {fileID: 9080664463649839645}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &2716809489586725679 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
   m_PrefabInstance: {fileID: 9080664463649839645}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7687151871829557268 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1489354272125344265, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+  m_PrefabInstance: {fileID: 9080664463649839645}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6549ed4364f3f92469222f0249d37b56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

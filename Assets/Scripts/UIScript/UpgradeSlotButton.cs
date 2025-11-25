@@ -40,7 +40,7 @@ public class UpgradeSlotButton : MonoBehaviour
         this.upgradeType = upgradeType;
         lb_priceUpgrade.text = price.ToString();
         
-        if(upgradeType == Currency.Gem)
+        if(upgradeType == Currency.Ticket)
         {
             SetImage(false);
         }

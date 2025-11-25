@@ -19,6 +19,7 @@ namespace Enums
         Purple,
         Cyan,
         Brown,
+        Rainbow,    
     }
 
     public static class ColorEnumExtensions

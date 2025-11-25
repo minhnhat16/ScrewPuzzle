@@ -173,7 +173,7 @@ public class CollectionDialog : BaseDialog
     public void OnCloseButton()
     {
         
-        DialogManager.Instance.HideDialog(dialogIndex);
+        DialogManager.ins.HideDialog(dialogIndex);
     }
 
 }

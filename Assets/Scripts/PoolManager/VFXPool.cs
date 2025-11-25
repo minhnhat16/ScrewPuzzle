@@ -14,11 +14,7 @@ public class VFXPool : MonoBehaviour
         Instance = this;
         pool = new BY_Local_Pool<SplashVfx>(prefab, 40, this.transform);
     }
-     IEnumerator Start()
-    {
-        yield return new WaitUntil(() => ConfigFileManager.Instance.ColorConfig != null);
-        config = ConfigFileManager.Instance.ColorConfig;
-    }
+    
     public Color GetColor(CardColorPallet color)
     {
         var c = config.GetRecordByKeySearch(color);

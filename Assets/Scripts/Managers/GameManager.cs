@@ -17,7 +17,7 @@ namespace Managers
         [SerializeField] private int totalLevel;
         [SerializeField] private int trackLevelStart;
         [SerializeField] private int levelCanUnlockNewCard;
-        [SerializeField] private int playerGold;
+        [SerializeField] private long playerGold;
         [SerializeField] private float popupDuration = 1;
         [SerializeField] private float starMoveDuration = 1;
         [SerializeField] private Vector3 starScale = new(0.5f, 0.5f);
@@ -59,27 +59,20 @@ namespace Managers
         public void AddGoldToCurrent(int gold, Action<bool> success = null)
         {
 
-            int current = playerGold;
+            long current = playerGold;
             playerGold += gold;
             success?.Invoke(current < playerGold);
         }
         public void MinusGoldToCurrent(int gold, Action<bool> success = null)
         {
 
-            int current = playerGold;
+            long current = playerGold;
             playerGold -= gold;
             success?.Invoke(current > playerGold);
         }
-        public int GetPlayerGold()
+        public long GetPlayerGold()
         {
             return playerGold;
-        }
-        public void SaveGoldToData(Action<bool> success = null)
-        {
-            CurrencyWallet gold = new();
-            gold.currency = Currency.Gold;
-            gold.amount = playerGold;
-            DataAPIController.instance.SaveGold(gold, success);
         }
         public void NextLevelCanUnlock(int levelCanUnlock)
         {
@@ -118,7 +111,7 @@ namespace Managers
             int goldInt = Mathf.FloorToInt(gold);
             return goldInt;
         }
-        public string DevideCurrency(int currency)
+        public string DevideCurrency(long currency)
         {
             if (currency < 10000) return currency.ToString();
             else

@@ -43,8 +43,8 @@ public abstract class BaseInputHandler : MonoBehaviour
     // ============================
     protected virtual IEnumerator InputLoop()
     {
-        while (true)
-        {   
+        while ( !IsClickOverUI())
+        {
             if (!isInputLocked)
             {
 #if UNITY_EDITOR || UNITY_STANDALONE
@@ -59,7 +59,16 @@ public abstract class BaseInputHandler : MonoBehaviour
             yield return null;
         }
     }
-
+    private bool IsClickOverUI()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        if (Input.touchCount > 0)
+            return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
+        return false;
+#else
+    return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+#endif
+    }
     // ============================
     // GENERIC PICKER
     // ============================

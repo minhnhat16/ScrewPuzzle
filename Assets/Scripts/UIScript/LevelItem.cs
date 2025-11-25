@@ -161,7 +161,7 @@ namespace UIScript
         {
             // Perform actions when the level button is clicked (e.g., load the level)
             Debug.Log("Handle logic for level: " + id);
-            LevelManager.Instance.LoadLevel(id);
+            LevelManager.ins.LoadLevel(id);
         }
 
         private void OnDisable()

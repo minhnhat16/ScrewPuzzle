@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using UIScript;
 using UnityEditor;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public static class GameConstants
 {
@@ -18,10 +20,12 @@ public static class GameConstants
     public const string SCREW_SPRITE_PATH = "GAMEPLAY/DINH";
     public const string BOX_SPRITE_PATH = "GAMEPLAY/HOP";
 
-    public static string COMMON_PACK = "Prefabs/UIPrefab/BluePack.prefab";
+    public static string COMMON_PACK = "Prefabs/UIPrefab/ShopPack/BluePack";
     internal static string BOX_CONFIGS = "Assets/Resources/Config/BoxConfigs/BoxLevel";
-    internal static string EPIC_PACK = "Prefabs/UIPrefab/PinkPack.prefab";
-    internal static string RARE_PACK = "Prefabs/UIPrefab/OrangePack.prefab";
+    internal static string EPIC_PACK = "Prefabs/UIPrefab/ShopPack/PinkPack";
+    internal static string RARE_PACK = "Prefabs/UIPrefab/ShopPack/OrangePack";
+
+    public static float MINI_SIZE = 150f;
 }
 
 
@@ -59,5 +63,30 @@ public static class GameUtils
         return $"{formatted} {currencyCode}";
     }
 
-   
+    public static class ShopItemLoader
+    {
+        public static void LoadItems<TItemConfig, TItemPrefab>(
+         List<TItemConfig> configs,
+         RectTransform parent,
+         Func<TItemConfig, TItemPrefab> getPrefab,
+         Action<TItemPrefab, TItemConfig> onInit = null,
+         Action<TItemPrefab> onRegister = null)
+         where TItemPrefab : MonoBehaviour
+        {
+            if (configs == null || parent == null) return;
+
+            foreach (var cfg in configs)
+            {
+                var prefab = getPrefab(cfg);
+                if (prefab == null)
+                    continue;
+
+                var itemObj = GameObject.Instantiate(prefab, parent);
+
+                onRegister?.Invoke(itemObj);
+                onInit?.Invoke(itemObj, cfg);
+            }
+        }
+
+    }
 }

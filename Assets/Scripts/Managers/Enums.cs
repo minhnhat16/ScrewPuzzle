@@ -1,12 +1,12 @@
-
+﻿
 public enum ItemType
 {
-   Magnet = 0,
-   Breaker = 1,
-   Drill =2,
-   AddBox = 3,
-   Gold = 4,
-   Ticket = 5,
+    Magnet = 0,
+    Breaker = 1,
+    Drill = 2,
+    AddBox = 3,
+    Gold = 4,
+    Ticket = 5,
 }
 
 public enum PackType
@@ -14,11 +14,15 @@ public enum PackType
     Common,
     Rare,
     Epic,
+    Ticket,
+    Gold
 }
 public enum Currency
 {
-   Gold = 0,
-   Gem = 1,
+    Gold = 0,
+    Ticket = 1,
+    RealMoney = 2,
+    Ads = 3,
 }
 public enum DailyReward
 {
@@ -79,7 +83,7 @@ public enum CardColorPallet
     Mauve,         // 29
     Maroon,        // 30
     Lavender,      // 31
-    SkyBlue ,       // 32
+    SkyBlue,       // 32
 }
 
 public enum SizeAmoutGold
@@ -87,7 +91,7 @@ public enum SizeAmoutGold
     S = 5,
     M = 10,
     L = 15,
-   XL = 20,
+    XL = 20,
 }
 
 public enum PackEnum
@@ -96,6 +100,27 @@ public enum PackEnum
     Ticket,
     Coin,
 }
+
+public enum MissionType
+{
+    CollectColor,
+    ClearRainbowBox,
+    ClearNormalBoxes,
+    UseItem,
+    TimeSurvive,
+    ScoreReached,
+    CompleteLevel,
+    CompleteSpecialLevel,
+}
+
+public enum MissionState
+{
+    Locked = 0,      // chưa mở
+    InProgress = 1,  // đang làm
+    Completed = 2,   // đủ điều kiện claim
+    Claimed = 3      // đã nhận thưởng
+}
+
 public enum TutorialEnum
 {
     StepOne = 1,

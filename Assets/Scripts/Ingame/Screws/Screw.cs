@@ -116,7 +116,7 @@ namespace Ingame.Screw
         private void SetScrewColor()
         {
             if (color == ColorEnum.Clear) return;
-            var targetColor = ConfigFileManager.Instance.ColorConfig.GetRecordByKeySearch(color).Color;
+            var targetColor = ConfigFileManager.Instance.GetColor(color);
             render.color = targetColor;
         }
         public bool OnScrewClicked()
@@ -254,6 +254,8 @@ namespace Ingame.Screw
             {
                 // parent the screw to the hold and stop movement flag
                 _transform.SetParent(holdScrew.transform);
+                ResetRender();
+                transform.localPosition = Vector3.zero;
                 isMoving = false;
             });
 
@@ -268,8 +270,6 @@ namespace Ingame.Screw
             render.transform.DOMove(targetPos, 0.5f).OnComplete(() =>
             {
                 hingeController.Reset();
-
-                transform.position = targetPos;
                 callback?.Invoke();
             });
         }
@@ -278,13 +278,9 @@ namespace Ingame.Screw
             _circleCollider2D.isTrigger = true;
             hingeController.FreeHinges();
         }
-
-        public void ChangeScrewColor(UnityEngine.Color color)
+        public void ChangeScrewColor(ColorEnum color)
         {
-        }
-
-        public void ChangeScrewColorByEnum(ColorEnum color)
-        {
+            this.color = color;
             render.sprite = color.ToScrewSprite();
         }
         public virtual HingeJoint2D CreateHinge(Rigidbody2D targetPart, HingeConnection connection)

@@ -1,7 +1,9 @@
+using Managers;
+using Spine;
 using System;
 using System.Collections;
 using System.DataBase;
-using Managers;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class BootLoader : MonoBehaviour
@@ -9,9 +11,54 @@ public class BootLoader : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject uiRoot;
     [SerializeField] private UIRootControlScale uiRootControl;
+
     IEnumerator Start()
     {
         DontDestroyOnLoad(this.gameObject);
+        ScreenSetup();
+        yield return new WaitForSeconds(0.1f);
+
+        // ----- REGISTER BOOT TASKS -----
+        TaskManager.ins.AddTask(Task_InitConfig);
+
+        TaskManager.ins.AddTask(Task_InitData);
+        TaskManager.ins.AddTask(Task_InitMission);
+        TaskManager.ins.AddTask(Task_SetupUI);
+        TaskManager.ins.AddTask(Task_FinishBoot);
+
+
+        LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
+        {
+            Debug.Log("task run done");
+            float progressTime = TaskManager.ins.TotalProgress;
+            LoadSceneManager.ins.TimeWait = progressTime;
+            MainScreenViewParam param = new()
+            {
+                totalGold = GameManager.instance.GetPlayerGold()
+            };
+
+            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
+            {
+                Debug.Log("task run done switch view");
+
+                DayTimeController.instance.CheckNewDay();
+            });
+        });
+        // ----- RUN TASKS -----
+     
+      
+    }
+
+    private IEnumerator Task_InitMission()
+    {
+        Debug.Log("[BOOT] InitMission...");
+        bool done = false;
+        yield return MissionManager.ins.Init(() => done = true);
+        yield return new WaitUntil(() => done);
+    }
+
+    private void ScreenSetup()
+    {
         Screen.orientation = ScreenOrientation.AutoRotation;
 
         // Ch? cho phép xoay ngang
@@ -19,78 +66,49 @@ public class BootLoader : MonoBehaviour
         Screen.autorotateToLandscapeRight = false;
         Screen.autorotateToPortrait = true;
         Screen.autorotateToPortraitUpsideDown = false;
-        yield return new WaitForSeconds(1f);
-        InitConfig(() =>
-        {
-            InitDataDone(() =>
-            {
-
-            });
-        });
-        yield return new WaitUntil(()=> ConfigFileManager.Instance.isDone);
-        StartCoroutine(SetUpUI(() =>
-        {
-            SetupAfterInitConfig();
-
-            gameManager.SetUpIngame();
-            gameManager = GetComponentInChildren<GameManager>();
-            gameManager.TrackLevelStart = 0;
-            ZenSDK.instance.TrackLevelStart(gameManager.TrackLevelStart);
-        }));
     }
-    private void InitDataDone(Action callback)
+
+    IEnumerator Task_InitConfig()
     {
-        DataAPIController.instance.InitData(() =>
-        {
-            callback?.Invoke();
-        });
+        Debug.Log("[BOOT] InitConfig...");
+        bool done = false;
+        ConfigFileManager.Instance.Init(() => done = true);
+        LevelManager.ins.Init();
+        yield return new WaitUntil(() => done);
     }
-    IEnumerator SetUpUI(Action callback)
+    IEnumerator Task_InitData()
     {
+        Debug.Log("[BOOT] InitData...");
+        bool done = false;
+
+        DataAPIController.instance.InitData(() => done = true);
+
+        yield return new WaitUntil(() => done);
+    }
+    IEnumerator Task_SetupUI()
+    {
+        Debug.Log("[BOOT] Setup UI...");
         uiRoot.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        LoadSceneManager.instance.LoadSceneByName("Buffer", () =>
-        {
-            MainScreenViewParam param = new MainScreenViewParam();
-            param.totalGold = GameManager.instance.GetPlayerGold();
-            //Debug.Log("LoadSenceCallback");
-            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
-            {
-                DayTimeController.instance.CheckNewDay();
-                ZenSDK.instance.ShowAppOpen((isDone) =>
-                {
-                  //  SoundManager.instance.PlayMusic(SoundManager.Music.GamplayMusic);
-                    //Debug.LogWarning("SHOW APP OPEN ON END LOADING");
-                    if (DayTimeController.instance.isNewDay)
-                    {
-                        //Debug.Log("isnewday now go to claim spin reward");
-                        DataAPIController.instance.SetSpinData(false);
-                    }
-                    else
-                    {
-                        //Debug.Log("still in last day can't claim spin reward");
-                        //DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
-                    }
-                });
-            });
-           
+        yield return ViewManager.Instance.Init();
+        Debug.Log("[BOOT] VIEW LOAD DONE ");
+        yield return DialogManager.ins.Init();
+        Debug.Log("[BOOT] DIALOG LOAD DONE ");
+   
 
-        });
+
+
+    }
+    IEnumerator Task_FinishBoot()
+    {
+        Debug.Log("[BOOT] Finalizing...");
+
+        gameManager = GetComponentInChildren<GameManager>();
+        gameManager.SetUpIngame();
+        gameManager.TrackLevelStart = 0;
+
+        ZenSDK.instance.TrackLevelStart(gameManager.TrackLevelStart);
+
         yield return null;
-        callback?.Invoke();
-    }
-    private void SetupAfterInitConfig()
-    {
-        MainScreenViewParam param = new();
-        param.totalGold = GameManager.instance.GetPlayerGold();
-
-    }
-    private void InitConfig(Action callback)
-    {
-        ConfigFileManager.Instance.Init(() =>
-        {
-            callback?.Invoke();
-        }); ;
     }
     private void OnApplicationPause(bool pause)
     {

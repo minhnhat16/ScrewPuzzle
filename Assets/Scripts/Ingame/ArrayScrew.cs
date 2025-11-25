@@ -1,12 +1,13 @@
+using Enums;
+using Ingame.Screw;
 using Managers;
+using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using PoolManager;
 using UnityEngine;
 using UnityEngine.Events;
-using Enums;
 namespace Ingame
 {
     public class ArrayScrew : MonoBehaviour, IResetable
@@ -18,7 +19,8 @@ namespace Ingame
         [SerializeField] private List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
         [SerializeField] private List<Screw.Screw> screws; // Mảng các HoldScrew (ô chứa screw)
         private Coroutine alignmentCoroutine;
-
+        private Coroutine holdRoutine;
+        private bool stopCheckHold = false;
 
         public UnityEvent onHoldScrewsFull = new(); // Sự kiện khi holdScrews đầy
         public List<Screw.Screw> Screws
@@ -91,10 +93,10 @@ namespace Ingame
             {
                 StopCoroutine(alignmentCoroutine);
             }
-            alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine(0,callback));
+            alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine(0, callback));
         }
 
-        private IEnumerator HoldAlignmentCoroutine(float duration = 0.5f,Action callBack = null)
+        private IEnumerator HoldAlignmentCoroutine(float duration = 0.5f, Action callBack = null)
         {
             var activeHolds = holdScrews.Where(hold => hold.gameObject.activeSelf).ToList();
             if (activeHolds.Count == 0) yield break;
@@ -143,38 +145,32 @@ namespace Ingame
         private void ScrewFullEvent()
         {
 
-            IngameController.Instance.GameEndInvoker();
+            IngameController.ins.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
         private IEnumerator CheckHoldCoroutine()
         {
-            bool isGameOver = IngameController.Instance.IsGameOver;
-            while (!isGameOver)
-            {
+            stopCheckHold = false;
 
-                // Kiểm tra nếu tất cả các ô đều đầy
-                bool allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
+            while (!stopCheckHold && !IngameController.ins.IsGameOver)
+            {
+                bool allFull = holdScrews.All(h => h != null && !h.IsEmpty());
+
                 if (allFull)
                 {
                     Debug.Log("All holdScrews are full!");
+                    yield return new WaitForSeconds(2f);
 
-                    yield return new WaitForSeconds(2f); // Chờ 2 giây để chắc chắn
+                    allFull = holdScrews.All(h => h != null && !h.IsEmpty());
 
-                    // Kiểm tra lại sau 2 giây xem có ô nào trống hay không
-                    allFull = holdScrews.All(holdScrew => holdScrew != null && !holdScrew.IsEmpty());
-
-                    if (allFull && BoxQueue.Instance.MovingBox == false)
+                    if (allFull && BoxQueue.ins.MovingBox == false)
                     {
-                        // Nếu vẫn đầy, gọi sự kiện
+                        stopCheckHold = true;     // <--- STOP TẠI ĐÂY
                         onHoldScrewsFull?.Invoke();
-                        yield return null; // Kết thúc coroutine sau khi gọi sự kiện
-                    }
-                    else
-                    {
-                        Debug.Log("HoldScrews cleared during waiting period.");
+                        yield break;              // <--- Thoát coroutine
                     }
                 }
-                // Đợi 0.5 giây trước khi kiểm tra lại
+
                 yield return new WaitForSeconds(2f);
             }
         }
@@ -182,7 +178,10 @@ namespace Ingame
 
         private void CheckIfHoldScrewsFull()
         {
-            StartCoroutine(CheckHoldCoroutine());
+            if (holdRoutine != null)
+                StopCoroutine(holdRoutine);
+
+            holdRoutine = StartCoroutine(CheckHoldCoroutine());
         }
         public void RemoveScrewOutHold(Screw.Screw screw)
         {
@@ -227,15 +226,15 @@ namespace Ingame
         private void AddScrewToHoldScrew(Screw.Screw screw, HoldScrew holdScrew)
         {
             // Tìm box phù hợp cho screw
-            var suitableBox = BoxQueue.Instance.FindSuitableBox(screw);
+            var suitableBox = BoxQueue.ins.FindSuitableBox(screw);
             bool canAdd = false;
             if (suitableBox != null)
             {
                 // Thêm screw vào box phù hợp
-                BoxQueue.Instance.AddScrewToBox(screw, suitableBox, out canAdd);
+                BoxQueue.ins.AddScrewToBox(screw, suitableBox, out canAdd);
             }
             if (canAdd) return;
-            holdScrew.AddScrew(screw, false,(onMoved) =>
+            holdScrew.AddScrew(screw, false, (onMoved) =>
             {
                 // Kiểm tra nếu tất cả holdScrew đã đầy
                 CheckIfHoldScrewsFull();
@@ -243,7 +242,7 @@ namespace Ingame
 
             // Thêm screw vào danh sách tạm thời
             screws.Add(screw);
-            var screwMng = LevelManager.Instance.ScrewManager;
+            var screwMng = LevelManager.ins.ScrewManager;
             screwMng.RemoveScrew(screw);
 
         }
@@ -256,18 +255,18 @@ namespace Ingame
 
         private IEnumerator SetScrewInActive()
         {
-            foreach (var screw in screws)
+            for (int i = 0; i < screws.Count; i++)
             {
-
+                var screw = screws[i];
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
                 yield return null;
             }
 
-            foreach (var hold in holdScrews)
-            {
-                hold.ClearScrewOnHold();
-                yield return null;
 
+            for (int j = 0; j < holdScrews.Count; j++)
+            {
+                holdScrews[j].ClearScrewOnHold();
+                yield return null;
             }
             screws.Clear();
         }
@@ -284,6 +283,7 @@ namespace Ingame
 
         public void OnReset()
         {
+            holdRoutine = null;
             ShowArrayActive(5);
         }
         //private void OnValidate()

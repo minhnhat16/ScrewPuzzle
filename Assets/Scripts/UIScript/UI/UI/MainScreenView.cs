@@ -20,7 +20,7 @@ namespace UIScript.UI.UI
         [SerializeField] private Button adsRemover;
         [SerializeField] private Text goldLB;
         [SerializeField] private LevelPanel levelPanel;
-        [SerializeField] private int gold;
+        [SerializeField] private long gold;
 
         private void OnEnable()
         {
@@ -36,7 +36,7 @@ namespace UIScript.UI.UI
             adsRemover.onClick.AddListener(OnClickAdsRemover);
         }
 
-      
+
 
         private void OnDisable()
         {
@@ -50,7 +50,7 @@ namespace UIScript.UI.UI
         public override void OnStartShowView()
         {
             int currentPlayerLevel = DataAPIController.instance.GetPlayerLevel();
-            LevelManager.Instance.currentLevelID = currentPlayerLevel;
+            LevelManager.ins.currentLevelID = currentPlayerLevel;
             base.OnStartShowView();
             SetLevelPanelIs(true);
         }
@@ -60,19 +60,24 @@ namespace UIScript.UI.UI
             SetLevelPanelIs(false);
 
         }
-    
+
         public override void Setup(ViewParam viewParam)
         {
             base.Setup(viewParam);
 
             MainScreenViewParam param = viewParam as MainScreenViewParam;
-            int userGold = gold = param.totalGold;
+            if (param != null)
+            {
+                long userGold = gold = param.totalGold;
 
-            SetUpGold(userGold);
-            SetLevelPanelIs(true);
+                SetUpGold(userGold);
+                SetLevelPanelIs(true);
+            }
+
+
         }
 
-        private void SetUpGold(int userGold)
+        private void SetUpGold(long userGold)
         {
             goldLB.text = GameManager.instance.DevideCurrency(userGold);
         }
@@ -81,15 +86,15 @@ namespace UIScript.UI.UI
             SetLevelPanelIs(false);
             DailyParam param = new()
             {
-                config = ConfigFileManager.Instance.DailyRewardConfig,
+                config = ConfigFileManager.Instance.GetConfig<DailyRewardConfig>(),
                 data = DataAPIController.instance.GetDailyData(),
                 totalGold = GameManager.instance.GetPlayerGold(),
             };
-            DialogManager.Instance.ShowDialog(DialogIndex.DailyRewardDialog, param, null);
+            DialogManager.ins.ShowDialog(DialogIndex.DailyRewardDialog, param, null);
         }
         private void OnSkinButton()
         {
-            
+
 
         }
 
@@ -105,11 +110,11 @@ namespace UIScript.UI.UI
             param.totalGold = GameManager.instance.GetPlayerGold();
             List<ShopItem> specialItems = new List<ShopItem>();
 
-            DialogManager.Instance.ShowDialog(DialogIndex.SpecialDialog, param, null);
+            DialogManager.ins.ShowDialog(DialogIndex.SpecialDialog, param, null);
         }
         private void RateButton()
         {
-            DialogManager.Instance.ShowDialog(DialogIndex.RateDialog);
+            DialogManager.ins.ShowDialog(DialogIndex.RateDialog);
         }
 
         public override void OnInit(Action callback = null)
@@ -122,12 +127,12 @@ namespace UIScript.UI.UI
         }
         private void OnPlayButton()
         {
-            int currentLevel = LevelManager.Instance.currentLevelID;
-          
+            int currentLevel = LevelManager.ins.currentLevelID;
 
-            LevelManager.Instance.LoadLevel(currentLevel, () =>
+
+            LevelManager.ins.LoadLevel(currentLevel, () =>
             {
-                IngameController.Instance.PauseGame();
+                IngameController.ins.PauseGame();
             });
         }
 
@@ -144,7 +149,7 @@ namespace UIScript.UI.UI
             param.totalGold = GameManager.instance.GetPlayerGold();
             //if (param.totalGold == null) Debug.Log("total gold is null");
             param.title = "SETTING";
-            DialogManager.Instance.ShowDialog(DialogIndex.SettingDialog, param);
+            DialogManager.ins.ShowDialog(DialogIndex.SettingDialog, param);
         }
         public void ShopButton()
         {
@@ -152,7 +157,6 @@ namespace UIScript.UI.UI
             Debug.Log("Shop button on clicked");
             var param = new ShopViewParam();
             param.gold = gold;
-
             ViewManager.Instance.SwitchView(ViewIndex.ShopView, param);
         }
         private void OnClickAdsRemover()
@@ -165,11 +169,11 @@ namespace UIScript.UI.UI
             param.currency = "VND";
             param.totalGold = GameManager.instance.GetPlayerGold();
 
-            DialogManager.Instance.ShowDialog(DialogIndex.AdsRemoveDialog, param, null);
+            DialogManager.ins.ShowDialog(DialogIndex.QuestDialog, param, null);
         }
         private void LevelButton()
         {
-            var levelsConfig = LevelManager.Instance.levelConfig;
+            var levelsConfig = LevelManager.ins.levelConfig;
             var levelData = DataAPIController.instance.GetAllLevelData();
             List<BaseLevelItem> listLevel = new();
 

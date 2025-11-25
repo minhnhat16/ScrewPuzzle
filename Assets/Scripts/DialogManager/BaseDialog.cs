@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 public class BaseDialog : MonoBehaviour
 {
+    public bool isInitDone = false;
     public DialogIndex dialogIndex;
-    [SerializeField]private BaseDialogAnimation baseDialogAnim;
+    [SerializeField] private BaseDialogAnimation baseDialogAnim;
 
     public BaseDialogAnimation BaseDialogAnim { get => baseDialogAnim; set => baseDialogAnim = value; }
 
@@ -13,14 +15,18 @@ public class BaseDialog : MonoBehaviour
         baseDialogAnim = gameObject.GetComponentInChildren<BaseDialogAnimation>();
     }
 
-    public void Init()
+    public IEnumerator Init()
     {
-        OnInit();
-        gameObject.SetActive(false);
+        isInitDone = false;
+        OnInit(() =>
+        {
+            isInitDone = true;
+            gameObject.SetActive(!isInitDone);
+        });
+        yield return new WaitUntil(()=> isInitDone);
     }
 
-    public virtual void OnInit() { }
-
+    public virtual void OnInit(Action callback = null) { callback?.Invoke(); }
     public virtual void Setup(DialogParam dialogParam) { }
 
     public void ShowDialogAnimation(Action callback)

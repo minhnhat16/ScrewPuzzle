@@ -1,44 +1,53 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class LoadingView : BaseView
 {
     public Slider loadingProgress;
     public Text loaddingText;
-    private float t1 = 0;
+
+    private float dotTimer = 0;
+
     public override void Setup(ViewParam viewParam)
     {
         base.Setup(viewParam);
     }
+
     public override void OnStartShowView()
     {
         base.OnStartShowView();
-        //logo = GetComponentInChildren<SkeletonGraphic>();
-        //PlayStartingAnimation()
     }
+
     private void Update()
     {
         UpdateLoadingProgress();
     }
-  
+
     private void UpdateLoadingProgress()
     {
-        loadingProgress.value = LoadSceneManager.instance.progress + 0.01f;
-        t1 += Time.timeScale * 0.005f;
-        
-        if (t1 >= 0.0f && t1 < 0.2f)
-        {
+        // =====================
+        //   TASK MANAGER PROGRESS
+        // =====================
+
+        float totalTasks = Mathf.Max(1, TaskManager.ins.TaskCount);
+        float basicProgress = TaskManager.ins.TotalProgress;              
+        float currentTaskProgress = TaskManager.ins.CurrentTaskProgress; 
+
+        loadingProgress.value = Mathf.Lerp(0, totalTasks, totalTasks * 0.5f); ;
+
+        // =====================
+        //   LOADING TEXT ANIMATION
+        // =====================
+
+        dotTimer += Time.deltaTime;
+
+        if (dotTimer < 0.5f)
             loaddingText.text = "Loading.";
-        }
-        else if (t1 >= 0.2f && t1 < 0.4f)
-        {
+        else if (dotTimer < 1.0f)
             loaddingText.text = "Loading..";
-        }
-        else if (t1 >= 0.6f && t1 <= 1.5f)
-        {
+        else if (dotTimer < 1.5f)
             loaddingText.text = "Loading...";
-            t1 = 0;
-        }
-       
+        else
+            dotTimer = 0;
     }
 }

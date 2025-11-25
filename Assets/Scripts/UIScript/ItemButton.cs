@@ -44,14 +44,23 @@ namespace UIScript
         [HideInInspector]
         public UnityEvent<int> Event = new UnityEvent<int>();
 
+
+        private void Awake()
+        {
+            button = GetComponent<Button>();    
+        }
+
         public virtual void OnEnable()
         {
         }
+        public virtual void OnDisable()
+        {
 
+        }
         public virtual void OnClick()
         {
             Debug.Log("on button click");
-            IngameController.Instance.onItemInvoke?.Invoke(type);
+            IngameController.ins.onItemInvoke?.Invoke(type);
         }
 
         public virtual void OnAddQuantity()

@@ -29,7 +29,7 @@ namespace UIScript.Dialog
             WinParam param = (WinParam)dialogParam;
             string levelStr = param.level.ToString();
             string scoreStr = param.score.ToString();
-            int userGold = param.totalGold;
+            long userGold = param.totalGold;
             string rewardString = param.reward.ToString();
             SetLevelLB(levelStr);
             SetScore(scoreStr);
@@ -37,7 +37,7 @@ namespace UIScript.Dialog
 
             goldDisplay= GetComponentInChildren<GoldDisplay>();
             goldDisplay.SetGoldToLable(userGold);
-            IngameController.Instance.PauseGame();
+            IngameController.ins.PauseGame();
         }
 
 
@@ -65,13 +65,13 @@ namespace UIScript.Dialog
         {
             base.OnEndHideDialog();
             SetButtonInteractAble(true);
-            IngameController.Instance.ResumeGame();
+            IngameController.ins.ResumeGame();
         }
         private void OnNextButtonClicked()
         {
             SetButtonInteractAble(false);
             nextLevelButton.interactable = false;
-            var levelManager = LevelManager.Instance;
+            var levelManager = LevelManager.ins;
             int currentLevel = levelManager.currentLevelID + 1 ;
 
             LevelData data = new();
@@ -82,7 +82,7 @@ namespace UIScript.Dialog
             DataAPIController.instance.SaveNewLevelData(data, () =>
             {
                 SetButtonInteractAble(true);
-                DialogManager.Instance.HideDialog(dialogIndex);
+                DialogManager.ins.HideDialog(dialogIndex);
                 levelManager.LoadLevel(currentLevel);
 
             });

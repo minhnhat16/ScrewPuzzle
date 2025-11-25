@@ -12,11 +12,12 @@ namespace UIScript.Dialog
         [SerializeField] private LevelItem prefabLevelItem;
         [SerializeField] private List<LevelItem> listLevelItem;
         [SerializeField] private Transform grid;
-        public override void OnInit()
+        public override void OnInit(Action callback)
         {
             Debug.Log("Init new Level item");
             LoadLevelButton();
             LoadLevelToItem();
+            base.OnInit(callback);
         }
 
         private void LoadLevelButton()
@@ -26,8 +27,8 @@ namespace UIScript.Dialog
         private void LoadLevelToItem()
         {
             List<LevelItem>levelItemList = new();
-            var waitUntil = new WaitUntil(()=> LevelManager.Instance.IsInitDone);
-            var allLevelConfig = new List<Level.Level>(LevelManager.Instance.Levels.Values);
+            var waitUntil = new WaitUntil(()=> LevelManager.ins.IsInitDone);
+            var allLevelConfig = new List<Level.Level>(LevelManager.ins.Levels.Values);
         }
     }
 }

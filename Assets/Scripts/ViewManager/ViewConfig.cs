@@ -16,11 +16,12 @@ public enum ViewIndex
 public class ViewParam { }
 
 public class LoadingViewParam : ViewParam
-{ 
+{
+    public float target;
 }
 public class GamePlayViewParam : ViewParam
 {
-    public int totalGold;
+    public long totalGold;
     public bool isNewPlayer;
     public int currentCardCount;
     public int maxCardCount;
@@ -30,11 +31,11 @@ public class GamePlayViewParam : ViewParam
 
 public class ShopViewParam : ViewParam
 {
-    public int gold;
+    public long gold;
 }
 public class MainScreenViewParam : ViewParam
 {
-    public int totalGold;
+    public long totalGold;
 }
 public class CollectionParam : ViewParam
 {

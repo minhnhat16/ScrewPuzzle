@@ -53,7 +53,7 @@ public class BuyDialog : BaseDialog
     }
     public void HideConfirmDialog()
     {
-        DialogManager.Instance.HideDialog(dialogIndex);
+        DialogManager.ins.HideDialog(dialogIndex);
     }
     public void ConfirmWatch()
     {

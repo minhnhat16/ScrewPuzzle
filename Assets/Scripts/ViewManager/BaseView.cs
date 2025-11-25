@@ -45,7 +45,7 @@ public class BaseView : MonoBehaviour
     {
         baseViewAnim.HideViewAnimation(() => 
         {
-            //Debug.Log("HideViewAnimation");
+            Debug.Log("HideViewAnimation");
             OnStartHideView();
             callback?.Invoke();
             OnEndHideView();

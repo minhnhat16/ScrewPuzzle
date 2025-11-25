@@ -14,6 +14,7 @@ using UnityEditor;
 using UnityEditor.Analytics;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame
@@ -54,9 +55,9 @@ namespace Ingame
         public float squashDuration = 0.2f;
         public Vector3 initialPosition;
         public bool isMoving;
-        public UnityEvent<int> spawnStartEvent = new();
-         public List<HoldScrew> holdScrews; // Mảng các lỗ Screw
-         public UnityEvent<bool> onScrewBoxFull;
+        public UnityEvent<int, List<Vector3>> spawnStartEvent = new();
+        public List<HoldScrew> holdScrews; // Mảng các lỗ Screw
+        public UnityEvent<bool> onScrewBoxFull;
         [SerializeField] private ColorEnum color;
         public BoxSlot boxSlot;
         private bool isLocked;
@@ -104,7 +105,7 @@ namespace Ingame
         public virtual void OnDisable()
         {
             spawnStartEvent.RemoveAllListeners();
-            OnReset();  
+            OnReset();
         }
         public void OnInit(Vector3 position, ColorEnum color, bool isBoxFull, int totalHold)
         {
@@ -130,7 +131,7 @@ namespace Ingame
 
             var renderGObj = render.gameObject;
             TunOffScrews();
-            color= ColorEnum.Empty;
+            color = ColorEnum.Empty;
             renderUpper.color = Color.ToColor();
             renderGObj.SetActive(true);
             renderGObj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
@@ -153,7 +154,7 @@ namespace Ingame
         public void SetIsLocked(bool isLocked)
         {
             this.isLocked = isLocked;
-          
+
             if (IsLocked)
             {
                 string path = $"{GameConstants.BOX_SPRITE_PATH}/box_them";
@@ -193,11 +194,11 @@ namespace Ingame
         IEnumerator InactiveBoxCoroutine()
         {
             yield return new WaitForSeconds(1f);
-            yield return new WaitUntil(()=>!isMoving);
-            BoxQueue.Instance.DeactivateAndMoveQueue(this);
+            yield return new WaitUntil(() => !isMoving);
+            BoxQueue.ins.DeactivateAndMoveQueue(this);
         }
 
-        public void CloseBox(float time = 0.5f,Action<bool> callback = null)
+        public void CloseBox(float time = 0.5f, Action<bool> callback = null)
         {
             DoUpperBoxMove((boxFull) =>
             {
@@ -207,44 +208,48 @@ namespace Ingame
 
         private void TunOffScrews()
         {
+            if(holdScrews.Count ==0) return;
 
             //Debug.Log("Turn off Screww");
             foreach (var t in holdScrews)
             {
+                if(t.Screw == null) continue;
                 ScrewPool.Instance.Pool.ReturnToPool(t.Screw);
+                GameUtils.LogAndSelect(this.gameObject.name + " return screw to pool ", this.gameObject);
             }
         }
         private void DoUpperBoxMove(Action<bool> callback, float time = 0.5f)
         {
             Sequence mySequence = DOTween.Sequence();
             renderUpper.enabled = true;
-            var color= ColorEnumExtensions.ToColor(this.color);
+            var color = ColorEnumExtensions.ToColor(this.color);
             color.a = 0.4f;
             renderUpper.color = color;
             int totalHold = holdScrews.Count;
-            // Debug trước khi sử dụng giá trị này
-            //Debug.Log("Total Hold Screws: " + totalHold);
 
+            Vector3 pos = CameraMain.instance.GetTopRight();
+            var holdPosition = holdScrews.Select(p => p.transform.position)
+                                          .ToList();
             mySequence.Append(renderUpper.transform.DOLocalMoveY(0, time)
                 .SetEase(Ease.InCirc).OnComplete(() =>
                 {
-                    //Debug.Log("OnComplete: TunOffScrews & SpawningStar");
                     //TunOffScrews();
-                    spawnStartEvent?.Invoke(totalHold);
                     //Debug.Log($"Processing Hold Screw at { totalHold}");
                 }))
-                .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f),time, 1)
+                .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f), time, 1)
+                    .OnStart(() => spawnStartEvent?.Invoke(totalHold, holdPosition))
                     .SetEase(Ease.InBack).OnComplete(() =>
                     {
+
                         callback.Invoke(true);
                     }))
-                .Append(transform.DOMove(new Vector3(10, 10, 0), time * 4, false)
-                    .SetEase(Ease.OutBounce)).OnComplete(() =>
+                .Append(transform.DOMove(pos, time * 2, false)
+                    .SetEase(Ease.OutSine)).OnComplete(() =>
                     {
                         Reset();
-
                         gameObject.SetActive(false);
                     });
+
         }
 
         public virtual void SetActive(bool isActive)
@@ -252,7 +257,7 @@ namespace Ingame
             gameObject.SetActive(isActive);
         }
 
-        public void SpawningStar(int totalHold)
+        public void SpawningStar(int totalHold, List<Vector3> positions)
         {
             if (totalHold <= 0)
             {
@@ -260,25 +265,27 @@ namespace Ingame
                 return;
             }
             //Debug.Log("SpawningStar");
-
-            StartCoroutine(PoppingStar(totalHold));
+            if (gameObject.activeSelf)
+            {
+                StartCoroutine(PoppingStar(totalHold, positions));
+            }
         }
 
-        private IEnumerator PoppingStar(int totalHold)
+        private IEnumerator PoppingStar(int totalHold, List<Vector3> positions)
         {
             int newStarAdded = 0;
 
-            foreach (var hold in holdScrews)
+            for (int i = 0; i < positions.Count; i++)
             {
+                var position = positions[i];
                 var star = StarPool.Instance.pool.SpawnNonGravity();
-                star.SetStarPos(hold.transform.position);
-
-                Vector3 newPosition = new(CameraMain.instance.GetTop(), CameraMain.instance.GetRight());
-
-
-                Debug.Log("Position target " + newPosition);
+                star.SetStarPos(position);
                 Vector3 starScale = GameManager.instance.StarScale;
+                var gameView = ViewManager.Instance.currentView;
+                var startRect = ViewManager.Instance.GetUIObject<StarBottleFill>(gameView).GetComponent<RectTransform>();
 
+                Vector3 newPosition = ViewManager.Instance.UIToWorld(startRect, Camera.main);
+                yield return new WaitForSeconds(0.02f);
                 star.PopingStar(starScale, newPosition, () =>
                 {
                     //Debug.Log("Callback triggered for a star!");
@@ -290,7 +297,7 @@ namespace Ingame
             yield return new WaitUntil(() => newStarAdded == holdScrews.Count);
 
             //Debug.Log("All stars completed popping!");
-            IngameController.Instance.StarChanging(holdScrews.Count);
+            IngameController.ins.StarChanging(holdScrews.Count);
         }
 
 
@@ -314,7 +321,7 @@ namespace Ingame
 
                 StartCoroutine(WaitForBoxStopAndAddScrew(() =>
                 {
-                    AddScrewToSlot(screw, out added,isTele);
+                    AddScrewToSlot(screw, out added, isTele);
 
                     isAddingScrew = false;
                 }));
@@ -323,15 +330,15 @@ namespace Ingame
             }
             else
             {
-                AddScrewToSlot(screw, out canAdd,isTele);
+                AddScrewToSlot(screw, out canAdd, isTele);
                 isAddingScrew = false;
             }
         }
 
-        public virtual void AddScrew(List<Screw.Screw> screws,bool isTele = false)
+        public virtual void AddScrew(List<Screw.Screw> screws, bool isTele = false)
         {
             bool canAdd;
-            var screwManager = LevelManager.Instance.ScrewManager;
+            var screwManager = LevelManager.ins.ScrewManager;
             //Debug.Log("Add many screw");
             if (isActiveAndEnabled)
             {
@@ -339,7 +346,7 @@ namespace Ingame
                 {
                     foreach (var screw in screws)
                     {
-                        if(!screw.isActiveAndEnabled) screw.gameObject.SetActive(true);    
+                        if (!screw.isActiveAndEnabled) screw.gameObject.SetActive(true);
                         AddScrewToSlot(screw, out canAdd, isTele);
                         //GameUtils.LogAndSelect("can add active " + canAdd, this.gameObject);
                     }
@@ -351,7 +358,7 @@ namespace Ingame
                 {
                     if (!screw.isActiveAndEnabled) screw.gameObject.SetActive(true);
                     AddScrewToSlot(screw, out canAdd);
-                   // GameUtils.LogAndSelect("can add inactive" + canAdd, this.gameObject);
+                    // GameUtils.LogAndSelect("can add inactive" + canAdd, this.gameObject);
                 }
             }
             screwManager.RemoveScrew(screws);
@@ -365,10 +372,10 @@ namespace Ingame
         }
 
 
-        private void AddScrewToSlot( Screw.Screw screw, out bool canAdd, bool isTele = false)
+        private void AddScrewToSlot(Screw.Screw screw, out bool canAdd, bool isTele = false)
         {
             canAdd = false;
-            if(isBoxFull)
+            if (isBoxFull)
             {
                 canAdd = false;
                 return;
@@ -421,7 +428,8 @@ namespace Ingame
                 Debug.Log("Box full");
                 canAdd = false;
                 return;
-            };
+            }
+            ;
 
             bool isKnowPosition = nextEmptyIndex >= 0 && nextEmptyIndex < holdScrews.Count;
             Debug.Log("Next empty index has know position " + isKnowPosition);
@@ -435,7 +443,7 @@ namespace Ingame
 
                     Debug.Log("Adding screw at" + nextEmptyIndex);
                     canAdd = true;
-                    holdScrews[nextEmptyIndex].AddScrew(screw, false,    (onComplete) =>
+                    holdScrews[nextEmptyIndex].AddScrew(screw, false, (onComplete) =>
                     {
                         ArrayScrew.Instance.RemoveScrewOutHold(screw);
                     });
@@ -443,19 +451,19 @@ namespace Ingame
                     return;
                 }
             }
-           
+
             for (var i = 0; i < holdScrews.Count; i++)
             {
                 Debug.Log("Adding screw at 2" + i);
 
                 if (!holdScrews[i].IsEmpty()) continue;
-                holdScrews[i].AddScrew(screw, false,(onComplete) =>
+                holdScrews[i].AddScrew(screw, false, (onComplete) =>
                 {
                     ArrayScrew.Instance.RemoveScrewOutHold(screw);
 
                 });
                 nextEmptyIndex = i;
-                UpdateNextEmptyIndex(); 
+                UpdateNextEmptyIndex();
                 canAdd = true;
                 return;
             }
@@ -498,13 +506,14 @@ namespace Ingame
         public void SetBoxColor(ColorEnum color)
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
+            this.color = color;
             render.sprite = color.ToBoxSprite();
         }
 
 
         public void Clear()
         {
-           
+
         }
         public void FindScrew()
         {
@@ -522,19 +531,19 @@ namespace Ingame
         }
         public IEnumerator FindScrewCoroutine()
         {
-            while (gameObject.activeInHierarchy) 
+            while (gameObject.activeInHierarchy)
             {
 
                 var screws = ArrayScrew.Instance.Screws.Where(s => s.Color == color && !s.IsMoving() && s.isActiveAndEnabled).ToList();
 
                 if (screws.Count == 0)
                 {
-                    yield return new WaitForSeconds(1f); 
+                    yield return new WaitForSeconds(1f);
                 }
                 else
                 {
                     AddScrew(screws);
-                    yield return new WaitForSeconds(0.5f); 
+                    yield return new WaitForSeconds(0.5f);
                 }
             }
 

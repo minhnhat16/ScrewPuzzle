@@ -386,7 +386,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             yield break;
         }
         layerManager.screwDict = new Dictionary<int, List<Screw>>();
-        BoxQueue.Instance.boxConfig = levelData.boxConfig;
+        BoxQueue.ins.boxConfig = levelData.boxConfig;
         List<BaseLayer> listBaseLayer = new();
         // Loop through all layers in the level data
         foreach (var layerData in levelData.layers)
@@ -461,7 +461,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
 
             ScrewLevelMaker screwComponent = screwGameObject.GetComponent<ScrewLevelMaker>();
             var color = screwComponent.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
-            screwComponent.ChangeScrewColorByEnum(color);
+            screwComponent.ChangeScrewColor(color);
             // Handle hinge connections
 
             foreach (var hingeConnection in screwData.hingeConnections)
@@ -519,7 +519,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             screwManager.transform);
         var screwComp = screw.GetComponent<ScrewLevelMaker>();
         screwComp.Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
-        screwComp.ChangeScrewColorByEnum(screwComp.Color);
+        screwComp.ChangeScrewColor(screwComp.Color);
         StartCoroutine(screwComp.InitOnLevelMaker());
         int layerID = LevelMaker.instance.layerDropdown.Value();
         layerID -= 1;

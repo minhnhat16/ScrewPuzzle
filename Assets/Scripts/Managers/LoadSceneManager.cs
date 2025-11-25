@@ -6,64 +6,72 @@ using UnityEngine.SceneManagement;
 
 public class LoadSceneManager : MonoBehaviour
 {
-    public static LoadSceneManager instance;
+    public static LoadSceneManager ins;
     [Range(0f, 1f)] public float sampleWait = 0.5f;
     [SerializeField] private float timeWait = 5f;
     public float progress;
 
     private Action callback;
 
+    private string sceneName;
+
+    List<Func<IEnumerator>> preTask =null;
+
+    public float TimeWait { get => timeWait; set => timeWait = value; }
+
     private void Awake()
     {
-        instance = this;
+        ins = this;
     }
 
     // Hàm chính gọi load
-    public void LoadSceneByName(string sceneName, Action callback, List<Func<IEnumerator>> preTasks = null)
+    public void LoadSceneByName(string sceneName, Action callback)
     {
         StopAllCoroutines();
         this.callback = callback;
 
+        this.sceneName = sceneName;
         ViewManager.Instance.SwitchView(ViewIndex.LoadingView, null, () =>
         {
-            StartCoroutine(LoadSceneProgress(sceneName, preTasks));
+            Debug.Log("Switch loading view ");
+            StartCoroutine(RunFullLoadProcess());
         });
     }
-
-    private IEnumerator LoadSceneProgress(string sceneName, List<Func<IEnumerator>> preTasks)
+     IEnumerator RunFullLoadProcess()
     {
-        progress = 0;
-        float taskWeight = sampleWait;
-        float sceneWeight = 1f - sampleWait;
+        yield return TaskManager.ins.RunTasks(callback);
+        Debug.Log("Run task done");
+        // 2. Load scene progress + fake progress
+        yield return StartCoroutine(LoadSceneProgress(sceneName));
+    }
 
-        // 🔹 1. Chạy các pre-task
-        if (preTasks != null && preTasks.Count > 0)
+
+    private IEnumerator LoadSceneProgress(string sceneName)
+    {
+        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+        op.allowSceneActivation = false;
+
+        float smooth = 0;
+        float target = TaskManager.ins.CurrentTaskProgress;
+        while (!op.isDone)
         {
-            float step = taskWeight / preTasks.Count;
-            foreach (var task in preTasks)
+            target = Mathf.Clamp01(op.progress / 0.9f);
+
+            smooth = Mathf.MoveTowards(smooth, target, Time.deltaTime * 0.8f);
+
+            // Gửi progress đến LoadingView
+
+           progress = smooth;
+
+
+            Debug.Log("Progress " + progress); ;
+            if (smooth >= 0.99f)
             {
-                yield return StartCoroutine(task());
-                progress += step; // tăng dần progress khi task xong
+                op.allowSceneActivation = true;
             }
-        }
 
-        // 🔹 2. Bắt đầu load scene
-        AsyncOperation async = SceneManager.LoadSceneAsync(sceneName);
-        async.allowSceneActivation = false; // tạm thời dừng khi 0.9
-
-        while (async.progress < 0.9f)
-        {
-            progress = sampleWait + async.progress * sceneWeight;
             yield return null;
         }
-
-        // 🔹 3. Chờ một chút cho đẹp (optional)
-        yield return new WaitForSeconds(0.5f);
-
-        // 🔹 4. Cho phép vào scene
-        async.allowSceneActivation = true;
-
-        // 🔹 5. Gọi callback
-        callback?.Invoke();
     }
+
 }

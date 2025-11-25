@@ -52,7 +52,7 @@ public class SettingDialog : BaseDialog
     public override void Setup(DialogParam dialogParam)
     {
         SettingParam param = (SettingParam)dialogParam;
-        int userGold = param.totalGold;
+        long userGold = param.totalGold;
         bool isMainScreen = param.isMainScreen;
         SetupButton(isMainScreen);
         goldDisplay.SetGoldToLable(userGold);
@@ -71,12 +71,12 @@ public class SettingDialog : BaseDialog
     public override void OnEndHideDialog()
     {
         base.OnEndHideDialog();
-        IngameController.Instance.ResumeGame();
+        IngameController.ins.ResumeGame();
     }
     public void PlayButton()
     {
         SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
-        DialogManager.Instance.HideDialog(dialogIndex, () =>
+        DialogManager.ins.HideDialog(dialogIndex, () =>
         {
 
         });
@@ -86,9 +86,9 @@ public class SettingDialog : BaseDialog
 
     public void HomeButton()
     {
-        DialogManager.Instance.ShowDialog(DialogIndex.QuitDialog);
-        DialogManager.Instance.HideDialog(this.dialogIndex, () =>
+        DialogManager.ins.HideDialog(this.dialogIndex, () =>
         {
+            DialogManager.ins.ShowDialog(DialogIndex.QuitDialog);
 
         });
     }
@@ -98,7 +98,7 @@ public class SettingDialog : BaseDialog
     {
         // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         //Debug.Log("Close button on " + this.dialogIndex);
-        DialogManager.Instance.HideDialog(dialogIndex, () =>
+        DialogManager.ins.HideDialog(dialogIndex, () =>
         {
 
         });
@@ -113,7 +113,7 @@ public class SettingDialog : BaseDialog
     private void SetupPauseGame(bool isMainScreen)
     {
         if (isMainScreen) return;
-        IngameController.Instance.PauseGame();
+        IngameController.ins.PauseGame();
     }
     private void OnDropdownValueChanged(int index)
     {

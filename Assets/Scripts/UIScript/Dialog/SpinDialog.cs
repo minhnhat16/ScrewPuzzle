@@ -20,11 +20,12 @@ public class SpinDialog : BaseDialog
         onSpinDone = circle.spinnedEvent;
         onSpinDone.AddListener(OnSpinDone);
     }
-    public override void OnInit()
+    public override void OnInit(Action callback)
     {
         //Debug.Log("ON INIT  DIALOG");
         circle.Init();
         circle.RadialLayout.CalculateRadial();
+        base.OnInit(callback);
     }
  
     public override void OnStartShowDialog()
@@ -35,8 +36,8 @@ public class SpinDialog : BaseDialog
         exitBtn.onClick?.AddListener(() =>
         {
             //Debug.Log("ONCLICK EXIT");
-            DialogManager.Instance.HideDialog(dialogIndex);
-            DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog);
+            DialogManager.ins.HideDialog(dialogIndex);
+            DialogManager.ins.ShowDialog(DialogIndex.LableChooseDialog);
 
         });
 

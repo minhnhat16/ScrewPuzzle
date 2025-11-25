@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
@@ -238,118 +239,135 @@ public class DataModel : MonoBehaviour
     {
         Debug.Log("(BOOT) // CREATE NEW DATA");
         userData = new UserData();
-        UserInfo inf = new UserInfo();
-        inf.name = ZenSDK.instance.GetConfigString("userName", "player");
-        inf.isNewPlayer = true;
-        userData.userInfo = inf;
 
+        // ===============================
+        // USER INFO
+        // ===============================
+        userData.userInfo = new UserInfo
+        {
+            name = ZenSDK.instance.GetConfigString("userName", "player"),
+            isNewPlayer = true
+        };
 
-        ///item
-        userData.itemInventory = new();
-        Dictionary<string, ItemData> newItemDict = new();
+        // ===============================
+        // INVENTORY (ITEMS)
+        // ===============================
+        userData.itemInventory = new ItemInvent();
+        userData.itemInventory.itemDict = new Dictionary<string, ItemData>();
 
-        ItemData newAddHoldInvent = new();
-        newAddHoldInvent.type = ItemType.Magnet;
-        newAddHoldInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 5);
-        var key = newAddHoldInvent.type.ToString();
-        newItemDict.Add(key, newAddHoldInvent);
+        AddNewItem(ItemType.Magnet, ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 0));
+        AddNewItem(ItemType.Breaker, ZenSDK.instance.GetConfigInt(ItemType.Breaker.ToString(), 5));
+        AddNewItem(ItemType.Drill, ZenSDK.instance.GetConfigInt(ItemType.Drill.ToString(), 5));
 
-        ItemData newAddBoxInvent = new();
-        newAddBoxInvent.type = ItemType.Breaker;
-        newAddBoxInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Breaker.ToString(), 5);
-        key = newAddBoxInvent.type.ToString();
-        newItemDict.Add(key, newAddBoxInvent);
+        // ===============================
+        // LEVEL DATA
+        // ===============================
+        userData.levelInfo = new LevelInfo
+        {
+            expLevel = 0f,
+            bonusCount = 0,
+            currentLevel = 1,
+            levelData = new List<LevelData>
+        {
+            new LevelData
+            {
+                levelID = 1,
+                levelStar = 0,
+                isCompleted = true
+            }
+        }
+        };
 
-        ItemData newClearOnScrewInvent = new();
-        newClearOnScrewInvent.type = ItemType.Drill;
-        newClearOnScrewInvent.total = ZenSDK.instance.GetConfigInt(ItemType.Drill.ToString(), 5);
-        key = newClearOnScrewInvent.type.ToString();
-        newItemDict.Add(key, newClearOnScrewInvent);
+        // ===============================
+        // WALLET
+        // ===============================
+        userData.wallet = new Wallet();
 
-        userData.itemInventory.itemDict = new();
-        userData.itemInventory.itemDict = newItemDict;
-        //leve
-        LevelInfo levelInf = new();
-        levelInf.expLevel = 0.0f;
-        levelInf.bonusCount = 0;
-        LevelData dataLevelOne = new();
-        dataLevelOne.levelID = 1;
-        dataLevelOne.levelStar = 0;
-        dataLevelOne.isCompleted = true;
-        levelInf.currentLevel = 1;
-        levelInf.levelData = new();
-        levelInf.levelData.Add(dataLevelOne);
+        userData.wallet.goldWallet = new CurrencyWallet
+        {
+            currency = Currency.Gold,
+            amount = ZenSDK.instance.GetConfigInt(Currency.Gold.ToString(), 100000)
+        };
 
-        userData.levelInfo = levelInf;
-        userData.wallet = new();
+        userData.wallet.ticketWallet = new CurrencyWallet
+        {
+            currency = Currency.Ticket,
+            amount = ZenSDK.instance.GetConfigInt(Currency.Ticket.ToString(), 1000000)
+        };
 
-        //WALLET 
-        userData.wallet = new();
-        //Add gold 
-        CurrencyWallet goldWallet = new();
-        goldWallet.currency = Currency.Gold;
-        goldWallet.amount = ZenSDK.instance.GetConfigInt(Currency.Gold.ToString(), 100000);
-        userData.wallet.goldWallet = goldWallet;
+        // ===============================
+        // DAILY DATA
+        // ===============================
+        userData.dailyData = new DailyData
+        {
+            isClaimToday = false,
+            timeClaimed = DateTime.MinValue.ToString(),
+            dailyList = new List<DailyItemData>()
+        };
 
-        //Add gem 
-        CurrencyWallet gemWallet = new();
-        gemWallet.currency = Currency.Gem;
-        gemWallet.amount = ZenSDK.instance.GetConfigInt(Currency.Gem.ToString(), 1000000);
-        userData.wallet.gemWallet = gemWallet;
-        //daily data
-        DailyData newDaily = new();
-        newDaily.isClaimToday = false;
-        newDaily.timeClaimed = DateTime.MinValue.ToString();
-        List<DailyItemData> _dailyData = new();
         for (int i = 0; i < 7; i++)
         {
-            DailyItemData dailyData = new DailyItemData();
-            dailyData.day = i + 1;
-            DailyType iEDailyType = i == 0 ? DailyType.Available : DailyType.Unavailable;
-            dailyData.currentType = iEDailyType;
-            _dailyData.Add(dailyData);
+            userData.dailyData.dailyList.Add(new DailyItemData
+            {
+                day = i + 1,
+                currentType = (i == 0 ? DailyType.Available : DailyType.Unavailable)
+            });
         }
-        newDaily.dailyList = _dailyData;
-        userData.dailyData = newDaily;
 
-        ; CollectionData newCollectionData = new CollectionData();
+        // ===============================
+        // COLLECTION DATA
+        // ===============================
+        userData.collectionData = new CollectionData
+        {
+            currentBG = new BackGroundData { isUnlocked = true, name = "07_Shape_mini board" },
+            currentBoard = new BoardColorData { isUnlocked = true, name = "18_Screw_mini board" },
+            currentScrew = new ScrewSkinData { isUnlocked = true, name = "19_Screw_mini board" },
 
-        // Initialize current items
-        newCollectionData.currentBG = new BackGroundData { isUnlocked = true ,name = "07_Shape_mini board" };
-        newCollectionData.currentBoard = new BoardColorData { isUnlocked = true, name = "18_Screw_mini board" };
-        newCollectionData.currentScrew = new ScrewSkinData { isUnlocked = true, name = "19_Screw_mini board" };
+            backGroundDict = new Dictionary<string, BackGroundData>(),
+            boardColorDict = new Dictionary<string, BoardColorData>(),
+            screwColorDict = new Dictionary<string, ScrewSkinData>()
+        };
 
-        // Initialize background dictionary with example entries
-        newCollectionData.backGroundDict = new Dictionary<string, BackGroundData>();
         for (int i = 0; i < 5; i++)
         {
-            BackGroundData bgData = new BackGroundData { /* Set properties for each background */ };
-            newCollectionData.backGroundDict.Add($"Background_{i + 1}", bgData);
+            userData.collectionData.backGroundDict.Add($"Background_{i + 1}", new BackGroundData());
+            userData.collectionData.boardColorDict.Add($"BoardColor_{i + 1}", new BoardColorData());
+            userData.collectionData.screwColorDict.Add($"ScrewColor_{i + 1}", new ScrewSkinData());
         }
-        // Initialize board color dictionary with example entries
-        newCollectionData.boardColorDict = new Dictionary<string, BoardColorData>();
-        for (int i = 0; i < 5; i++)
+
+        // ===============================
+        // SPIN DATA
+        // ===============================
+        userData.spinData = new SpinData
         {
-            BoardColorData boardColorData = new BoardColorData { /* Set properties for each board color */ };
-            newCollectionData.boardColorDict.Add($"BoardColor_{i + 1}", boardColorData);
-        }
+            isSpin = false,
+            timeSpin = DateTime.MinValue.ToString()
+        };
 
-        // Initialize screw color dictionary with example entries
-        newCollectionData.screwColorDict = new Dictionary<string, ScrewSkinData>();
-        for (int i = 0; i < 5; i++)
+        // ===============================
+        // MISSION PROGRESS INIT
+        // ===============================
+        foreach (var mission in MissionManager.ins.GetActiveMissions())
         {
-            ScrewSkinData screwSkinData = new ScrewSkinData { /* Set properties for each screw color */ };
-            newCollectionData.screwColorDict.Add($"ScrewColor_{i + 1}", screwSkinData);
+            DataAPIController.instance.GetMissionProgress(mission.Id); // auto create if null
         }
 
-        // Assign to user data
-        userData.collectionData = newCollectionData;
 
-        SpinData newSpinData = new();
-        newSpinData.isSpin = false;
-        newSpinData.timeSpin = DateTime.MinValue.ToString();
-        userData.spinData = newSpinData;
+        Debug.Log("(BOOT) // NEW PLAYER DATA CREATED");
     }
+
+    private void AddNewItem(ItemType type, int defaultAmount)
+    {
+        ItemData item = new ItemData
+        {
+            type = type,
+            total = defaultAmount
+        };
+
+        userData.itemInventory.itemDict.Add(type.ToString(), item);
+    }
+
+  
     private void NewDataForTester()
     {
         Debug.Log("(BOOT) // CREATE NEW DATA");
@@ -404,9 +422,9 @@ public class DataModel : MonoBehaviour
 
         //Add gem 
         CurrencyWallet gemWallet = new();
-        gemWallet.currency = Currency.Gem;
-        gemWallet.amount = ZenSDK.instance.GetConfigInt(Currency.Gem.ToString(), 10000000);
-        userData.wallet.gemWallet = gemWallet;
+        gemWallet.currency = Currency.Ticket;
+        gemWallet.amount = ZenSDK.instance.GetConfigInt(Currency.Ticket.ToString(), 10000000);
+        userData.wallet.ticketWallet = gemWallet;
         DailyData newDaily = new();
         newDaily.isClaimToday = false;
         newDaily.timeClaimed = DateTime.MinValue.ToString();
