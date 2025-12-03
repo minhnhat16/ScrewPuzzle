@@ -28,13 +28,31 @@ public class GamePlayAnim : BaseViewAnimation
         this.callback = callback;
         animator.Play("GamePlayShow");
     }
-
+    public void ShowDescription(Action callback)
+    {
+        this.callback = callback;
+        animator.Play("ShowDescription");
+    }
+    public void HideDescription(Action callback)
+    {
+        this.callback = callback;
+        animator.Play("HideDescription");
+    }
     public void ShowAnim()
     {
         callback?.Invoke();
     }
 
     public void HideAnim()
+    {
+        callback?.Invoke();
+    }
+
+    public void ShowDescAnim()
+    {
+        callback?.Invoke();
+    }
+    public void HideDescAnim()
     {
         callback?.Invoke();
     }

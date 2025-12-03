@@ -1,20 +1,13 @@
 ﻿using ConfigFile;
-using JetBrains.Annotations;
 using Managers;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UIScript;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using static GameUtils;
-using Button = UnityEngine.UI.Button;
-using Slider = UnityEngine.UI.Slider;
 
 namespace UIScript.UI.UI
 {
@@ -27,11 +20,21 @@ namespace UIScript.UI.UI
         [SerializeField] private RectTransform coinRectTransform;
         [SerializeField] private RectTransform ticketRectTransform;
 
-
         [SerializeField] private ShopPrefabDatabase prefabDB;
 
 
         public ShopController shopController;
+        private void OnEnable()
+        {
+            DataTrigger.RegisterValueChange(DataPath.TICKET, OnTicketChanged);
+            DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        }
+
+        private void OnDisable()
+        {
+            DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
+            DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        }
         public override void OnInit(Action callback)
         {
             shopController = new ShopController();
@@ -79,10 +82,32 @@ namespace UIScript.UI.UI
 
             callback?.Invoke();
         }
+        private void OnTicketChanged(object arg0)
+        {
+           long ticket = DataAPIController.instance.GetTicket();
+            txt_ticket.text = ticket.ToString();
+        }
 
+        private void OnGoldChanged(object arg0)
+        {
+            long ticket = DataAPIController.instance.GetGold();
+            txt_gold.text = ticket.ToString();
+        }
+
+        public override void Setup(ViewParam viewParam)
+        {
+            base.Setup(viewParam);
+
+            long ticket = DataAPIController.instance.GetTicket();
+            txt_ticket.text = ticket.ToString();
+            long gold = DataAPIController.instance.GetGold();
+            txt_gold.text = gold.ToString();
+        }
     }
 
 }
+
+
 
 public class ShopController
 {
@@ -100,6 +125,8 @@ public class ShopController
 
         isProcessing = true;
 
+
+        Debug.Log("Starting purchase for pack: " + config.Pack);    
         PaymentManager.ins.PurchasePack(config);
 
         // Khi payment done → unlock
@@ -108,10 +135,20 @@ public class ShopController
 
     private void OnPaymentDone(PaymentResult result)
     {
+        // Luôn unlock
         isProcessing = false;
 
-        // gỡ để không double-subscribe
+        // Gỡ sub để không bị leak
         PaymentManager.ins.OnPaymentCompleted -= OnPaymentDone;
+
+        // Kiểm tra lỗi payment
+        if (!result.success)
+        {
+            Debug.LogWarning("Payment failed or cancelled.");
+            return;
+        }
+
+        Debug.Log("Payment success!");
     }
 }
 

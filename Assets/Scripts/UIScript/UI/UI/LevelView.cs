@@ -1,6 +1,8 @@
-﻿using Managers;
+﻿using Level;
+using Managers;
 using System;
 using System.Collections.Generic;
+using System.ConfigFile;
 using System.DataBase;
 using System.Linq;
 using System.Security.Cryptography;
@@ -16,18 +18,38 @@ namespace UIScript.UI.UI
         [SerializeField]private List<LevelItem> levelItems = new(50);
         [SerializeField] private Button closeButton;
         [SerializeField] private GridLayoutGroup layout;
+
+
+        [SerializeField] private LevelParam param;
         public override void OnStartShowView()
         {
+            layout.enabled = true;
             closeButton.onClick.AddListener(CloseView);
         }
         public override void OnEndHideView()
         {
             closeButton.onClick.RemoveListener(CloseView);
-            foreach (LevelItem item in levelItems)
+        }
+
+        public override void OnInit(Action callback = null)
+        {
+            base.OnInit(callback);
+            var  baseConfig= LevelManager.ins.levelConfig;
+            List<BaseLevelItem> listLevel = new();
+            var data = DataAPIController.instance.GetAllLevelData();
+
+
+            baseConfig = baseConfig.OrderBy(level => level.levelId).ToList();
+            foreach (var levelConfig in baseConfig)
             {
-                item.gameObject.SetActive(false);
+                int id = levelConfig.levelId;
+                var currentLevel = data.Find((data) => data.levelID == id);
+                bool isComplete = currentLevel?.isCompleted == true;
+                BaseLevelItem newItem = new (id, isComplete, false);
+                listLevel.Add(newItem);
             }
-            
+            baseLevelItems= listLevel;
+            InitListLevelItem(listLevel);
         }
         public override void Setup(ViewParam param)
         {
@@ -38,7 +60,6 @@ namespace UIScript.UI.UI
             baseLevelItems = newParam.listLevelItems;
             var orderLevelItems = baseLevelItems.OrderBy(item => item.IdLevel);
             layout.enabled = false;
-            InitListLevelItem(orderLevelItems.ToList());
         }
 
         private void InitListLevelItem( List<BaseLevelItem> items)

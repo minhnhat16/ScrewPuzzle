@@ -41,7 +41,7 @@ namespace Ingame
 
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
-            bool isHandlingItem = ItemController.ins.IsHandlingItem;
+            bool isHandlingItem = ItemController.ins.IsHandlingHammer;
 
 
             if (isHandlingItem)
@@ -49,8 +49,8 @@ namespace Ingame
                 var part = PickAtScreenPos<BasePart>(screenPos, "Part");
                 if (part != null)
                 {
-                    ItemController.ins.IsHandlingItem = false;
-                    LevelManager.ins.RemovePartItem(part);
+                    ItemController.ins.IsHandlingHammer = false;
+                    ItemController.ins.RemovePartState.Peform(part);
                 }
                 return;
             }
@@ -66,7 +66,7 @@ namespace Ingame
             var box = PickAtScreenPos<BoxThreeHold>(screenPos, "Player");
 
             Debug.Log("is box null" + box);
-            if (box != null)
+            if (box != null && box.IsLocked)
             {
                 IngameController.ins.ShowAddBox();
             }
@@ -78,8 +78,6 @@ namespace Ingame
             _screw.Clear();
 
             var layermanager = LevelManager.ins.layerManager;
-
-
             layermanager.RemoveScrewOnDict(screw, screw.sortingOrder);
             ArrayScrew.Instance.AddScrew(screw);
         }

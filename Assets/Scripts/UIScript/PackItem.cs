@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 
 namespace UIScript
@@ -57,25 +56,32 @@ namespace UIScript
         {
             this.ribbonText.name = name;
             this.price = price;
-            this.priceText.text = GameUtils.FormatPrice(price);
+            this.priceText.text = price > 0 ?  GameUtils.FormatPrice(price) : "FREE";
             this.amount = amount;
             this.amountText.text = $"x{amount}";
 
         }
 
-        public virtual void Init(PackConfigRecord packConfig)
+        private void OnEnable()
         {
-            this.packData = packConfig;
-            purchaseButton.onClick.RemoveAllListeners();
             purchaseButton.onClick.AddListener(() =>
             {
 
                 Debug.Log("Pack item on clicked");
                 OnBuyClicked?.Invoke(packData);
             });
+        }
+        private void OnDisable()
+        {
+            purchaseButton.onClick.RemoveAllListeners();
+        }
+        public virtual void Init(PackConfigRecord packConfig)
+        {
+            this.packData = packConfig;
+         
             // Set pack title + price
             if(ribbonText != null)  ribbonText.text = packConfig.Name;
-            priceText.text = GameUtils.FormatPrice(packConfig.Price);
+            this.priceText.text = packConfig.Price > 0 ? GameUtils.FormatPrice(packConfig.Price) : "FREE";
 
             // Clear old items
             foreach (Transform child in ItemContainer)

@@ -1,3 +1,4 @@
+using Enums;
 using Ingame.Screw;
 using PoolManager;
 using System.Collections;
@@ -158,30 +159,86 @@ namespace Ingame.Board
         public void RemoveScrewOnDict(Screw.Screw screw, int layer)
         {
             screwDict.TryGetValue(layer, out List<Screw.Screw> listScrews);
-            Debug.Log("Remove screw on layer " + layer + " total screws " + (listScrews != null ? listScrews.Count.ToString() : "null"));
+            //Debug.Log("Remove screw on layer " + layer + " total screws " + (listScrews != null ? listScrews.Count.ToString() : "null"));
             if (listScrews == null) return;
             listScrews.Remove(screw);
+            screwDict[layer] = listScrews;
         }
+        public void RemoveScrewsOnDict(List<Screw.Screw> screws)
+        {
+            if (screws == null) return;
+
+            var group = screws
+                .Where(s => s != null)
+                .GroupBy(s => s.layerMask);
+
+            foreach (var g in group)
+            {
+                int layer = g.Key;
+
+                if (!screwDict.TryGetValue(layer, out var list))
+                    continue;
+
+                foreach (var screw in g)
+                    list.Remove(screw);
+                if (list.Count == 0)
+                    screwDict.Remove(layer);
+            }
+        }
+
         public List<Screw.Screw> GetScrewByPart(BasePart part)
         {
-            Debug.Log("part null: " +part.name);
-            if (part == null) return new List<Screw.Screw>();
+            // Check null trước khi đụng vào part.name
+            if (part == null)
+            {
+                Debug.LogWarning("GetScrewByPart called with null part");
+                return new List<Screw.Screw>();
+            }
+
+            Debug.Log("GetScrewByPart → part: " + part.name);
 
             int layer = part.PartLayer() - 10;
 
-            if (!screwDict.TryGetValue(layer, out var screwsInLayer) || screwsInLayer == null || screwsInLayer.Count == 0)
+            // Bảo vệ trường hợp layer âm hoặc vượt ngoài dict
+            if (layer < 0 || !screwDict.TryGetValue(layer, out var screwsInLayer) || screwsInLayer == null || screwsInLayer.Count == 0)
             {
-                Debug.Log("Screw in layer ");
+                Debug.Log($"No screws found in layer {layer}");
                 return new List<Screw.Screw>();
-
             }
 
-            // Match any hinge connected body to the part's Rigidbody2D (safe null checks)
+            // Tìm tất cả screw có body nối với part.Body
+            var body = part.Body;  // cache để tối ưu + sạch code
+
             var result = screwsInLayer
-                .Where(s => s?.HingeController?.BodyConnect != null && s.HingeController.BodyConnect.Any(b => b == part.Body))
+                .Where(s =>
+                    s?.HingeController?.BodyConnect != null &&
+                    body != null &&
+                    s.HingeController.BodyConnect.Any(b => b == body))
                 .ToList();
 
             return result;
+        }
+
+        public HashSet<ColorEnum> GetUniqueScrewColorsByLayer(int layer)
+        {
+            if (!screwDict.TryGetValue(layer, out var screws) || screws == null)
+                return new HashSet<ColorEnum>();
+
+            return screws
+                .Where(s => s != null)
+                .Select(s => s.Color)
+                .ToHashSet();
+        }
+        public List<ColorEnum> GetScrewColorsByLayer(int layer)
+        {
+            if (layer < 0 || !screwDict.TryGetValue(layer, out var screws) || screws == null)
+                return new List<ColorEnum>();
+
+            // Lấy màu của từng screw còn tồn tại
+            return screws
+                .Where(s => s != null)
+                .Select(s => s.Color)     // hoặc s.color / s.screwColor tùy class của bạn
+                .ToList();
         }
         public void ClearPartDict()
         {

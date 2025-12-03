@@ -3,25 +3,19 @@ using System.Linq;
 using UIScript;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.U2D.ScriptablePacker;
 
 public class ShopItem : PackItem
 {
-
     public override void Init(PackConfigRecord packConfig)
     {
         this.packData = packConfig;
-        purchaseButton.onClick.RemoveAllListeners();
-        purchaseButton.onClick.AddListener(() =>
-        {
-
-            Debug.Log("Pack item on clicked");
-            OnBuyClicked?.Invoke(packData);
-        });
         // Set pack title + price
         if (ribbonText != null) ribbonText.text = packConfig.Name;
-        priceText.text = GameUtils.FormatPrice(packConfig.Price);
 
+        if(packConfig.Price > 0)
+            priceText.text = GameUtils.FormatPrice(packConfig.Price);
+        else
+            priceText.text = "FREE";
         // Clear old items
         foreach (Transform child in ItemContainer)
             child.gameObject.SetActive(false);

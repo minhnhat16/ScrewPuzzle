@@ -403,7 +403,6 @@ namespace System.DataBase
             }
         }
         #endregion
-
         public List<LevelData> GetAllLevelData()
         {
             var listLevelData = dataModel.ReadData<List<LevelData>>(DataPath.ALLLEVEL);
@@ -423,7 +422,18 @@ namespace System.DataBase
             {
                 type = item.Id;
                 int quantity = item.Quantity;
-                AddItemTotal(type, quantity);
+                if (type == ItemType.Ticket)
+                {
+                    long tickets = GetTicket() + quantity;
+                    SaveTicket(tickets);
+                }
+                else if( type == ItemType.Gold)
+                {
+                    long golds = GetGold() + quantity;
+                    SaveGold(golds);
+                }
+                else AddItemTotal(type, quantity);
+
             }
         }
 

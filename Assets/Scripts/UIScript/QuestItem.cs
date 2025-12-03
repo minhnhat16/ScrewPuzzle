@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Managers;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class MissionItemUI : MonoBehaviour
@@ -12,6 +13,37 @@ public class MissionItemUI : MonoBehaviour
 
     private MissionConfigRecord missionData;
 
+
+    public void OnEnable()
+    {
+        actionButton.onClick.AddListener(() =>
+        {
+            // Start mission gameplay
+            LoadLevelConclick();
+
+
+        });
+    }
+    private void OnDisable()
+    {
+        actionButton.onClick.RemoveListener(() =>
+        {
+            LoadLevelConclick();
+        });
+    }
+
+
+    public void LoadLevelConclick()
+    {
+        Debug.Log($"Starting mission: {missionData.Description}");
+
+        DialogManager.ins.HideDialog(DialogIndex.QuestDialog, () =>
+        {
+            // Here you would add the logic to start the mission gameplay
+            int lv = LevelManager.ins.currentLevelID;
+            LevelManager.ins.LoadLevel(lv);
+        });
+    }
     public void Setup(MissionConfigRecord data, int currentProgress)
     {
         missionData = data;

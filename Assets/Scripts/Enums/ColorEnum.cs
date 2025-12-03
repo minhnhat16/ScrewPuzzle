@@ -45,6 +45,7 @@ namespace Enums
             string path = $"{GameConstants.BOX_SPRITE_PATH}/{colorEnum.ToColorString()}";
 
             var sprite = Resources.Load<Sprite>($"{path}");
+            if(sprite ==null ) sprite = Resources.Load<Sprite>($"{GameConstants.BOX_SPRITE_PATH}/Green");
             return sprite;
         }
         public static Color ToColor(this ColorEnum colorEnum)

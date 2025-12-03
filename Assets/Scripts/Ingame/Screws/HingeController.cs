@@ -53,6 +53,7 @@ namespace Ingame.Screw
                 if (bodyConnect.Count == 1)
                 {
                     hingeJoint2D[i].connectedBody = bodyConnect[0];
+                    hingeJoint2D[i].gameObject.name = bodyConnect[0].gameObject.name + "_Hinge";
                 }
                 hingeJoint2D[i].connectedBody = bodyConnect[i];
             }
@@ -72,7 +73,15 @@ namespace Ingame.Screw
 
         public virtual int GetIntBodyLayer(int index)
         {
-            return bodyConnect[index].gameObject.layer;
+            return GetIntBodyLayer(index, bodyConnect);
+        }
+
+        public virtual int GetIntBodyLayer(int index, List<Rigidbody2D> bodyConnect)
+        {
+            if (bodyConnect == null || index < 0 || index >= bodyConnect.Count)
+                return -1;
+
+            return bodyConnect[index]?.gameObject.layer ?? -1;
         }
 
         public virtual void FreeHinges()
@@ -92,8 +101,8 @@ namespace Ingame.Screw
         }
         public virtual void ClearBody(Rigidbody2D body)
         {
+
             bodyConnect.Remove(body);
-            
         }
         public virtual void ClearBody()
         {

@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SingletonMono <T>: MonoBehaviour where T: MonoBehaviour
+public class SingletonMono<T> : MonoBehaviour where T : MonoBehaviour
 {
     static T instance_;
     public static T ins
     {
         get
         {
-            if(instance_==null)
+            if (instance_ == null)
             {
                 instance_ = GameObject.FindFirstObjectByType<T>();
-                if(instance_ == null)
+                if (instance_ == null)
                 {
                     GameObject gameobject_ = new GameObject();
                     gameobject_.AddComponent<T>();
@@ -24,7 +24,7 @@ public class SingletonMono <T>: MonoBehaviour where T: MonoBehaviour
         }
     }
 
-   public virtual void Awake()
+    public virtual void Awake()
     {
         instance_ = gameObject.GetComponent<T>();
         OnAwake();
@@ -39,7 +39,7 @@ public class SingletonMono <T>: MonoBehaviour where T: MonoBehaviour
     {
 
     }
-    void Reset()
+    public void Reset()
     {
         gameObject.name = typeof(T).Name.ToString();
     }

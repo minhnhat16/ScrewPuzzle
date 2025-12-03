@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8755657504042749257}
   - component: {fileID: 3520337934081065260}
   - component: {fileID: 1383215776721218530}
+  - component: {fileID: 4840540479533241572}
   m_Layer: 11
   m_Name: LevelObject
   m_TagString: Untagged
@@ -83,6 +84,20 @@ MonoBehaviour:
   rePreviewMax: 5
   preViewMin: 2
   fadeDuration: 0.5
+--- !u!114 &4840540479533241572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4836148234320853291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d743f78d69c80e46a36591fad7a9ba8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showNextLayerKey: 273
+  hideTopLayerKey: 274
 --- !u!1001 &5053808982191793511
 PrefabInstance:
   m_ObjectHideFlags: 0

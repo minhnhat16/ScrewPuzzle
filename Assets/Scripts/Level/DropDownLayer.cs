@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -56,3 +55,4 @@ public class DropDownLayer : MonoBehaviour
         return dropDown.value;
     }
 }
+#endif

@@ -73,6 +73,19 @@ namespace UIScript
             get => levelType;
             set => levelType = value;
         }
+
+
+        private void OnEnable()
+        {
+            button.onClick.AddListener(() => OnLevelButtonClick(idLevel));
+
+        }
+
+        private void OnDisable()
+        {
+            button.onClick.RemoveAllListeners();
+
+        }
         public void Setup(int idLevel, bool isCompleted, int levelStars,LevelEnum levelType)
         {
             this.idLevel = idLevel;
@@ -142,7 +155,6 @@ namespace UIScript
 
             // Set level text and add click listener
             SetLevelText(id);
-            button.onClick.AddListener(() => OnLevelButtonClick(id));
         }
 
 
@@ -164,9 +176,6 @@ namespace UIScript
             LevelManager.ins.LoadLevel(id);
         }
 
-        private void OnDisable()
-        {
-            button.onClick.RemoveAllListeners();
-        }
+     
     }
 }

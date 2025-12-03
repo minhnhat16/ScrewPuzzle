@@ -22,6 +22,9 @@ namespace UIScript.UI.UI
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private long gold;
 
+
+        [SerializeField] private Text txt_gold;
+        [SerializeField] private Text txt_ticket;
         private void OnEnable()
         {
             /*playBtn.onClick.AddListener(OnPlayButton);
@@ -34,6 +37,9 @@ namespace UIScript.UI.UI
             specialButton.onClick.AddListener(OnClickSpecialButton);
             settingButton.onClick.AddListener(OnClickSettingButton);
             adsRemover.onClick.AddListener(OnClickAdsRemover);
+
+            DataTrigger.RegisterValueChange(DataPath.TICKET, OnTicketChanged);
+            DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
         }
 
 
@@ -46,6 +52,11 @@ namespace UIScript.UI.UI
             rateButton.onClick.RemoveListener(RateButton);
             playBtn.onClick.RemoveListener(OnPlayButton);
             levelButton.onClick.RemoveAllListeners();
+
+
+
+            DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
+            DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
         }
         public override void OnStartShowView()
         {
@@ -79,7 +90,7 @@ namespace UIScript.UI.UI
 
         private void SetUpGold(long userGold)
         {
-            goldLB.text = GameManager.instance.DevideCurrency(userGold);
+            //goldLB.text = GameManager.instance.DevideCurrency(userGold);
         }
         private void OnDailyReward()
         {
@@ -196,6 +207,17 @@ namespace UIScript.UI.UI
                 listLevelItems = listLevel
             };
             ViewManager.Instance.SwitchView(ViewIndex.LevelView, param);
+        }
+        private void OnTicketChanged(object arg0)
+        {
+            long ticket = DataAPIController.instance.GetTicket();
+            txt_ticket.text = GameUtils.FormatPrice(ticket);
+        }
+
+        private void OnGoldChanged(object arg0)
+        {
+            long ticket = DataAPIController.instance.GetGold();
+            txt_gold.text = GameUtils.FormatPrice(ticket);
         }
 
     }

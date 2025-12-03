@@ -2,6 +2,7 @@
 using Enums;
 using Ingame;
 using Ingame.Board;
+using Ingame.Pools;
 using Ingame.Screw;
 using Level;
 using Managers;
@@ -10,7 +11,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.AnimatedValues;
 using UnityEngine;
 
 public class LevelManager : SingletonMono<LevelManager>, IResetable
@@ -26,7 +26,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     [SerializeField] private GameObject screwManagerPrefb;
     [SerializeField] private ScrewManager screwManager;
-
 
     [SerializeField] private BaseLevelObject currentLevelObject;
 
@@ -114,6 +113,8 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         Debug.LogWarning("Start loading level ");
         var boxManager = BoxQueue.ins;
         var arrayScrew = ArrayScrew.Instance;
+        IngameController.ins.IsGameOver = false;
+        boxManager.activeBoxCount = 2;
         arrayScrew.ShowArrayScrew();
         OnReset();
         arrayScrew.HoldAlignment();
@@ -134,7 +135,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
               long userGold = GameManager.instance.GetPlayerGold();
               GamePlayViewParam param = new();
               param.totalGold = userGold;
-              ViewManager.Instance.SwitchView(ViewIndex.GamePlayView, param);
+              ViewManager.Instance.SwitchView(ViewIndex.GameView, param);
           }));
     }
     public Dictionary<int, int> GetScrewCountByColor()
@@ -215,27 +216,29 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         yield return ActivateAllParts();
         //Debug.Log("Step 6 complete");
 
-        int requireSpecial = IngameController.ins.requireCount;
-        layerManager.visibilityController.ApplyLayerVisibility();
-        SideMission mission = SideMissionManager.ins.GenerateColorMission(currentLevel,BoxQueue.ins, requireSpecial);
-        IngameController.ins.SetSideMission(mission); // tạo hàm này
-
-
-
-        BoxQueue.ins.hasSpecialBox = mission != null;
-        
-
-        Debug.Log("Has special box: " + BoxQueue.ins.hasSpecialBox);    
-        if (mission != null)
-        {
-            ConvertColorToRainbow((ColorEnum)mission.targetColorID);
-            BoxQueue.ins.InitRainbowBoxes(mission.requiredCount/3);
-        }
+        InitSpecial();
+        BoxQueue.ins.InitBoxToSlot();
         Debug.Log("Level loading complete.");
         callback?.Invoke();
         //Debug.Log($"Level data with ID {levelId} loaded.");
     }
+    public void InitSpecial()
+    {
+        int requireSpecial = IngameController.ins.requireCount;
+        layerManager.visibilityController.ApplyLayerVisibility();
+        SideMission mission = SideMissionManager.ins.GenerateColorMission(currentLevel, BoxQueue.ins, requireSpecial);
+        IngameController.ins.SetSideMission(mission); // tạo hàm này
 
+        BoxQueue.ins.hasSpecialBox = mission != null;
+
+
+        Debug.Log("Has special box: " + BoxQueue.ins.hasSpecialBox);
+        if (mission != null)
+        {
+            ConvertColorToRainbow((ColorEnum)mission.targetColorID);
+            BoxQueue.ins.InitRainbowBoxes(mission.requiredCount / 3, (ColorEnum)mission.targetColorID);
+        }
+    }
     private IEnumerator InitializeLevelObject()
     {
         var levelObject = LevelObjectPool.Instance.pool.SpawnNonGravity();
@@ -459,9 +462,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         }
         BoxQueue.ins.ClearConfigRecords();
         BoxQueue.ins.ClearCurrentBoxes();
+        BoxQueue.ins.OnReset();
         ArrayScrew.Instance.OnReset();
+        SpecialBoxManager.ins.OnReset();
         screwManager.Reset();
 
+        ThreeHoldBoxPool.Instance.ReturnAll();
         currentLevelObject = null;
     }
     public bool TryHexToColor(string hex, out Color color)
@@ -495,11 +501,11 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         var group = screws.Take(requiredCount).ToList();
 
 
-        Debug.Log("Corvertin color to rainbow");
         // Xóa các screw cũ
         foreach (var s in group)
         {
             s.ChangeScrewColor(ColorEnum.Rainbow);
+
         }
         return true;
     }
@@ -514,13 +520,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     {
         List<Screw> listScrews = layerManager.GetScrewByPart(bp);
         var boxQueue = BoxQueue.ins; ;
-        Debug.Log("List screw " + listScrews.Count);
-
-        boxQueue.TryMoveScrewsGroupedByColor(listScrews);
-
+        boxQueue.TryMoveScrewsGroupedByColor(listScrews, true);
+        layerManager.RemoveScrewsOnDict(listScrews);
         layerManager.RemovePart(bp.uniqueID);
-
-
         bp.gameObject.SetActive(false);
+
     }
+
+
 }

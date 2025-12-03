@@ -84,7 +84,6 @@ namespace UIScript.Dialog
                 SetButtonInteractAble(true);
                 DialogManager.ins.HideDialog(dialogIndex);
                 levelManager.LoadLevel(currentLevel);
-
             });
         }
     }

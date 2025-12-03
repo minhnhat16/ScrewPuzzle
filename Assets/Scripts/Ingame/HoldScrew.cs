@@ -33,6 +33,7 @@ namespace Ingame
             if (!screw)
             {
                 screw = newScrew;
+                screw.SetSortingOrderAndLayer(5,"Box");
                 screw.DoMoveToHold(this, isTele);
                 callback?.Invoke(true);
             }

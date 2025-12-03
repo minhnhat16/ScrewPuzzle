@@ -116,6 +116,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
 
     public void ReturnToPool(T trans)
     {
+        if (trans == null) return;
         if (trans.transform.parent != parent)
         {
             trans.transform.SetParent(parent);

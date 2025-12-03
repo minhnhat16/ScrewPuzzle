@@ -43,16 +43,16 @@ public abstract class BaseInputHandler : MonoBehaviour
     // ============================
     protected virtual IEnumerator InputLoop()
     {
-        while ( !IsClickOverUI())
+        while (true)
         {
-            if (!isInputLocked)
+            if (!isInputLocked && !IsClickOverUI())
             {
 #if UNITY_EDITOR || UNITY_STANDALONE
                 if (Input.GetMouseButtonDown(0))
                     HandleInput(Input.mousePosition);
 #elif UNITY_ANDROID || UNITY_IOS
-                if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-                    HandleInput(Input.GetTouch(0).position);
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+                HandleInput(Input.GetTouch(0).position);
 #endif
             }
 

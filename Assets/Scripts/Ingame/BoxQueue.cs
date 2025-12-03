@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -38,7 +39,6 @@ namespace Ingame
         [Header("Runtime")]
         public List<Screw.Screw> hidingScrews;
         [SerializeField] private List<BoxSlot> boxSlots;
-        [SerializeField] private List<Box> rainbowBoxes;
         private Coroutine alignCoroutine;
 
         [Header("Events")]
@@ -82,6 +82,7 @@ namespace Ingame
 
         public void Init()
         {
+
             StartCoroutine(InitCoroutine());
             Debug.Log("top align spacing " + topAlignSpacing);
         }
@@ -93,32 +94,23 @@ namespace Ingame
 
             InitAndShuffleColor();
             InitBoxes();
-            InitBoxSlots(boxSlots);
-
 
             yield return new WaitForSeconds(0.1f);
         }
 
-        public void InitRainbowBoxes(int count = 1)
+        public void InitRainbowBoxes(int count = 1, ColorEnum targetColorID = 0)
         {
-            rainbowBoxes.Clear();
-
-            for (int i = 0; i < count; i++)
+            var list = boxesStack.ToList();
+            var oldColor = list.Where(b => b.Color == targetColorID).Take(count).ToList();
+            foreach (var oc in oldColor)
             {
-                var box = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
-                box.SetActive(true);
-                box.SetIsLocked(false);
-                box.SetBoxColor(ColorEnum.Rainbow);
-
-                // Vị trí khác nhau (gom ở phía trên)
-                var pos = CameraMain.instance.GetTopRight();
-                pos.x -= 2f + (i * 2.5f);
-                pos.y -= 5f;
-                box.transform.position = pos;
-
-                box.isMoving = false;
-                rainbowBoxes.Add(box);
+                list.Remove(oc);
             }
+
+            screwBoxes.Clear();
+            screwBoxes = list.OrderByDescending(b => b.TotalHold).ToList();
+            boxesStack = new Stack<Box>(list);
+            boxesStack.OrderByDescending(b => b.TotalHold);
         }
 
 
@@ -270,7 +262,7 @@ namespace Ingame
 
             IngameController.ins.TotalStarInLevel--;
 
-            var ordered = listBox.OrderBy(b => b.holdScrews.Count).ToList();
+            var ordered = listBox.OrderByDescending(b => b.TotalHold).ToList();
             boxesStack = new Stack<Box>(ordered);
             screwBoxes = ordered;
         }
@@ -298,7 +290,10 @@ namespace Ingame
         #endregion
 
         #region BoxSlots & Align
-
+        public void InitBoxToSlot()
+        {
+            InitBoxSlots(boxSlots);
+        }
         private void InitBoxSlots(List<BoxSlot> slots)
         {
             if (slots == null || slots.Count == 0) return;
@@ -413,9 +408,18 @@ namespace Ingame
             screwBox.CloseBox(time, _ =>
             {
                 Debug.Log("Closed box");
+
                 screwBoxes.Remove(screwBox);
 
-                if (screwBoxes.Count == 0 && rainbowBoxes.Count <0)
+
+
+                Debug.Log("Screw boxes count after remove: " + screwBoxes.Count);
+
+                int specialScrew = SideMissionManager.ins.currentMission.requiredCount;
+                int currentScrew = SideMissionManager.ins.currentMission.currentCount;
+                bool missionComplete = currentScrew >= specialScrew;
+
+                if (screwBoxes.Count <= 0 && missionComplete)
                 {
                     OnLastBoxClearScrew();
                 }
@@ -463,13 +467,13 @@ namespace Ingame
             return box;
         }
 
-        public void DeactivateAndMoveQueue(Box screwBox)
+        public void DeactivateAndMoveQueue(Box screwBox, float timeClose = 0.5f)
         {
             if (screwBox == null) return;
 
             var currentSlot = boxSlots.Find(slot => slot.CheckIsContainingThisBox(screwBox));
 
-            CloseAndRemoveBox(screwBox, 0.5f, () =>
+            CloseAndRemoveBox(screwBox, timeClose, () =>
             {
                 Debug.Log("Close and remove box " + currentSlot);
 
@@ -477,20 +481,23 @@ namespace Ingame
                 var newBox = TrySpawnNewBox(currentSlot);
                 if (newBox != null)
                 {
-                    AddHidingScrewToBox(newBox);
-                    StartCoroutine(MoveAndHandleBox(newBox, currentSlot));
-                }
+                    var fpos = currentSlot.transform.position;
+                    fpos.x -= 10;
+                    newBox.transform.position = fpos;
+                    newBox.Render.enabled = true;
+                    StartCoroutine(MoveAndHandleBox(newBox, currentSlot, fpos));
+                }   
             });
         }
 
-        private IEnumerator MoveAndHandleBox(Box newBox, BoxSlot currentSlot, float time = 0.5f)
+        private IEnumerator MoveAndHandleBox(Box newBox, BoxSlot currentSlot, Vector3 fPos = default, float time = 0.5f)
         {
             if (newBox == null || currentSlot == null) yield break;
 
             bool isDone = false;
             MovingBox = true;
 
-            yield return StartCoroutine(MoveToSlot(newBox, currentSlot, time, ok =>
+            yield return StartCoroutine(MoveToSlot(newBox, currentSlot, time, fPos, ok =>
             {
                 isDone = ok;
             }));
@@ -498,7 +505,7 @@ namespace Ingame
             yield return new WaitUntil(() => isDone);
         }
 
-        private IEnumerator MoveToSlot(Box newBox, BoxSlot slot, float time = 0.5f, Action<bool> callback = null)
+        private IEnumerator MoveToSlot(Box newBox, BoxSlot slot, float time = 0.5f, Vector3 fromPos = default, Action<bool> callback = null)
         {
             yield return new WaitForSeconds(time);
 
@@ -512,15 +519,19 @@ namespace Ingame
             var toPos = slot.transform.position;
 
             newBox.gameObject.SetActive(true);
-            newBox.Position = toPos + new Vector3(CameraMain.instance.GetLeft() - 1, 0);
-            newBox.isMoving = true;
+
+            if (fromPos == default)
+                fromPos = newBox.transform.position;
+            newBox.transform.position = fromPos;
 
             slot.AddBox(newBox);
 
-            var t = newBox.transform.DOMove(toPos, time).SetEase(Ease.OutCirc);
+            var t = newBox.transform.DOMove(toPos, time).SetEase(Ease.InOutElastic);
             t.OnStart(() =>
             {
                 AddHidingScrewToBox(newBox);
+                newBox.isMoving = true;
+
             });
             t.OnComplete(() =>
             {
@@ -569,7 +580,16 @@ namespace Ingame
             if (canAdd)
             {
                 var screwMng = LevelManager.ins.ScrewManager;
+                int boxLayer = box.Render.sortingLayerID;
+                screw.SetSortingOrderAndLayer(boxLayer + 2, box.Render.sortingLayerName);
                 screwMng.RemoveScrew(screw);
+                MissionManager.OnScrewCollected?.Invoke(screw.Color);
+
+            }
+            else
+            {
+                screw.IsClicked = false;
+                Debug.Log($"Cannot add screw {screw.name} to box {box.name}.");
             }
         }
 
@@ -577,7 +597,6 @@ namespace Ingame
         {
             if (box == null || screwList == null || screwList.Count == 0) return;
             if (box.IsAddingScrew) return;
-
             box.AddScrew(screwList, isTele);
         }
 
@@ -586,6 +605,8 @@ namespace Ingame
             if (newBox == null || hidingScrews == null || hidingScrews.Count == 0)
                 return;
 
+
+            Debug.Log($"new box is moving " + newBox.isMoving);
             var hinding = hidingScrews
                 .Where(h => h != null && h.Color == newBox.Color)
                 .Take(3)
@@ -609,8 +630,7 @@ namespace Ingame
             foreach (var screwItem in screws)
             {
                 hidingScrews.Add(screwItem);
-                if (screwItem != null && screwItem.gameObject != null)
-                    screwItem.gameObject.SetActive(false);
+                screwItem.gameObject.SetActive(false);
             }
 
             int total = hidingScrews.Count;
@@ -644,92 +664,125 @@ namespace Ingame
 
         public Box FindSuitableBox(Screw.Screw screw, bool allowFallbackToInactive = true)
         {
-            if (screw == null) return null;
+            if (screw == null)
+                return null;
 
-            if (screw.Color == ColorEnum.Rainbow)
-            {
-                return rainbowBoxes
-                    .Where(box => box != null && !box.IsBoxFull)
-                    .OrderByDescending(box => box.NextEmptyIndex)
-                    .FirstOrDefault();
-            }
-
-            bool BasePredicate(Box box) =>
+            // -------------------------------
+            // Predicate chung cho Normal Box
+            // -------------------------------
+            bool Match(Box box) =>
                 box != null &&
                 box.Color == screw.Color &&
                 !box.isMoving &&
                 !box.IsBoxFull;
 
-            var activeCandidate = screwBoxes
-                .Where(box => BasePredicate(box) && box.gameObject != null && box.gameObject.activeInHierarchy)
-                .OrderByDescending(box => box.isActiveAndEnabled)
-                .ThenByDescending(box => box.NextEmptyIndex)
+            // -------------------------------
+            // CASE 2: Ưu tiên Active Boxes
+            // -------------------------------
+            var activeBox = screwBoxes
+                .Where(b => Match(b) && b.gameObject.activeInHierarchy)
+                .OrderByDescending(b => b.NextEmptyIndex)   // ưu tiên box gần full trước
                 .FirstOrDefault();
 
-            if (activeCandidate != null)
-                return activeCandidate;
+            if (activeBox != null)
+                return activeBox;
 
+            // -------------------------------
+            // CASE 3: Allow fallback vào inactive boxes
+            // -------------------------------
             if (!allowFallbackToInactive)
                 return null;
 
-            var inactiveCandidate = screwBoxes
-                .Where(box => BasePredicate(box) && (box.gameObject == null || !box.gameObject.activeInHierarchy))
-                .OrderByDescending(box => box.NextEmptyIndex)
-                .ThenByDescending(box => box.NextEmptyIndex)
+            var inactiveBox = screwBoxes
+                .Where(b => Match(b) && !b.gameObject.activeInHierarchy)
+                .OrderByDescending(b => b.NextEmptyIndex)
                 .FirstOrDefault();
 
-            return inactiveCandidate;
+            return inactiveBox;
         }
+
 
         public bool TryMoveScrewsGroupedByColor(List<Screw.Screw> screws, bool includeInactive = false)
         {
-            if (screws == null || screws.Count == 0) return false;
+            if (screws == null || screws.Count == 0)
+                return false;
 
-            var distinct = screws.Where(s => s != null).Distinct().ToList();
-            if (distinct.Count == 0) return false;
+            var validScrews = screws.Distinct().Where(s => s != null).ToList();
+            if (validScrews.Count == 0)
+                return false;
 
-            var groups = distinct.GroupBy(s => s.Color);
+            // -------------------------------
+            // NEW: Nếu level dùng Special Box → đưa hết screw vào SpecialBoxManager,
+            // không dùng box thường / rainbow nữa.
+            // -------------------------------
+
             int totalMoved = 0;
+
+            var groups = validScrews.GroupBy(s => s.Color);
 
             foreach (var group in groups)
             {
                 var color = group.Key;
                 var groupList = group.ToList();
+                var screw = groupList[0];
+                var box = FindSuitableBox(screw, false);
 
-                var box = FindSuitableBox(groupList[0], includeInactive);
-                if (box == null)
+                if (box == null && group.Key != ColorEnum.Rainbow)
                 {
                     AddToHidingList(groupList);
-                    Debug.Log($"BoxQueue: No suitable box found for color {color}. Skipping {groupList.Count} screws.");
+                    Debug.Log($"❌ Không tìm thấy box {color}, đưa {groupList.Count} screw vào hiding.");
                     continue;
                 }
 
+                if (hasSpecialBox && group.Key == ColorEnum.Rainbow)
+                {
+                    if (SpecialBoxManager.ins == null)
+                    {
+                        Debug.LogWarning("[BoxQueue] hasSpecialBox = true nhưng SpecialBoxManager.Instance = null");
+                        return false;
+                    }
+
+                    SpecialBoxManager.ins.AddScrews(groupList);
+                    Debug.Log($"[BoxQueue] SpecialBox: moved {validScrews.Count} screws to special box.");
+                    return true;
+                }
+
+
+                // Lấy hold trống
                 var freeHold = box.holdScrews.Where(h => h.IsEmpty()).ToList();
                 int freeSlots = freeHold.Count;
 
-                List<Screw.Screw> toMove = groupList;
-                if (freeSlots > 0 && groupList.Count > freeSlots)
+                if (freeSlots <= 0)
                 {
-                    toMove = groupList.Take(freeSlots).ToList();
-                }
-                else if (freeSlots <= 0)
-                {
-                    GameUtils.LogAndSelect($"Box {box.name} is full for color {color}. Skipping.", box.gameObject);
+                    Debug.Log($"⚠ Box {box.Color} đã full → skip màu {color}");
                     continue;
                 }
 
+                // Cắt số lượng screw cần move
+                var toMove = groupList.Take(freeSlots).ToList();
+
+                // move
                 AddMultipleScrew(toMove, box, false);
+
                 totalMoved += toMove.Count;
 
-                if (toMove.Count < groupList.Count)
+                Debug.Log($"✔ Moved {toMove.Count}/{groupList.Count} screw vào box {box.Color}");
+
+                // Nếu còn dư → cho hiding (nhưng KHÔNG hiding Rainbow)
+                var remain = groupList.Skip(toMove.Count).ToList();
+                if (remain.Count > 0)
                 {
-                    Debug.Log($"Moved {toMove.Count} of {groupList.Count} screws into box {box.name} for color {color} (box filled).");
+                    if (box.Color != ColorEnum.Rainbow)
+                        AddToHidingList(remain);
                 }
             }
 
-            Debug.Log($"TryMoveScrewsGroupedByColor: moved {totalMoved} screws grouped by color.");
+
+
+            Debug.Log($"[TryMove] Tổng move = {totalMoved}");
             return totalMoved > 0;
         }
+
 
         #endregion
 
@@ -741,11 +794,6 @@ namespace Ingame
             bool isComplete = onCompleteClearBoxes != null && IngameController.ins.IsGameOver;
             onCompleteClearBoxes?.Invoke(isComplete);
         }
-
-        //public bool CanAddRainbowScrew(Box box)
-        //{
-        //    return box == rainbowBox;
-        //}
 
         public int IdexLockedBox()
         {
@@ -770,6 +818,7 @@ namespace Ingame
                 return;
             }
 
+            activeBoxCount++;
             var color = ArrayScrew.Instance.GetMostestColorInArray();
             boxUnlock.SetActive(false);
 
@@ -784,11 +833,44 @@ namespace Ingame
                 Debug.Log("try spawn new box " + newBox);
                 AddHidingScrewToBox(newBox);
 
+                var fpos = Vector3.down * 2;
+                newBox.transform.position = fpos;
                 if (newBox != null)
-                    StartCoroutine(MoveAndHandleBox(newBox, slot, 0));
+                    StartCoroutine(MoveWithFade(newBox, slot, fpos, 1f, 0.25f));
+
+                MissionManager.OnBoxClosed?.Invoke();
             });
         }
 
+        public IEnumerator MoveWithFade(Box newBox, BoxSlot slot, Vector3 startPos, float moveTime = 0.5f, float fadeTime = 0.25f)
+        {
+            if (newBox == null) yield break;
+
+            // đưa box về vị trí spawn
+            newBox.transform.position = startPos;
+            newBox.SetActive(true);
+
+            // Fade in trước
+            yield return StartCoroutine(FadeInBox(newBox, fadeTime));
+
+            // Fade xong thì move box vào slot
+            yield return StartCoroutine(MoveAndHandleBox(newBox, slot, startPos, moveTime));
+        }
+        public IEnumerator FadeInBox(Box box, float duration = 0.25f)
+        {
+            if (box == null) yield break;
+
+            var renderer = box.GetComponentInChildren<SpriteRenderer>();
+            if (renderer == null) yield break;
+
+            // set alpha = 0 trước
+            var c = renderer.color;
+            c.a = 0;
+            renderer.color = c;
+
+            renderer.DOFade(1f, duration).SetEase(Ease.OutSine);
+            yield return new WaitForSeconds(duration);
+        }
         public void AddNewBoxSlot()
         {
             if (boxSlots.All(slot => slot.gameObject.activeSelf)) return;
@@ -811,7 +893,8 @@ namespace Ingame
 
             if (newBox != null)
             {
-                StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot));
+                Vector3 fPos = Vector3.left * -6;
+                StartCoroutine(MoveAndHandleBox(newBox, newBoxSlot, fPos, 4));
                 StartAligningSlots(boxSlots);
             }
             else
@@ -822,25 +905,14 @@ namespace Ingame
 
         public void OnReset()
         {
-            ThreeHoldBoxPool.Instance.pool.DeSpawnAll();
+            activeBoxCount = 2;
+            ThreeHoldBoxPool.Instance.ReturnAll();
             TwoHoldBoxPool.Instance.pool.DeSpawnAll();
             OneHoldBoxPool.Instance.pool.DeSpawnAll();
-
-            foreach (var box in screwBoxes)
-            {
-                if (box != null)
-                    box.Reset();
-            }
-
             screwBoxes.Clear();
             boxesStack.Clear();
             hidingScrews?.Clear();
-            foreach (var rb in rainbowBoxes)
-            {
-                if (rb != null) rb.Reset();
-            }
-
-            rainbowBoxes.Clear();
+            StopAllCoroutines();
         }
 
         internal void RemoveBoxByColor(ColorEnum color, int requiredCount)

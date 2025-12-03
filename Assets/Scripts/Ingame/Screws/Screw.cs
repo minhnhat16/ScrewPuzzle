@@ -82,6 +82,7 @@ namespace Ingame.Screw
 
         public string BasePartLayerID { get => basePartLayerID; set => basePartLayerID = value; }
         public bool IsInHold { get => isInHold; set => isInHold = value; }
+        public bool IsClicked { get => isClicked; set => isClicked = value; }
 
         public virtual void Awake()
         {
@@ -109,7 +110,7 @@ namespace Ingame.Screw
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
             float z = 0.2f * (layerIndex + 1);
-            //Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
+            Debug.LogWarning("Layer index " + gameObject.name + " is " + layerIndex);
             transform.position = new Vector3(Position.x, Position.y, z);
         }
 
@@ -190,12 +191,14 @@ namespace Ingame.Screw
             IsInHold = true;
             if (isTele)
             {
+                gameObject.SetActive(true);
+                Debug.Log("teleport screw to hold");
                 isClicked = isMoving = true;
                 IsInHold = true;
-                transform.localPosition = Vector3.zero;
                 _circleCollider2D.enabled = false;
                 FreeHinge();
                 _transform.SetParent(holdScrew.transform);
+                _transform.localPosition = Vector3.zero;
                 return;
             }
             DoMoveToHold(holdScrew);
@@ -219,57 +222,76 @@ namespace Ingame.Screw
         }
         public void JumpScrewToHold(HoldScrew holdScrew)
         {
-            Vector3 toPos = holdScrew.Transf.position + new Vector3(0, 0.25f);
-            //Debug.Log("DO move to hold " + toPos);
+            Vector3 toPos = holdScrew.Transf.position + new Vector3(0, 0.18f);
 
-            // Lưu lại vị trí offset giữa render và cha trước khi di chuyển
-            Vector3 offset = toPos - _transform.position;
+            Sequence seq = DOTween.Sequence();
 
-            // Tạo một Sequence để sắp xếp các tweens
-            Sequence sequence = DOTween.Sequence();
+            seq.Append(render.transform
+                .DOJump(toPos, 1.6f, 1, 0.45f)
+                .SetEase(Ease.OutQuad));
 
-            // Di chuyển render trước, đồng thời di chuyển cha
-            sequence.Append(render.transform.DOJump(toPos, 2, 1, 0.5f, false));
-            sequence.Join(render.transform.DOScale(1.2f,0.4f));
-            sequence.OnPlay(() => isMoving = true);
-            // free joint to release wood and joint
-            // Khi cả hai di chuyển xong
-            sequence.OnComplete(() =>
-            {
-                // _transform.SetParent(holdScrew.Transf);
-                MoveScrewDown(holdScrew);
-            });
+            seq.Join(render.transform
+                .DOScale(1.12f, 0.3f)
+                .SetEase(Ease.OutSine));
+
+            seq.OnPlay(() => isMoving = true);
+
+            seq.OnComplete(() => MoveScrewDown(holdScrew));
         }
 
         public Tween MoveScrewDown(HoldScrew holdScrew)
         {
-            // target is 0.25 down from current render position
-            var targetPos = render.transform.position - new Vector3(0f, 0.25f, 0f);
+            var targetPos = render.transform.position - new Vector3(0, 0.18f);
 
-            // Build a sequence so rotation and move happen together and we can control callbacks
             Sequence seq = DOTween.Sequence();
-            seq.Append(render.transform.DORotate(new Vector3(0f, 0f, -360f), 1f, RotateMode.FastBeyond360));
-            seq.Join(render.transform.DOMoveY(targetPos.y, 1f).SetEase(Ease.OutQuad));
+
+            seq.Append(render.transform
+                .DOMoveY(targetPos.y, 0.15f)
+                .SetEase(Ease.InQuad));
+
+            seq.Join(render.transform
+                .DORotate(new Vector3(0, 0, -360f), 0.15f, RotateMode.FastBeyond360)
+                .SetEase(Ease.InOutSine));
+
+            seq.Join(render.transform
+                .DOScale(1f, 0.15f)
+                .SetEase(Ease.OutBack));
+
             seq.OnComplete(() =>
             {
-                // parent the screw to the hold and stop movement flag
                 _transform.SetParent(holdScrew.transform);
-                ResetRender();
-                transform.localPosition = Vector3.zero;
+                _transform.transform.localPosition = Vector3.zero;
                 isMoving = false;
+                render.transform.localPosition = Vector3.zero;
+
+
+
             });
 
             return seq;
         }
         public void DoMoveScrewUp(Action callback)
         {
-            var targetPos = render.transform.position;
-            targetPos += new Vector3(0, 0.25f, 0);
+            Vector3 targetPos = render.transform.position + new Vector3(0, 0.22f, 0);
 
-            render.transform.DORotate(new Vector3(0, 0, 360), 0.7f, RotateMode.FastBeyond360).SetEase(Ease.InOutQuad);
-            render.transform.DOMove(targetPos, 0.5f).OnComplete(() =>
+            Sequence seq = DOTween.Sequence();
+
+            seq.Append(render.transform
+                .DOMove(targetPos, 0.2f)
+                .SetEase(Ease.OutQuad));
+
+            seq.Join(render.transform
+                .DORotate(new Vector3(0, 0, 290), 0.2f, RotateMode.FastBeyond360)
+                .SetEase(Ease.OutSine));
+
+            seq.Join(render.transform
+                .DOScale(1.08f, 0.1f)
+                .SetEase(Ease.OutBack));
+
+            seq.OnComplete(() =>
             {
                 hingeController.Reset();
+                render.transform.DOScale(1f, 0.1f).SetEase(Ease.OutSine);
                 callback?.Invoke();
             });
         }
@@ -323,6 +345,7 @@ namespace Ingame.Screw
         {
             isClicked = false;
             color = ColorEnum.Clear;
+            render.transform.localScale = Vector3.one;
             CircleCollider2D.enabled = true;
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());

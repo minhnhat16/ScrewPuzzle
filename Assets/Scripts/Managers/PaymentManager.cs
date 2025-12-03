@@ -21,7 +21,6 @@ public class PaymentManager : SingletonMono<PaymentManager>
         }
         else if (config.CurrencyType == Currency.Ads)
         {
-
         }
         else
         {

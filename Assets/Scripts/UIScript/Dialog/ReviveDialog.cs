@@ -1,6 +1,7 @@
 using System;
 using Managers;
 using UnityEngine;
+using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
 namespace UIScript.Dialog
@@ -40,8 +41,7 @@ namespace UIScript.Dialog
             this.param = newParam;
             if (newParam == null) return;
             long userGold = newParam.totalGold;
-
-
+            ticketPayButton.interactable = newParam.currentTicket > 0;
             SetRevive(newParam.isRevive);
             goldDisplay.SetGoldToLable(userGold);
             IngameController.ins.PauseGame();
@@ -72,33 +72,22 @@ namespace UIScript.Dialog
         private void WatchAccept()
         {
 
-            //ZenSDK.instance.ShowVideoReward(onWatch =>
-            //{
-            //    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
-            //    else IngameController.Instance.OnGameOver();
-            //});
-
             DialogManager.ins.HideDialog(dialogIndex, () =>
             {
-                //Debug.Log($"Hide this dialog {dialogIndex}");
-                IngameController.ins.OnRevive();
-
-                //if (!param.isRevive)
-                //{
-                //    IngameController.ins.OnGameOver();
-                //}
-                //else
-                //{
-                //    IngameController.ins.OnRevive();
-                //}
+                ItemController.ins.AddBoxItem.Use();
             });
         }
 
         private void TickeAccept()
         {
             DialogManager.ins.HideDialog(dialogIndex);
-            IngameController.ins.OnRevive();
 
+            bool isSpent = WalletManager.ins.TrySpend(Currency.Ticket, 1);
+
+            if (isSpent)
+                IngameController.ins.OnRevive();
+            else
+                IngameController.ins.OnGameOver();
             //ZenSDK.instance.ShowVideoReward(onWatch =>
             //{
             //    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);

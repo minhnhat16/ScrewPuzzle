@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace UIScript
 {
-    public abstract class ItemButton : MonoBehaviour
+    public abstract class ItemButton :MonoBehaviour
     {
         [SerializeField] private Button button;
         [SerializeField] private Button addQuantityBtn;
@@ -39,15 +39,15 @@ namespace UIScript
             get => Event;
             set => Event = value;
         }
+        public int Quantity { get => quantity; set => quantity = value; }
 
-       
         [HideInInspector]
         public UnityEvent<int> Event = new UnityEvent<int>();
 
 
         private void Awake()
         {
-            button = GetComponent<Button>();    
+            button = GetComponent<Button>();
         }
 
         public virtual void OnEnable()
@@ -60,6 +60,8 @@ namespace UIScript
         public virtual void OnClick()
         {
             Debug.Log("on button click");
+
+          
             IngameController.ins.onItemInvoke?.Invoke(type);
         }
 

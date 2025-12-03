@@ -11,7 +11,6 @@ namespace Ingame
     {
         public string uniqueID;
         private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
-        private List<HingeJoint> joints = new List<HingeJoint>();
 
         public virtual Rigidbody2D Body
         {
@@ -84,7 +83,9 @@ namespace Ingame
         public void Start()
         {
             // Ensure the checking coroutine is running (StartFallingCheck uses null-coalescing so it's safe)
+
             StartFallingCheck();
+
         }
 
         public IEnumerator Init(SpriteRenderer render, Action callBack = null)
@@ -133,11 +134,16 @@ namespace Ingame
                 checkFallingRoutine = StartCoroutine(CheckFalling());
                 Debug.Log($"[{name}] Coroutine started!");
             }
+            else
+            {
+            }
         }
 
         // Coroutine để kiểm tra trạng thái rơi
         private IEnumerator CheckFalling()
         {
+
+            Debug.Log($"[{name}] CheckFalling coroutine running.");
             while (true)
             {
                 bool wasFalling = isFalling;
@@ -146,8 +152,8 @@ namespace Ingame
                 // Nếu trạng thái thay đổi, kích hoạt sự kiện
                 if (isFalling != wasFalling)
                 {
-
                     Debug.Log("Falling " + isFalling);
+                    body.gravityScale = 1;
                     OnStateChanged?.Invoke(isFalling,this);
                 }
 
@@ -194,6 +200,7 @@ namespace Ingame
             if (activeSprite != null)
             {
                 activeSprite.sortingLayerName = layerName;
+                outline.sortingLayerName = layerName;
             }
 
             //if (inactiveSprite != null)
@@ -204,6 +211,8 @@ namespace Ingame
             //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
 
             activeSprite.sortingOrder = 0;
+           outline.sortingOrder = 0;
+            
             //inactiveSprite.sortingOrder = activeSprite.sortingOrder+1; 
         }
         private string GenerateUniqueID()

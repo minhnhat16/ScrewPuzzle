@@ -57,15 +57,26 @@ public class SettingDialog : BaseDialog
         SetupButton(isMainScreen);
         goldDisplay.SetGoldToLable(userGold);
         SetupPauseGame(isMainScreen);
-        tg_music.m_Toggle.isOn = true;
-        tg_soundSfx.m_Toggle.isOn = true;
+    
         //isMainScreen = param.isMainScreen;
         //        below.gameObject.SetActive(!param.isMainScreen);
     }
+
     public override void OnStartShowDialog()
     {
         base.OnStartShowDialog();
         ZenSDK.instance.ShowFullScreen();
+        //tg_music.SwapSprite(true);
+        //tg_soundSfx.SwapSprite(true);
+
+        //tg_soundVib.SwapSprite(true);
+    }
+    public override void OnEndShowDialog()
+    {
+        base.OnEndShowDialog();
+        tg_soundVib.m_Toggle.isOn = true;
+        tg_soundSfx.m_Toggle.isOn = true;
+        tg_music.m_Toggle.isOn = true;
 
     }
     public override void OnEndHideDialog()

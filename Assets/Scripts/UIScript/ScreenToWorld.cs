@@ -108,8 +108,8 @@ public class ScreenToWorld : MonoBehaviour
     }
     public void SetWorldToAnchorView(Vector3 position, RectTransform toPos)
     {
-        ViewManager.Instance.dicView.TryGetValue(ViewIndex.GamePlayView, out BaseView gameplay);
-        var view = (GamePlayView)gameplay;
+        ViewManager.Instance.dicView.TryGetValue(ViewIndex.GameView, out BaseView gameplay);
+        var view = (GameView)gameplay;
         var anchor = view.Anchor;
         var viewPos = CanvasPositioningExtensions.WorldToCanvasPosition(m_viewCanvas, position, m_WCamera);
 

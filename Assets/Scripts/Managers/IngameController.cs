@@ -28,7 +28,7 @@ namespace Managers
         [SerializeField] private Player player;
         [SerializeField] private BoxQueue boxManager;
         [SerializeField] private ArrayScrew arrayScrew;
-        [SerializeField] private SpriteRenderer bgRender;
+        [SerializeField] private BackgroundSizeControl bgRender;
         [HideInInspector] public UnityEvent<int> onGoldChanged;
         [HideInInspector] public UnityEvent<int> onGemChanged;
         [HideInInspector] public UnityEvent<float> onExpChange;
@@ -91,6 +91,7 @@ namespace Managers
             WinParam param = new();
             param.totalGold = DataAPIController.instance.GetGold();
             DialogManager.ins.ShowDialog(DialogIndex.WinDialog);
+
         }
 
 
@@ -113,6 +114,7 @@ namespace Managers
         {
             //Debug.Log("ActiveBG " +isActive);
             bgRender.enabled = isActive;
+            bgRender.Fit();
         }
 
         public void Init(Action callback)
@@ -141,14 +143,14 @@ namespace Managers
         private void ItemIvoked(ItemType item)
         {
             itemJustInvoke = true;
-            ItemController.ins.IsHandlingItem = itemJustInvoke;
+            ItemController.ins.IsHandlingHammer = itemJustInvoke;
             StartCoroutine(ItemCoroutine(item));
         }
 
         private IEnumerator ItemCoroutine(ItemType itemType)
         {
             yield return new WaitUntil(() => itemJustInvoke);
-            Debug.Log("Item couroutine " + itemType);
+            Debug.Log("x " + itemType);
             itemJustInvoke = false;
 
 
@@ -156,28 +158,19 @@ namespace Managers
             switch (itemType)
             {
                 case ItemType.Magnet:
-                    ClearAllScrewOnArray(null);
+                    ItemController.ins.ClearArrayState.Use();
                     break;
                 case ItemType.Breaker:
                     AddBox(null);
+                    ItemController.ins.RemovePartState.Use();
                     break;
                 case ItemType.Drill:
-                    AddHold(() =>
-                    {
-                    });
+                    ItemController.ins.AddOneHold.Use();
                     break;
                 default:
                     break;
             }
         }
-
-        private void AddHold(Action callback)
-        {
-            itemPerforming = true;
-            ArrayScrew.Instance.SpawnNewHold();
-            callback?.Invoke();
-        }
-
         internal void PauseGame()
         {
             Time.timeScale = 0;
@@ -245,10 +238,9 @@ namespace Managers
             callback?.Invoke();
         }
 
-        private void ClearAllScrewOnArray(Action callback)
+        public void ClearAllScrewOnArray(Action callback)
         {
-            ArrayScrew.Instance.ClearAllScrewsOnArray();
-            callback?.Invoke();
+            
         }
 
         private void ClearOneScrew(Action callback)
@@ -274,12 +266,14 @@ namespace Managers
             param.isRevive = true;
             param.isHasAds = true;// set defaul allway true cus has none ads
             param.totalGold = DataAPIController.instance.GetGold();
+            param.currentTicket = DataAPIController.instance.GetTicket();
             // ZenSDK.instance.IsVideoRewardReady();
             // Debug.LogWarning("PREPARE SHOW DIALOG REVIVE DIALOG");
             int activeBoxCount = BoxQueue.ins.activeBoxCount;
-            if (activeBoxCount >= 2)
+            if (activeBoxCount >= 4)
             {
                 DialogManager.ins.ShowDialog(DialogIndex.LoseDialog);
+                callback?.Invoke();
                 return;
             }
 
@@ -288,6 +282,8 @@ namespace Managers
                 // Debug.LogWarning("SHOW DIALOG REVIVE DIALOG");
                 //if accepted watch ads invoke no reset level
                 // else return and reset current level, -1 heart
+                callback?.Invoke();
+
             });
         }
 
@@ -331,33 +327,39 @@ namespace Managers
         {
             CurrentStar += addedStar;
             float percentStart = (float)CurrentStar / (float)totalStarInLevel;
-            Debug.LogWarning($"Star Changing {percentStart}");
 
             onStarChange?.Invoke(percentStart);
         }
         public void OnRevive()
         {
+            isGameOver = false;
             player.IsInputLocked = false;
+            ItemController.ins.IsHandlingHammer = false;
             BoxQueue.ins.UnlockedBox();
         }
         public void ReturnToHome(DialogIndex dialogIndex)
         {
+
+            LevelManager.ins.OnReset();
             // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
             DialogManager.ins.HideDialog(dialogIndex, () =>
             {
                 Debug.Log($"HideDialog {dialogIndex} ");
-                LevelManager.ins.OnReset();
-                LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
+               
+            
+            });
+
+            LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
+            {
+                DialogManager.ins.HideAllDialog();
+                Debug.Log("Switch view mainscreenview ");
+                MainScreenViewParam param = new();
+                param.totalGold = GameManager.instance.GetPlayerGold();
+                ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
+                /*  
+                DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog, null, () =>
                 {
-                    Debug.Log("Switch view mainscreenview ");
-                    MainScreenViewParam param = new();
-                    param.totalGold = GameManager.instance.GetPlayerGold();
-                    ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param);
-                    /*  
-                    DialogManager.Instance.ShowDialog(DialogIndex.LableChooseDialog, null, () =>
-                    {
-                    });*/
-                });
+                });*/
             });
         }
         public void OnGameOver()

@@ -65,6 +65,7 @@ namespace Ingame.Board
         {
             foreach (var part in parts)
             {
+                part.OnStateChanged.RemoveListener(OnPartFallingChanged);
                 part.OnStateChanged.AddListener(OnPartFallingChanged);
             }
         }

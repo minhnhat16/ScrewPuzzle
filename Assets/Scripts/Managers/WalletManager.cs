@@ -1,4 +1,6 @@
+using System;
 using System.DataBase;
+using Unity.VisualScripting.FullSerializer.Internal;
 using UnityEngine;
 
 public class WalletManager : SingletonMono<WalletManager>
@@ -23,7 +25,12 @@ public class WalletManager : SingletonMono<WalletManager>
 
         Set(type, final);
     }
-
+    public bool Check(Currency type, long amount)
+    {
+        long current = Get(type);
+        long final = current + amount;
+        return final >= 0;
+    }
     public long Get(Currency type)
     {
         switch (type)
@@ -61,6 +68,48 @@ public class WalletManager : SingletonMono<WalletManager>
         // Optional UI update
         OnCurrencyUpdated?.Invoke(type, value);
     }
+    public bool TrySpend(Currency type, long amount, Action callback = null)
+    {
+        try
+        {
+            if (!HasEnough(type, amount))
+                return false;
+
+            Spend(type, amount);
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Wallet] TrySpend failed: {ex}");
+            callback?.Invoke();
+            return false;
+        }
+    }
+    public bool TryAdd(Currency type, long amount)
+    {
+        try
+        {
+            Add(type, amount);
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Wallet] TryAdd failed: {ex}");
+            return false;
+        }
+    }
+    public bool ValidatePayment(Currency type, long price)
+    {
+        if (!HasEnough(type, price))
+        {
+            Debug.LogWarning("[Wallet] Not enough currency.");
+            return false;
+        }
+
+        return true;
+    }
+
+
 
     // OPTIONAL EVENT: Update UI automatically
     public System.Action<Currency, long> OnCurrencyUpdated;

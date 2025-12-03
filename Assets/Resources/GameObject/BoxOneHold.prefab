@@ -84,7 +84,7 @@ SpriteRenderer:
   m_Size: {x: 3.71, y: 1.71}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &6556257181718751225
@@ -200,7 +200,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.36, y: 2.58}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -245,7 +245,7 @@ BoxCollider2D:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 2.36, y: 2.58}
-    newSize: {x: 1, y: 1}
+    newSize: {x: 2.36, y: 2.58}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -313,13 +313,6 @@ MonoBehaviour:
   isAddingScrew: 0
   totalHold: 0
   nextEmptyIndex: -1
-  holdScrews:
-  - {fileID: 5541671317930602014}
-  onScrewBoxFull:
-    m_PersistentCalls:
-      m_Calls: []
-  color: 0
-  boxSlot: {fileID: 0}
   animator: {fileID: 0}
   moveDuration: 1
   squashAmount: 0.9
@@ -329,6 +322,13 @@ MonoBehaviour:
   spawnStartEvent:
     m_PersistentCalls:
       m_Calls: []
+  holdScrews:
+  - {fileID: 5541671317930602014}
+  onScrewBoxFull:
+    m_PersistentCalls:
+      m_Calls: []
+  color: 0
+  boxSlot: {fileID: 0}
 --- !u!1001 &1676534350721570930
 PrefabInstance:
   m_ObjectHideFlags: 0

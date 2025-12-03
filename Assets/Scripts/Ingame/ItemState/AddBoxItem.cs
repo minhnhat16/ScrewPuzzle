@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices.WindowsRuntime;
+using Managers;
 
 public class AddBoxItem : FSMState<ItemController>, IItem
 {
@@ -7,7 +7,10 @@ public class AddBoxItem : FSMState<ItemController>, IItem
 
     public bool IsHandling => isHadling;
 
-    
+    public AddBoxItem(ItemController sys)
+    {
+        Setup(sys);
+    }
     public override void OnEnter()
     {
         base.OnEnter();
@@ -27,6 +30,7 @@ public class AddBoxItem : FSMState<ItemController>, IItem
 
     public void Use()
     {
-        throw new System.NotImplementedException();
+        IngameController.ins.OnRevive();
+        sys.itemPerformed?.Invoke(true);
     }
 }

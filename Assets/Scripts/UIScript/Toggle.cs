@@ -20,13 +20,14 @@ using UnityEngine.UI;
         {
             m_Toggle.onValueChanged.RemoveListener(SwapSprite);
         }
-        private void SwapSprite(bool value)
+        public void SwapSprite(bool value)
         {
+
             float activeAlpha = value ? 1f : 0f;
             float disabledAlpha = value ? 0f : 1f;
 
-            activeIcon.CrossFadeAlpha(activeAlpha, 0.2f, false);
-            disabledIcon.CrossFadeAlpha(disabledAlpha, 0.2f, false);
+            activeIcon.CrossFadeAlpha(activeAlpha, 0.2f, true);
+            disabledIcon.CrossFadeAlpha(disabledAlpha, 0.2f, true);
         }
 
         private void Start()

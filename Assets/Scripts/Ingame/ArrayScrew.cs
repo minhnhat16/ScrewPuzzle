@@ -1,5 +1,4 @@
 using Enums;
-using Ingame.Screw;
 using Managers;
 using PoolManager;
 using System;
@@ -76,6 +75,11 @@ namespace Ingame
             {
                 holdScrews[i].gameObject.SetActive(true);
             }
+
+            var pos = transform.position;
+            var y = CameraMain.instance.GetTop() - 5.5f;
+            pos.y = y;
+            transform.position = pos;
         }
         public void ShowArrayActive(int activeCount)
         {
@@ -144,7 +148,7 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()
         {
-
+            Debug.Log("HoldScrews are full! Game Over!");
             IngameController.ins.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
@@ -175,9 +179,11 @@ namespace Ingame
             }
         }
 
-
+       
         private void CheckIfHoldScrewsFull()
         {
+
+            Debug.Log("Check if holdScrews full" + holdRoutine);
             if (holdRoutine != null)
                 StopCoroutine(holdRoutine);
 
@@ -225,27 +231,50 @@ namespace Ingame
 
         private void AddScrewToHoldScrew(Screw.Screw screw, HoldScrew holdScrew)
         {
-            // Tìm box phù hợp cho screw
-            var suitableBox = BoxQueue.ins.FindSuitableBox(screw);
+            var screwMng = LevelManager.ins.ScrewManager;
+
+            
+            var suitableBox = BoxQueue.ins.FindSuitableBox(screw,false);
             bool canAdd = false;
+
+
+            Debug.Log("suitableBox: " + suitableBox);   
             if (suitableBox != null)
             {
-                // Thêm screw vào box phù hợp
+                screw.SetSortingOrderAndLayer(4, "Box");
+
                 BoxQueue.ins.AddScrewToBox(screw, suitableBox, out canAdd);
+                holdScrew.Screw = null; // Đảm bảo holdScrew không giữ screw nữa
+                return;
+            }
+
+            // Tìm box phù hợp cho screw
+            if (screw.Color == ColorEnum.Rainbow)
+            {
+                SpecialBoxManager.ins.AddSingle(screw);
+                screwMng.RemoveScrew(screw);
+
+                return;
             }
             if (canAdd) return;
+            screw.SetSortingOrderAndLayer(4, "Box");
+
             holdScrew.AddScrew(screw, false, (onMoved) =>
             {
                 // Kiểm tra nếu tất cả holdScrew đã đầy
+
+                Debug.Log("Added screw to holdScrew");  
                 CheckIfHoldScrewsFull();
             });
 
             // Thêm screw vào danh sách tạm thời
             screws.Add(screw);
-            var screwMng = LevelManager.ins.ScrewManager;
             screwMng.RemoveScrew(screw);
 
         }
+
+
+       
 
         public void ClearAllScrewsOnArray()
         {
@@ -281,14 +310,37 @@ namespace Ingame
             return t;
         }
 
+
+
         public void OnReset()
         {
             holdRoutine = null;
             ShowArrayActive(5);
+            ClearAllScrewsOnArray();
         }
-        //private void OnValidate()
-        //{
-        //    HoldAlignment();
-        //}
+
+
+        public void StartClearHiding()
+        {
+            StartCoroutine(ClearToHidding());
+        }
+        // Change the signature of ClearToHidding from void to IEnumerator
+        public IEnumerator ClearToHidding()
+        {
+            for (int i = 0; i < screws.Count; i++)
+            {
+                var screw = screws[i];
+                screw.gameObject.SetActive(false);
+                yield return null;
+            }
+            BoxQueue.ins.hidingScrews.AddRange(screws);
+
+            for (int j = 0; j < holdScrews.Count; j++)
+            {
+                holdScrews[j].ClearScrewOnHold();
+                yield return null;
+            }
+            screws.Clear();
+        }
     }
 }

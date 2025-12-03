@@ -27,25 +27,21 @@ namespace Ingame
             }
         }
 
-        public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm, bool isInactive = false)
+        public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm)
         {
-
+            if (lm == null) return;
             if (layer < 0 || layer >= lm.Layers.Count) return;
-            List<BasePart> parts = lm.Layers[layer].parts;
-            List<string> idParts = parts.Where(p => p != null)
-                                        .Select(p => p.uniqueID)
-                                        .ToList();
-            var idLayerTostring = LayerMask.LayerToName(layer + 10);
-            var listScrews = lm.screwDict.GetValueOrDefault(layer);
 
-            if (listScrews == null) return;
-            List<Screw.Screw> screwsActives = listScrews.Where(s => s != null).ToList();
-            if (screwsActives == null) return;
-            foreach (var s in screwsActives)
+            if (!lm.screwDict.TryGetValue(layer, out var screws) || screws == null || screws.Count == 0)
+                return;
+
+            foreach (var screw in screws)
             {
-                s.gameObject.SetActive(isOn);
+                if (screw != null)
+                    screw.gameObject.SetActive(isOn);
             }
         }
+
 
         private static void SetLayerRecursively(GameObject obj, int newLayer)
         {
@@ -62,15 +58,35 @@ namespace Ingame
                 SetLayerRecursively(child.gameObject, newLayer);
             }
         }
-        public static void FadeSprite(SpriteRenderer old, Sprite newSprite, float time = 0.5f)
+        public static void FadeSprite(SpriteRenderer r, Sprite newSprite, float time = 0.5f)
         {
-            // Fade out
-            old.DOFade(0f, time)
-                .OnComplete(() =>
-                {
-                    old.sprite = newSprite; // đổi sprite sau khi ẩn
-                    old.DOFade(1f, time); // fade in lại
-                });
+            if (r == null) return;
+
+            r.DOKill(); // tránh overlap tween
+
+            r.DOFade(0f, time)
+             .OnComplete(() =>
+             {
+                 r.sprite = newSprite;
+                 r.DOFade(1f, time);
+             });
         }
+
+
+        internal static void RemoveScrew(Screw.Screw screw, LayerManager lm)
+        {
+            if (screw == null || lm == null) return;
+            screw.FreeHinge();
+            lm.RemoveScrewOnDict(screw, screw.sortingOrder);
+        }
+
+        public static void RemoveScrews(List<Screw.Screw> screws, LayerManager lm)
+        {
+            if (screws == null || lm == null) return;
+
+            foreach (var screw in screws)
+                RemoveScrew(screw, lm);
+        }
+
     }
 }

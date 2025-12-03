@@ -1,3 +1,4 @@
+using Enums;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -78,5 +79,14 @@ public class ViewManager : MonoBehaviour
     public T GetUIObject<T>(BaseView targetView) where T : Component
     {
         return targetView.GetComponentInChildren<T>(true);
+    }
+
+    internal void UpdateSpecialBoxCount(ColorEnum color, int v)
+    {
+
+        if(currentView is GameView gameview)
+        {
+            gameview.UpdateSpecialBoxCount(color, v);
+        }
     }
 }

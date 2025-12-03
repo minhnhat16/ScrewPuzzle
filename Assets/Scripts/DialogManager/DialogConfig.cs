@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public enum DialogIndex
 {
     LableChooseDialog,
     BuyConfirmDialog,
-    AddItemDialog,
+    ItemDialog,
     SettingDialog,
     DailyRewardDialog,
     RateDialog,
@@ -88,6 +89,7 @@ public class ReviveDialogParam : DialogParam
     public bool isRevive;
     public bool isHasAds;
     public long totalGold;
+    public long currentTicket;
 }
 public class WinParam : DialogParam
 {
@@ -105,6 +107,7 @@ public class AddItemDialogParam : DialogParam
     public bool IsAdsAvailable;
     public int ItemPrice;
     public string detail;
+    public Sprite sprite;
 }
 public class CollectionDialogParam : DialogParam
 {
@@ -166,7 +169,7 @@ public class DialogConfig
     {
         DialogIndex.LableChooseDialog,
         DialogIndex.BuyConfirmDialog,
-        DialogIndex.AddItemDialog,
+        DialogIndex.ItemDialog,
         DialogIndex.DailyRewardDialog,
         DialogIndex.SettingDialog,
         DialogIndex.SpinDialog,

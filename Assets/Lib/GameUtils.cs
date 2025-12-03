@@ -4,7 +4,6 @@ using System.Globalization;
 using UIScript;
 using UnityEditor;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public static class GameConstants
 {
@@ -17,8 +16,8 @@ public static class GameConstants
 
 
 
-    public const string SCREW_SPRITE_PATH = "GAMEPLAY/DINH";
-    public const string BOX_SPRITE_PATH = "GAMEPLAY/HOP";
+    public const string SCREW_SPRITE_PATH = "Sprites/GAMEPLAY/DINH";
+    public const string BOX_SPRITE_PATH = "Sprites/GAMEPLAY/HOP";
 
     public static string COMMON_PACK = "Prefabs/UIPrefab/ShopPack/BluePack";
     internal static string BOX_CONFIGS = "Assets/Resources/Config/BoxConfigs/BoxLevel";
@@ -31,6 +30,7 @@ public static class GameConstants
 
 public static class GameUtils
 {
+#if UNITY_EDITOR
     public static void LogAndSelect(string message, GameObject go)
     {
         Debug.Log(message, go);                // message with context (clickable in Console)
@@ -54,7 +54,7 @@ public static class GameUtils
             }
         }
     }
-
+#endif
 
     public static string FormatPrice(long amount, string currencyCode = "VND")
     {

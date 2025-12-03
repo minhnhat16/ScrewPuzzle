@@ -5,60 +5,87 @@ using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class MissionManager : SingletonMono<MissionManager>
 {
     private MissionConfig missionConfig;
 
-    // List chứa tất cả mission trong file CSV
+    // full mission list loaded from CSV
     private List<MissionConfigRecord> allMissions = new();
 
-
+    // 3 missions shown on UI
     [SerializeField]
-    // List 3 mission đang active
     private List<MissionConfigRecord> activeMissions = new();
 
-    // Queue chứa các mission còn lại
+    // missions waiting (not completed)
     private Queue<MissionConfigRecord> missionQueue = new();
-
-    public event Action<MissionConfigRecord> OnMissionUpdated;
-    public event Action<MissionConfigRecord> OnMissionCompleted;
 
     private const int MAX_ACTIVE = 3;
 
+    // runtime progress (NOT written to DataModel)
+    private Dictionary<int, MissionProgress> runtimeProgress = new();
 
+    // Events fired by gameplay
+    public static UnityEvent<ColorEnum> OnScrewCollected = new();
+    public static UnityEvent OnBoxClosed = new();
+    public static UnityEvent OnItemUsed = new();
+    public static UnityEvent OnLevelCompleted = new();
+    public static UnityEvent OnSecondTick = new();
+
+    // events for UI
+    public event Action<MissionConfigRecord> OnMissionUpdated;
+    public event Action<MissionConfigRecord> OnMissionCompleted;
+
+    private void OnEnable()
+    {
+        OnScrewCollected.AddListener(color => AddProgress(color));
+        OnBoxClosed.AddListener(() => AddProgress());
+        OnItemUsed.AddListener(() => AddProgress());
+        OnLevelCompleted.AddListener(() => SaveAllMissionProgress());
+        OnSecondTick.AddListener(() => AddProgress());
+    }
+
+    private void OnDisable()
+    {
+        OnScrewCollected.RemoveAllListeners();
+        OnBoxClosed.RemoveAllListeners();
+        OnItemUsed.RemoveAllListeners();
+        OnLevelCompleted.RemoveAllListeners();
+        OnSecondTick.RemoveAllListeners();
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
 
     public IEnumerator Init(Action callback = null)
     {
         missionConfig = ConfigFileManager.Instance.GetConfig<MissionConfig>();
-        yield return new WaitUntil(()=> missionConfig!= null);
+
+        yield return new WaitUntil(() => missionConfig != null);
 
         allMissions = missionConfig.GetAllRecord();
 
-        Debug.Log("Mission config loaded." + allMissions.Count);
+        runtimeProgress.Clear();
+        missionQueue.Clear();
+        activeMissions.Clear();
 
         BuildMissionQueue();
         FillActiveMissions();
+
         callback?.Invoke();
     }
-    // =============================================================
-    // LOAD 3 MISSION HIỆN TẠI
-    // =============================================================
 
     private void BuildMissionQueue()
     {
         missionQueue.Clear();
 
-        // Sắp xếp theo ID hoặc độ khó
-        var ordered = allMissions.OrderBy(m => m.Id);
-
-        foreach (var mission in ordered)
+        foreach (var mission in allMissions.OrderBy(m => m.Id))
         {
             var progress = DataAPIController.instance.GetMissionProgress(mission.Id);
 
-            // Đẩy vào queue nếu chưa completed
             if (progress.state != MissionState.Completed)
                 missionQueue.Enqueue(mission);
         }
@@ -68,26 +95,20 @@ public class MissionManager : SingletonMono<MissionManager>
     {
         activeMissions.Clear();
 
-        Debug.Log($"[Mission] Adding mission to active list. Active count: {activeMissions.Count}, Queue count: {missionQueue.Count}");
-
         while (activeMissions.Count < MAX_ACTIVE && missionQueue.Count > 0)
         {
-
             var next = missionQueue.Dequeue();
             activeMissions.Add(next);
         }
 
-        Debug.Log($"[Mission] Active missions: {activeMissions.Count}");
+        Debug.Log($"[Mission] Active missions loaded: {activeMissions.Count}");
     }
 
-    public List<MissionConfigRecord> GetActiveMissions()
-    {
-        return activeMissions;
-    }
+    public List<MissionConfigRecord> GetActiveMissions() => activeMissions;
 
-    // =============================================================
-    // UPDATE PROGRESS
-    // =============================================================
+    // ============================================================
+    // ADD PROGRESS
+    // ============================================================
 
     public void AddProgress(ColorEnum color = ColorEnum.Clear)
     {
@@ -113,7 +134,20 @@ public class MissionManager : SingletonMono<MissionManager>
                     break;
 
                 case MissionType.TimeSurvive:
-                    break; // TimeController sẽ gọi riêng
+                    IncreaseProgress(mission.Id, 1);
+                    break;
+
+                case MissionType.ClearRainbowBox:
+                    // sẽ gọi từ BoxQueue.OnRainbowBoxClosed
+                    break;
+
+                case MissionType.CompleteLevel:
+                    // gọi khi level complete
+                    break;
+
+                case MissionType.ScoreReached:
+                    // gọi khi gameplay đạt điểm
+                    break;
             }
 
             OnMissionUpdated?.Invoke(mission);
@@ -123,59 +157,67 @@ public class MissionManager : SingletonMono<MissionManager>
     private void IncreaseProgress(int missionId, int amount)
     {
         var mission = allMissions.Find(m => m.Id == missionId);
-        var progress = DataAPIController.instance.GetMissionProgress(missionId);
 
-        progress.current += amount;
-
-        if (progress.current >= mission.Target)
+        if (!runtimeProgress.TryGetValue(missionId, out var prog))
         {
-            progress.current = mission.Target;
-            DataAPIController.instance.CompleteMission(missionId);
-            HandleMissionCompleted(mission);
+            prog = DataAPIController.instance.GetMissionProgress(missionId);
+            runtimeProgress[missionId] = prog;
         }
 
+        prog.current += amount;
 
-        DataAPIController.instance.UpdateMissionProgress(progress);
+        if (prog.current >= mission.Target)
+        {
+            prog.current = mission.Target;
+            prog.state = MissionState.Completed;
+            HandleMissionCompleted(mission);
+        }
     }
 
     private void CompleteMissionForce(MissionConfigRecord mission)
     {
-        DataAPIController.instance.CompleteMission(mission.Id);
+        if (!runtimeProgress.TryGetValue(mission.Id, out var p))
+        {
+            p = DataAPIController.instance.GetMissionProgress(mission.Id);
+            runtimeProgress[mission.Id] = p;
+        }
+
+        p.current = mission.Target;
+        p.state = MissionState.Completed;
+
         HandleMissionCompleted(mission);
     }
 
-    // =============================================================
-    // MISSION COMPLETE HANDLER
-    // =============================================================
+    // ============================================================
+    // HANDLE COMPLETE
+    // ============================================================
 
     private void HandleMissionCompleted(MissionConfigRecord mission)
     {
+        Debug.Log("[Mission] Completed: " + mission.Id);
+
         OnMissionCompleted?.Invoke(mission);
-
-        Debug.Log($"[Mission] Completed: {mission.Id}");
-
-        // Remove khỏi active list
         activeMissions.Remove(mission);
 
-        // Đẩy mission mới vào
         if (missionQueue.Count > 0)
         {
             var next = missionQueue.Dequeue();
             activeMissions.Add(next);
-
-            Debug.Log($"[Mission] Added new mission: {next.Id}");
         }
     }
 
     public bool IsMissionCompleted(int missionId)
     {
-        var p = DataAPIController.instance.GetMissionProgress(missionId);
+        var p = runtimeProgress.ContainsKey(missionId)
+            ? runtimeProgress[missionId]
+            : DataAPIController.instance.GetMissionProgress(missionId);
+
         return p.state == MissionState.Completed;
     }
 
-    // =============================================================
+    // ============================================================
     // SPECIAL: RAINBOW BOX
-    // =============================================================
+    // ============================================================
 
     public void OnRainbowBoxClosed(Box box)
     {
@@ -188,13 +230,34 @@ public class MissionManager : SingletonMono<MissionManager>
         }
     }
 
-    // =============================================================
+    // ============================================================
+    // SAVE ON LEVEL COMPLETE
+    // ============================================================
+
+    private void SaveAllMissionProgress()
+    {
+        Debug.Log("[Mission] Saving progress on level complete...");
+
+        foreach (var kv in runtimeProgress)
+        {
+            DataAPIController.instance.UpdateMissionProgress(kv.Value);
+        }
+
+        runtimeProgress.Clear();
+
+        BuildMissionQueue();
+        FillActiveMissions();
+    }
+
+    // ============================================================
     // GET PROGRESS
-    // =============================================================
+    // ============================================================
 
     public int GetProgress(int missionId)
     {
-        var progress = DataAPIController.instance.GetMissionProgress(missionId);
-        return progress?.current ?? 0;
+        if (runtimeProgress.TryGetValue(missionId, out var p))
+            return p.current;
+
+        return DataAPIController.instance.GetMissionProgress(missionId)?.current ?? 0;
     }
 }

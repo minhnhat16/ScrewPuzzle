@@ -26,10 +26,13 @@ public class LoseDialog : BaseDialog
         //{
         //    if(isWatched)
         //    {
-        IngameController.ins.OnRevive();
-        IngameController.ins.onItemInvoke.Invoke(ItemType.Magnet);
+     
 
-        DialogManager.ins.HideDialog(DialogIndex.LoseDialog);
+        DialogManager.ins.HideDialog(DialogIndex.LoseDialog, () =>
+        {
+            IngameController.ins.OnRevive();
+            IngameController.ins.onItemInvoke.Invoke(ItemType.Magnet);
+        });
         //    }   
         //    DialogManager.ins.HideDialog(DialogIndex.LoseDialog);
         //});

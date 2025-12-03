@@ -258,6 +258,7 @@ public class DataModel : MonoBehaviour
         AddNewItem(ItemType.Magnet, ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 0));
         AddNewItem(ItemType.Breaker, ZenSDK.instance.GetConfigInt(ItemType.Breaker.ToString(), 5));
         AddNewItem(ItemType.Drill, ZenSDK.instance.GetConfigInt(ItemType.Drill.ToString(), 5));
+       
 
         // ===============================
         // LEVEL DATA
@@ -292,7 +293,7 @@ public class DataModel : MonoBehaviour
         userData.wallet.ticketWallet = new CurrencyWallet
         {
             currency = Currency.Ticket,
-            amount = ZenSDK.instance.GetConfigInt(Currency.Ticket.ToString(), 1000000)
+            amount = ZenSDK.instance.GetConfigInt(Currency.Ticket.ToString(), 1)
         };
 
         // ===============================

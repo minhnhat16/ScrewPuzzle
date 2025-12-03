@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SideMissionManager : SingletonMono<SideMissionManager>
+public class SideMissionManager : SingletonMono<SideMissionManager>,IResetable
 {
-    SideMission currentMission;
+    public SideMission currentMission;
     /// <summary>
     /// Tạo nhiệm vụ 3 vít cùng màu khi level load xong
     /// </summary>
@@ -44,6 +44,19 @@ public class SideMissionManager : SingletonMono<SideMissionManager>
         BoxQueue.ins.RemoveBoxByColor((ColorEnum)targetColor,require/3);
         return mission;
     }
+
+    public void OnReset()
+    {
+        currentMission = null;
+    }
+
+    internal void UpdateMission( int count)
+    {
+       this.currentMission.currentCount += count;
+    }
+
+
+
 }
 
 public class SideMission

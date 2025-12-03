@@ -1,61 +1,52 @@
-using Managers;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class StarBottleFill : MonoBehaviour
+public class StarBottleFill : MonoBehaviour, IResetable
 {
-    [SerializeField] private Image imgBackground;
     [SerializeField] private Image imgFill;
-    public float animationDuration = 1.0f; // Time for the animation to complete
+    public float animationDuration = 1.0f;
 
     public UnityEvent<float> fillChange = new();
+
+    private Tween fillTween;
+    private Tween popTween;
+
     public void OnEnable()
     {
         fillChange.AddListener(AnimateToPercent);
     }
-
-
-    public void Awake()
+    public void OnDisable()
     {
-        //imgBackground = transform.GetChild(0).GetComponent<Image>();
-        //imgBackground = transform.GetChild(1).GetComponent<Image>();
+        fillChange.RemoveListener(AnimateToPercent);
     }
-
-
-    /// <summary>
-    /// Smoothly animates the progress bar to the given percentage.
-    /// </summary>
-    /// <param name="targetPercent">Target fill amount (0 to 1)</param>
     public void AnimateToPercent(float targetPercent)
     {
         if (imgFill == null) return;
-        Debug.LogWarning($"Animate To Percent {targetPercent}");
 
-        StartCoroutine(AnimateProgressCoroutine(targetPercent));
-    }
+        // Kill tween cũ tránh conflict
+        fillTween?.Kill();
+        popTween?.Kill();
 
-    private IEnumerator AnimateProgressCoroutine(float targetPercent)
+        // Tween fill
+        fillTween = imgFill
+            .DOFillAmount(targetPercent, animationDuration / 2)
+            .SetEase(Ease.InOutSine);
+
+        //// Tween popping scale — scale nhẹ cho UI sống động
+        //popTween = imgFill.transform
+        //    .DOPunchScale(Vector3.one * 1.15f, animationDuration / 2)       // phồng lên
+        //    .SetEase(Ease.OutBack).OnComplete(() =>
+        //    {
+        //        imgFill.transform.localScale = Vector3.one;
+        //    });
+    } 
+    public void OnReset()
     {
-        float startPercent = imgFill.fillAmount;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < animationDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsedTime / animationDuration);
-            imgFill.fillAmount = Mathf.Lerp(startPercent, targetPercent, t);
-            yield return null; // Wait for the next frame
-        }
-
-        imgFill.fillAmount = targetPercent; // Ensure it ends exactly at the target
-    }
-
-    public void Reset()
-    {
+        fillTween?.Kill();
+        popTween?.Kill();
         imgFill.fillAmount = 0;
+        imgFill.transform.localScale = Vector3.one;
     }
 }
