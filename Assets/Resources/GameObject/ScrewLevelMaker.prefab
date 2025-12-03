@@ -74,7 +74,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1867890477
-  m_SortingLayer: 17
+  m_SortingLayer: 18
   m_SortingOrder: 11
   m_Sprite: {fileID: 21300000, guid: e5f699f185402324b901171b12e4052c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_Size: {x: 1.34, y: 1.34}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &6964780634413545595
@@ -162,7 +162,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1867890477
-  m_SortingLayer: 17
+  m_SortingLayer: 18
   m_SortingOrder: 10
   m_Sprite: {fileID: 5747889533200651394, guid: f706810be19b7bf498c32337c08a9c33, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -188,7 +188,7 @@ GameObject:
   - component: {fileID: 7455194392694617073}
   - component: {fileID: 5884226729302126253}
   - component: {fileID: 5271949845176647228}
-  - component: {fileID: -827183834850213000}
+  - component: {fileID: 2832902819024704746}
   m_Layer: 9
   m_Name: ScrewLevelMaker
   m_TagString: Player
@@ -318,7 +318,7 @@ MonoBehaviour:
     m_Bits: 0
   bodyConnect: []
   hingeJoint2D: []
---- !u!114 &-827183834850213000
+--- !u!114 &2832902819024704746
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -327,7 +327,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7455194392694617076}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9953be57aa6cf74bb48382c44a4c388, type: 3}
+  m_Script: {fileID: 11500000, guid: 642f3975b82429c4a8b166576d52bdd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   color: 0
@@ -336,9 +336,9 @@ MonoBehaviour:
   layerMask: 0
   sortingOrder: 0
   isMultipleJoint: 0
-  _circleCollider2D: {fileID: 0}
-  rb: {fileID: 0}
-  render: {fileID: 0}
+  _circleCollider2D: {fileID: 5884226729302126253}
+  rb: {fileID: 7455194392694617075}
+  render: {fileID: 516593389017136271}
   _layerMask:
     serializedVersion: 2
     m_Bits: 0

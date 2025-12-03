@@ -344,7 +344,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             partComponent.GenerateColliderFromSprite();
             partComponent.SetSortingLayer(partData.layer);
             layerComponent.Parts.Add(partComponent);
-
+            partComponent.StartFallingCheck();
 
         }
 
@@ -385,16 +385,11 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
         foreach (var hingeConnection in screwData.hingeConnections)
         {
-            //Debug.Log($"Attempting to create hinge connection for part ID {hingeConnection.bodyPartUniqueID}");
             if (currentLevelObject == null) continue;
-            // Try to fetch the connected part
             var connectedPart = currentLevelObject.GetComponent<LayerManager>()?.GetPartByKey(hingeConnection.bodyPartUniqueID);
 
-            // Check if connectedPart is null and provide detailed feedback
             if (connectedPart == null)
             {
-                //Debug.LogError($"Error: Part with ID {hingeConnection.bodyPartUniqueID} not found. " +
-                //               $"Ensure that the part is loaded correctly and the ID matches.");
                 continue;
             }
 
@@ -402,17 +397,13 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             var connectedRigidBody = connectedPart.GetComponent<Rigidbody2D>();
             if (connectedRigidBody == null)
             {
-                //Debug.LogError($"Error: Part with ID {hingeConnection.bodyPartUniqueID} is missing a Rigidbody2D component.");
                 continue;
             }
 
-            // Create the hinge connection
             var hinge = screw.CreateHinge(connectedRigidBody, hingeConnection);
 
-            // Add the hinge to the ScrewManager
             ScrewManager.AddHingeConnection(hinge, connectedPart);
 
-            //Debug.Log($"Hinge connection successfully created for part ID {hingeConnection.bodyPartUniqueID}");
         }
         if (currentLevelObject != null)
         {
@@ -450,7 +441,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     private void HandleScrewRemoved(Screw removedScrew)
     {
-        //Debug.Log($"Screw {removedScrew.name} has been removed. Handling additional logic...");
     }
     public void OnReset()
     {
@@ -475,14 +465,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         color = default;
 
         if (hex.Length == 8)
-        { // Check if it's in RRGGBBAA format
-          // Parse R, G, B, and A components
+        { 
             if (ColorUtility.TryParseHtmlString("#" + hex, out color))
             {
-                return true;
+                return true;    
             }
         }
-        //Debug.LogError("Hex string must be 8 characters in RRGGBBAA format");
         return false;
     }
 

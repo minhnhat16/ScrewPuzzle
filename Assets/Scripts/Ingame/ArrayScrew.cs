@@ -302,12 +302,15 @@ namespace Ingame
 
         public ColorEnum GetMostestColorInArray()
         {
-            if (screws.Count == 0)
-            {
+            if (screws == null || screws.Count == 0)
                 return ColorEnum.Clear;
-            }
-            var t = screws.Max(screw => screw.Color);
-            return t;
+
+            return screws
+                .Where(s => s != null)
+                .GroupBy(s => s.Color)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
         }
 
 

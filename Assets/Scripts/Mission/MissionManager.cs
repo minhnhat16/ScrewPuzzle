@@ -28,7 +28,7 @@ public class MissionManager : SingletonMono<MissionManager>
     private Dictionary<int, MissionProgress> runtimeProgress = new();
 
     // Events fired by gameplay
-    public static UnityEvent<ColorEnum> OnScrewCollected = new();
+    public static UnityEvent<ColorEnum,int> OnScrewCollected = new();
     public static UnityEvent OnBoxClosed = new();
     public static UnityEvent OnItemUsed = new();
     public static UnityEvent OnLevelCompleted = new();
@@ -40,7 +40,7 @@ public class MissionManager : SingletonMono<MissionManager>
 
     private void OnEnable()
     {
-        OnScrewCollected.AddListener(color => AddProgress(color));
+        OnScrewCollected.AddListener((color,total)=> AddProgress(color,total));
         OnBoxClosed.AddListener(() => AddProgress());
         OnItemUsed.AddListener(() => AddProgress());
         OnLevelCompleted.AddListener(() => SaveAllMissionProgress());
@@ -110,8 +110,11 @@ public class MissionManager : SingletonMono<MissionManager>
     // ADD PROGRESS
     // ============================================================
 
-    public void AddProgress(ColorEnum color = ColorEnum.Clear)
+    public void AddProgress(ColorEnum color = ColorEnum.Clear,int total = 1)
     {
+
+
+        Debug.Log("add progress mission ");
         foreach (var mission in activeMissions.ToList())
         {
             if (IsMissionCompleted(mission.Id))
@@ -121,7 +124,10 @@ public class MissionManager : SingletonMono<MissionManager>
             {
                 case MissionType.CollectColor:
                     if (mission.Color == color)
-                        IncreaseProgress(mission.Id, 1);
+                    {
+                        IncreaseProgress(mission.Id, total);
+                        Debug.Log("increase progress " + mission.Id);   
+                    }
                     break;
 
                 case MissionType.ClearNormalBoxes:
@@ -130,11 +136,11 @@ public class MissionManager : SingletonMono<MissionManager>
                     break;
 
                 case MissionType.UseItem:
-                    IncreaseProgress(mission.Id, 1);
+                    IncreaseProgress(mission.Id, total);
                     break;
 
                 case MissionType.TimeSurvive:
-                    IncreaseProgress(mission.Id, 1);
+                    IncreaseProgress(mission.Id, total);
                     break;
 
                 case MissionType.ClearRainbowBox:

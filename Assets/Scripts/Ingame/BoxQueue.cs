@@ -92,7 +92,7 @@ namespace Ingame
             yield return new WaitUntil(() => CameraMain.instance.GetCam() != null);
             yield return new WaitUntil(() => configRecords.Count != 0);
 
-            InitAndShuffleColor();
+            InitAndShuffleColorSmart();
             InitBoxes();
 
             yield return new WaitForSeconds(0.1f);
@@ -179,6 +179,70 @@ namespace Ingame
             IngameController.ins.TotalStarInLevel = totalStar;
 
             configRecords = finalList;
+            ConfigStack = new Stack<BoxConfigRecord>(configRecords);
+        }
+        private Dictionary<ColorEnum, int> GetDesignWeight()
+        {
+            return configRecords
+                .GroupBy(r => r.BoxColor)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(r => r.NumberOfScrewHoles)
+                );
+        }
+        private Dictionary<ColorEnum, int> GetActiveDemand()
+        {
+            var dict = new Dictionary<ColorEnum, int>();
+
+            foreach (var kv in LevelManager.ins.layerManager.screwDict)
+            {
+                foreach (var screw in kv.Value)
+                {
+                    if (screw == null) continue;
+
+                    if (!dict.ContainsKey(screw.Color))
+                        dict[screw.Color] = 0;
+
+                    dict[screw.Color]++;
+                }
+            }
+
+            return dict;
+        }
+        public void InitAndShuffleColorSmart()
+        {
+            var activeDemand = GetActiveDemand();
+            var designWeight = GetDesignWeight();
+
+            // GOM bucket theo màu
+            var buckets = configRecords
+                .GroupBy(r => r.BoxColor)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var result = new List<BoxConfigRecord>();
+            ColorEnum? last = null;
+
+            while (true)
+            {
+                bool allEmpty = buckets.Values.All(l => l.Count == 0);
+                if (allEmpty) break;
+
+                var color = ChooseNextColor(activeDemand, buckets, last);
+
+                if (!buckets.ContainsKey(color) || buckets[color].Count == 0)
+                    continue;
+
+                // LẤY BOX QUAN TRỌNG NHẤT TRONG MÀU
+                var next = buckets[color]
+                    .OrderByDescending(r => r.NumberOfScrewHoles)
+                    .First();
+
+                result.Add(next);
+                buckets[color].Remove(next);
+                last = color;
+            }
+
+            configRecords = result;
             ConfigStack = new Stack<BoxConfigRecord>(configRecords);
         }
 
@@ -286,7 +350,41 @@ namespace Ingame
             boxesStack = new Stack<Box>(ordered);
             return box;
         }
+        private ColorEnum ChooseNextColor(
+        Dictionary<ColorEnum, int> activeDemand,
+        Dictionary<ColorEnum, List<BoxConfigRecord>> buckets,
+        ColorEnum? lastColor)
+        {
+            float alpha = 2f;   // mức ưu tiên theo screw thật
+            float beta = 1f;   // mức ưu tiên theo thiết kế
 
+            ColorEnum bestColor = default;
+            float bestScore = float.NegativeInfinity;
+
+            foreach (var kv in buckets)
+            {
+                var color = kv.Key;
+                var list = kv.Value;
+
+                if (list.Count == 0)
+                    continue;
+
+                int demand = activeDemand.ContainsKey(color) ? activeDemand[color] : 0;
+                int design = list.Sum(r => r.NumberOfScrewHoles);
+
+                float penalty = (lastColor == color) ? 5f : 0f;
+
+                float score = demand * alpha + design * beta - penalty;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestColor = color;
+                }
+            }
+
+            return bestColor;
+        }
         #endregion
 
         #region BoxSlots & Align
@@ -419,6 +517,8 @@ namespace Ingame
                 int currentScrew = SideMissionManager.ins.currentMission.currentCount;
                 bool missionComplete = currentScrew >= specialScrew;
 
+
+
                 if (screwBoxes.Count <= 0 && missionComplete)
                 {
                     OnLastBoxClearScrew();
@@ -446,7 +546,6 @@ namespace Ingame
                                        0);
                 box = SpawnBox();
                 if (box == null) return null;
-
                 box.gameObject.SetActive(false);
             }
             else
@@ -456,13 +555,13 @@ namespace Ingame
                                        0);
                 box = PopBoxByPredicate(predicate);
                 if (box == null) return null;
-
                 box.gameObject.SetActive(true);
             }
 
             box.transform.position = spawnPos;
             box.Position = spawnPos;
-            box.ClearScrewOnHold();
+            //box.ClearScrewOnHold();
+            box.SetIsLocked(false);
 
             return box;
         }
@@ -486,7 +585,7 @@ namespace Ingame
                     newBox.transform.position = fpos;
                     newBox.Render.enabled = true;
                     StartCoroutine(MoveAndHandleBox(newBox, currentSlot, fpos));
-                }   
+                }
             });
         }
 
@@ -583,7 +682,7 @@ namespace Ingame
                 int boxLayer = box.Render.sortingLayerID;
                 screw.SetSortingOrderAndLayer(boxLayer + 2, box.Render.sortingLayerName);
                 screwMng.RemoveScrew(screw);
-                MissionManager.OnScrewCollected?.Invoke(screw.Color);
+                MissionManager.OnScrewCollected.Invoke(screw.Color,1);
 
             }
             else

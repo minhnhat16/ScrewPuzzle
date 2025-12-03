@@ -160,7 +160,7 @@ public class LevelMaker : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
+            Debug.Log("Clicked part");
             // Check if the clicked object is a valid part and is active
             if (hit.collider != null && hit.collider.CompareTag("Part"))
             {

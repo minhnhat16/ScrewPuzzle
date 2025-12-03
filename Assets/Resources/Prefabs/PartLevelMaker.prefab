@@ -91,7 +91,7 @@ SpriteRenderer:
   m_Size: {x: 2.16, y: 1.85}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!50 &6508685874718984852
@@ -196,7 +196,7 @@ MonoBehaviour:
   isFalling: 0
   body: {fileID: 0}
   activeSprite: {fileID: 0}
-  outline: {fileID: 0}
+  outline: {fileID: 8160175156728093057}
   inactiveSprite: {fileID: 0}
   col: {fileID: 0}
   OnStateChanged:

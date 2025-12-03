@@ -111,7 +111,7 @@ namespace Managers
                         IngameController.ins.StarChanging(1);
                         SideMissionManager.ins.UpdateMission(1);
                         ViewManager.Instance.UpdateSpecialBoxCount(color, screwCounts[color]);
-                        MissionManager.OnScrewCollected?.Invoke(color);
+                        MissionManager.OnScrewCollected?.Invoke(color,1);
                     });
 
 
@@ -124,7 +124,7 @@ namespace Managers
                             {
                                 screw.gameObject.SetActive(false);
                                 ViewManager.Instance.UpdateSpecialBoxCount(color, screwCounts[color]);
-                                MissionManager.OnScrewCollected?.Invoke(color);
+                                MissionManager.OnScrewCollected?.Invoke(color,1);
                             }
                         });
                     }

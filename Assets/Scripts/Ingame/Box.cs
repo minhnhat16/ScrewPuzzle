@@ -194,7 +194,7 @@ namespace Ingame
 
         IEnumerator InactiveBoxCoroutine()
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
             yield return new WaitUntil(() => !isMoving);
             BoxQueue.ins.DeactivateAndMoveQueue(this);
         }
@@ -468,6 +468,7 @@ namespace Ingame
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
             this.color = color;
+            render.enabled =true;
             render.sprite = color.ToBoxSprite();
         }
         public void FindScrew()
@@ -505,9 +506,11 @@ namespace Ingame
 
         public void OnReset()
         {
+            Reset();
             holdScrews.RemoveAll(h => !h.IsEmpty());
             SetIsLocked(false);
             StopAllCoroutines();
+            ClearScrewOnHold();
         }
     }
 }

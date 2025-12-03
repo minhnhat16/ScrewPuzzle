@@ -451,16 +451,19 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         var screwTransform = screwManager.transform;
 
 
-
+        var screwPrefab = Resources.Load("GameObject/ScrewLevelMaker");
         // Load screws
         foreach (var screwData in levelData.screws)
         {
             GameObject screwGameObject =
-                Instantiate(Resources.Load("GameObject/ScrewLevelMaker"), screwTransform) as GameObject;
+                Instantiate(screwPrefab, screwTransform) as GameObject;
             screwGameObject.transform.localPosition = screwData.screwPosition;
 
+
+            Debug.Log("Screw is null " + screwData.idColor==null);
             ScrewLevelMaker screwComponent = screwGameObject.GetComponent<ScrewLevelMaker>();
-            var color = screwComponent.Color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
+            var color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
+            screwComponent.Color = color;
             screwComponent.ChangeScrewColor(color);
             // Handle hinge connections
 
