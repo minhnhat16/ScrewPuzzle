@@ -71,7 +71,7 @@ namespace Level
         public int idScrew;
         public int idColor;
         public Vector3 screwPosition;
-        public List<HingeConnection> hingeConnections;
+        public HingeConnection hingeConnection;
     }
 
     [System.Serializable]
