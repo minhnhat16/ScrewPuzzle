@@ -7,13 +7,9 @@ using UnityEngine;
 public class LevelBaseMaker : BaseLevelObject
 {
 
-    [SerializeField] private ScrewManager screwManager;
+     public ScrewManager screwManager;
 
-    public ScrewManager ScrewManager
-    {
-        get => screwManager;
-        set => screwManager = value;
-    }
+ 
 
 
     // Start is called before the first frame update

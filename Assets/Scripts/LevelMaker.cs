@@ -6,10 +6,12 @@ using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
 using Level;
+using TMPro;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LevelMaker : MonoBehaviour
@@ -116,8 +118,6 @@ public class LevelMaker : MonoBehaviour
     {
         Debug.Log("Screw clicked. Entering selection mode.");
         if (isInputData) return;
-        // Logic để xử lý khi nhấn vào screw
-        // Có thể gọi sự kiện hay logic khác ở đây
         onScrewClicked.Invoke();
     }
 
@@ -126,36 +126,101 @@ public class LevelMaker : MonoBehaviour
         StartCoroutine(ChosePart(screw));
     }
 
+    private bool isChoosingPart = false;
+    float timer = 0f;
+    float timeout = 3f;
     private IEnumerator ChosePart(ScrewLevelMaker screw)
     {
+        if (isChoosingPart) yield break; // tránh start 2 lần
+        isChoosingPart = true;
+
         GameObject partChosen = null;
-        yield return new WaitForEndOfFrame();
-        // Wait until a valid part is clicked
-        yield return new WaitUntil(() => 
+
+        // Chờ 1 frame để đảm bảo mọi input từ frame trước đã trôi qua
+        yield return null;
+
+        // Chờ đến khi người chơi chọn đúng đối tượng Part
+        yield return new WaitUntil(() =>
         {
             partChosen = PartGetInput();
-            return partChosen != null;
+            screw.ScrewChangeColorOnClick(true);
+            return partChosen != null && partChosen.TryGetComponent(out BasePart _);
         });
 
-        // Once a part is selected, get its Rigidbody2D and create a hinge
-        var partScript = partChosen.GetComponent<BasePart>();
-        var bodyPart = partScript.Body;
-
-        Debug.Log("Part layered selected: " + partChosen.layer);
-
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorldPosition.z = 0;
-        HingeConnection hingeConnection = new HingeConnection()
+        // Bảo vệ null
+        if (partChosen == null)
         {
-            hingePosition = mouseWorldPosition,
+            Debug.LogWarning("ChosePart: partChosen bị null sau WaitUntil");
+            isChoosingPart = false;
+            yield break;
+        }
+
+        // Lấy BasePart
+        if (!partChosen.TryGetComponent<BasePart>(out var partScript))
+        {
+            Debug.LogWarning("ChosePart: Object click không có BasePart");
+            isChoosingPart = false;
+            yield break;
+        }
+
+        var bodyPart = partScript.Body;
+        if (bodyPart == null)
+        {
+            Debug.LogError("ChosePart: BasePart.Body null");
+            isChoosingPart = false;
+            yield break;
+        }
+
+        Debug.Log("Part layer selected: " + partChosen.layer);
+
+        // Lấy mouse pos world
+        Vector3 mouseWorldPos = GetMouseWorldPosition();
+
+        // Tạo dữ liệu hinge
+        HingeConnection hinge = new HingeConnection()
+        {
+            hingePosition = mouseWorldPos,
             bodyPartUniqueID = partScript.uniqueID,
             bodyPartHingePosition = partScript.transform.position,
         };
-        screw.CreateHingeWithMousePos(bodyPart, hingeConnection);
+       
+
+   
+        if (timer > timeout)
+        {
+            Debug.LogWarning("ChosePart timeout");
+            isChoosingPart = false;
+            yield break;
+        }
+        // Tạo hinge
+        screw.CreateHingeWithMousePos(bodyPart, hinge);
+        isChoosingPart = false;
+    }
+
+    public void ChangeScene()
+    {
+        GameViewUtils.SetGameViewResolution(1080, 1920);
+        SceneManager.LoadScene("BootScene");
+
+    }
+    private Vector3 GetMouseWorldPosition()
+    {
+        var cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogError("Không tìm thấy Camera.main");
+            return Vector3.zero;
+        }
+
+        Vector3 pos = cam.ScreenToWorldPoint(Input.mousePosition);
+        pos.z = 0;
+        return pos;
     }
 
     private GameObject PartGetInput()
     {
+
+        Debug.Log("Part get input ");
         // Detect mouse click
         if (Input.GetMouseButtonDown(0))
         {
@@ -305,7 +370,6 @@ public class LevelMaker : MonoBehaviour
         TurnAllEditModeOff();
         SetEditMode(EditMode.RemoveHinge);
     }
-
 
 
     public void RemoveAllScrew()

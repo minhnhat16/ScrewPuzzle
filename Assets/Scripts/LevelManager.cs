@@ -256,9 +256,16 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
         yield return new WaitForEndOfFrame();
     }
+    // Fix for UNT0008: Unity objects should not use null propagation.
+    // Replace all usages of ?. (null propagation) on UnityEngine.Object-derived types with explicit null checks.
+
+    // 1. In LoadConfigFromFile and LoadLevelOnFile, the callback?.Invoke() is safe because Action is not a Unity object.
+    // 2. In LoadGameObjectFromLevel, GetLevelData, and other methods, check for ?. usage on UnityEngine.Object types.
+
     private Level.Level GetLevelData(int levelId)
     {
-        Level.Level levelData = Levels.GetValueOrDefault(levelId.ToString());
+        Level.Level levelData;
+        Levels.TryGetValue(levelId.ToString(), out levelData);
         if (levelData == null)
         {
             Debug.LogWarning($"Level with ID {levelId} not found!");
@@ -335,7 +342,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             var sprite = SpriteLibControl.Instance.GetSprite(partData.spriteName);
             var outline = SpriteLibControl.Instance.GetSprite(partData.spriteName, true);
             partComponent.Renderer.sprite = sprite;
-            partComponent.OutLine.sprite = outline;
+            partComponent.Outline.sprite = outline;
             if (TryHexToColor(partData.colorString, out Color color))
             {
                 partComponent.Renderer.color = color;
@@ -344,7 +351,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             partComponent.GenerateColliderFromSprite();
             partComponent.SetSortingLayer(partData.layer);
             layerComponent.Parts.Add(partComponent);
-            partComponent.StartFallingCheck();
 
         }
 
@@ -355,61 +361,50 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     }
     private IEnumerator LoadScrewManagerAndScrews(Level.Level levelData)
     {
-        //Debug.Log("Step 5.1: Instantiating Screw Manager");
         var screwManagerGameObject = Instantiate(screwManagerPrefb, currentLevelObject.transform) as GameObject;
         screwManagerGameObject.transform.SetPositionAndRotation(new Vector3(0, -5, 0), Quaternion.identity);
         ScrewManager = screwManagerGameObject.GetComponent<ScrewManager>();
-        ScrewManager.hingeConnections = new();
         ScrewManager.OnScrewRemoved += HandleScrewRemoved;
-        //Debug.Log("Step 5.2: Screw Manager instantiated successfully");
         foreach (var screwData in levelData.screws)
         {
-            //Debug.Log($"Step 5.3: Loading screw {screwData.idColor}");
             yield return LoadScrew(screwData);
-            //Debug.Log($"Step 5.4: Finished loading screw {screwData.idColor}");
         }
     }
 
     private IEnumerator LoadScrew(ScrewScriptable screwData)
     {
-        //Debug.Log($"Loading screw with ID color {screwData.idColor}");
         var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
         var screwGameObject = screw.gameObject;
         screw.OnReset();
         screwGameObject.transform.SetParent(ScrewManager.transform);
         screwGameObject.transform.SetLocalPositionAndRotation(screwData.screwPosition, Quaternion.identity);
-        //Debug.Log("Screw position set");
         screw.Color = (ColorEnum)screwData.idColor;
         screw.ChangeScrewColor(screw.Color);
-        //Debug.Log("Screw color and render reset");
 
-        foreach (var hingeConnection in screwData.hingeConnections)
+        var hingeConnection = screwData.hingeConnection;
+        if (currentLevelObject == null) yield break;
+        LayerManager lm = currentLevelObject.GetComponent<LayerManager>();
+        BasePart connectedPart = null;
+        if (lm != null)
         {
-            if (currentLevelObject == null) continue;
-            var connectedPart = currentLevelObject.GetComponent<LayerManager>()?.GetPartByKey(hingeConnection.bodyPartUniqueID);
-
-            if (connectedPart == null)
-            {
-                continue;
-            }
-
-            // Check if the connected part has a Rigidbody2D component
-            var connectedRigidBody = connectedPart.GetComponent<Rigidbody2D>();
-            if (connectedRigidBody == null)
-            {
-                continue;
-            }
-
-            var hinge = screw.CreateHinge(connectedRigidBody, hingeConnection);
-
-            ScrewManager.AddHingeConnection(hinge, connectedPart);
-
+            connectedPart = lm.GetPartByKey(hingeConnection.bodyPartUniqueID);
         }
-        if (currentLevelObject != null)
-        {
-            var lm = currentLevelObject.GetComponent<LayerManager>();
 
-            var partLayer = lm.GetPartByKey(screwData.hingeConnections[0].bodyPartUniqueID).PartLayer() - 10;
+        Debug.Log("Connected part " + connectedPart);
+
+        Rigidbody2D connectedRigidBody = null;
+        if (connectedPart != null)
+        {
+            connectedRigidBody = connectedPart.GetComponent<Rigidbody2D>();
+        }
+
+        var hinge = screw.CreateHinge(connectedRigidBody, hingeConnection);
+
+        ScrewManager.AddHingeConnection(hinge, connectedPart);
+
+        if (currentLevelObject != null && lm != null && connectedPart != null)
+        {
+            var partLayer = lm.GetPartByKey(screwData.hingeConnection.bodyPartUniqueID).PartLayer() - 10;
             screw.sortingOrder = partLayer;
             if (lm.screwDict.ContainsKey(partLayer))
             {
@@ -418,9 +413,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             }
 
             ScrewManager.AddScrew(screw);
-            //Debug.Log("Screw added to ScrewManager");s
             yield return screw.Init();
-            //Debug.Log($"Screw initialization complete");
             yield return null;
         }
     }
@@ -478,8 +471,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     {
         var sm = screwManager;
 
-        var screws = sm.GetScrews() // bạn có thể thay bằng screwDict list
-                        .Where(s => s.Color == color)
+        var screws = sm.Screws.Where(s => s.Color == color)
                         .ToList();
 
         if (screws.Count < requiredCount)

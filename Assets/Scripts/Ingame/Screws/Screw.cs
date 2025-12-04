@@ -328,15 +328,14 @@ namespace Ingame.Screw
             {
                 hingeBody = newHingeChild.AddComponent<Rigidbody2D>();
             }
-            hingeBody.bodyType = RigidbodyType2D.Static;
+            hingeBody.bodyType = RigidbodyType2D.Kinematic;
 
-            // Configure the hinge joint
             hingeJoint.connectedBody = targetPart;
             hingeJoint.autoConfigureConnectedAnchor = true;
 
             // Add hinge joint and connected body to the hinge controller lists
-            hingeController.HingeJoint2D.Add(hingeJoint);
-            hingeController.BodyConnect.Add(targetPart);
+            hingeController.HingeJoint2D = hingeJoint;
+            hingeController.BodyConnect = targetPart;
 
             return hingeJoint;
         }

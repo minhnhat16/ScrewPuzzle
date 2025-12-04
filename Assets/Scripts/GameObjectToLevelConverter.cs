@@ -30,8 +30,9 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
 
 
     public LayerManager lmanager;
-    public void Awake()
+    public override void Awake()
     {
+        base.Awake();
         lmanager = levelObject.GetComponent<LayerManager>();
     }
     private void Start()
@@ -63,7 +64,6 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 nextLevelId = allLevels[i].levelId + 1; // Move to the next consecutive levelId
             }
 
-            // If no gaps are found, nextLevelId will be set to one higher than the largest existing levelId
             return;
         }
     }
@@ -180,30 +180,28 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 screwPosition = screw.transform.localPosition,
                 idScrew = idScrew,
                 idColor = (int)screw.Color,
-                hingeConnections = new List<HingeConnection>()
+                hingeConnection =new HingeConnection()
             };
 
-            var hinges = screw.HingeController.HingeJoint2D;
+            var hinge = screw.HingeController.HingeJoint2D;
             var listHingeObject = new List<HingeConnection>();
-            if (hinges.Count == 0) continue;
+            if (hinge == null) continue;
             int idBody = 0;
-            foreach (var hinge in hinges)
+          
+            var pos = hinge.transform.localPosition;
+            var body = $"{screw.HingeController.BodyConnect?.GetComponent<BasePart>().uniqueID}";
+            var hingPos = hinge.connectedBody.transform.localPosition;
+            HingeConnection hingeConnection = new HingeConnection()
             {
-                var pos = hinge.transform.localPosition;
-                var body = $"{screw.HingeController.BodyConnect[idBody]?.GetComponent<BasePart>().uniqueID}";
-                var hingPos = hinge.connectedBody.transform.localPosition;
-                HingeConnection hingeConnection = new HingeConnection()
-                {
-                    hingePosition = pos,
-                    bodyPartUniqueID = body,
-                    bodyPartHingePosition = hingPos,
-                };
-                idBody++;
-                listHingeObject.Add(hingeConnection);
-            }
+                hingePosition = pos,
+                bodyPartUniqueID = body,
+                bodyPartHingePosition = hingPos,
+            };
+            idBody++;
+            listHingeObject.Add(hingeConnection);
             idScrew++;
 
-            screwData.hingeConnections = listHingeObject;
+            screwData.hingeConnection = hingeConnection;
             newLevelData.screws.Add(screwData);
         }
         // Save the new level data as a ScriptableObject in the Resources folder
@@ -240,9 +238,9 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             foreach (var screw in levelData.screws)
             {
                 // Clear hinge connections for each screw
-                if (screw.hingeConnections != null)
+                if (screw.hingeConnection != null)
                 {
-                    screw.hingeConnections.Clear();
+                    screw.hingeConnection = null;
                 }
             }
             levelData.screws.Clear();
@@ -467,16 +465,15 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             screwComponent.ChangeScrewColor(color);
             // Handle hinge connections
 
-            foreach (var hingeConnection in screwData.hingeConnections)
-            {
-               // Debug.Log($"Level data with ID {levelId} loaded.");
-                var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
-                screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(),hingeConnection);
+            var hingeConnection = screwData.hingeConnection;
+            // Debug.Log($"Level data with ID {levelId} loaded.");
+            var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
+            screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(), hingeConnection);
 
-                Debug.Log(
-                    $"Hinge connected to part {connectedPart.PartLayer()} at position {connectedPart.uniqueID   }");
-            }
-            var connection = screwData.hingeConnections.First();
+            Debug.Log(
+                $"Hinge connected to part {connectedPart.PartLayer()} at position {connectedPart.uniqueID}");
+         
+            var connection = screwData.hingeConnection;
             var part = layerManager.GetPartByKey(connection.bodyPartUniqueID);
             var partLayerID = part.PartLayer() - 10;
 
@@ -492,7 +489,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             }
             yield return null; 
             StartCoroutine(screwComponent.InitOnLevelMaker());
-
+            screwManager.GetComponent<ScrewManager>().AddScrew(screwComponent);
         }
         
         this.levelData = levelData;
@@ -604,7 +601,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     {
         var levelObj = levelObject.GetComponent<BaseLevelObject>();
         var screwMnger = levelObj.ScrewManager;
-        var screws = screwMnger.GetScrews();
+        var screws = screwMnger.Screws;
 
         foreach(var s in screws)
         {
@@ -641,7 +638,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     public void RemoveAllScrew()
     {
         var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
-        var screws = screwManager.GetScrews();
+        var screws = screwManager.Screws;
         foreach (var s in screws) {
             var sm = s as ScrewLevelMaker;
             RemoveScrew(sm);
@@ -665,6 +662,8 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     {
         screwLevelMaker.ResetHinge();
         lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.layerMask);
+        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        screwManager.RemoveScrew(screwLevelMaker);
         Destroy(screwLevelMaker.gameObject);
     }
 }

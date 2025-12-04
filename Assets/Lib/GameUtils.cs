@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using UIScript;
 using UnityEditor;
 using UnityEngine;
@@ -88,5 +89,133 @@ public static class GameUtils
             }
         }
 
+    }
+}
+public static class GameViewUtils
+{
+    public static void SetGameViewSize(int width, int height)
+    {
+        var group = GetCurrentGroupType();
+        int index = FindSize(group, width, height);
+
+        if (index == -1)
+        {
+            AddCustomSize(group, width, height);
+            index = FindSize(group, width, height);
+        }
+
+        SetSize(index);
+    }
+
+    // ====================== INTERNAL IMPLEMENTATION ======================
+
+    private static Type gameViewSizeType = typeof(Editor).Assembly.GetType("UnityEditor.GameViewSize");
+    private static Type gameViewSizeGroupType = typeof(Editor).Assembly.GetType("UnityEditor.GameViewSizeGroupType");
+    private static Type gameViewSizesType = typeof(Editor).Assembly.GetType("UnityEditor.GameViewSizes");
+    private static Type scriptableSingletonType = typeof(Editor).Assembly.GetType("UnityEditor.ScriptableSingleton`1")
+        .MakeGenericType(gameViewSizesType);
+
+    private static object GetGameViewSizesInstance()
+    {
+        return scriptableSingletonType.GetProperty("instance").GetValue(null, null);
+    }
+
+    private static object GetGroup(object instance, int groupType)
+    {
+        return gameViewSizesType.GetMethod("GetGroup").Invoke(instance, new object[] { groupType });
+    }
+
+    private static int GetCurrentGroupType()
+    {
+        return (int)gameViewSizeGroupType.GetEnumValues().GetValue(0); // Standalone
+    }
+
+    private static int FindSize(int groupType, int width, int height)
+    {
+        var instance = GetGameViewSizesInstance();
+        var group = GetGroup(instance, groupType);
+
+        var getDisplayTexts = group.GetType().GetMethod("GetDisplayTexts");
+        var texts = getDisplayTexts.Invoke(group, null) as string[];
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            if (texts[i].Contains($"{width} x {height}"))
+                return i;
+        }
+        return -1;
+    }
+
+    private static void AddCustomSize(int groupType, int width, int height)
+    {
+        var instance = GetGameViewSizesInstance();
+        var group = GetGroup(instance, groupType);
+
+        var sizeType = typeof(Editor).Assembly.GetType("UnityEditor.GameViewSizeType");
+        var ctor = gameViewSizeType.GetConstructor(new Type[] { sizeType, typeof(int), typeof(int), typeof(string) });
+
+        var newSize = ctor.Invoke(new object[]
+        {
+            Enum.Parse(sizeType, "FixedResolution"),
+            width,
+            height,
+            $"{width}x{height}"
+        });
+
+        var addCustom = group.GetType().GetMethod("AddCustomSize");
+        addCustom.Invoke(group, new object[] { newSize });
+    }
+
+    private static void SetSize(int index)
+    {
+        var gameView = EditorWindow.GetWindow(typeof(EditorWindow).Assembly.GetType("UnityEditor.GameView"));
+        var prop = gameView.GetType().GetProperty("selectedSizeIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+        prop.SetValue(gameView, index, null);
+    }
+
+
+    public static void SetGameViewResolution(int width, int height)
+    {
+        // Lấy type GameView
+        var gvType = typeof(Editor).Assembly.GetType("UnityEditor.GameView");
+        var gvWindow = EditorWindow.GetWindow(gvType);
+        if (gvWindow == null)
+        {
+            Debug.LogError("Cannot open GameView!");
+            return;
+        }
+
+        // Lấy GameViewState
+        var gvStateType = typeof(Editor).Assembly.GetType("UnityEditor.GameViewState");
+        if (gvStateType == null)
+        {
+            Debug.LogError("GameViewState Type Not Found (Unity changed internal API).");
+            return;
+        }
+
+        // Lấy field private: m_GameViewState
+        var field = gvType.GetField("m_GameViewState", BindingFlags.NonPublic | BindingFlags.Instance);
+        var gvState = field.GetValue(gvWindow);
+        if (gvState == null)
+        {
+            Debug.LogError("GameViewState is NULL!");
+            return;
+        }
+
+        // Lấy property: targetSize
+        var sizeProp = gvStateType.GetProperty("targetSize", BindingFlags.Public | BindingFlags.Instance);
+
+        if (sizeProp == null)
+        {
+            Debug.LogError("targetSize property not found!");
+            return;
+        }
+
+        // Set GameView resolution
+        var newSize = new Vector2(width, height);
+        sizeProp.SetValue(gvState, newSize);
+        gvWindow.Repaint();
+
+        Debug.Log($"GameView Resolution Set To: {width} x {height}");
     }
 }

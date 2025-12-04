@@ -213,7 +213,7 @@ namespace Ingame.Board
                 .Where(s =>
                     s?.HingeController?.BodyConnect != null &&
                     body != null &&
-                    s.HingeController.BodyConnect.Any(b => b == body))
+                    s.HingeController.BodyConnect == body)
                 .ToList();
 
             return result;

@@ -40,7 +40,6 @@ public class ColorDropDown : MonoBehaviour
     {
         for (int i = 0; i < buttons.Count; i++)
         {
-
             var btn = buttons[i];
             int total = GameObjectToLevelConverter.ins.GetScrewTotal(btn.Color);
             btn.SetColorTotal(total);

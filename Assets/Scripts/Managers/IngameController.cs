@@ -252,10 +252,6 @@ namespace Managers
             callback?.Invoke();
         }
 
-        public void Reset()
-        {
-            //SceneManager.LoadScene("BootScene");
-        }
 
         public void GameEndInvoker(Action callback = null)
         {

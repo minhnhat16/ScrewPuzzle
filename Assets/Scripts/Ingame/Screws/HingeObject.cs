@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HingeObject : MonoBehaviour
+public class HingeObject : MonoBehaviour,IResetable
 {
     private Rigidbody rb;
     private Vector3 position;
@@ -41,7 +41,7 @@ public class HingeObject : MonoBehaviour
         _transform = transform;
     }
 
-    public void Reset()
+    public void OnReset()
     {
         HingeJoint2D.connectedBody = null;
         position = Vector3.zero;

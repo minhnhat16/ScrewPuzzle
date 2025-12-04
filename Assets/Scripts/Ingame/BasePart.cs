@@ -1,17 +1,32 @@
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Experimental.AI;
+
 namespace Ingame
 {
     public class BasePart : MonoBehaviour
     {
         public string uniqueID;
-        private static HashSet<string> usedIDs = new HashSet<string>(); // To track used IDs
+        private static readonly HashSet<string> usedIDs = new HashSet<string>();
 
+        [Header("Components")]
+        [SerializeField] private Rigidbody2D body;
+        [SerializeField] private SpriteRenderer activeSprite;
+        [SerializeField] private SpriteRenderer outline;
+        [SerializeField] private PolygonCollider2D col;
+
+        [Header("State")]
+        [SerializeField] private bool isFalling;
+
+        public bool IsFalling => isFalling;
+
+        public UnityEvent<bool, BasePart> OnStateChanged = new();
+
+        //-----------------------------
+        // PROPERTIES
+        //-----------------------------
         public virtual Rigidbody2D Body
         {
             get => body;
@@ -29,236 +44,180 @@ namespace Ingame
             get => col;
             set => col = value;
         }
+        public SpriteRenderer Outline { get => outline; set => outline = value; }
 
-        [SerializeField] private bool isFalling;
-        [SerializeField] private Rigidbody2D body;
-        [SerializeField] private SpriteRenderer activeSprite;
-        [SerializeField] private SpriteRenderer outline;
-        [SerializeField] private Sprite inactiveSprite;
-        [SerializeField] private PolygonCollider2D col;
-
-
-
-        private Coroutine checkFallingRoutine;
-        public bool IsFalling
-        {
-            get => isFalling;
-            private set => isFalling = value;
-        }
-        public SpriteRenderer OutLine
-        {
-            get => outline;
-            set => outline = value;
-        }
-
-
-        public UnityEvent<bool,BasePart> OnStateChanged = new();
-        public BasePart(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider)
-        {
-            this.body = body;
-            this.activeSprite = renderer;
-            this.col = collider;
-        }
-        public int PartLayer()
-        {
-            return gameObject.layer;
-        }
-
-        public void Awake()
+        //-----------------------------
+        // UNITY LIFECYCLE
+        //-----------------------------
+        private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             activeSprite = GetComponentInChildren<SpriteRenderer>();
             col = GetComponent<PolygonCollider2D>();
-            // Assign a GUID if not already set
-            if (string.IsNullOrEmpty(uniqueID))
-            {
-                uniqueID = GenerateUniqueID();
-            }
 
-            // Immediately evaluate falling state on Awake
+            // Unique ID
+            if (string.IsNullOrEmpty(uniqueID))
+                uniqueID = GenerateUniqueID();
+
             UpdateFallingState();
         }
 
-        // Start is called before the first frame update
-        public void Start()
+        private void Start()
         {
-            // Ensure the checking coroutine is running (StartFallingCheck uses null-coalescing so it's safe)
-
-            StartFallingCheck();
-
+            // No coroutine needed — using FixedUpdate instead
         }
 
-        public IEnumerator Init(SpriteRenderer render, Action callBack = null)
+        private void FixedUpdate()
         {
-            yield return new WaitForSeconds(0.125f);
-            col = GetComponent<PolygonCollider2D>();
-            col.pathCount = 0;
-            this.activeSprite = render;
-            col.SetPath(0, this.activeSprite.sprite.vertices);
-
-            gameObject.tag = "Part";
+            UpdateFallingState();
         }
 
-
-        private void SetUpCollider()
-        {
-
-        }
-
-        // Public helper to perform a single immediate falling-state check and fire event if changed.
+        //-----------------------------
+        // FALLING LOGIC (STABLE VERSION)
+        //-----------------------------
         public void UpdateFallingState()
         {
-            bool wasFalling = isFalling;
-            if (body != null)
+            if (body == null)
             {
-                isFalling = body.linearVelocity.y < -5f;
-            }
-            else
-            {
-                isFalling = false;
-            }
-
-            if (isFalling != wasFalling)
-            {
-
-                Debug.Log("Falling " + isFalling);
-                OnStateChanged?.Invoke(isFalling,this);
-            }
-        }
-
-        public void StartFallingCheck()
-        {
-            Debug.Log($"[{name}] StartFallingCheck called. routine={checkFallingRoutine}");
-            if (checkFallingRoutine == null)
-            {
-                checkFallingRoutine = StartCoroutine(CheckFalling());
-                Debug.Log($"[{name}] Coroutine started!");
-            }
-            else
-            {
-            }
-        }
-
-        // Coroutine để kiểm tra trạng thái rơi
-        private IEnumerator CheckFalling()
-        {
-
-            Debug.Log($"[{name}] CheckFalling coroutine running.");
-            while (true)
-            {
-                bool wasFalling = isFalling;
-                isFalling = (body != null) && body.linearVelocity.y < -5f;
-
-                // Nếu trạng thái thay đổi, kích hoạt sự kiện
-                if (isFalling != wasFalling)
-                {
-                    Debug.Log("Falling " + isFalling);
-                    body.gravityScale = 1;
-                    OnStateChanged?.Invoke(isFalling,this);
-                }
-
-                // Điều chỉnh thời gian chờ giữa các lần kiểm tra, có thể thay đổi thời gian cho phù hợp
-                yield return new WaitForSeconds(0.1f); // Kiểm tra sau mỗi 0.1 giây
-            }
-        }
-        // Hàm dừng Coroutine kiểm tra trạng thái rơi
-        public void StopFallingCheck()
-        {
-            if (checkFallingRoutine != null)
-            {
-                StopCoroutine(checkFallingRoutine);
-                checkFallingRoutine = null;
-            }
-        }
-        public void HandleNoHingesLeft()
-        {
-            var partLayer = PartLayer();
-            SetIgnoreColliderLayer(false, partLayer, partLayer);
-            // Ví dụ: đổi trạng thái, cập nhật UI, hoặc xóa đối tượng
-            body.gravityScale = 1;
-            body.bodyType = RigidbodyType2D.Dynamic;
-
-        }
-
-        public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
-        {
-
-            if (idLayer < 0 || idTargetLayer < 0)
-            {
-                //Debug.LogWarning($"Layer {idLayer} hoặc {idTargetLayer} không tồn tại.");
+                SetFalling(false);
                 return;
             }
 
-            Physics2D.IgnoreLayerCollision(idLayer, idLayer, isIgnoring);
+            bool falling = body.linearVelocity.y < -0.15f;
 
-            //Debug.Log($"Đã {(isIgnoring ? "bỏ qua" : "kích hoạt")} va chạm giữa lớp {idLayer} và {idTargetLayer}.");
+            if (falling != isFalling)
+                SetFalling(falling);
         }
+
+        private void SetFalling(bool newState)
+        {
+            isFalling = newState;
+            OnStateChanged?.Invoke(newState, this);
+
+            if (newState)
+                body.gravityScale = 1;
+        }
+
+        //-----------------------------
+        // COLLISION / SORTING
+        //-----------------------------
+        public void SetIgnoreColliderLayer(bool isIgnoring, int idLayer, int idTargetLayer)
+        {
+            if (idLayer < 0 || idTargetLayer < 0)
+                return;
+
+            Physics2D.IgnoreLayerCollision(idLayer, idTargetLayer, isIgnoring);
+        }
+
         public void SetSortingLayer(string layerName)
         {
-            //Debug.Log("sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
-
             if (activeSprite != null)
             {
                 activeSprite.sortingLayerName = layerName;
-                outline.sortingLayerName = layerName;
+                activeSprite.sortingOrder = 0;
             }
 
-            //if (inactiveSprite != null)
-            //{
-            //    inactiveSprite.sortingLayerName = layerName; // Both sprites use the same sorting layer
-            //}
-
-            //Debug.Log("After sorting layer name " + layerName + "sortinglayer name" + render.sortingLayerName);
-
-            activeSprite.sortingOrder = 0;
-           outline.sortingOrder = 0;
-            
-            //inactiveSprite.sortingOrder = activeSprite.sortingOrder+1; 
-        }
-        private string GenerateUniqueID()
-        {
-            string newID;
-            do
+            if (outline != null)
             {
-                newID = UnityEngine.Random.Range(1000, 9999).ToString(); // Generate a random 4-digit number
-            } while (usedIDs.Contains(newID)); // Ensure the ID is unique
-            usedIDs.Add(newID); // Mark the ID as used
-            return newID;
+                outline.sortingLayerName = layerName;
+                outline.sortingOrder = 0;
+            }
         }
+
+        //-----------------------------
+        // HINGE REMOVED
+        //-----------------------------
+        public void HandleNoHingesLeft()
+        {
+            if (body == null) return;
+
+            body.gravityScale = 1;
+            body.bodyType = RigidbodyType2D.Dynamic;
+
+            int layer = gameObject.layer;
+            SetIgnoreColliderLayer(false, layer, layer);
+        }
+
+        //-----------------------------
+        // COLLIDER GENERATION
+        //-----------------------------
+        public IEnumerator Init(SpriteRenderer render, Action callback = null)
+        {
+            yield return new WaitForSeconds(0.1f);
+
+            activeSprite = render;
+            col = GetComponent<PolygonCollider2D>();
+
+            ResetAndReapplyPolygonCollider();
+
+            gameObject.tag = "Part";
+            callback?.Invoke();
+        }
+
         public virtual void ResetAndReapplyPolygonCollider()
         {
-            // Reset the collider by clearing all paths
-            col.pathCount = 0;
+            if (col == null || activeSprite == null || activeSprite.sprite == null)
+                return;
 
-            // Generate a new shape for the polygon collider from the sprite
             GenerateColliderFromSprite();
         }
 
         public virtual void GenerateColliderFromSprite()
         {
-            var sprite = activeSprite.sprite;
-
-            if (activeSprite == null || col == null || sprite == null)
+            if (activeSprite == null || col == null || activeSprite.sprite == null)
                 return;
 
-            // Xoá các path cũ
-            col.pathCount = sprite.GetPhysicsShapeCount();
+            var sprite = activeSprite.sprite;
+            int shapeCount = sprite.GetPhysicsShapeCount();
 
-            // Copy physics shape từ sprite sang collider
-            List<Vector2> path = new List<Vector2>();
-            for (int i = 0; i < sprite.GetPhysicsShapeCount(); i++)
+            col.pathCount = shapeCount;
+
+            List<Vector2> path = new();
+            for (int i = 0; i < shapeCount; i++)
             {
                 path.Clear();
                 sprite.GetPhysicsShape(i, path);
                 col.SetPath(i, path);
             }
-
         }
+
+        //-----------------------------
+        // RESET
+        //-----------------------------
         public void Reset()
         {
             isFalling = false;
-            activeSprite.sprite = null;
 
+            if (activeSprite != null)
+                activeSprite.sprite = null;
+
+            if (body != null)
+            {
+                body.linearVelocity = Vector2.zero;
+                body.gravityScale = 0;
+            }
+        }
+
+        //-----------------------------
+        // UTILITIES
+        //-----------------------------
+        private string GenerateUniqueID()
+        {
+            string newID;
+
+            do
+            {
+                newID = UnityEngine.Random.Range(1000, 9999).ToString();
+            }
+            while (usedIDs.Contains(newID));
+
+            usedIDs.Add(newID);
+            return newID;
+        }
+
+        public int PartLayer()
+        {
+            return gameObject.layer;
         }
     }
 }

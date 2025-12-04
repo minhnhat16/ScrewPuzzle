@@ -1,10 +1,11 @@
 #if UNITY_EDITOR
 
-using System.Collections;
 using Enums;
 using Ingame.Board;
 using Ingame.Screw;
 using Level;
+using System.Collections;
+using System.Drawing;
 using Unity.Jobs;
 using UnityEngine;
 public class ScrewLevelMaker : Screw
@@ -69,19 +70,15 @@ public class ScrewLevelMaker : Screw
         string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
         yield return new WaitUntil(() => bodyLayer != null);
         SetSortingOrderAndLayer(sortingOrder, bodyLayer);
-        // yield return new WaitUntil(()=>ConfigFileManager.Instance.isDone );
-        // SetScrewColor();
+        ChangeScrewColor(Color);
     }
 
     internal void ResetHinge()
     {
-        var allHinge = hingeController.HingeJoint2D;
-        foreach (var hinge in allHinge)
-        {
-            Destroy(hinge.gameObject);
-        }
-        hingeController.HingeJoint2D.Clear();
-        hingeController.BodyConnect.Clear();
+        var hinge = hingeController.HingeJoint2D;
+
+        Destroy(hinge.gameObject);
+
     }
 
     private void OnMouseClick()
@@ -98,7 +95,7 @@ public class ScrewLevelMaker : Screw
 
             if (LevelMaker.instance.isEditHinge)
             {
-                if (hingeController.HingeJoint2D.Count > 0) return;
+                if (hingeController.HingeJoint2D == null) return;
                 ScrewChangeColorOnClick(isSelecting);
                 isHeld = true; // Đánh dấu screw là đang được giữ
                 LevelMaker.instance.OnScrewClicked(); // Gọi phương thức từ LevelMaker
@@ -112,8 +109,6 @@ public class ScrewLevelMaker : Screw
             if (LevelMaker.instance.isEditScrewColor)
             {
                 Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
-
-
                 GameObjectToLevelConverter.ins.UpdateScrewTotal();
                 ChangeScrewColor(Color);
             }
@@ -130,11 +125,15 @@ public class ScrewLevelMaker : Screw
         }
     }
 
+
     public void ScrewChangeColorOnClick(bool isSelected)
     {
-        ColorEnum color;
-        color = Color == ColorEnum.Green ? ColorEnum.Red : ColorEnum.Green;
-        ChangeScrewColor(isSelected ? Color : color);
+        ColorEnum temp;
+        temp = Color == ColorEnum.Green ? ColorEnum.Red : ColorEnum.Green;
+        temp = isSelected ? temp : Color;
+        Debug.Log("Color temp " + temp + " main color: " + Color + " and is selected " + isSelected);
+        render.sprite = temp.ToScrewSprite();
+
     }
     public void TurnColliderIs(bool isEnable)
     {
@@ -160,12 +159,12 @@ public class ScrewLevelMaker : Screw
         newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
         hingeJoint.connectedBody = targetBody; // Kết nối hinge với đối tượng screw mục tiêu
         // Lưu HingeJoint2D vào danh sách nếu cần
-        hingeController.HingeJoint2D.Add(hingeJoint);
-        hingeController.BodyConnect.Add(targetBody); // Thêm Rigidbody2D vào danh sách bodyConnect
+        hingeController.HingeJoint2D = hingeJoint;
+        hingeController.BodyConnect =targetBody; // Thêm Rigidbody2D vào danh sách bodyConnect
         hingeJoint.autoConfigureConnectedAnchor = true;
         Debug.Log("Created hinge joint with: " + targetBody.name + ",layer : " + targetBody.gameObject.layer);
         isSelecting = false;
-        ScrewChangeColorOnClick(true);
+        ScrewChangeColorOnClick(false);
         TurnColliderIs(!isSelecting);
         return hingeJoint;
     }
@@ -187,12 +186,12 @@ public class ScrewLevelMaker : Screw
         newHingeChild.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
         hingeJoint.connectedBody = targetScrew; // Kết nối hinge với đối tượng screw mục tiêu
         // Lưu HingeJoint2D vào danh sách nếu cần
-        hingeController.HingeJoint2D.Add(hingeJoint);
-        hingeController.BodyConnect.Add(targetScrew); // Thêm Rigidbody2D vào danh sách bodyConnect
+        hingeController.HingeJoint2D= hingeJoint;
+        hingeController.BodyConnect = targetScrew; // Thêm Rigidbody2D vào danh sách bodyConnect
         hingeJoint.autoConfigureConnectedAnchor = true;
         Debug.Log("Created hinge joint with: " + targetScrew.name);
         isSelecting = false;
-        ScrewChangeColorOnClick(true);
+        ScrewChangeColorOnClick(false);
         TurnColliderIs(!isSelecting);
         return hingeJoint;
     }

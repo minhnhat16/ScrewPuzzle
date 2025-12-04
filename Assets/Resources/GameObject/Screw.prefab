@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 4241144412972584126}
   - component: {fileID: 4241144412972584099}
   - component: {fileID: 6748274948914760515}
-  - component: {fileID: 9090076101329068977}
   - component: {fileID: 3012382608794122584}
+  - component: {fileID: 781120882172530673}
   m_Layer: 9
   m_Name: Screw
   m_TagString: Player
@@ -99,23 +99,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.27
---- !u!114 &9090076101329068977
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4241144412972584127}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 769db6d90e828774c91990fa142c0f88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  layer:
-    serializedVersion: 2
-    m_Bits: 0
-  bodyConnect: []
-  hingeJoint2D: []
 --- !u!114 &3012382608794122584
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,9 +123,26 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
-  hingeController: {fileID: 9090076101329068977}
+  hingeController: {fileID: 781120882172530673}
   isShaking: 0
   isMoving: 0
+--- !u!114 &781120882172530673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769db6d90e828774c91990fa142c0f88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layer:
+    serializedVersion: 2
+    m_Bits: 0
+  bodyConnect: {fileID: 0}
+  hingeJoint2D: {fileID: 0}
 --- !u!1 &4241144413796154025
 GameObject:
   m_ObjectHideFlags: 0

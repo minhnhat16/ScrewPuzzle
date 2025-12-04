@@ -41,11 +41,13 @@ public class StarBottleFill : MonoBehaviour, IResetable
         //    {
         //        imgFill.transform.localScale = Vector3.one;
         //    });
-    } 
+    }
     public void OnReset()
     {
         fillTween?.Kill();
         popTween?.Kill();
+        fillTween = imgFill.DOFillAmount(0, 0);
+
         imgFill.fillAmount = 0;
         imgFill.transform.localScale = Vector3.one;
     }
