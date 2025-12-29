@@ -74,7 +74,7 @@ namespace Managers
                 // Xoá khỏi ScrewManager nếu có
                 if (screwMng != null)
                 {
-              
+
                     screwMng.RemoveScrew(screw);
                 }
 
@@ -83,7 +83,7 @@ namespace Managers
                     screwCounts[color] = 0;
 
                 screwCounts[color]++;
-           
+
                 // Di chuyển screw tới vị trí Special Box (nếu có đặt anchor)
                 if (specialBoxAnchor != null)
                 {
@@ -100,7 +100,7 @@ namespace Managers
                         .SetEase(Ease.InCubic)
 
                     );
-                    seq.Join( 
+                    seq.Join(
                         spark.transform.DOMove(specialBoxAnchor.position, 0.45f).SetEase(Ease.InCubic));
                     // 2) Pop scale (nảy nhẹ)
                     seq.Append(
@@ -111,7 +111,8 @@ namespace Managers
                         IngameController.ins.StarChanging(1);
                         SideMissionManager.ins.UpdateMission(1);
                         ViewManager.Instance.UpdateSpecialBoxCount(color, screwCounts[color]);
-                        MissionManager.OnScrewCollected?.Invoke(color,1);
+                        MissionManager.ins.ProcessCollectScrew(color, 1);
+
                     });
 
 
@@ -124,12 +125,14 @@ namespace Managers
                             {
                                 screw.gameObject.SetActive(false);
                                 ViewManager.Instance.UpdateSpecialBoxCount(color, screwCounts[color]);
-                                MissionManager.OnScrewCollected?.Invoke(color,1);
+
+                                Debug.Log("screw collected and update mission " + color);
+                                MissionManager.ins.ProcessCollectScrew(color, 1);
                             }
                         });
                     }
                 }
-            
+
             }
 
             Debug.Log($"[SpecialBoxManager] Added {screws.Count} screws to special box.");

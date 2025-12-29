@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 259d8cb123bcb1b42aef5a1322a81ffb, type: 3}
+  m_Name: RewardConfig
+  m_EditorClassIdentifier: 
+  records:
+  - id: 0
+    items:
+    - itemType: 0
+      icon_name: Magnet
+      amount: 1
+    - itemType: 1
+      icon_name: Breaker
+      amount: 1
+    - itemType: 2
+      icon_name: Drill
+      amount: 1
+    - itemType: 4
+      icon_name: Gold
+      amount: 500
+  - id: 1
+    items:
+    - itemType: 0
+      icon_name: Magnet
+      amount: 2
+    - itemType: 1
+      icon_name: Breaker
+      amount: 2
+    - itemType: 2
+      icon_name: Drill
+      amount: 2
+    - itemType: 4
+      icon_name: Gold
+      amount: 1000
+    - itemType: 5
+      icon_name: Ticket
+      amount: 1

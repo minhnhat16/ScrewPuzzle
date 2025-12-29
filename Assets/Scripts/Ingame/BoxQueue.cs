@@ -502,14 +502,12 @@ namespace Ingame
             }
 
             movingBox = true;
+            MissionManager.ins.ProcessBoxClosed(screwBox.Color, 1); // increment ClearNormalBoxes missions by 1 
 
             screwBox.CloseBox(time, _ =>
             {
                 Debug.Log("Closed box");
-
                 screwBoxes.Remove(screwBox);
-
-
 
                 Debug.Log("Screw boxes count after remove: " + screwBoxes.Count);
 
@@ -523,7 +521,7 @@ namespace Ingame
                 {
                     OnLastBoxClearScrew();
                 }
-
+                MissionManager.ins.ProcessCollectScrew(screwBox.Color, 3);
                 onComplete?.Invoke();
             });
         }
@@ -576,7 +574,7 @@ namespace Ingame
             {
                 Debug.Log("Close and remove box " + currentSlot);
 
-                MissionManager.ins.OnRainbowBoxClosed(screwBox);
+                //MissionManager.ins.OnRainbowBoxClosed(screwBox);
                 var newBox = TrySpawnNewBox(currentSlot);
                 if (newBox != null)
                 {
@@ -682,7 +680,6 @@ namespace Ingame
                 int boxLayer = box.Render.sortingLayerID;
                 screw.SetSortingOrderAndLayer(boxLayer + 2, box.Render.sortingLayerName);
                 screwMng.RemoveScrew(screw);
-                MissionManager.OnScrewCollected.Invoke(screw.Color,1);
 
             }
             else
@@ -937,7 +934,7 @@ namespace Ingame
                 if (newBox != null)
                     StartCoroutine(MoveWithFade(newBox, slot, fpos, 1f, 0.25f));
 
-                MissionManager.OnBoxClosed?.Invoke();
+                MissionManager.ins.ProcessBoxClosed(ColorEnum.Clear,1) ;
             });
         }
 
@@ -1021,6 +1018,29 @@ namespace Ingame
                 .Take(requiredCount)
                 .ToList();
             screwBoxes.RemoveAll(b => listedBox.Contains(b));
+        }
+
+        #endregion
+
+        #region Mission Updates
+
+     
+
+        private void OnScrewCollected(ColorEnum color, int amount)
+        {
+            NewMethod(color, amount);
+        }
+
+        private static void NewMethod(ColorEnum color, int amount)
+        {
+            // existing logic...
+            MissionManager.ins.ProcessCollectScrew(color, amount);
+        }
+
+        private void UseItem(ItemType item)
+        {
+            // existing logic...
+            MissionManager.ins.ProcessUseItem(item, 1);
         }
 
         #endregion

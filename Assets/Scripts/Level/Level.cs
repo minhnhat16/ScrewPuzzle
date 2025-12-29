@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using ConfigFile;
@@ -63,15 +63,25 @@ namespace Level
             boxConfig = data.connectors;
             screws = data.screws;
         }
+
+        //private void OnValidate()
+        //{
+        //    foreach(var s in screws) {
+        //        s.OnValidate();
+        //    }
+        //}
     }
 
+    // Remove the problematic field initializer from ScrewScriptable
     [System.Serializable]
     public class ScrewScriptable
     {
         public int idScrew;
         public int idColor;
         public Vector3 screwPosition;
-        public HingeConnection hingeConnection;
+
+        public HingeConnection hinge;
+
     }
 
     [System.Serializable]
@@ -146,4 +156,6 @@ namespace Level
             screws = level.screws;
         }
     }
+
+
 }

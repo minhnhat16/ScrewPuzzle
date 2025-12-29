@@ -1,5 +1,8 @@
 ﻿using ConfigFile;
+using Mono.Cecil.Cil;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -23,6 +26,7 @@ namespace System.DataBase
             dataModel.InitData(() =>
             {
                 // CheckDailyLogin();
+                CheckDailyBlockReset();
                 isInitDone = true;
                 callback();
             });
@@ -38,6 +42,13 @@ namespace System.DataBase
             dataModel.UpdateData(DataPath.NEWPLAYER, false, () => callback?.Invoke());
         }
 
+
+        public void AddOneCurrent()
+        {
+            var current = dataModel.ReadData<int>(DataPath.CURRENTPLAYERLEVEL);
+            current += 1;
+            SavePlayerLevel(current);
+        }
         public int GetPlayerLevel()
         {
             return dataModel.ReadData<int>(DataPath.CURRENTPLAYERLEVEL);
@@ -259,6 +270,8 @@ namespace System.DataBase
         {
             //Debug.Log("GetItemTotal");
             ItemData itemData = GetItemData(type);
+
+            if (itemData == null) return 0;
             int total = itemData.total;
             if (total < 0) total = 0;
             //Debug.Log($"TOTAL ITEM{itemData.id} {total}");
@@ -427,7 +440,7 @@ namespace System.DataBase
                     long tickets = GetTicket() + quantity;
                     SaveTicket(tickets);
                 }
-                else if( type == ItemType.Gold)
+                else if (type == ItemType.Gold)
                 {
                     long golds = GetGold() + quantity;
                     SaveGold(golds);
@@ -483,6 +496,8 @@ namespace System.DataBase
 
         public void UpdateMissionProgress(MissionProgress missionProgress, Action callback = null)
         {
+
+            Debug.Log(" update mission progress " + missionProgress.missionId);
             dataModel.UpdateDataDictionary(DataPath.MISSION_PROGRESS, missionProgress.missionId.ToKey(), missionProgress, callback);
         }
         public void AddMissionProgress(int missionId, int amount = 1, Action callback = null)
@@ -507,6 +522,395 @@ namespace System.DataBase
 
             dataModel.UpdateDataDictionary(DataPath.MISSION_PROGRESS, missionId.ToKey(), mission, callback);
 
+        }
+
+        internal bool IsChestClaimed(int id)
+        {
+            return false;
+        }
+
+        internal bool CheckStageUnlocked(int id)
+        {
+            var stage = dataModel.ReadDictionary<StageProgress>(DataPath.STAGEPATH, id.ToString());
+
+
+            Debug.Log($"Check stage unlocked {id}: stage {stage} is unlocked {stage.isUnlocked}");
+            if (stage == null) return false;
+            return stage.isUnlocked;
+        }
+
+        internal void SetCurrentStage(int v)
+        {
+
+        }
+
+        internal void ResetDailyMissionProgress()
+        {
+            // Lấy tất cả mission từ config
+            var missionConfig = ConfigFileManager.Instance.GetConfig<MissionConfig>();
+            if (missionConfig == null) return;
+
+            var allMissions = missionConfig.GetAllRecord();
+            if (allMissions == null) return;
+
+            foreach (var mission in allMissions)
+            {
+                MissionProgress progress = new MissionProgress()
+                {
+                    missionId = mission.Id,
+                    current = 0,
+                    state = MissionState.InProgress
+                };
+
+                UpdateMissionProgress(progress);
+            }
+
+            Debug.Log("[Daily Reset] All mission progress reset.");
+        }
+
+        internal void ResetChestStates()
+
+        {
+            var chestConfig = ConfigFileManager.Instance.GetConfig<ChestConfig>();
+            if (chestConfig == null)
+            {
+                Debug.LogWarning("[DataAPI] ChestConfig not found!");
+                return;
+            }
+
+            var allChests = chestConfig.GetAllRecord();
+            if (allChests == null)
+                return;
+
+            foreach (var chest in allChests)
+            {
+                ChestStageData newState = new ChestStageData
+                {
+                    chestId = chest.Id,
+                    isClaimed = false,
+                    isUnlocked = chest.Id == 0,   // Unlock chest 0 (stage đầu)
+                    progress = 0f
+                };
+
+                SaveChestState(newState);
+            }
+
+            Debug.Log("[Daily Reset] All chest states reset.");
+        }
+
+
+        private void SaveChestState(ChestStageData state)
+        {
+            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, state.chestId.ToSafeString(), state);
+        }
+
+        public void AddStage(StageProgress progress, Action<bool> isDone = null)
+        {
+            var stageDict = dataModel.ReadData<Dictionary<int, StageProgress>>(DataPath.STAGEPATH);
+            var hasInDict = stageDict.ContainsValue(progress);
+            if (hasInDict)
+            {
+                isDone?.Invoke(false);
+                return;
+            }
+            stageDict.Add(progress.stageId, progress);
+        }
+        public ChestStageData GetChestState(int chestId)
+        {
+            var chestData = dataModel.ReadDictionary<ChestStageData>(DataPath.CHESTSTAGE, chestId.ToString());
+
+            if (chestData == null)
+            {
+                chestData = new ChestStageData
+                {
+                    chestId = chestId,
+                    isUnlocked = chestId == 0,
+                    isClaimed = false,
+                    progress = 0
+                };
+                AddNewChestStage(chestData);
+            }
+
+            return chestData;
+        }
+
+        public void AddNewChestStage(ChestStageData data, Action<bool> isDone = null)
+        {
+            var chestDict = dataModel.ReadData<Dictionary<int, ChestStageData>>(DataPath.CHESTSTAGE);
+
+            chestDict.Add(data.chestId, data);
+            dataModel.UpdateData(DataPath.CHESTSTAGE, data);
+            isDone?.Invoke(true);
+        }
+        public StageProgress GetStageProgress(int stageId)
+        {
+            var progressData = dataModel.ReadDictionary<StageProgress>(DataPath.STAGEPATH, stageId.ToSafeString());
+            if (progressData == null)
+            {
+                progressData = new StageProgress
+                {
+                    stageId = stageId,
+                    isUnlocked = stageId == 0,   // stage 0 unlock mặc định
+                    isCompleted = false,
+                    rewardClaimed = false,
+                    chestProgress = 0
+                };
+                AddStage(progressData);
+            }
+
+            return progressData;
+        }
+
+        public void UpdateStageProgress(StageProgress stage)
+        {
+            if (stage == null)
+            {
+                Debug.LogError("[DataAPI] UpdateStageProgress FAILED: stage = null");
+                return;
+            }
+
+
+            // Lưu xuống DataModel (ổn định, dùng key stageId)
+            dataModel.UpdateDataDictionary(
+                DataPath.STAGEPATH,
+                stage.stageId.ToString(),
+                stage
+            );
+
+#if UNITY_EDITOR
+            Debug.Log($"[Stage] Updated stage {stage.stageId}: unlocked={stage.isUnlocked}, completed={stage.isCompleted}");
+#endif
+        }
+
+        public void UnlockStage(int stageId)
+        {
+            var stage = GetStageProgress(stageId);
+            stage.isUnlocked = true;
+            UpdateStageProgress(stage);
+        }
+
+        public void CompleteStage(int stageId)
+        {
+            var stage = GetStageProgress(stageId);
+            stage.isCompleted = true;
+            UpdateStageProgress(stage);
+
+            // When a stage is completed, unlock the chest associated with that stage.
+            UnlockChestForStage(stageId);
+
+            Debug.Log($"[DataAPI] Stage {stageId} completed and chest unlocked if existed.");
+        }
+
+        public void UnlockNextStage(int currentStage)
+        {
+            // Keep existing behaviour: unlock the provided stage id
+            UnlockStage(currentStage);
+        }
+
+        /// <summary>
+        /// Ensures the chest state exists for given stageId and marks it unlocked.
+        /// Uses SaveChestState(...) to persist the change.
+        /// </summary>
+        public void UnlockChestForStage(int stageId)
+        {
+            // GetChestState will create a default chest state if missing
+            var chest = GetChestState(stageId);
+
+
+            Debug.Log("Chest stage null " + chest);
+            if (chest == null)
+            {
+                Debug.LogError($"[DataAPI] UnlockChestForStage: failed to obtain chest state for id={stageId}");
+                return;
+            }
+
+            if (!chest.isUnlocked)
+            {
+                chest.isUnlocked = true;
+                SaveChestState(chest);
+                Debug.Log($"[DataAPI] Chest {stageId} unlocked.");
+            }
+            else
+            {
+                Debug.Log($"[DataAPI] Chest {stageId} was already unlocked.");
+            }
+        }
+
+        //public void UnlockNextStage(int currentStage)
+        //{
+        //    UnlockStage(currentStage);
+        //}
+
+        internal int GetCurrentStage()
+        {
+            // Default
+            var currentStage = 0;
+
+            // Read stored stages (safe null-handling)
+            var stages = dataModel.ReadData<Dictionary<int, StageProgress>>(DataPath.STAGEPATH) ?? new Dictionary<int, StageProgress>();
+
+            // 1) Prefer the first unlocked stage that is NOT completed (the active stage player should play)
+            var active = stages.Values
+                .OrderBy(s => s.stageId)
+                .LastOrDefault(s => s.isUnlocked && !s.isCompleted);
+
+            if (active != null)
+                return active.stageId;
+
+            // 2) Fallback: return the highest unlocked stage (player progressed furthest)
+            var lastUnlocked = stages.Values
+                .Where(s => s.isUnlocked)
+                .OrderByDescending(s => s.stageId)
+                .LastOrDefault();
+
+            if (lastUnlocked != null)
+                return lastUnlocked.stageId;
+
+            // 3) Final fallback: stage 0
+            return currentStage;
+        }
+
+        internal void UpdateChestState(ChestStageData chestState)
+        {
+            string chestID = chestState.chestId.ToString();
+            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, chestID, chestState);
+        }
+
+        internal List<BlockParam> GetBlocksData()
+        {
+            var blocksData =
+                dataModel.ReadData<Dictionary<int, BlockData>>(DataPath.BLOCKSDATA);
+
+            if (blocksData == null || blocksData.Count == 0)
+                return new List<BlockParam>();
+
+            List<BlockParam> result = new List<BlockParam>();
+
+
+
+            foreach (var item in blocksData)
+            {
+                var id = item.Key;
+                var block = item.Value;
+                BlockParam param = new BlockParam
+                {
+                    blockId = id,
+                    screwRequired = block.screwRequired,
+                    unlocked = block.unlocked,
+
+                    // CLONE dictionary để tránh reference bug
+                    removedCells = block.removedCells != null
+                       ? new Dictionary<int, bool>(block.removedCells)
+                       : new Dictionary<int, bool>()
+                };
+
+                result.Add(param);
+            }
+
+
+            return result;
+        }
+        public void RefreshBlockData()
+        {
+            var blockData = dataModel.ReadData<Dictionary<int, BlockData>>(DataPath.BLOCKSDATA);
+            if (blockData.Count == 0)
+            {
+                blockData = new Dictionary<int, BlockData>(25);
+            }
+            ;
+        }
+
+        public void CheckDailyBlockReset()
+        {
+            var meta = dataModel.ReadData<TimeSaveMeta>(DataPath.TIMESAVEMETA);
+
+            long now = DateTime.UtcNow.Ticks;
+
+            if (meta == null)
+            {
+                meta = new TimeSaveMeta { lastResetUtcTicks = now };
+                dataModel.UpdateData(DataPath.TIMESAVEMETA, meta);
+                return;
+            }
+
+            TimeSpan delta = new TimeSpan(now - meta.lastResetUtcTicks);
+
+            if (delta.TotalHours >= 24)
+            {
+                meta.lastResetUtcTicks = now;
+                dataModel.UpdateData(DataPath.TIMESAVEMETA, meta);
+                int puzzleId = GetRandomPuzzleId();
+                SetCurrentPuzzle(puzzleId);
+                RefreshBlockData();
+                Debug.Log("[BlockData] Daily reset executed");
+            }
+        }
+
+        // Returns a random puzzle id from PuzzleConfig (or -1 if none found)
+        public int GetRandomPuzzleId()
+        {
+            var puzzleConfig = ConfigFileManager.Instance.GetConfig<PuzzleConfig>();
+            if (puzzleConfig == null)
+            {
+                Debug.LogWarning("[DataAPI] GetRandomPuzzleId: PuzzleConfig not found.");
+                return -1;
+            }
+
+            var puzzles = puzzleConfig.GetAllRecord();
+            if (puzzles == null || puzzles.Count == 0)
+            {
+                Debug.LogWarning("[DataAPI] GetRandomPuzzleId: no puzzles available.");
+                return -1;
+            }
+
+            // filter out null entries
+            var list = puzzles.Where(p => p != null).ToList();
+            if (list.Count == 0) return -1;
+
+            var chosen = list[UnityEngine.Random.Range(0, list.Count)];
+
+            // try common property/field names for id
+            var idProp = chosen.GetType().GetProperty("Id") ?? chosen.GetType().GetProperty("ID");
+            if (idProp != null)
+            {
+                var val = idProp.GetValue(chosen);
+                return System.Convert.ToInt32(val);
+            }
+
+            var idField = chosen.GetType().GetField("id") ?? chosen.GetType().GetField("ID") ?? chosen.GetType().GetField("blockId");
+            if (idField != null)
+            {
+                var val = idField.GetValue(chosen);
+                return System.Convert.ToInt32(val);
+            }
+
+            Debug.LogWarning("[DataAPI] GetRandomPuzzleId: unable to locate Id field/property on puzzle record.");
+            return -1;
+        }
+        internal void UpdateBlockCell(int blockid, int idCell, bool v)
+        {
+            var block = dataModel.ReadDictionary<BlockData>(DataPath.BLOCKSDATA, blockid.ToString());
+            block.removedCells[idCell] = v;
+            dataModel.UpdateDataDictionary(DataPath.BLOCKSDATA, blockid.ToString(), block);
+        }
+
+
+
+        public int CurrentPuzzle()
+        {
+            return dataModel.ReadData<int>(DataPath.CURPUZZLEID);
+        }
+        public void SetCurrentPuzzle(int id, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.CURPUZZLEID, id, () =>
+            {
+                callback?.Invoke();
+            });
+        }
+
+        internal int GetToolScrew()
+        {
+            return 1000;
         }
         #endregion
     }

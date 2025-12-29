@@ -16,35 +16,35 @@ MonoBehaviour:
   - id: 1
     missionType: 0
     description: Collect 5 Red Screw In Level
-    iconName: icon_collectscrew
+    iconName: Red
     target: 5
     color: 2
-    rewardItemType: 0
-    rewardAmount: 10
+    rewardItemType: 4
+    rewardAmount: 200
   - id: 2
-    missionType: 1
-    description: Try Clear 10 Boxes
-    iconName: icon_clearbox
-    target: 10
-    color: 1
-    rewardItemType: 1
-    rewardAmount: 20
-  - id: 3
     missionType: 2
-    description: CompleteLevel 15
-    iconName: icon_completelevel
-    target: 15
+    description: Try Clear 10 Boxes
+    iconName: Red
+    target: 1
     color: 2
+    rewardItemType: 1
+    rewardAmount: 2
+  - id: 3
+    missionType: 3
+    description: CompleteLevel 15
+    iconName: Rainbow
+    target: 1
+    color: 0
     rewardItemType: 2
-    rewardAmount: 30
+    rewardAmount: 1
   - id: 4
     missionType: 3
     description: Rainbow 20
-    iconName: icon_rainbow
+    iconName: Rainbow
     target: 20
     color: 3
-    rewardItemType: 3
-    rewardAmount: 40
+    rewardItemType: 1
+    rewardAmount: 1
   - id: 5
     missionType: 0
     description: CollectScrew 25

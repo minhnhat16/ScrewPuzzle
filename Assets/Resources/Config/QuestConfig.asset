@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34430fa0d2d34524ba7e1d66c9241ddc, type: 3}
+  m_Name: QuestConfig
+  m_EditorClassIdentifier: 
+  records:
+  - id: 0
+    chestID: 1
+    missionRecords: 010000000200000003000000
+  - id: 1
+    chestID: 2
+    missionRecords: 320000003c00000046000000
+  - id: 2
+    chestID: 3
+    missionRecords: 040000000500000006000000
+  - id: 3
+    chestID: 4
+    missionRecords: 070000000800000009000000
+  - id: 4
+    chestID: 0
+    missionRecords: 0a0000000b0000000c000000
+  - id: 5
+    chestID: 1
+    missionRecords: 0d0000000e0000000f000000
+  - id: 6
+    chestID: 2
+    missionRecords: 100000001100000012000000
+  - id: 7
+    chestID: 3
+    missionRecords: 130000001400000015000000
+  - id: 8
+    chestID: 4
+    missionRecords: 160000001700000018000000

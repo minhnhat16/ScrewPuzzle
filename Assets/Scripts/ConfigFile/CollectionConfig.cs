@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-
 public class CollectionConfigRecord
 {
     public CollectionLable type;

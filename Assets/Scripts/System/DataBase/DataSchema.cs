@@ -22,6 +22,19 @@ public class UserData
 
     [SerializeField]
     public Dictionary<string,MissionProgress> missions;
+
+    [SerializeField]
+    public Dictionary<int, ChestStageData> chestStates = new();
+    [SerializeField]
+    public Dictionary<int, StageProgress> stageProgress = new();
+    [SerializeField]
+    public Dictionary<int, BlockData> puzzleBlockData = new();
+    [SerializeField]
+    public TimeSaveMeta timeMeta;
+
+
+    [SerializeField]
+    public int currentPuzzleID;
 }
 [Serializable]
 public class UserInfo
@@ -110,7 +123,12 @@ public class CollectionData
 
     [SerializeField]
 
-    public Dictionary<string, MissionProgress> missions = new();
+    public Dictionary<int, MissionProgress> missions = new();
+    [SerializeField]
+    public Dictionary<int, ChestStageData> chestStates = new();
+
+    [SerializeField]
+    public TimeSaveMeta timeMeta;
 }
 [Serializable]
 public class ScrewSkinData
@@ -161,9 +179,42 @@ public class MissionProgress
     public bool rewardClaimed;
 
     [SerializeField]
-    public int stage;
+    public MissionState stage;
 
     [SerializeField]
     public string extra;
 }
+[Serializable]
+public class StageProgress
+{
+    public int stageId;        // số thứ tự stage
+    public bool isUnlocked;    // đã mở chưa
+    public bool isCompleted;   // hoàn thành chưa
+    public bool rewardClaimed; // nếu có chest ở cuối stage
 
+    public int chestProgress;  // tiến trình mở rương của stage
+
+    public int claimedMissions = 0;
+}
+
+[Serializable]
+public class ChestStageData
+{
+    public int chestId;
+    public bool isUnlocked;
+    public bool isClaimed;
+    public float progress;   // nếu bạn có tiến trình mở rương
+}
+[Serializable]
+public class BlockData
+{
+    public bool unlocked;
+    public int screwRequired;
+    public Dictionary<int, bool> removedCells = new();
+
+}
+[Serializable]
+public class TimeSaveMeta
+{
+    public long lastResetUtcTicks;
+}

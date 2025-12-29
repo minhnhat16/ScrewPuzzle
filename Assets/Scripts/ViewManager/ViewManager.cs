@@ -57,7 +57,7 @@ public class ViewManager : MonoBehaviour
         currentView = dicView[newView];
         currentView.gameObject.SetActive(true);
         //Debug.Log("Show Next View call back " + currentView);
-
+            
         currentView.Setup(viewParam);
         currentView.ShowViewAnimation(() =>
         {

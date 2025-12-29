@@ -90,8 +90,10 @@ namespace Managers
             int totalGold = GameManager.instance.GoldCalculation(level);
             WinParam param = new();
             param.totalGold = DataAPIController.instance.GetGold();
-            DialogManager.ins.ShowDialog(DialogIndex.WinDialog);
 
+            DataAPIController.instance.AddOneCurrent();
+            DialogManager.ins.ShowDialog(DialogIndex.WinDialog);
+            MissionManager.ins.ProcessLevelComplete();
         }
 
 

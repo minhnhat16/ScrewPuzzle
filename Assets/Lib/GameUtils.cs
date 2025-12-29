@@ -219,3 +219,22 @@ public static class GameViewUtils
         Debug.Log($"GameView Resolution Set To: {width} x {height}");
     }
 }
+
+
+public static class ChestTierHelper
+{
+    public static string GetSpriteName(ChestTier tier)
+    {
+        switch (tier)
+        {
+            case ChestTier.Common: return "chest_common";
+            case ChestTier.Rare: return "chest_rare";
+            case ChestTier.Epic: return "chest_epic";
+            case ChestTier.Legendary: return "chest_legendary";
+            case ChestTier.Special: return "chest_special";
+            //case ChestTier.Premium: return "chest_premium";
+            //case ChestTier.Mega: return "chest_mega";
+            default: return "chest_common";
+        }
+    }
+}

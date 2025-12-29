@@ -64,7 +64,7 @@ public class LoadSceneManager : MonoBehaviour
            progress = smooth;
 
 
-            Debug.Log("Progress " + progress); ;
+            //Debug.Log("Progress " + progress); ;
             if (smooth >= 0.99f)
             {
                 op.allowSceneActivation = true;

@@ -23,6 +23,7 @@ public enum DialogIndex
     MissionDialog,
     NotifyDialog,
     QuestDialog,
+    GiftClaimDialog,
 }
 
 public class DialogParam
@@ -158,7 +159,16 @@ public class MissionParam : DialogParam
     public MissionParam() { }
 
 }
+public class GiftParam : DialogParam
+{
+    public List<RewardItem> rewards;
 
+    public GiftParam() { }  
+    public GiftParam(QuestChestParam chestParam)
+    {
+        this.rewards = chestParam.rewards; 
+    }
+}
 public class LoseParam : DialogParam
 {
     public bool isAdAvailable;
@@ -185,5 +195,6 @@ public class DialogConfig
         DialogIndex.QuitDialog
 ,       DialogIndex.MissionDialog,
         DialogIndex.QuestDialog,
+        DialogIndex.GiftClaimDialog,
     };
 }

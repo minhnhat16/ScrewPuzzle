@@ -12,6 +12,7 @@ public class ClearArrayState : FSMState<ItemController>
 
     internal void Use(Action callback = null)
     {
+        MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
 
         ArrayScrew.Instance.StartClearHiding();
         callback?.Invoke();

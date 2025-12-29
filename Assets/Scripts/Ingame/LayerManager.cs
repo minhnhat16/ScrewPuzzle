@@ -79,7 +79,7 @@ namespace Ingame.Board
         {
             foreach (var part in parts)
             {
-                part.Body.bodyType = RigidbodyType2D.Dynamic;
+                part.UpdateFallingState();
                 yield return null;
             }
         }
@@ -217,6 +217,27 @@ namespace Ingame.Board
                 .ToList();
 
             return result;
+        }
+
+        public bool PartHasNoScrewConnected(BasePart part)
+        {
+            if (part == null) return true;
+
+            int layer = part.PartLayer() - 10;
+
+            if (!screwDict.TryGetValue(layer, out var screws) || screws == null)
+                return true;  // Không có list → coi như không có screw kết nối
+
+            var body = part.Body;
+
+            // Kiểm tra có screw nào đang kết nối vào part không
+            bool hasConnection = screws.Any(s =>
+                s != null &&
+                s.HingeController != null &&
+                s.HingeController.BodyConnect != null &&
+                s.HingeController.BodyConnect == body);
+
+            return !hasConnection; // return true nếu KHÔNG có screw kết nối
         }
 
         public HashSet<ColorEnum> GetUniqueScrewColorsByLayer(int layer)

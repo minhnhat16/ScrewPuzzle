@@ -82,7 +82,6 @@ public class BootLoader : MonoBehaviour
         bool done = false;
 
         DataAPIController.instance.InitData(() => done = true);
-
         yield return new WaitUntil(() => done);
     }
     IEnumerator Task_SetupUI()

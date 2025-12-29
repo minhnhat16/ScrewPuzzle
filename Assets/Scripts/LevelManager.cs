@@ -381,7 +381,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         screw.Color = (ColorEnum)screwData.idColor;
         screw.ChangeScrewColor(screw.Color);
 
-        var hingeConnection = screwData.hingeConnection;
+        var hingeConnection = screwData.hinge;
         if (currentLevelObject == null) yield break;
         LayerManager lm = currentLevelObject.GetComponent<LayerManager>();
         BasePart connectedPart = null;
@@ -404,7 +404,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
         if (currentLevelObject != null && lm != null && connectedPart != null)
         {
-            var partLayer = lm.GetPartByKey(screwData.hingeConnection.bodyPartUniqueID).PartLayer() - 10;
+            var partLayer = lm.GetPartByKey(screwData.hinge.bodyPartUniqueID).PartLayer() - 10;
             screw.sortingOrder = partLayer;
             if (lm.screwDict.ContainsKey(partLayer))
             {
@@ -434,6 +434,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     private void HandleScrewRemoved(Screw removedScrew)
     {
+       
     }
     public void OnReset()
     {

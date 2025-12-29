@@ -93,10 +93,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91f8ba2ca341f8d4d9a96b0d932d21ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  target: 0
+  id: 0
   icon: {fileID: 5157295766478655948}
   titleText: {fileID: 6200377483932829974}
   progressText: {fileID: 8064398740923454199}
-  progressFill: {fileID: 6177430777267953979}
+  fill: {fileID: 8071726929902154265}
   actionButton: {fileID: 6868476187644428922}
   doneIcon: {fileID: 4564238185968029511}
 --- !u!1 &2631347058385045434
@@ -773,14 +775,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1845801101832431819, guid: be523d3fed132174db4dd62d3b9b7931, type: 3}
   m_PrefabInstance: {fileID: 5223279563072412215}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6177430777267953979 stripped
+--- !u!114 &8071726929902154265 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2145531573970287372, guid: be523d3fed132174db4dd62d3b9b7931, type: 3}
+  m_CorrespondingSourceObject: {fileID: 4069101180112381998, guid: be523d3fed132174db4dd62d3b9b7931, type: 3}
   m_PrefabInstance: {fileID: 5223279563072412215}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: f804abdde67453841af29ec09a0caac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

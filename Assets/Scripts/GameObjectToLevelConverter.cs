@@ -180,7 +180,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 screwPosition = screw.transform.localPosition,
                 idScrew = idScrew,
                 idColor = (int)screw.Color,
-                hingeConnection =new HingeConnection()
+                hinge =new HingeConnection()
             };
 
             var hinge = screw.HingeController.HingeJoint2D;
@@ -201,7 +201,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             listHingeObject.Add(hingeConnection);
             idScrew++;
 
-            screwData.hingeConnection = hingeConnection;
+            screwData.hinge = hingeConnection;
             newLevelData.screws.Add(screwData);
         }
         // Save the new level data as a ScriptableObject in the Resources folder
@@ -238,9 +238,9 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             foreach (var screw in levelData.screws)
             {
                 // Clear hinge connections for each screw
-                if (screw.hingeConnection != null)
+                if (screw.hinge != null)
                 {
-                    screw.hingeConnection = null;
+                    screw.hinge = null;
                 }
             }
             levelData.screws.Clear();
@@ -465,7 +465,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             screwComponent.ChangeScrewColor(color);
             // Handle hinge connections
 
-            var hingeConnection = screwData.hingeConnection;
+            var hingeConnection = screwData.hinge;
             // Debug.Log($"Level data with ID {levelId} loaded.");
             var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
             screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(), hingeConnection);
@@ -473,7 +473,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             Debug.Log(
                 $"Hinge connected to part {connectedPart.PartLayer()} at position {connectedPart.uniqueID}");
          
-            var connection = screwData.hingeConnection;
+            var connection = screwData.hinge;
             var part = layerManager.GetPartByKey(connection.bodyPartUniqueID);
             var partLayerID = part.PartLayer() - 10;
 

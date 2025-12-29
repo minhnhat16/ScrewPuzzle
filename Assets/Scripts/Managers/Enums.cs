@@ -118,7 +118,8 @@ public enum MissionState
     Locked = 0,      // chưa mở
     InProgress = 1,  // đang làm
     Completed = 2,   // đủ điều kiện claim
-    Claimed = 3      // đã nhận thưởng
+    Claimed = 3 ,     // đã nhận thưởng
+    NotStarted = 4,
 }
 
 public enum TutorialEnum

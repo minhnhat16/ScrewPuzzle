@@ -29,5 +29,13 @@ public class DataPath
     public const string BACKGROUND = "collectionData/backGroundDict";
     public const string BOARDCOLOR = "collectionData/boardColorDict";
     public const string SCREWCOLOR = "collectionData/screwColorDict";
+    internal static string STAGEPATH = "stageProgress";
+    public static string CHESTSTAGE = "chestStates";
+
+    public static string BLOCKSDATA = "puzzleBlockData";
+
+    public static string TIMESAVEMETA = "timeMeta";
+    public static string LASTRESETTIME = TIMESAVEMETA+ "/lastResetUtcTicks";
+    public static string CURPUZZLEID = "currentPuzzleID";   
 
 }

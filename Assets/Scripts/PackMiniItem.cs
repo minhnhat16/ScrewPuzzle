@@ -27,14 +27,14 @@ public class PackMiniItem : MonoBehaviour
         icon.preserveAspect = true;
         this.rectTransform = GetComponent<RectTransform>();
     }
-    public void Init(ItemType type, int quantity, Sprite sprite)
+    public void Init(ItemType type, int quantity, Sprite sprite,bool activeDetail = true)
     {
         this.quantity = quantity;
         this.icon.sprite = sprite;
 
         this.TextQuantity.text = $"x{quantity}";
 
-        if (textDetail != null)
+        if (textDetail != null && activeDetail)
             this.textDetail.gameObject.SetActive(type == ItemType.Ticket);
     }
 }

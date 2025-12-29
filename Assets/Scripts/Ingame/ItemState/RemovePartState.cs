@@ -16,6 +16,7 @@ public class RemovePartState : FSMState<ItemController>
     }
     internal void Peform(BasePart part)
     {
+        MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
         LevelManager.ins.RemovePartItem(part);
         sys.IsHandlingHammer = false;
         sys.itemPerformed?.Invoke(true);

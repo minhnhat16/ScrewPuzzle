@@ -59,7 +59,6 @@ namespace Ingame
             if (string.IsNullOrEmpty(uniqueID))
                 uniqueID = GenerateUniqueID();
 
-            UpdateFallingState();
         }
 
         private void Start()
@@ -69,7 +68,6 @@ namespace Ingame
 
         private void FixedUpdate()
         {
-            UpdateFallingState();
         }
 
         //-----------------------------
@@ -83,7 +81,7 @@ namespace Ingame
                 return;
             }
 
-            bool falling = body.linearVelocity.y < -0.15f;
+            bool falling = body.linearVelocity.y <=0f;
 
             if (falling != isFalling)
                 SetFalling(falling);
@@ -218,6 +216,21 @@ namespace Ingame
         public int PartLayer()
         {
             return gameObject.layer;
+        }
+
+        void OnCollisionStay2D(Collision2D col)
+        {
+            //Debug.Log("Stay: vẫn đang chạm");
+
+            StartCoroutine(ApplyForceAfter(2f));
+        }
+
+        private IEnumerator ApplyForceAfter(float v)
+        {
+            //if (!isFalling) yield break;
+            yield return new WaitForSeconds(v);
+            body.AddForceAtPosition(Vector2.up,transform.position);
+
         }
     }
 }

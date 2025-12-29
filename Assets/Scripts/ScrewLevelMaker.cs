@@ -76,9 +76,10 @@ public class ScrewLevelMaker : Screw
     internal void ResetHinge()
     {
         var hinge = hingeController.HingeJoint2D;
+        if (hinge == null) return;
+        hinge.connectedBody = null;
 
-        Destroy(hinge.gameObject);
-
+        Destroy(hinge);
     }
 
     private void OnMouseClick()
@@ -95,7 +96,7 @@ public class ScrewLevelMaker : Screw
 
             if (LevelMaker.instance.isEditHinge)
             {
-                if (hingeController.HingeJoint2D == null) return;
+                //if (hingeController.HingeJoint2D == null) return;
                 ScrewChangeColorOnClick(isSelecting);
                 isHeld = true; // Đánh dấu screw là đang được giữ
                 LevelMaker.instance.OnScrewClicked(); // Gọi phương thức từ LevelMaker

@@ -52,8 +52,12 @@ MonoBehaviour:
   isInitDone: 0
   dialogIndex: 18
   baseDialogAnim: {fileID: 0}
-  missionListParent: {fileID: 7455092895309340784}
-  missionItemPrefab: {fileID: 1093483796753864950, guid: 4b0e97aab34f1c4409e5d15b56f6c62f, type: 3}
+  chestTrackParent: {fileID: 0}
+  stageTabParent: {fileID: 0}
+  missionPanelCurrent: {fileID: 0}
+  missionPanelNext: {fileID: 0}
+  chestItemPrefab: {fileID: 0}
+  stageTabPrefab: {fileID: 0}
 --- !u!1 &2024404688404785031
 GameObject:
   m_ObjectHideFlags: 0
@@ -302,7 +306,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7455092895309340784}
-  - component: {fileID: 6525469171320500108}
   m_Layer: 5
   m_Name: MissionHolder
   m_TagString: Untagged
@@ -332,32 +335,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 750, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &6525469171320500108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8930131317270681887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1001 &3692299471720638557
 PrefabInstance:
   m_ObjectHideFlags: 0

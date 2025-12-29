@@ -2,6 +2,7 @@ using Managers;
 using System;
 using System.Collections.Generic;
 using System.DataBase;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +32,7 @@ namespace UIScript.UI.UI
         dailyReward.onClick.AddListener(OnDailyReward);*/
             shopButton.onClick.AddListener(ShopButton);
             levelButton.onClick.AddListener(LevelButton);
-            dailyReward.onClick.AddListener(OnDailyReward);
+            dailyReward.onClick.AddListener(SpinView);
             rateButton.onClick.AddListener(RateButton);
             playBtn.onClick.AddListener(OnPlayButton);
             specialButton.onClick.AddListener(OnClickSpecialButton);
@@ -48,11 +49,12 @@ namespace UIScript.UI.UI
         {
             shopButton.onClick.RemoveListener(ShopButton);
             levelButton.onClick.RemoveListener(LevelButton);
-            dailyReward.onClick.RemoveListener(OnDailyReward);
+            dailyReward.onClick.RemoveListener(SpinView);
             rateButton.onClick.RemoveListener(RateButton);
             playBtn.onClick.RemoveListener(OnPlayButton);
             levelButton.onClick.RemoveAllListeners();
 
+            adsRemover.onClick.RemoveAllListeners();
 
 
             DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
@@ -95,13 +97,20 @@ namespace UIScript.UI.UI
         private void OnDailyReward()
         {
             SetLevelPanelIs(false);
-            DailyParam param = new()
-            {
-                config = ConfigFileManager.Instance.GetConfig<DailyRewardConfig>(),
-                data = DataAPIController.instance.GetDailyData(),
-                totalGold = GameManager.instance.GetPlayerGold(),
-            };
-            DialogManager.ins.ShowDialog(DialogIndex.DailyRewardDialog, param, null);
+            //DailyParam param = new()
+            //{
+            //    config = ConfigFileManager.Instance.GetConfig<Dx`ailyRewardConfig>(),
+            //    data = DataAPIController.instance.GetDailyData(),
+            //    totalGold = GameManager.instance.GetPlayerGold(),
+            //};
+
+            GiftParam param = new GiftParam();
+
+            var record = ConfigExtensions.GetRewardConfig(ConfigFileManager.Instance, 1);    
+
+
+            param.rewards = record.Items; 
+            DialogManager.ins.ShowDialog(DialogIndex.GiftClaimDialog, param, null);
         }
         private void OnSkinButton()
         {
@@ -149,8 +158,13 @@ namespace UIScript.UI.UI
 
         public void SpinView()
         {
-            ///Debug.Log("View SPin Button");
+            PuzzleParam param = new PuzzleParam();  
+            param.idPuzzle = 1; // Example puzzle ID for spin view
+            param.progress = 0f;
+            param.target = 1f;
+            param.currentTool = 1;
 
+            ViewManager.Instance.SwitchView(ViewIndex.PuzzleView,param  );
         }
 
         private void OnClickSettingButton()

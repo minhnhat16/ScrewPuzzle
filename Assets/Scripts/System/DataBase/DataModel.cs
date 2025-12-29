@@ -1,8 +1,10 @@
+﻿using Mono.Cecil.Cil;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -76,7 +78,6 @@ public class DataModel : MonoBehaviour
             //else
             NewDataForPlayer();
             SaveData();
-
             Debug.Log("(BOOT) // INIT DATA DONE");
             callback?.Invoke();
         }
@@ -127,20 +128,77 @@ public class DataModel : MonoBehaviour
 
     private void ReadDataDictionaryByPath<T>(List<string> paths, object data, string key, out T dataOut)
     {
+        dataOut = default;
+
+        if (data == null)
+        {
+            Debug.LogError("[DataModel] ReadDataDictionaryByPath: data is null for path segment '" + paths[0] + "'.");
+            return;
+        }
+
         string p = paths[0];
         Type t = data.GetType();
-        FieldInfo field = t.GetField(p);
-        //Debug.Log(data.GetType().ToString());
+        // Use explicit BindingFlags so private / serialized fields are found too
+        FieldInfo field = t.GetField(p, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        if (field == null)
+        {
+            Debug.LogError($"[DataModel] ReadDataDictionaryByPath: field '{p}' not found on type '{t.FullName}'. Check DataPath and UserData field names (case-sensitive).");
+            return;
+        }
+
         if (paths.Count == 1)
         {
             object dic = field.GetValue(data);
-            Dictionary<string, T> dicData = (Dictionary<string, T>)dic;
-            dicData.TryGetValue(key, out dataOut);
+
+            // If the dictionary is null, return default
+            if (dic == null)
+            {
+                dataOut = default;
+                return;
+            }
+
+            // Support dictionaries keyed by string or int.
+            if (dic is Dictionary<string, T> dicString)
+            {
+                dicString.TryGetValue(key, out dataOut);
+                return;
+            }
+            else if (dic is Dictionary<int, T> dicInt)
+            {
+                if (int.TryParse(key, out int ik))
+                {
+                    dicInt.TryGetValue(ik, out dataOut);
+                }
+                else
+                {
+                    dataOut = default;
+                }
+                return;
+            }
+            else
+            {
+                // Handle unsupported key types or unexpected runtime type
+                if (field.FieldType.IsGenericType)
+                {
+                    var keyType = field.FieldType.GetGenericArguments()[0];
+                    if (keyType == typeof(string) || keyType == typeof(int))
+                    {
+                        dataOut = default;
+                        return;
+                    }
+                }
+
+                dataOut = default;
+                Debug.LogError($"[DataModel] ReadDictionary: field '{p}' is not a supported dictionary type. Actual runtime type: {dic?.GetType().FullName}");
+                return;
+            }
         }
         else
         {
             paths.RemoveAt(0);
-            ReadDataDictionaryByPath(paths, field.GetValue(data), key, out dataOut);
+            var nextData = field.GetValue(data);
+            ReadDataDictionaryByPath(paths, nextData, key, out dataOut);
         }
     }
 
@@ -198,15 +256,77 @@ public class DataModel : MonoBehaviour
         if (paths.Count == 1)
         {
             object dic = field.GetValue(data);
-            Dictionary<string, T> dicData = (Dictionary<string, T>)dic;
-            if (dicData == null)
+
+            // If dictionary instance exists, handle by actual runtime type
+            if (dic is Dictionary<string, T> dicString)
             {
-                dicData = new Dictionary<string, T>();
+                if (dicString == null)
+                    dicString = new Dictionary<string, T>();
+                dicString[key] = newData;
+                dataOut = dicString;
+                field.SetValue(data, dicString);
+                callback?.Invoke();
+                return;
             }
-            dicData[key] = newData;
-            dataOut = dicData;
-            field.SetValue(data, dicData);
-            callback?.Invoke();
+            else if (dic is Dictionary<int, T> dicInt)
+            {
+                if (dicInt == null)
+                    dicInt = new Dictionary<int, T>();
+
+                if (int.TryParse(key, out int ik))
+                {
+                    dicInt[ik] = newData;
+                    dataOut = dicInt;
+                    field.SetValue(data, dicInt);
+                    callback?.Invoke();
+                }
+                else
+                {
+                    dataOut = dicInt;
+                    Debug.LogError($"[DataModel] UpdateDataDictionary: key '{key}' is not a valid int for dictionary '{p}'.");
+                }
+                return;
+            }
+            else
+            {
+                // If field is null or not assigned, create appropriate dictionary based on declared field type
+                if (field.FieldType.IsGenericType)
+                {
+                    var genericArgs = field.FieldType.GetGenericArguments();
+                    var keyType = genericArgs[0];
+
+                    if (keyType == typeof(string))
+                    {
+                        var newDic = new Dictionary<string, T>();
+                        newDic[key] = newData;
+                        dataOut = newDic;
+                        field.SetValue(data, newDic);
+                        callback?.Invoke();
+                        return;
+                    }
+                    else if (keyType == typeof(int))
+                    {
+                        var newDic = new Dictionary<int, T>();
+                        if (int.TryParse(key, out int ik))
+                        {
+                            newDic[ik] = newData;
+                            dataOut = newDic;
+                            field.SetValue(data, newDic);
+                            callback?.Invoke();
+                        }
+                        else
+                        {
+                            dataOut = newDic;
+                            Debug.LogError($"[DataModel] UpdateDataDictionary: key '{key}' is not a valid int for dictionary '{p}'.");
+                        }
+                        return;
+                    }
+                }
+
+                dataOut = null;
+                Debug.LogError($"[DataModel] UpdateDataDictionary: field '{p}' is not a supported dictionary type. Actual type: {dic?.GetType().FullName}");
+                return;
+            }
         }
         else
         {
@@ -258,8 +378,7 @@ public class DataModel : MonoBehaviour
         AddNewItem(ItemType.Magnet, ZenSDK.instance.GetConfigInt(ItemType.Magnet.ToString(), 0));
         AddNewItem(ItemType.Breaker, ZenSDK.instance.GetConfigInt(ItemType.Breaker.ToString(), 5));
         AddNewItem(ItemType.Drill, ZenSDK.instance.GetConfigInt(ItemType.Drill.ToString(), 5));
-       
-
+        userData.currentPuzzleID = 1;
         // ===============================
         // LEVEL DATA
         // ===============================
@@ -346,14 +465,91 @@ public class DataModel : MonoBehaviour
         };
 
         // ===============================
-        // MISSION PROGRESS INIT
+        // INIT MISSION PROGRESS
         // ===============================
+        userData.missions = new Dictionary<string, MissionProgress>();
+
         foreach (var mission in MissionManager.ins.GetActiveMissions())
         {
-            DataAPIController.instance.GetMissionProgress(mission.Id); // auto create if null
+            var mp = new MissionProgress
+            {
+                missionId = mission.Id,
+                current = 0,
+                target = mission.Target,
+                state = MissionState.NotStarted,
+                rewardClaimed = false,
+                startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            };
+
+            userData.missions[mission.Id.ToString()] = mp;
         }
 
+        // ===============================
+        // INIT STAGE PROGRESS
+        // ===============================
+        userData.stageProgress = new Dictionary<int, StageProgress>();
 
+        // Stage 0 always unlocked
+        userData.stageProgress[0] = new StageProgress
+        {
+            stageId = 0,
+            isUnlocked = true,
+            isCompleted = false,
+            rewardClaimed = false,
+            chestProgress = 0
+        };
+
+        // Next stages locked
+        int stageCount = ConfigExtensions.GetStageCount();
+        for (int i = 1; i < stageCount; i++)
+        {
+            userData.stageProgress[i] = new StageProgress
+            {
+                stageId = i,
+                isUnlocked = i < 1,
+                isCompleted = false,
+                rewardClaimed = false,
+                chestProgress = 0
+            };
+        }
+
+        // ===============================
+        // INIT CHEST STATE
+        // ===============================
+        userData.chestStates = new Dictionary<int, ChestStageData>();
+
+        var chestConfig = ConfigFileManager.Instance.GetConfig<ChestConfig>().GetAllRecord();
+        foreach (var chest in chestConfig)
+        {
+            userData.chestStates[chest.Id] = new ChestStageData
+            {
+                chestId = chest.Id,
+                isUnlocked = chest.Id == 0,
+                isClaimed = false,
+                progress = 0
+            };
+        }
+        var puzzleBlockDatas = new Dictionary<int, BlockData>();
+
+        for (int i = 0; i < 25; i++)
+        {
+            var puzzleBlockData = new BlockData
+            {
+                screwRequired = 0,
+                unlocked = false,
+                removedCells = new Dictionary<int, bool>()
+            };
+            puzzleBlockDatas.Add(i, puzzleBlockData);
+        }
+        userData.puzzleBlockData = puzzleBlockDatas;
+
+        userData.timeMeta = new TimeSaveMeta
+        {
+            lastResetUtcTicks = DateTime.MinValue.Ticks
+        };
+
+
+        Debug.Log("Time save meta " + userData.timeMeta.lastResetUtcTicks);
         Debug.Log("(BOOT) // NEW PLAYER DATA CREATED");
     }
 
@@ -368,7 +564,7 @@ public class DataModel : MonoBehaviour
         userData.itemInventory.itemDict.Add(type.ToString(), item);
     }
 
-  
+
     private void NewDataForTester()
     {
         Debug.Log("(BOOT) // CREATE NEW DATA");
@@ -445,5 +641,49 @@ public class DataModel : MonoBehaviour
         newSpinData.timeSpin = DateTime.MinValue.ToString();
         userData.spinData = newSpinData;
     }
-}
 
+    public void DeleteData(string path)
+    {
+        List<string> paths = path.ConvertToListPath();
+        DeleteDataByPath(paths, userData);
+    }
+    private void DeleteDataByPath(List<string> paths, object data)
+    {
+        if (data == null || paths == null || paths.Count == 0)
+            return;
+
+        string p = paths[0];
+        Type t = data.GetType();
+        FieldInfo field = t.GetField(p);
+
+        if (field == null)
+            return;
+
+        // ===== DELETE HERE =====
+        if (paths.Count == 1)
+        {
+            // reference type → null
+            if (!field.FieldType.IsValueType)
+            {
+                field.SetValue(data, null);
+            }
+            else
+            {
+                // value type → default(T)
+                object defaultValue = Activator.CreateInstance(field.FieldType);
+                field.SetValue(data, defaultValue);
+            }
+
+            return;
+        }
+
+        // ===== GO DEEPER =====
+        object next = field.GetValue(data);
+        if (next == null)
+            return;
+
+        paths.RemoveAt(0);
+        DeleteDataByPath(paths, next);
+    }
+
+}
