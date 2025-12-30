@@ -15,6 +15,20 @@ public class BlockParam
     public bool unlocked;
     // cell nào đã bị remove trước đó (save/load)
     public Dictionary<int, bool> removedCells = new();
+
+
+    public BlockParam Clone()
+    {
+        return new BlockParam
+        {
+            blockId = this.blockId,
+            screwRequired = this.screwRequired,
+            unlocked = this.unlocked,
+            removedCells = this.removedCells != null
+                ? new Dictionary<int, bool>(this.removedCells)
+                : new Dictionary<int, bool>()
+        };
+    }
 }
 public abstract class PuzzleBlock : MonoBehaviour, IResetable
 {
@@ -30,10 +44,10 @@ public abstract class PuzzleBlock : MonoBehaviour, IResetable
 
     private RectTransform rectTransform;
     public List<PuzzleCellUI> Cells { get => cells; set => cells = value; }
-    
+
 
     private void OnDisable()
-    { 
+    {
         rectTransform.anchoredPosition = Vector3.zero;
     }
     protected virtual void Awake()
@@ -59,13 +73,16 @@ public abstract class PuzzleBlock : MonoBehaviour, IResetable
 
         remainingCells = cells.Count;
         var cellParam = param?.removedCells;
+
+
+
         foreach (var c in cells)
         {
             c.SetOwner(this);
-            c.IsOn = cellParam.TryGetValue(c.record.Id, out bool isRemoved) ? !isRemoved : true;
-
+            cellParam.TryGetValue(c.id,out bool isRemoved);
+            c.IsOn = !isRemoved;
+            Debug.Log($"Block {blockId} Cell {c.record.Id} IsOn: {c.IsOn} (param: {isRemoved})");
             c.SetCellOn(c.IsOn);
-            // nếu cell đã bị remove trước đó
             if (param != null &&
                 param.removedCells.TryGetValue(c.record.Id, out bool removed) &&
                 removed)
@@ -79,7 +96,7 @@ public abstract class PuzzleBlock : MonoBehaviour, IResetable
         if (remainingCells <= 0)
         {
             unlocked = true;
-            gameObject.SetActive(false);    
+            gameObject.SetActive(false);
         }
 
         var shape = BlockShapeAnalyzer.Analyze(cells);

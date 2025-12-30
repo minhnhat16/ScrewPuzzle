@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.DataBase;
 using UnityEngine;
@@ -19,20 +19,39 @@ public class PuzzleBoardRuntime
         internal int removedCells;
     }
 
+
+    public void LoadFromSave(List<BlockParam> saved)
+    {
+        blocks.Clear(); // ❗ BẮT BUỘC
+
+        if (saved == null) return;
+
+        foreach (var p in saved)
+        {
+            blocks[p.blockId] = new BlockState
+            {
+                screwRequired = p.screwRequired,
+                removedCells = p.removedCells.Count,
+                isUnlocked = p.unlocked
+            };
+        }
+    }
     // ===============================
     // API
     // ===============================
-    public void RegisterBlock(int blockId, int screwRequired,int removedCells)
+    public void RegisterBlock(int blockId, int screwRequired,int removedCell)
     {
         if (blocks.ContainsKey(blockId))
-            return;
+        {
+            return; // đã load từ save rồi
+        }
 
-        blocks.Add(blockId, new BlockState
+        blocks[blockId] = new BlockState
         {
             screwRequired = screwRequired,
-            removedCells = removedCells,
+            removedCells = removedCell,
             isUnlocked = false
-        });
+        };
     }
 
     public bool IsUnlocked(int blockId)
@@ -59,6 +78,8 @@ public class PuzzleBoardRuntime
         block.removedCells++;
 
         Debug.Log($"Remove cell {block.removedCells}, screw require  {block.screwRequired}");
+
+
         if (block.removedCells >= block.screwRequired)
         {
             block.isUnlocked = true;

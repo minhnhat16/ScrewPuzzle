@@ -159,10 +159,10 @@ namespace UIScript.UI.UI
         public void SpinView()
         {
             PuzzleParam param = new PuzzleParam();  
-            param.idPuzzle = 1; // Example puzzle ID for spin view
+            param.idPuzzle = 2; // Example puzzle ID for spin view
             param.progress = 0f;
             param.target = 1f;
-            param.currentTool = 1;
+            param.currentTool = 100;
 
             ViewManager.Instance.SwitchView(ViewIndex.PuzzleView,param  );
         }

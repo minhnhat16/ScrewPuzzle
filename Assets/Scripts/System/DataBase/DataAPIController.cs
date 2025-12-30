@@ -1,5 +1,6 @@
 ﻿using ConfigFile;
 using Mono.Cecil.Cil;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -786,8 +787,6 @@ namespace System.DataBase
 
             List<BlockParam> result = new List<BlockParam>();
 
-
-
             foreach (var item in blocksData)
             {
                 var id = item.Key;
@@ -889,8 +888,11 @@ namespace System.DataBase
         }
         internal void UpdateBlockCell(int blockid, int idCell, bool v)
         {
+
             var block = dataModel.ReadDictionary<BlockData>(DataPath.BLOCKSDATA, blockid.ToString());
             block.removedCells[idCell] = v;
+            Debug.Log("UPdate block cell " + blockid + " cell " + idCell + " to " + v +" block : " +blockid + " block + " + (block.removedCells[idCell]));
+
             dataModel.UpdateDataDictionary(DataPath.BLOCKSDATA, blockid.ToString(), block);
         }
 

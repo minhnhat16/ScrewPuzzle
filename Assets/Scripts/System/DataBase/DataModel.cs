@@ -265,6 +265,8 @@ public class DataModel : MonoBehaviour
                 dicString[key] = newData;
                 dataOut = dicString;
                 field.SetValue(data, dicString);
+
+                Debug.Log("Update dictionary string key " + key + " with value " + newData.ToString());
                 callback?.Invoke();
                 return;
             }

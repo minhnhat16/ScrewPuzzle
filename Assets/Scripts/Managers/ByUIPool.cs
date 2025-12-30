@@ -9,6 +9,8 @@ public class ByUIPoolUI<T> where T : MonoBehaviour
     private readonly Queue<T> inactive = new();
     private readonly List<T> active = new();
 
+    public List<T> Active => active;
+
     public ByUIPoolUI(T prefab, int preload, Transform parent)
     {
         this.prefab = prefab;
@@ -41,7 +43,7 @@ public class ByUIPoolUI<T> where T : MonoBehaviour
         rect.SetParent(parent, false);       // <--- giữ anchor/layout
 
         obj.gameObject.SetActive(true);
-        active.Add(obj);
+        Active.Add(obj);
 
         return obj;
     }
@@ -49,17 +51,17 @@ public class ByUIPoolUI<T> where T : MonoBehaviour
     public void Release(T obj)
     {
         obj.gameObject.SetActive(false);
-        active.Remove(obj);
+        Active.Remove(obj);
         inactive.Enqueue(obj);
     }
 
     public void ReleaseAll()
     {
-        foreach (var obj in active)
+        foreach (var obj in Active)
         {
             obj.gameObject.SetActive(false);
             inactive.Enqueue(obj);
         }
-        active.Clear();
+        Active.Clear();
     }
 }

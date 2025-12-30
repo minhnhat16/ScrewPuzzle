@@ -1,8 +1,10 @@
 ﻿using Ingame.Screw;
 using Mono.Cecil.Cil;
+using System;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,30 +31,34 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
 
     private Dictionary<int, PuzzleBlock> blockViews
         = new Dictionary<int, PuzzleBlock>();
-    private UnityEvent<int> grandPrize = new();
+    public Action<int> grandPrize ;
     // Event invoked when every block on the runtime board is unlocked/cleared
     public UnityEvent OnAllBlocksCleared = new();
 
+
+    public Action<int> updatePlayerScrew;
     // Guard to prevent firing the "all cleared" event multiple times
     private bool allClearedFired = false;
 
     // =====================================================
     // INIT
     // =====================================================
-    public void Init(PuzzleBoardRuntime runtime)
+    public void Init(int curentScrew,PuzzleBoardRuntime runtime)
     {
         this.runtime = runtime;
         logic = new PuzzleBoardLogic(runtime);
+        logic.playerScrew = curentScrew;
         logic.OnBlockUnlocked += HandleBlockUnlocked;
+        logic.OnScrewClick += HandleUpdatePlayerScrew;
     }
 
     // =====================================================
     // LOAD PATTERN
     // =====================================================
     public void LoadPattern(
-      PuzzleBoardRecord boardConfig,
-      PuzzlePartenRecord pattern
-  )
+    PuzzleBoardRecord boardConfig,
+    PuzzlePartenRecord pattern
+)
     {
         ClearBoard();
 
@@ -63,7 +69,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
         }
 
         // ===============================
-        // SETUP GRID (CELL ONLY)
+        // SETUP GRID
         // ===============================
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         grid.constraintCount = boardConfig.width;
@@ -72,7 +78,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
         grid.cellSize = new Vector2(cellSize, cellSize);
 
         // ===============================
-        // LOAD CELL RECORDS
+        // LOAD CELL CONFIG
         // ===============================
         var cellRecords = ConfigExtensions
             .GetAllPuzzleCellConfig(ConfigFileManager.Instance)
@@ -84,77 +90,106 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             return;
         }
 
-        // sort for grid layout
+        // sort stable for grid
         cellRecords.Sort((a, b) =>
-            a.Y == b.Y ? a.X.CompareTo(b.X) : b.Y.CompareTo(a.Y));
+            a.Y == b.Y ? a.X.CompareTo(b.X) : a.Y.CompareTo(b.Y));
 
+        string orderLog = string.Join(" | ",
+            cellRecords.Select(c => $"({c.X},{c.Y})#{c.Id}")
+        );
 
+        
+        Debug.Log("[CellOrder] " + orderLog);
         // ===============================
-        // SPAWN CELLS (INPUT ONLY)
+        // SPAWN CELLS (VIEW ONLY)
         // ===============================
-        foreach (var record in cellRecords.OrderBy(c => c.Y))
+        foreach (var record in cellRecords)
         {
             var cell = PuzzleCellPool.ins.Spawn();
             cell.Setup(record);
             cell.Init(this);
+
+            Debug.Log(
+                $"[Cell setup] id={record.Id}, " +
+                $"pos=({record.X},{record.Y}), " +
+                $"blockId={record.BlockId},"+
+                $"is cell on = {cell.IsOn}"
+            );
             RegisterCell(cell);
         }
 
-        // FORCE GRID LAYOUT CALC -- run twice and rebuild layout to ensure rects are final
+
+
+        PuzzleCellPool.ins.ShortBy(cellRecords);
+        // force layout
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(cellRoot);
         Canvas.ForceUpdateCanvases();
 
-        var blockParams = GetCurrentBlockParams();
-
-        Debug.Log("Loaded block params: " + blockParams.Count + " and cell " +
-                            blockCells.Count);
         // ===============================
-        // CREATE BLOCKS
+        // LOAD SAVED BLOCK PARAMS
+        // ===============================
+        var blockParams = GetCurrentBlockParams();
+        var paramMap = blockParams.ToDictionary(p => p.blockId);
+
+        // ===============================
+        // CREATE BLOCKS (RENDER FROM RUNTIME)
         // ===============================
         foreach (var pair in blockCells.OrderBy(kv => kv.Key))
         {
             int blockId = pair.Key;
             var cells = pair.Value;
-            var param = blockParams.FirstOrDefault(p => p.blockId == blockId);
 
-            Debug.Log("Param for block " + blockId + ": " + (param?.removedCells == null ? "null" : "found"));
-            // ---- SAFETY CHECK ----
+            // safety
             if (cells.Any(c => c.BlockId != blockId))
             {
                 Debug.LogError($"[Block ERROR] Mixed blockId in group {blockId}");
                 continue;
             }
 
+            // get save param if exists
+            paramMap.TryGetValue(blockId, out var param);
 
-            Debug.Log($"[Block] id={blockId}, cells={cells.Count}");
+        
+            // ===============================
+            // REGISTER RUNTIME (ONLY IF ABSENT)
+            // ===============================
+            int screwRequired = cells.Count; // total cells = total screws
+            int removedCells = param.removedCells.Count(c => c.Value);
 
+            runtime.RegisterBlock(blockId, screwRequired, removedCells);
+
+            // ===============================
+            // INIT BLOCK VIEW (APPLY SAVE)
+            // ===============================
             var block = PuzzleBlockPool.ins.Spawn();
+
+            string cellsLog = string.Join(", ",
+                cells.Select(c => c.id.ToString())
+            );
 
             var shapeResult = block.Init(blockId, cells, param);
 
-            int screwRequired = cells.Count(c => c.IsOn);
+            // visual
+            var sprite = SpriteLibControl.Instance
+                .GetSprite("Block " + shapeResult.shape);
 
-            int onCellsCount = cells.Count(c => !c.IsOn);
-            // register with correct screwRequired and initial cell count
-            runtime.RegisterBlock(blockId, screwRequired, onCellsCount);
-
-            // apply sprite (BOARD quyết định)
-            var sprite = SpriteLibControl.Instance.GetSprite("Block " + shapeResult.shape);
             block.ApplyVisual(shapeResult, sprite);
             block.SetSize();
 
-            // ---- POSITION BLOCK (use stable world->local conversion) ----
+
+
+            // position
             RectTransform blockRT = (RectTransform)block.transform;
-            blockRT.anchoredPosition = GetBlockCenterInBlockRoot(cells, blockRoot);
+            blockRT.anchoredPosition =
+                GetBlockCenterInBlockRoot(cells, blockRoot);
 
             blockViews.Add(blockId, block);
-
-            // Register block listeners
             RegisterBlockListeners(block);
 
             Debug.Log(
-                $"[Block setup] Block {blockId} shape={shapeResult.shape} orientation={shapeResult.orientation}, screw {screwRequired}, sprite {sprite == null}, position {blockRT.anchoredPosition}"
+                $"[Block setup] id={blockId}, cells={cells.Count}, " +
+                $"saved={(param != null)}"
             );
         }
 
@@ -163,21 +198,28 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             $"cells={cellRecords.Count}, blocks={blockCells.Count}"
         );
 
-        // Immediately check if board was already cleared (all blocks unlocked)
         CheckAllBlocksCleared();
     }
+
 
     public List<BlockParam> GetCurrentBlockParams()
     {
         // lấy data cũ (từ save)
         List<BlockParam> savedParams =
             DataAPIController.instance.GetBlocksData();
-
         // map nhanh theo blockId
         Dictionary<int, BlockParam> paramMap =
             savedParams != null
                 ? savedParams.ToDictionary(p => p.blockId)
                 : new Dictionary<int, BlockParam>();
+
+       string cells = string.Join(" | ",
+            paramMap.Values.Select(p =>
+                $"Block {p.blockId}: " +
+                $"removedCells=[{string.Join(",", p.removedCells.Keys)}], " +
+                $"unlocked={p.unlocked}"
+            )
+        );
         return paramMap.Values.ToList();
     }
 
@@ -235,38 +277,9 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
     // =====================================================
     public void OnCellClicked(PuzzleCellUI cell)
     {
-        if (cell == null) return;
-
-
-
-        // Read player's current screw/tool count from DataAPIController
-        int playerTool = 0;
-        try
-        {
-            playerTool = DataAPIController.instance.GetToolScrew();
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogWarning($"[PuzzleBoardUI] Failed to read player tool count: {ex.Message}");
-        }
-
-        // Block removal if player has no tools/screws
-        if (playerTool <= 0)
-        {
-
-            return;
-        }
-        int blockId = cell.BlockId;
-        Debug.Log($"[PuzzleBoardUI] Cell clicked: id={cell.id}, blockId={blockId}");
-  
-
-        cell.SetCellOn(false);// immediate visual feedback
-        // Enough tools: forward to logic which will attempt to unlock the block
-        logic.OnBlockClicked(blockId);
-        return;
+        logic.OnCellClicked(cell);
 
     }
-
     // =====================================================
     // BLOCK UNLOCK VISUAL
     // =====================================================
@@ -308,8 +321,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
                 var block = kv.Value;
                 if (block == null) continue;
                 UnregisterBlockListeners(block);
-                if (PuzzleBlockPool.ins != null) PuzzleBlockPool.ins.Return(block);
-                else Destroy(block.gameObject);
+                PuzzleBlockPool.ins.Return(block);
             }
             blockViews.Clear();
         }
@@ -339,7 +351,6 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
         allClearedFired = false;
 
         // Clear grandPrize listeners (do not destroy external subscribers)
-        grandPrize.RemoveAllListeners();
 
         // Force layout rebuild so next LoadPattern has stable rects
         Canvas.ForceUpdateCanvases();
@@ -382,9 +393,6 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
 
         Debug.Log("On block cell removed: blockId=" + block.blockId + ", cellId=" + cell.id);   
         runtime.blocks.Remove(block.blockId);
-        DataAPIController.instance.UpdateBlockCell(block.blockId, cell.id, true); // mark cell as removed in save data   
-
-
 
         if (block.IsUnlocked())
         {
@@ -392,7 +400,11 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             CheckAllBlocksCleared();
         }
     }
-
+    public void HandleUpdatePlayerScrew(int newScrew)
+    {
+        logic.playerScrew = newScrew;
+        updatePlayerScrew?.Invoke(newScrew);
+    }
     /// <summary>
     /// Check runtime state and invoke OnAllBlocksCleared once when every registered block is unlocked.
     /// </summary>

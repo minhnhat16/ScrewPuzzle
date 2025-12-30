@@ -1,4 +1,5 @@
 ﻿using System;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -43,8 +44,6 @@ public class PuzzleCellUI : MonoBehaviour, IPointerClickHandler,IResetable
     public void Init(PuzzleBoardUI board)
     {
         this.board = board;
-
-        Debug.Log("cell position " + ((RectTransform)this.transform).position);
     }
 
     public void SetOwner(PuzzleBlock block)

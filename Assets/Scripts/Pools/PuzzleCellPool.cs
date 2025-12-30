@@ -1,3 +1,6 @@
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PuzzleCellPool : SingletonMono<PuzzleCellPool>
@@ -27,5 +30,13 @@ public class PuzzleCellPool : SingletonMono<PuzzleCellPool>
    public void ReturnAll()
     {
         pool.ReleaseAll();
+    }
+
+    internal void ShortBy(List<PuzzleCellRecord> sortedCells)
+    {
+        for (int i = 0; i < sortedCells.Count; i++)
+        {
+            pool.Active[i].transform.SetSiblingIndex(i);
+        }
     }
 }

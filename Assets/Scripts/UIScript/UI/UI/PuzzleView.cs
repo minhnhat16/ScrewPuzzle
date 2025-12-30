@@ -1,7 +1,9 @@
 ﻿using Mono.Cecil.Cil;
 using System;
 using System.DataBase;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class PuzzleView : BaseView
@@ -70,16 +72,32 @@ public class PuzzleView : BaseView
             return;
         }
 
-        // 1️⃣ build runtime (STATE ONLY)
         runtime = new PuzzleBoardRuntime();
-
-        // 2️⃣ init board view (orchestrator)
-        boardView.Init(runtime);
-
-        // 3️⃣ load pattern & register blocks
+        boardView.Init(param.currentTool,runtime);
         boardView.LoadPattern(boardConfig, pattern);
 
+        RegisterEventBoard();
+
         Debug.Log($"[PuzzleView] Loaded puzzle pattern {pattern.patternId}");
+    }
+    public void RegisterEventBoard()
+    {
+        boardView.updatePlayerScrew += UpdateCurrentToolAndParam;
+        boardView.grandPrize += ShowReward;
+    }
+
+    private void ShowReward(int rewarId)
+    {
+        DialogManager.ins.ShowDialog(DialogIndex.GiftClaimDialog, new GiftParam()
+        {
+            rewards = ConfigExtensions.GetRewardConfig(ConfigFileManager.Instance, rewarId).Items
+        }, null);
+    }
+
+    private void UpdateCurrentToolAndParam(int tools)
+    {
+        param.currentTool = tools;
+        lb_toolScrew.text = tools.ToString();
     }
 
     private void OnClickReturn()
