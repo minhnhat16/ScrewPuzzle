@@ -2,6 +2,7 @@ using Managers;
 using Spine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.DataBase;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class BootLoader : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
         ScreenSetup();
         yield return new WaitForSeconds(0.1f);
-
+        TaskManager.ins.AddTask(Task_LoadRemoteAsset);
         // ----- REGISTER BOOT TASKS -----
         TaskManager.ins.AddTask(Task_InitConfig);
 
@@ -92,11 +93,32 @@ public class BootLoader : MonoBehaviour
         Debug.Log("[BOOT] VIEW LOAD DONE ");
         yield return DialogManager.ins.Init();
         Debug.Log("[BOOT] DIALOG LOAD DONE ");
-   
+    }
 
+    IEnumerator Task_LoadRemoteAsset()
+    {
+        bool done = false;
 
+        yield return ResourceManager.ins.Init(
+            new List<string>
+            {
+            "Image_Level",
+            "Config_Level",
+            "UI"
+            },
+            () => done = true
+        );
+
+        while (!done)
+        {
+            yield return null;
+
+        }
+        SpriteLibControl.Instance.LoadAllPartSprites(true);
 
     }
+
+
     IEnumerator Task_FinishBoot()
     {
         Debug.Log("[BOOT] Finalizing...");

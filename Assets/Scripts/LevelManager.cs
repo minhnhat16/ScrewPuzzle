@@ -53,7 +53,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         StartCoroutine(LoadLevelOnFile(() => isInitDone = true));
 
     }
-
     public IEnumerator LoadConfigFromFile(Action callback = null)
     {
         isInitDone = false;
@@ -79,34 +78,29 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     public IEnumerator LoadLevelOnFile(Action callback = null)
     {
-        yield return new WaitForSeconds(1f);
+        var assets = ResourceManager.ins.GetAllCachedAssets();
+        // Đảm bảo Addressables đã init & preload
+        yield return assets;
 
-        // Path should not include "Resources" or file extension
-        string resourcePath = "Levels"; // Assuming files are in Resources/ConfigFile/Level
+        Levels.Clear();
 
-        // Load all assets of type BoxConfig from the specified folder
-        var levels = Resources.LoadAll<Level.Level>(resourcePath);
 
-        if (levels.Length > 0)
+        foreach (var pair in assets)
         {
-            foreach (var level in levels)
+            if (pair.Value is Level.Level level)
             {
-                string strIDLevel = level.levelId.ToString();
-                Levels.TryAdd(strIDLevel, level);
+                string id = level.levelId.ToString();
+                Levels[id] = level;
             }
-
-            levelConfig = new List<Level.Level>(Levels.Values);
-        }
-        else
-        {
-            Debug.LogError($"No GameObject assets found at path: {resourcePath}");
         }
 
+        levelConfig = new List<Level.Level>(Levels.Values);
 
-        Debug.Log("Load all config togame " + levels.Length);
-        // Call the callback if it's not null
+        Debug.Log($"[Level] Loaded remote levels: {levelConfig.Count}");
+
         callback?.Invoke();
     }
+
 
     public void LoadLevel(int levelID, Action callback = null)
     {
@@ -325,7 +319,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     {
         var partComponent = PartPool.Instance.pool.SpawnNonGravity();
         var partGameObject = partComponent.gameObject;
-
+        int layerIndex = LayerMask.NameToLayer(layerComponent.name);
 
         partComponent = partGameObject.GetComponent<BasePart>();
 
@@ -339,8 +333,10 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             layerManager.AddPart(partComponent);
 
             partGameObject.layer = LayerMask.NameToLayer(layerComponent.name);
-            var sprite = SpriteLibControl.Instance.GetSprite(partData.spriteName);
-            var outline = SpriteLibControl.Instance.GetSprite(partData.spriteName, true);
+            var sprite = SpriteLibControl.Instance.GetHinhSprite(currentLevelID, false, partData.spriteName);
+
+            Debug.Log($"  Loading part '{partData.partName}' with sprite '{partData.spriteName}', sprite {sprite == null}");
+            var outline = SpriteLibControl.Instance.GetHinhSprite(currentLevelID, true   ,partData.spriteName);
             partComponent.Renderer.sprite = sprite;
             partComponent.Outline.sprite = outline;
             if (TryHexToColor(partData.colorString, out Color color))
@@ -434,7 +430,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     private void HandleScrewRemoved(Screw removedScrew)
     {
-       
+
     }
     public void OnReset()
     {
@@ -459,10 +455,10 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         color = default;
 
         if (hex.Length == 8)
-        { 
+        {
             if (ColorUtility.TryParseHtmlString("#" + hex, out color))
             {
-                return true;    
+                return true;
             }
         }
         return false;

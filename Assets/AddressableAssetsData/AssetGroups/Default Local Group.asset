@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_GUID: 1f4c128c091a4db42b074294a273be3c
+  m_SerializeEntries:
+  - m_GUID: 7a777cf96a041e242b3c2b342ce11587
+    m_Address: Sprites/GAMEPLAY/item/Drill
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b3d12a227a5a1d458e2135470dc6a36
+    m_Address: HINH
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Image_Level
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b6669ff2fc02904186275c7f5d56513
+    m_Address: Levels
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config_Level
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a69e8df30a5aab640a557fc373505e72
+    m_Address: Sprites/GAMEPLAY/item/Breaker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1d812b956a9fe243849a0d858b09439
+    m_Address: Sprites/GAMEPLAY/item/Magnet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: a91ec6d147716da4abc380b8b110cf0d, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: b4ecdd976cc3be44ea901590d6479369, type: 2}
+    - {fileID: 11400000, guid: a99788d0ba95d174e9ee82f45ee48887, type: 2}
+    - {fileID: 11400000, guid: dc49c275269d372479bcea6928fa3c66, type: 2}

@@ -72,7 +72,7 @@ namespace Managers
         }
         public long GetPlayerGold()
         {
-            return playerGold;
+            return DataAPIController.instance.GetGold();
         }
         public void NextLevelCanUnlock(int levelCanUnlock)
         {

@@ -1,4 +1,14 @@
-﻿
+﻿public enum SpriteGroup
+{
+    None = 0,     // Không thuộc a / b
+    Main = 1,     // a
+    Outline = 2,  // b
+    UI = 3,
+    Effect = 4,
+    Background = 5
+
+
+}
 public enum ItemType
 {
     Magnet = 0,
@@ -138,4 +148,11 @@ public enum LevelEnum
     Lock,
     Complete,
     Hard,
+}
+
+
+public enum  ChestLocation
+{
+    Quest,
+    Puzzle,
 }

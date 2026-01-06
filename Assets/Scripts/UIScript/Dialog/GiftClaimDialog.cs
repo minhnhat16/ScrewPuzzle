@@ -129,7 +129,7 @@ public class GiftClaimDialog : BaseDialog
         var icon = go.transform.Find("Icon").GetComponent<Image>();
         var txt = go.transform.Find("Txt").GetComponent<Text>();
 
-        icon.sprite = SpriteLibControl.Instance.GetSpriteByName(reward.icon_name);
+        icon.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, reward.icon_name);
 
         // 1) Set kích thước tự nhiên của sprite
         icon.SetNativeSize();

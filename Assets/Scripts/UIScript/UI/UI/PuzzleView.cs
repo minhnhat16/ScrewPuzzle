@@ -14,28 +14,37 @@ public class PuzzleView : BaseView
     [Header("Config")]
     [SerializeField] private PuzzleBoardRecord boardConfig;
 
+
+    [Header("GameObjects")]
+    [SerializeField] private ProgressBarMultipleTarget progressBar;
     private PuzzleBoardRuntime runtime;
     [SerializeField]
     private Button returnBtn;
 
     public int IdPuzzle = 1;
-
+    public int currentProgress = 1;
 
     public Text lb_toolScrew;
     private PuzzleParam param;
 
-
+    public UnityEvent OnAllBlocksCleared = new();
 
     private void OnEnable()
     {
         returnBtn.onClick.AddListener(OnClickReturn);
     }
 
-
+   
 
     private void OnDisable()
     {
         returnBtn.onClick.RemoveListener(OnClickReturn);
+        OnAllBlocksCleared.RemoveAllListeners();
+    }
+
+    private void Awake()
+    {
+       
     }
     // =====================================================
     // SETUP
@@ -46,6 +55,12 @@ public class PuzzleView : BaseView
         this.param = (PuzzleParam)param;
         lb_toolScrew.text = this.param.currentTool.ToString();
         LoadPuzzle(this.param.idPuzzle);
+        progressBar.Init(new ProgressMultipleTargetParam(this.param.progress / this.param.target, 1f, OnProgressAction));
+
+    }
+
+    private void OnProgressAction()
+    {
     }
 
     // =====================================================
@@ -73,7 +88,7 @@ public class PuzzleView : BaseView
         }
 
         runtime = new PuzzleBoardRuntime();
-        boardView.Init(param.currentTool,runtime);
+        boardView.Init(param.currentTool, runtime);
         boardView.LoadPattern(boardConfig, pattern);
 
         RegisterEventBoard();
@@ -88,10 +103,22 @@ public class PuzzleView : BaseView
 
     private void ShowReward(int rewarId)
     {
-        DialogManager.ins.ShowDialog(DialogIndex.GiftClaimDialog, new GiftParam()
+        var record = ConfigExtensions.GetRewardConfig(ConfigFileManager.Instance, rewarId);
+        if (record == null)
         {
-            rewards = ConfigExtensions.GetRewardConfig(ConfigFileManager.Instance, rewarId).Items
-        }, null);
+            Debug.LogError($"[PuzzleView] Missing reward config for id: {rewarId}");
+            return;
+        }
+
+        var items = record.Items ?? new System.Collections.Generic.List<RewardItem>();
+        var param = new GiftParam() { rewards = items };
+
+        DialogManager.ins.ShowDialog(DialogIndex.GiftClaimDialog, param, () =>
+        {
+            Debug.Log("Reward claimed");
+        });
+
+        UpdateProgress(currentProgress);
     }
 
     private void UpdateCurrentToolAndParam(int tools)
@@ -103,6 +130,12 @@ public class PuzzleView : BaseView
     private void OnClickReturn()
     {
         ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
+    }
+
+    private void UpdateProgress(int i)
+    {
+        progressBar.UpdateProgressByTime((float)i / param.target, 1f, null);
+        currentProgress++;
     }
 
 }

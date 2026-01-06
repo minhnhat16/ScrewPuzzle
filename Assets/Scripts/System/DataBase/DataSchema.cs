@@ -126,7 +126,6 @@ public class CollectionData
     public Dictionary<int, MissionProgress> missions = new();
     [SerializeField]
     public Dictionary<int, ChestStageData> chestStates = new();
-
     [SerializeField]
     public TimeSaveMeta timeMeta;
 }
@@ -204,6 +203,7 @@ public class ChestStageData
     public bool isUnlocked;
     public bool isClaimed;
     public float progress;   // nếu bạn có tiến trình mở rương
+    public ChestLocation location;
 }
 [Serializable]
 public class BlockData

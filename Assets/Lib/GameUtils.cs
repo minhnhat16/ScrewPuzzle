@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using UIScript;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 public static class GameConstants
 {
@@ -26,9 +32,39 @@ public static class GameConstants
     internal static string RARE_PACK = "Prefabs/UIPrefab/ShopPack/OrangePack";
 
     public static float MINI_SIZE = 150f;
+
+    public static string SPRITE_PART_PATH = "HINH/";
 }
 
+public static class TaskExtensions
+{
+    public static IEnumerator AsCoroutine(this Task task)
+    {
+        while (!task.IsCompleted) yield return null;
 
+        if (task.Exception != null)
+            Debug.LogException(task.Exception);
+    }
+
+    public static async Task<List<string>> GetKeysFromLabel(string label)
+    {
+        List<string> keys = new();
+
+        var locationsHandle = Addressables.LoadResourceLocationsAsync(label);
+        await locationsHandle.Task;
+
+        if (locationsHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            foreach (IResourceLocation location in locationsHandle.Result)
+            {
+                keys.Add(location.PrimaryKey);
+            }
+        }
+
+        Addressables.Release(locationsHandle);
+        return keys;
+    }
+}
 public static class GameUtils
 {
 #if UNITY_EDITOR
@@ -62,6 +98,26 @@ public static class GameUtils
         var culture = new CultureInfo("vi-VN"); // vùng Việt Nam
         string formatted = string.Format(culture, "{0:N0}", amount);
         return $"{formatted} {currencyCode}";
+    }
+
+    internal static string SpriteFormat(int levelId, string spriteName, char type = 'a')
+    {
+        //string normalizeName = NormalizeShapeName(spriteName);
+        string path = $"{GameConstants.SPRITE_PART_PATH}{levelId}/type/{spriteName}";
+
+        return path;
+    }
+
+    public static string NormalizeShapeName(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+        // Match: Shape + space + number
+        var match = Regex.Match(input, @"(Shape\s*\d+)", RegexOptions.IgnoreCase);
+        if (match.Success)
+            return match.Value.ToLower(); // hoặc .ToUpper(), tuỳ bạn
+
+        return input;
     }
 
     public static class ShopItemLoader

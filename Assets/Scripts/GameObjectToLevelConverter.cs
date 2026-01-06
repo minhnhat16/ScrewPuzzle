@@ -410,7 +410,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                     partGameObject.transform.SetParent(layerGameObject.transform);
                     partGameObject.transform.SetPositionAndRotation(partData.partPosition , partData.partRotation);
                     partGameObject.transform.localScale = partData.partLocalScale;
-                    var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
+                    var sprite = SpriteLibControl.Instance.GetSprite(layerData.layerId,SpriteGroup.Main, partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
                     partComponent.uniqueID = partData.partName;
                     partGameObject.name = partData.partName;

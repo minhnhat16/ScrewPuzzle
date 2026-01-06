@@ -533,8 +533,6 @@ namespace System.DataBase
         internal bool CheckStageUnlocked(int id)
         {
             var stage = dataModel.ReadDictionary<StageProgress>(DataPath.STAGEPATH, id.ToString());
-
-
             Debug.Log($"Check stage unlocked {id}: stage {stage} is unlocked {stage.isUnlocked}");
             if (stage == null) return false;
             return stage.isUnlocked;
@@ -913,6 +911,20 @@ namespace System.DataBase
         internal int GetToolScrew()
         {
             return 1000;
+        }
+
+        internal List<ChestStageData> GetChestsData(ChestLocation location)
+        {
+            var chestDict = dataModel.ReadData<Dictionary<int, ChestStageData>>(DataPath.CHESTSTAGE);
+            List<ChestStageData> result = new List<ChestStageData>();
+            if (chestDict == null || chestDict.Count == 0)
+                return result;
+            foreach (var chest in chestDict.Values)
+            {
+                if (chest.location == location)
+                    result.Add(chest);
+            }
+            return result;
         }
         #endregion
     }

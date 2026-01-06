@@ -45,7 +45,7 @@ public class SpinItem : MonoBehaviour
         amount = record.Amount;
         amount_lb = GetComponentInChildren<Text>();
         amount_lb.text = $"{amount}";
-        itemImg.sprite = SpriteLibControl.Instance.GetSpriteByName(record.ItemImg);
+        itemImg.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, record.ItemImg);
         itemImg.SetNativeSize();
     }
     public void OnRewardItem()

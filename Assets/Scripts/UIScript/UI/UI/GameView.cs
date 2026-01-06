@@ -120,7 +120,7 @@ public class GameView : BaseView
     public void ShowDescription(ItemType itemType)
     {
         var itemConfig = ConfigFileManager.Instance.GetItemConfig(itemType);
-        var sprite = SpriteLibControl.Instance.GetSpriteByName(itemType.ToString());
+        var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, itemType.ToString());
         string detail = itemConfig.Detail;  
 
 
@@ -137,7 +137,7 @@ public class GameView : BaseView
 
         var itemData = DataAPIController.instance.GetItemData(itemType);
         var itemConfig = ConfigFileManager.Instance.GetItemConfig(itemType);
-        var sprite = SpriteLibControl.Instance.GetSpriteByName(itemType.ToString());
+        var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, itemType.ToString());
 
         if (itemData.total <= 0)   // <= 0 → mở ConfirmDialog
         {

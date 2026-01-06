@@ -52,7 +52,7 @@ public class QuestItem : MonoBehaviour
         MissionID = data.Id;   // ✅ DATA ID
         Debug.Log($"Mission data id {data.Id} and id {MissionID}");
         titleText.text = data.Description;
-        icon.sprite = SpriteLibControl.Instance.GetSprite(data.IconName);
+        icon.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, data.IconName);
 
         UpdateProgressUI(currentProgress, data.Target);
 

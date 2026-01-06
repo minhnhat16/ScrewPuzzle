@@ -31,7 +31,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
 
     private Dictionary<int, PuzzleBlock> blockViews
         = new Dictionary<int, PuzzleBlock>();
-    public Action<int> grandPrize ;
+    public Action<int> grandPrize;
     // Event invoked when every block on the runtime board is unlocked/cleared
     public UnityEvent OnAllBlocksCleared = new();
 
@@ -43,13 +43,16 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
     // =====================================================
     // INIT
     // =====================================================
-    public void Init(int curentScrew,PuzzleBoardRuntime runtime)
+    public void Init(int curentScrew, PuzzleBoardRuntime runtime)
     {
         this.runtime = runtime;
         logic = new PuzzleBoardLogic(runtime);
         logic.playerScrew = curentScrew;
         logic.OnBlockUnlocked += HandleBlockUnlocked;
         logic.OnScrewClick += HandleUpdatePlayerScrew;
+        // Replace this line in Init:
+        // OnAllBlocksCleared.AddListener(GrandPrize(5));
+        OnAllBlocksCleared.AddListener(() => UpdatePuzzleProgress(5));
     }
 
     // =====================================================
@@ -98,7 +101,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             cellRecords.Select(c => $"({c.X},{c.Y})#{c.Id}")
         );
 
-        
+
         Debug.Log("[CellOrder] " + orderLog);
         // ===============================
         // SPAWN CELLS (VIEW ONLY)
@@ -112,7 +115,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             Debug.Log(
                 $"[Cell setup] id={record.Id}, " +
                 $"pos=({record.X},{record.Y}), " +
-                $"blockId={record.BlockId},"+
+                $"blockId={record.BlockId}," +
                 $"is cell on = {cell.IsOn}"
             );
             RegisterCell(cell);
@@ -150,7 +153,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             // get save param if exists
             paramMap.TryGetValue(blockId, out var param);
 
-        
+
             // ===============================
             // REGISTER RUNTIME (ONLY IF ABSENT)
             // ===============================
@@ -171,8 +174,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             var shapeResult = block.Init(blockId, cells, param);
 
             // visual
-            var sprite = SpriteLibControl.Instance
-                .GetSprite("Block " + shapeResult.shape);
+            var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, "Block " + shapeResult.shape);
 
             block.ApplyVisual(shapeResult, sprite);
             block.SetSize();
@@ -213,13 +215,13 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
                 ? savedParams.ToDictionary(p => p.blockId)
                 : new Dictionary<int, BlockParam>();
 
-       string cells = string.Join(" | ",
-            paramMap.Values.Select(p =>
-                $"Block {p.blockId}: " +
-                $"removedCells=[{string.Join(",", p.removedCells.Keys)}], " +
-                $"unlocked={p.unlocked}"
-            )
-        );
+        string cells = string.Join(" | ",
+             paramMap.Values.Select(p =>
+                 $"Block {p.blockId}: " +
+                 $"removedCells=[{string.Join(",", p.removedCells.Keys)}], " +
+                 $"unlocked={p.unlocked}"
+             )
+         );
         return paramMap.Values.ToList();
     }
 
@@ -283,7 +285,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
     // =====================================================
     // BLOCK UNLOCK VISUAL
     // =====================================================
-    private void HandleBlockUnlocked(int blockId,bool isUnlocked)
+    private void HandleBlockUnlocked(int blockId, bool isUnlocked)
     {
         var block = blockViews.TryGetValue(blockId, out var view);
         view.unlocked = isUnlocked;
@@ -352,6 +354,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
 
         // Clear grandPrize listeners (do not destroy external subscribers)
 
+        OnAllBlocksCleared.RemoveAllListeners();
         // Force layout rebuild so next LoadPattern has stable rects
         Canvas.ForceUpdateCanvases();
         if (cellRoot != null)
@@ -391,7 +394,7 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
         if (block == null || cell == null) return;
 
 
-        Debug.Log("On block cell removed: blockId=" + block.blockId + ", cellId=" + cell.id);   
+        Debug.Log("On block cell removed: blockId=" + block.blockId + ", cellId=" + cell.id);
         runtime.blocks.Remove(block.blockId);
 
         if (block.IsUnlocked())
@@ -421,7 +424,9 @@ public class PuzzleBoardUI : MonoBehaviour, IResetable
             OnAllBlocksCleared?.Invoke();
         }
     }
-
+    public void UpdatePuzzleProgress(int idReward)
+    {
+    }
     public void OnReset()
     {
         // optional: clear board when resetting

@@ -1,93 +1,230 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SpriteLibControl : MonoBehaviour
 {
     public static SpriteLibControl Instance;
 
-    [SerializeField] private List<Sprite> sprites;
+    // Index trung tâm
+    private readonly Dictionary<SpriteIndexKey, Sprite> spriteIndex = new();
 
-    private Dictionary<string, Sprite> spriteDict = new();
-
-    private Dictionary<string, Sprite> outLineDict = new();
+    // ================= UNITY =================
 
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-            //DontDestroyOnLoad(gameObject); // Optional: if you want this instance to persist across scenes
-        }
         else
+            Destroy(gameObject);
+    }
+
+    // ================= ENTRY =================
+
+    public void LoadAllPartSprites(bool remoteLoad = false)
+    {
+        spriteIndex.Clear();
+
+        if (remoteLoad)
+            LoadRemote();
+        else
+            LoadLocal();
+
+        Debug.Log($"[SpriteLibControl] Indexed sprites: {spriteIndex.Count}");
+    }
+
+    // ================= LOCAL =================
+
+    private void LoadLocal()
+    {
+        // Chỉ dành cho sprite dạng HINH (a / b)
+        for (int layer = 1; layer <= 40; layer++)
         {
-            //Destroy(gameObject); // Destroy the duplicate instance to maintain the singleton pattern
+            LoadLocalGroup(layer, SpriteGroup.Main, "a");
+            LoadLocalGroup(layer, SpriteGroup.Outline, "b");
         }
     }
 
-    private void Start()
+    private void LoadLocalGroup(int layer, SpriteGroup group, string folder)
     {
+        var sprites = Resources.LoadAll<Sprite>($"Sprites/HINH/{layer}/{folder}");
+        if (sprites == null || sprites.Length == 0)
+            return;
 
-        LoadAllPartSprites();
-        // Initialize the sprite dictionary
         foreach (var sprite in sprites)
         {
+            AddToIndex(layer, group, sprite);
+        }
+    }
+
+    // ================= REMOTE =================
+
+    private void LoadRemote()
+    {
+        // key = address, value = sprite
+        var allSprites = ResourceManager.ins.GetAllSprites();
+
+        foreach (var pair in allSprites)
+        {
+            string address = pair.Key.Replace("\\", "/");
+            Sprite sprite = pair.Value;
             if (sprite == null) continue;
 
-            if (!spriteDict.TryAdd(sprite.name, sprite))
+            ParseAddressAndAdd(address, sprite);
+        }
+
+        Debug.Log($"[SpriteLibControl] Remote sprites indexed: {spriteIndex.Count}");
+    }
+
+    // ================= ADDRESS PARSER =================
+
+    private void ParseAddressAndAdd(string address, Sprite sprite)
+    {
+        var parts = address.Split('/');
+        if (parts.Length < 2) return;
+
+        int layer = 0;
+        SpriteGroup group = SpriteGroup.None;
+
+        // ===== HINH structure =====
+        // Sprites/HINH/12/a/xxx.png
+        if (parts.Length >= 4 &&
+            parts[^4].Equals("HINH", StringComparison.OrdinalIgnoreCase))
+        {
+            int.TryParse(parts[^3], out layer);
+            group = MapGroupFromFolder(parts[^2]);
+        }
+        else
+        {
+            // ===== Non-HINH =====
+            group = MapGroupFromPath(parts);
+            layer = 0; // global
+        }
+
+        AddToIndex(layer, group, sprite);
+    }
+
+    // ================= INDEX CORE =================
+
+    private void AddToIndex(int layer, SpriteGroup group, Sprite sprite)
+    {
+        if (sprite == null) return;
+
+        var key = new SpriteIndexKey
+        {
+            Layer = layer,
+            Group = group,
+            Name = NormalizeShapeName(sprite.name)
+        };
+
+        // Overwrite là hành vi đúng (remote override local)
+        spriteIndex[key] = sprite;
+
+
+        Debug.Log($"[SpriteLibControl] Indexed sprite: Layer={layer}, Group={group}, Name={key.Name}");
+    }
+
+    // ================= LOOKUP =================
+
+    public Sprite GetSprite(int layer, SpriteGroup group, string name)
+    {
+        var key = new SpriteIndexKey
+        {
+            Layer = layer,
+            Group = group,
+            Name = NormalizeShapeName(name)
+        };
+        spriteIndex.TryGetValue(key, out var sprite);
+
+        Debug.Log($"[SpriteLibControl] Lookup sprite: Layer={layer}, Group={group}, Name={key.Name} and sprite {sprite == null}");
+
+        return sprite;
+    }
+
+    /// <summary>
+    /// Helper phổ biến cho HINH
+    /// </summary>
+    public Sprite GetHinhSprite(int layer, bool outline, string shapeName)
+    {
+        return GetSprite(
+            layer,
+            outline ? SpriteGroup.Outline : SpriteGroup.Main,
+            shapeName
+        );
+    }
+
+    // ================= GROUP MAPPING =================
+
+    private SpriteGroup MapGroupFromFolder(string folder)
+    {
+        if (string.IsNullOrEmpty(folder))
+            return SpriteGroup.None;
+
+        return folder.ToLower() switch
+        {
+            "a" => SpriteGroup.Main,
+            "b" => SpriteGroup.Outline,
+            _ => SpriteGroup.None
+        };
+    }
+
+    private SpriteGroup MapGroupFromPath(string[] parts)
+    {
+        foreach (var p in parts)
+        {
+            switch (p.ToLower())
             {
-                //Debug.LogWarning($"Start: Failed to add sprite with name '{sprite.name}' to dictionary.");
+                case "ui":
+                    return SpriteGroup.UI;
+                case "effect":
+                case "effects":
+                    return SpriteGroup.Effect;
+                case "background":
+                case "bg":
+                    return SpriteGroup.Background;
             }
         }
 
+        return SpriteGroup.None;
     }
 
-    private void LoadAllPartSprites()
+    // ================= UTIL =================
+
+    private string NormalizeShapeName(string input)
     {
-        // Load tất cả thư mục cấp 1 trong HINH (1,2,...)
-        UnityEngine.Object[] layerFolders = UnityEngine.Resources.LoadAll("Sprites/HINH");
-        // Nhưng vì Unity không load thư mục, ta chỉ cần gọi riêng 2 nhánh: a và b
+        if (string.IsNullOrEmpty(input))
+            return input;
 
-        for (int i = 1; i <= 40; i++) // ví dụ 10 layer
+        input = input.ToLower();
+
+        int idx = input.IndexOf("shape");
+        if (idx < 0) return input;
+
+        string rest = input[(idx + 5)..].Trim();
+        string number = "";
+
+        foreach (char c in rest)
         {
-            Sprite[] groupA = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/a");
-            foreach (var s in groupA)
-                spriteDict[s.name] = s;
-
-            Sprite[] groupB = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/b");
-            foreach (var s in groupB)
-                outLineDict[s.name] = s;
+            if (char.IsDigit(c))
+                number += c;
+            else
+                break;
         }
 
-        Debug.Log($"Loaded {spriteDict.Count} main sprites and {outLineDict.Count} outlines.");
+        return $"shape {number}";
     }
+}
+public struct SpriteIndexKey : IEquatable<SpriteIndexKey>
+{
+    public int Layer;           // 0 = global
+    public SpriteGroup Group;   // Main / Outline / UI / Effect / ...
+    public string Name;
 
-    public Sprite GetSpriteByName(string spriteName)
-    {
-        if (string.IsNullOrEmpty(spriteName))
-        {
-            Debug.LogWarning("GetSpriteByName: spriteName is null or empty.");
-            return null;
-        }
+    public bool Equals(SpriteIndexKey other)
+        => Layer == other.Layer
+           && Group == other.Group
+           && Name == other.Name;
 
-        if (spriteDict.TryGetValue(spriteName, out Sprite sprite))
-        {
-            return sprite;
-        }
-        else
-        {
-            Debug.LogWarning($"GetSpriteByName: No sprite found with name '{spriteName}'.");
-            return null;
-        }
-    }
-
-    public Sprite GetSprite(string name, bool outline = false)
-    {
-        Dictionary<string, Sprite> dict = outline ? outLineDict : spriteDict;
-
-        if (dict.TryGetValue(name, out Sprite s))
-            return s;
-
-        Debug.LogWarning($"[SpriteLibControl] Sprite '{name}' not found in {(outline ? "outline" : "main")} dict.");
-        return null;
-    }
+    public override int GetHashCode()
+        => HashCode.Combine(Layer, Group, Name);
 }

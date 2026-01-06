@@ -67,9 +67,9 @@ public static class BlockShapeAnalyzer
         SpriteLibControl lib)
     {
         string name = "Block " + result.shape.ToString();
-        Sprite sprite = lib.GetSprite(name);
-        blockView.SetSprite(sprite);
-        Debug.Log($"Sprite name {name} is null {sprite is null}");
+     ////   Sprite sprite = lib.GetSprite(name);
+     //   //blockView.SetSprite(sprite);
+     //   Debug.Log($"Sprite name {name} is null {sprite is null}");
         if (result.shape == BlockShape.L3 || result.shape == BlockShape.L4)
             blockView.SetRotation(result.orientation);
     }

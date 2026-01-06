@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,13 +16,14 @@ public class QuestChestItem : MonoBehaviour
     [Header("Detail Preview")]
     [SerializeField] private GameObject detailRoot;
     [SerializeField] private CanvasGroup detailCanvasGroup;
-
     [Header("Button")]
-    [SerializeField] private Button chestBtn;
+    [SerializeField] private Toggle tgle;
 
     private List<PackMiniItem> items;
     private QuestChestParam param;
 
+
+    public int ChestId => param.chestId;
     // =====================================================
     // LIFECYCLE
     // =====================================================
@@ -34,12 +37,14 @@ public class QuestChestItem : MonoBehaviour
 
     private void OnEnable()
     {
-        chestBtn.onClick.AddListener(OnQuestChestClick);
+        tgle.onValueChanged.AddListener(OnQuestChestClick);
     }
 
     private void OnDisable()
     {
-        chestBtn.onClick.RemoveAllListeners();
+        tgle.isOn = false;
+        tgle.onValueChanged.RemoveAllListeners();
+
     }
 
     // =====================================================
@@ -60,7 +65,9 @@ public class QuestChestItem : MonoBehaviour
         // state
         lockIcon.SetActive(!param.isUnlocked);
         doneIcon.SetActive(param.isClaimed);
-        
+
+
+        tgle.group = param.toggleGroup;
         // rewards preview
         LoadItemDetail(param.rewards);
     }
@@ -84,10 +91,9 @@ public class QuestChestItem : MonoBehaviour
             var reward = rewards[i];
             var item = items[i];
 
-            Sprite sprite = SpriteLibControl.Instance
-                .GetSpriteByName(reward.icon_name);
+            Sprite sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, reward.icon_name);
 
-            item.Init(reward.itemType, reward.amount, sprite,false);
+            item.Init(reward.itemType, reward.amount, sprite, false);
             item.gameObject.SetActive(true);
         }
     }
@@ -95,8 +101,13 @@ public class QuestChestItem : MonoBehaviour
     // =====================================================
     // CLICK
     // =====================================================
-    public void OnQuestChestClick()
+    public void OnQuestChestClick(bool clicked)
     {
+        if (!clicked)
+        {
+            HideDetail();
+            return;
+        }
         if (param.isClaimed)
             return;
 
@@ -106,11 +117,14 @@ public class QuestChestItem : MonoBehaviour
             QuestDialogEvents.OnChestDetailOpened?.Invoke(this);
             return;
         }
-
         // unlocked → claim
         ShowClaimDialog();
     }
-
+    internal void SetChestUnlocked(bool isUnlocked)
+    {
+        lockIcon.SetActive(!isUnlocked);
+        progressFill.gameObject.SetActive(!isUnlocked);
+    }
     // =====================================================
     // UI ACTIONS
     // =====================================================
@@ -144,6 +158,10 @@ public class QuestChestItem : MonoBehaviour
         );
     }
 
+    internal void SelectToggle()
+    {
+       tgle.isOn = true;
+    }
 }
 
 public class QuestChestParam
@@ -158,6 +176,7 @@ public class QuestChestParam
     public bool isUnlocked;
     public bool isClaimed;
 
+    public ToggleGroup toggleGroup;
     public List<RewardItem> rewards;
 }
 

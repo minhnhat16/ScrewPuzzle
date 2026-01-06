@@ -93,7 +93,7 @@ namespace UIScript
                 var item = itemConfig.FirstOrDefault();
                 PackMiniItem miniItem;
                 miniItem = Instantiate(itemPrefab, ItemContainer).GetComponent<PackMiniItem>();
-                Sprite sprite = SpriteLibControl.Instance.GetSpriteByName(item.Id.ToString());
+                Sprite sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, item.Id.ToString());
                 miniItem.Init(item.Id, item.Quantity, sprite);
                 return;
             }
@@ -103,7 +103,7 @@ namespace UIScript
                 PackMiniItem miniItem;
                 miniItem = Instantiate(itemPrefab, ItemContainer).GetComponent<PackMiniItem>();
                 miniItem.rectTransform.sizeDelta = Vector2.one * GameConstants.MINI_SIZE;
-                Sprite sprite = SpriteLibControl.Instance.GetSpriteByName(item.Id.ToString());
+                Sprite sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, item.Id.ToString());
                 miniItem.Init(item.Id, item.Quantity, sprite);
             }
         }

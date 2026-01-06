@@ -126,7 +126,7 @@ namespace UIScript
         private void SetLevelSpriteByType(int id, LevelEnum type)
         {
             // Get the sprite based on the level type
-            var sprite = SpriteLibControl.Instance.GetSpriteByName($"level_{type.ToString()}");
+            var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, $"level_{type.ToString()}");
             if (sprite == null) return;
             levelBG.sprite = sprite;
 
