@@ -1,10 +1,7 @@
 fileFormatVersion: 2
 guid: df36896b9bb3dbb44b1038da93c3f6b8
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: -489288472147288824
-    second: Layer 10_0
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,8 +69,8 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 512
-    resizeAlgorithm: 1
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
@@ -111,29 +108,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: Layer 10_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 190
-        height: 279
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 80d97f81ab2b539f0800000000000000
-      internalID: -489288472147288824
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     customData: 
     physicsShape: []
@@ -147,8 +122,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Layer 10_0: -489288472147288824
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

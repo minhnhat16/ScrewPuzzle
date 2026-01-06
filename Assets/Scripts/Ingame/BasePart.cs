@@ -162,13 +162,16 @@ namespace Ingame
 
         public virtual void GenerateColliderFromSprite()
         {
-            if (activeSprite == null || col == null || activeSprite.sprite == null)
+            var sprite = activeSprite.sprite;
+
+            if (activeSprite == null || col == null || sprite== null)
                 return;
 
-            var sprite = activeSprite.sprite;
             int shapeCount = sprite.GetPhysicsShapeCount();
 
             col.pathCount = shapeCount;
+
+            Debug.Log($" Part {this.uniqueID}:Active {activeSprite == null}, col {col == null}, active sprite {activeSprite.sprite}, shape count {shapeCount}");
 
             List<Vector2> path = new();
             for (int i = 0; i < shapeCount; i++)

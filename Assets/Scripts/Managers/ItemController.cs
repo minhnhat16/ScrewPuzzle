@@ -44,6 +44,7 @@ public class ItemController : FSMSystem
     private IEnumerator WaitForSeconds(float time, Action callback)
     {
         yield return new WaitForSeconds(time);
+        IsHandlingHammer = false;
         callback?.Invoke();
     }
 }

@@ -66,7 +66,7 @@ public class ResourceManager : SingletonMono<ResourceManager>
                 if (handle.Status == AsyncOperationStatus.Succeeded)
                 {
                     assetCache[key] = handle.Result;
-                    //Debug.Log($"Loaded asset: {key} (name: {handle.Result.name} which type {handle.Result.GetType()})");
+                    Debug.Log($"Loaded asset: {key} (name: {handle.Result.name} which type {handle.Result.GetType()})");
                 }
                 else
                 {
@@ -145,28 +145,42 @@ public class ResourceManager : SingletonMono<ResourceManager>
     }
     public Sprite GetSprite(string key)
     {
-        try
+        // 1️⃣ Nếu đã cache Sprite → trả luôn
+        if (assetCache.TryGetValue(key, out var cached))
         {
-            Texture2D texture = GetAsset<Texture2D>(key);
-            if (texture == null)
-            {
-                Debug.LogError($"GetSprite: Texture2D not found for key '{key}'");
-                return null;
-            }
-
-            return Sprite.Create(
-                texture,
-                new Rect(0, 0, texture.width, texture.height),
-                new Vector2(0.5f, 0.5f), // Pivot: center
-                100f                     // Pixels per unit
-            );
+            if (cached is Sprite cachedSprite)
+                return cachedSprite;
         }
-        catch (System.Exception ex)
+
+        Sprite spriteAsset = GetAsset<Sprite>(key);
+        if (spriteAsset != null)
         {
-            Debug.LogError($"Exception in GetSprite('{key}'): {ex.Message}");
+            assetCache[key] = spriteAsset;
+            return spriteAsset;
+        }
+
+        Texture2D texture = GetAsset<Texture2D>(key);
+        if (texture == null)
+        {
+            Debug.LogError($"[ResourceManager] Sprite not found for key '{key}'");
             return null;
         }
+
+        Sprite sprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f),
+            100f
+        );
+
+        sprite.name = texture.name;
+
+        // 4️⃣ Cache lại để không tạo lại lần sau
+        assetCache[key] = sprite;
+
+        return sprite;
     }
+
     public Sprite GetSpriteFromResources(string path)
     {
         // The path should be relative to the Resources folder, without the .png/.jpg extension

@@ -38,10 +38,11 @@ namespace Ingame
 
         protected override void HandleInput(Vector3 screenPos)
         {
-
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                return;
+            bool poiterOver = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
             bool isHandlingItem = ItemController.ins.IsHandlingHammer;
+            Debug.Log("is pointer over UI: " + poiterOver + ", handling item " + isHandlingItem);
+            if (poiterOver)
+                return;
 
 
             if (isHandlingItem)
