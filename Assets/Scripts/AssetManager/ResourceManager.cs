@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -60,18 +61,28 @@ public class ResourceManager : SingletonMono<ResourceManager>
         {
             if (!assetCache.ContainsKey(key))
             {
-                AsyncOperationHandle<Object> handle = Addressables.LoadAssetAsync<Object>(key);
-                await handle.Task;
+                 if(key.Contains("/HINH/"))
+                 {
+                    Debug.Log($"[ResourceManager] Loading asset with key '{key}'");
+                    AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(key);
+                    await handle.Task;
 
-                if (handle.Status == AsyncOperationStatus.Succeeded)
-                {
-                    assetCache[key] = handle.Result;
-                    Debug.Log($"Loaded asset: {key} (name: {handle.Result.name} which type {handle.Result.GetType()})");
+                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        assetCache[key] = handle.Result;
+                    }
                 }
                 else
                 {
-                    //Debug.LogError($"Failed to load asset: {key}");
+                    AsyncOperationHandle<Object> handle = Addressables.LoadAssetAsync<Object>(key);
+                    await handle.Task;
+
+                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        assetCache[key] = handle.Result;
+                    }
                 }
+              
             }
         }
     }
@@ -142,43 +153,6 @@ public class ResourceManager : SingletonMono<ResourceManager>
         if (_handleCache.TryGetValue(key, out var h)) { Addressables.Release(h); }
         _handleCache.Remove(key);
         return null;
-    }
-    public Sprite GetSprite(string key)
-    {
-        // 1️⃣ Nếu đã cache Sprite → trả luôn
-        if (assetCache.TryGetValue(key, out var cached))
-        {
-            if (cached is Sprite cachedSprite)
-                return cachedSprite;
-        }
-
-        Sprite spriteAsset = GetAsset<Sprite>(key);
-        if (spriteAsset != null)
-        {
-            assetCache[key] = spriteAsset;
-            return spriteAsset;
-        }
-
-        Texture2D texture = GetAsset<Texture2D>(key);
-        if (texture == null)
-        {
-            Debug.LogError($"[ResourceManager] Sprite not found for key '{key}'");
-            return null;
-        }
-
-        Sprite sprite = Sprite.Create(
-            texture,
-            new Rect(0, 0, texture.width, texture.height),
-            new Vector2(0.5f, 0.5f),
-            100f
-        );
-
-        sprite.name = texture.name;
-
-        // 4️⃣ Cache lại để không tạo lại lần sau
-        assetCache[key] = sprite;
-
-        return sprite;
     }
 
     public Sprite GetSpriteFromResources(string path)
