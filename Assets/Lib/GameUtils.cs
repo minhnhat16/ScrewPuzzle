@@ -147,6 +147,8 @@ public static class GameUtils
 
     }
 }
+#if UNITY_EDITOR
+
 public static class GameViewUtils
 {
     public static void SetGameViewSize(int width, int height)
@@ -170,7 +172,6 @@ public static class GameViewUtils
     private static Type gameViewSizesType = typeof(Editor).Assembly.GetType("UnityEditor.GameViewSizes");
     private static Type scriptableSingletonType = typeof(Editor).Assembly.GetType("UnityEditor.ScriptableSingleton`1")
         .MakeGenericType(gameViewSizesType);
-
     private static object GetGameViewSizesInstance()
     {
         return scriptableSingletonType.GetProperty("instance").GetValue(null, null);
@@ -276,6 +277,7 @@ public static class GameViewUtils
     }
 }
 
+#endif
 
 public static class ChestTierHelper
 {

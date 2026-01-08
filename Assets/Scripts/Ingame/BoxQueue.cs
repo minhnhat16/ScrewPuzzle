@@ -242,6 +242,9 @@ namespace Ingame
                 last = color;
             }
 
+
+            int totalStar = result.Sum(r => r.NumberOfScrewHoles);  
+            IngameController.ins.TotalStarInLevel = totalStar;
             configRecords = result;
             ConfigStack = new Stack<BoxConfigRecord>(configRecords);
         }

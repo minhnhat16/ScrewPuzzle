@@ -1,9 +1,6 @@
 ﻿using ConfigFile;
-using Mono.Cecil.Cil;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -774,7 +771,22 @@ namespace System.DataBase
             string chestID = chestState.chestId.ToString();
             dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, chestID, chestState);
         }
+        public void SetChestUnlock(int chestId, bool isUnlocked)
+        {
+            var chest = GetChestState(chestId);
+            if (chest == null) return;
+            chest.isUnlocked = isUnlocked;
+            UpdateChestState(chest);
+        }
+        public void SetChestClaimed(int chestId, bool isClaimed = true)
+        {
+            var chest = GetChestState(chestId);
+            if (chest == null) return;
+            chest.isClaimed = isClaimed;
+            UpdateChestState(chest);
 
+
+        }
         internal List<BlockParam> GetBlocksData()
         {
             var blocksData =
@@ -889,7 +901,7 @@ namespace System.DataBase
 
             var block = dataModel.ReadDictionary<BlockData>(DataPath.BLOCKSDATA, blockid.ToString());
             block.removedCells[idCell] = v;
-            Debug.Log("UPdate block cell " + blockid + " cell " + idCell + " to " + v +" block : " +blockid + " block + " + (block.removedCells[idCell]));
+            Debug.Log("UPdate block cell " + blockid + " cell " + idCell + " to " + v + " block : " + blockid + " block + " + (block.removedCells[idCell]));
 
             dataModel.UpdateDataDictionary(DataPath.BLOCKSDATA, blockid.ToString(), block);
         }

@@ -1,7 +1,8 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,14 +23,20 @@ public class QuestChestItem : MonoBehaviour
     private List<PackMiniItem> items;
     private QuestChestParam param;
 
+    private Animator animController;
+    private Action animCallBack;
 
+    // Tween reference so we can stop/kill it safely
+    private Tween shakeTween;
     public int ChestId => param.chestId;
     // =====================================================
     // LIFECYCLE
     // =====================================================
-    private void Awake()
+    internal virtual void Awake()
     {
         items = GetComponentsInChildren<PackMiniItem>(true).ToList();
+        animController = GetComponent<Animator>();
+
 
         if (detailRoot != null)
             detailRoot.SetActive(false);
@@ -42,9 +49,12 @@ public class QuestChestItem : MonoBehaviour
 
     private void OnDisable()
     {
+        // ensure toggle cleaned up
         tgle.isOn = false;
         tgle.onValueChanged.RemoveAllListeners();
 
+        // stop any running shake tween to avoid leaks/continued animation
+        StopCanReward();
     }
 
     // =====================================================
@@ -70,6 +80,8 @@ public class QuestChestItem : MonoBehaviour
         tgle.group = param.toggleGroup;
         // rewards preview
         LoadItemDetail(param.rewards);
+        if (param.isUnlocked && !param.isClaimed) PlayCanReward();
+        else StopCanReward();
     }
 
     // =====================================================
@@ -155,12 +167,61 @@ public class QuestChestItem : MonoBehaviour
         DialogManager.ins.ShowDialog(
             DialogIndex.GiftClaimDialog,
             new GiftParam(param)
-        );
+       );
+        param.isClaimed = true;
+        SetChestClaimed(param.isClaimed);
+    }
+
+    private void SetChestClaimed(bool isClaim)
+    {
+        doneIcon.SetActive(isClaim);
+        lockIcon.SetActive(false);
+        tgle.isOn = false;
+        progressFill.gameObject.SetActive(false);
+        DataAPIController.instance.SetChestClaimed(ChestId,true);
+        if (isClaim) PlayCanReward();
+        else StopCanReward();
+            // stop any reward animation when claimed
+            StopCanReward();
     }
 
     internal void SelectToggle()
     {
-       tgle.isOn = true;
+        tgle.isOn = true;
+    }
+
+    // Start an infinite shake safely: we create a short shake tween and loop it.
+    public void PlayCanReward()
+    {
+        // Kill existing tween if present
+        if (shakeTween != null && shakeTween.IsActive())
+        {
+            shakeTween.Kill();
+            shakeTween = null;
+        }
+
+        progressFill.gameObject.SetActive(false);   
+        // Create a 0.8s shake and loop it infinitely. This avoids using Mathf.Infinity as duration.
+        shakeTween = transform
+                .DOShakeRotation(0.8f, strength: 10f, vibrato: 10, randomness: 90f)
+                .SetLoops(-1, LoopType.Restart)
+                .SetEase(Ease.Linear)
+                .SetId(this);
+        shakeTween.OnUpdate(() => Debug.Log("Shaking chesst"));
+    }
+
+    // Stop and kill the shake tween safely
+    public void StopCanReward()
+    {
+        if (shakeTween != null)
+        {
+            if (shakeTween.IsActive())
+                shakeTween.Kill();
+            shakeTween = null;
+
+            // reset transform rotation to identity to avoid leftover rotation
+            transform.localRotation = Quaternion.identity;
+        }
     }
 }
 

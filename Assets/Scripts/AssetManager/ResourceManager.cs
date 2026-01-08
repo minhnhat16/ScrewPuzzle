@@ -229,7 +229,6 @@ public class ResourceManager : SingletonMono<ResourceManager>
                 assetCache[key] = sp;
             }
         }
-
         return result;
     }
 

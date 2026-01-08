@@ -106,7 +106,7 @@ namespace Ingame.Screw
 
         public virtual int GetIntBodyLayer(int index)
         {
-            if (index < 0 ) return -1;
+            if (index < 0 || bodyConnect == null ) return -1;
             return bodyConnect?.gameObject.layer ?? -1;
         }
 

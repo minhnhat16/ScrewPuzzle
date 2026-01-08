@@ -333,10 +333,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             layerManager.AddPart(partComponent);
 
             partGameObject.layer = LayerMask.NameToLayer(layerComponent.name);
-            var sprite = SpriteLibControl.Instance.GetHinhSprite(currentLevelID, false, partData.spriteName);
+            var sprite = SpriteLibControl.Instance.GetHinhSprite(currentLevelID,false, partData.spriteName);
 
             Debug.Log($"  Loading part '{partData.partName}' with sprite '{partData.spriteName}', sprite {sprite == null}");
             var outline = SpriteLibControl.Instance.GetHinhSprite(currentLevelID, true   ,partData.spriteName);
+
+            
             partComponent.Renderer.sprite = sprite;
             partComponent.Outline.sprite = outline;
             if (TryHexToColor(partData.colorString, out Color color))

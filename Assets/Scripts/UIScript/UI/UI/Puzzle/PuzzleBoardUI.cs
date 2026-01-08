@@ -1,14 +1,9 @@
-﻿using Ingame.Screw;
-using Mono.Cecil.Cil;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PuzzleBoardUI : MonoBehaviour, IResetable

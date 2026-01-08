@@ -5,9 +5,7 @@
     Outline = 2,  // b
     UI = 3,
     Effect = 4,
-    Background = 5
-
-
+    Background = 5,
 }
 public enum ItemType
 {

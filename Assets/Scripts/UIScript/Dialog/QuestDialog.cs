@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +19,7 @@ public class QuestDialog : BaseDialog
     [Header("Prefabs")]
     [SerializeField] private GameObject chestItemPrefab;
     [SerializeField] private GameObject stageTabPrefab;
+    [SerializeField] private GameObject specialChestPrefab;
 
 
     [SerializeField] private Button outsideClickCatcher;
@@ -29,6 +29,11 @@ public class QuestDialog : BaseDialog
     private readonly Dictionary<int, List<MissionConfigRecord>> cachedStageMissions = new();
 
     private int currentStage;
+    [SerializeField]
+    private Transform topChestParent;
+    [SerializeField]
+    private Transform normalChestParent;
+
 
     // =====================================================
     // LIFECYCLE
@@ -169,16 +174,24 @@ public class QuestDialog : BaseDialog
 
         var chestConfig = ConfigFileManager.Instance.GetConfig<ChestConfig>();
         var chests = chestConfig.GetAllRecord();
-        foreach (var chest in chests)
-            CreateChestItem(chest);
+        bool isMaxTierChestCreated = false;
+        for (int i = 0; i < chests.Count; i++)
+        {
+            isMaxTierChestCreated = i == chests.Count - 1;
+            CreateChestItem(chests[i], isMaxTierChestCreated);
+        }
     }
 
-    private void CreateChestItem(ChestRecord chest)
+    private void CreateChestItem(ChestRecord chest,bool isMaxtier = false)
     {
-        var obj = Instantiate(chestItemPrefab, chestTrackParent);
+        Transform parent = isMaxtier
+            ? topChestParent
+            : normalChestParent;
+        var prefab = isMaxtier ? specialChestPrefab : chestItemPrefab;
+        var obj = Instantiate(prefab, parent);
         var item = obj.GetComponent<QuestChestItem>();
-
         var state = DataAPIController.instance.GetChestState(chest.Id);
+        obj.transform.localScale = isMaxtier ?  Vector3.one * 3f : Vector3.one;
 
         item.Setup(new QuestChestParam
         {
@@ -189,6 +202,7 @@ public class QuestDialog : BaseDialog
             rewards = chest.Rewards,
         });
     }
+
 
     // =====================================================
     // MISSIONS
