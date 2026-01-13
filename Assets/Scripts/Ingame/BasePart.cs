@@ -65,7 +65,7 @@ namespace Ingame
             return gameObject.layer;
         }
 
-        public void Awake()
+        public virtual void Awake()
         {
             body = GetComponent<Rigidbody2D>();
             activeSprite = GetComponentInChildren<SpriteRenderer>();

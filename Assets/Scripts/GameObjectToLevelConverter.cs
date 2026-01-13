@@ -665,5 +665,58 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.layerMask);
         Destroy(screwLevelMaker.gameObject);
     }
+
+    public void BuildLevelFromPsb(
+    Transform levelRoot,
+    List<Sprite> sprites
+)
+    {
+        Dictionary<string, Transform> layerMap = new();
+
+        foreach (var sprite in sprites)
+        {
+            var path = sprite.name.Split('/');
+            Transform parent = levelRoot;
+
+            // 1️⃣ Tạo BaseLayer theo group
+            for (int i = 0; i < path.Length - 1; i++)
+            {
+                string layerName = path[i];
+
+                if (!layerMap.TryGetValue(layerName, out var layerTf))
+                {
+                    var layerGO = Instantiate(layerBase, parent);
+                    layerGO.name = layerName;
+
+                    var baseLayer = layerGO.GetComponent<BaseLayer>();
+                    layerTf = layerGO.transform;
+
+                    layerMap[layerName] = layerTf;
+                }
+                parent = layerTf;
+            }
+
+            // 2️⃣ Tạo BasePart
+            CreatePart(parent, sprite);
+        }
+
+        void CreatePart(Transform parent, Sprite sprite)
+        {
+            var go = Instantiate(basePart, parent);
+            go.name = sprite.name.Split('/').Last();
+
+            var part = go.GetComponent<BasePart>();
+            part.uniqueID = go.name;
+
+            var sr = part.Renderer;
+            sr.sprite = sprite;
+
+            part.ResetAndReapplyPolygonCollider();
+            part.SetSortingLayer(parent.name);
+        }
+
+
+    }
+
 }
 #endif

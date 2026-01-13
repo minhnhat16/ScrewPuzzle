@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a41cfb8ac2b450b9c618ceeab6ce8fc, type: 3}
-  m_Name: BoxLevel1
+  m_Script: {fileID: 11500000, guid: cc638dba32f291748bb990be85dafdde, type: 3}
+  m_Name: Level_48
   m_EditorClassIdentifier: 
-  records:
-  - NumberOfScrewHoles: 3
-    BoxColor: 2
-  - NumberOfScrewHoles: 3
-    BoxColor: 2
+  levelId: 48
+  totalColorInLevel: 0
+  layer: 0
+  boxConfig: {fileID: 11400000, guid: 2831c69fc1fa3ec468aa888f9b195e9d, type: 2}
+  screws: []
+  layers: []

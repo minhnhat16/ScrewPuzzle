@@ -128,6 +128,13 @@ namespace Ingame.Board
                     parts.Add(child);
             }
         }
+        public void SetLayer(string layer)
+        {
+
+           gameObject.layer = LayerMask.NameToLayer(layer);
+            Debug.Log("Set layer to " + layer + " gobj " + gameObject.layer);
+
+        }
 
         public void Reset()
         {

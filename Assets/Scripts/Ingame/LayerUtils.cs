@@ -40,6 +40,7 @@ namespace Ingame
 
             if (listScrews == null) return;
             List<Screw.Screw> screwsActives = listScrews.Where(s => s != null).ToList();
+
             if (screwsActives == null) return;
             foreach (var s in screwsActives)
             {

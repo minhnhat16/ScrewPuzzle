@@ -132,7 +132,7 @@ namespace Ingame.Board
         public void ActivateSingleLayer(int idLayer)
         {
             idLayer--;
-            Debug.Log("Active layer " + idLayer);
+            Debug.Log("Active layer " + idLayer + "total layer " + layers.Count + ", name " + gameObject.name);
             if (idLayer >= layers.Count || idLayer < 0)
             {
                 ActiveAllLayers();
@@ -141,6 +141,7 @@ namespace Ingame.Board
             ;
             for (int i = 0; i < layers.Count; i++)
             {
+                Debug.Log($"Set active layer i {i}, layer :{layers[i]}");
                 layers[i].gameObject.SetActive(idLayer == i);
                 LayerUtils.ActiveObjectInLayer(idLayer == i, i, this);
 
