@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -93,6 +94,9 @@ namespace PSB
         internal void ImportPSB()
         {
             AddLayer(transform.GetChild(1));
+            
+            layerManager = GetComponent<LayerManager>();
+            levelObj = GetComponent<BaseLevelObject>();
 
             GameObjectToLevelConverter.ins.levelObject = this.gameObject;
             GameObjectToLevelConverter.ins.lmanager = this.layerManager;

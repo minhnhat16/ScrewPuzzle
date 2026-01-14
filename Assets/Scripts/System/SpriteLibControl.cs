@@ -82,7 +82,11 @@ public class SpriteLibControl : MonoBehaviour
             return null;
         }
     }
-
+    public void AddSprite(Sprite sprite)
+    {
+        Debug.Log("Add sprite " + sprite.name); 
+        sprites.Add(sprite);
+    }
     public Sprite GetSprite(string name, bool outline = false)
     {
         Dictionary<string, Sprite> dict = outline ? outLineDict : spriteDict;
