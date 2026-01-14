@@ -48,7 +48,6 @@ public class ResourceManager : SingletonMono<ResourceManager>
             Debug.LogError("Error loading addressable assets: " + loadTask.Exception);
             yield break;
         }
-        Task loadPSB = LoadPSB("level_screw/1.psb");
         Debug.Log($"Loaded {allKeys.Count} addressable assets from {labels.Count} labels successfully.");
         callback?.Invoke();
     }
@@ -237,13 +236,13 @@ public class ResourceManager : SingletonMono<ResourceManager>
     public IReadOnlyDictionary<string, Object> GetAllCachedAssets()
     {
         return assetCache;
-        }
+    }
 
-        Dictionary<string, Sprite> spriteDict = new();
-        public async Task LoadPSB(string psbKey)
-        {
-            var handle = Addressables.LoadAssetAsync<GameObject>(psbKey);
-            await handle.Task;
+    Dictionary<string, Sprite> spriteDict = new();
+    public async Task LoadPSB(string psbKey)
+    {
+        var handle = Addressables.LoadAssetAsync<GameObject>(psbKey);
+        await handle.Task;
 
         var obj = handle.Result;
 

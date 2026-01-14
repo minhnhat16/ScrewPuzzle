@@ -11,6 +11,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class LevelManager : SingletonMono<LevelManager>, IResetable
@@ -115,14 +116,19 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         OnReset();
         arrayScrew.HoldAlignment();
 
-
         List<Func<IEnumerator>> preTasks = new List<Func<IEnumerator>>()
         {
+            () => TaskLoadSpriteIngame(),
             () => IngameController.ins.LoadIngameAssetCoroutine(),
             () => TaskLoadObjectFromLevel(levelID),
         };
         TaskManager.ins.AddTask(preTasks);
         LoadSceneManager.ins.LoadSceneByName("InGame", null);
+    }
+    public IEnumerator TaskLoadSpriteIngame()
+    {
+        Task loadPSB = ResourceManager.ins.LoadPSB("level_screw/6.psb");
+        yield return loadPSB.IsCompletedSuccessfully;
     }
     public IEnumerator TaskLoadObjectFromLevel(int levelID)
     {
@@ -327,7 +333,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
         if (partGameObject != null && partComponent != null)
         {
-            SetupPartTransform(partComponent, partData,layerComponent.transform);
+            SetupPartTransform(partComponent, partData, layerComponent.transform);
             partComponent.uniqueID = partData.partName;
             partComponent.name = partData.partName;
             layerManager.AddPart(partComponent);
@@ -338,7 +344,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             {
                 partComponent.Renderer.color = color;
             }
-            SetupPartPhysics(partComponent, partData); 
+            SetupPartPhysics(partComponent, partData);
             layerComponent.Parts.Add(partComponent);
 
         }
@@ -358,10 +364,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     private void SetupPartSprite(BasePart part, BodyPartScriptable data, string layerName)
     {
         part.gameObject.layer = LayerMask.NameToLayer(layerName);
-        var sprite = spriteService.GetPartSprite(currentLevelID, data.spriteName, false);
+        string fixedName = layerName.Replace(" ", "_");
+
+        var sprite = spriteService.GetPartSprite(currentLevelID, data.spriteName, fixedName, false);
 
         Debug.Log($"  Loading part '{data.partName}' with sprite '{data.spriteName}', sprite {sprite == null}");
-        var outline = spriteService.GetPartSprite(currentLevelID, data.spriteName, true);
+        var outline = spriteService.GetPartSprite(currentLevelID, data.spriteName, fixedName, false);
 
         part.Renderer.sprite = sprite;
         part.Outline.sprite = outline;

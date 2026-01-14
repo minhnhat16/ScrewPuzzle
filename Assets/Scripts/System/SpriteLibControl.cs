@@ -151,7 +151,7 @@ public class SpriteLibControl : MonoBehaviour
     }
 
     // ================= LOOKUP =================
-    public Sprite GetSpritePSB(int level, SpriteGroup group, string name)
+    public Sprite GetSpritePSB(int level, SpriteGroup group, string layer, string name)
     {
         if (string.IsNullOrEmpty(name)) return null;
 
@@ -159,9 +159,9 @@ public class SpriteLibControl : MonoBehaviour
         if (group == SpriteGroup.Main) groupType = 'a';
         else if (group == SpriteGroup.Outline) groupType = 'b';
         else groupType = ' ';
-        string key = $"{level}_{name}{groupType}";
+        string partname = $"{level}_{layer}_{name}_{groupType}";
 
-        var sprite = ResourceManager.ins.GetSprite(key);
+        var sprite = ResourceManager.ins.GetSprite(partname);
         return sprite;
     }
     public Sprite GetSprite(int level, SpriteGroup group, string name)
