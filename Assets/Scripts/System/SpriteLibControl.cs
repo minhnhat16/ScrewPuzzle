@@ -75,7 +75,7 @@ public class SpriteLibControl : MonoBehaviour
             ParseAddressAndAdd(address, sprite);
         }
 
-        var spriteIndexZero = spriteIndex.Keys.Where(k => k.level ==0).ToList();
+        var spriteIndexZero = spriteIndex.Keys.Where(k => k.level == 0).ToList();
 
         foreach (var item in spriteIndexZero)
         {
@@ -147,11 +147,23 @@ public class SpriteLibControl : MonoBehaviour
         // Overwrite là hành vi đúng (remote override local)
         spriteIndex[key] = sprite;
 
-      
+
     }
 
     // ================= LOOKUP =================
+    public Sprite GetSpritePSB(int level, SpriteGroup group, string name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
 
+        char groupType;
+        if (group == SpriteGroup.Main) groupType = 'a';
+        else if (group == SpriteGroup.Outline) groupType = 'b';
+        else groupType = ' ';
+        string key = $"{level}_{name}{groupType}";
+
+        var sprite = ResourceManager.ins.GetSprite(key);
+        return sprite;
+    }
     public Sprite GetSprite(int level, SpriteGroup group, string name)
     {
         if (string.IsNullOrEmpty(name))

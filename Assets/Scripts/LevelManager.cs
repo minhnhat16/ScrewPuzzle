@@ -29,6 +29,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     [SerializeField] private BaseLevelObject currentLevelObject;
 
+    private PartSpriteService spriteService;
     public bool IsInitDone
     {
         get => isInitDone;
@@ -40,6 +41,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     {
         base.Awake();
         this.screwManager = GetComponent<ScrewManager>();
+        spriteService = new PartSpriteService();
     }
 
     public void Start()
@@ -325,29 +327,18 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
         if (partGameObject != null && partComponent != null)
         {
-            partGameObject.transform.SetParent(layerComponent.transform);
-            partGameObject.transform.SetLocalPositionAndRotation(partData.partPosition, partData.partRotation);
-            partGameObject.transform.localScale = partData.partLocalScale;
-            partComponent.Body.bodyType = RigidbodyType2D.Static;
+            SetupPartTransform(partComponent, partData,layerComponent.transform);
             partComponent.uniqueID = partData.partName;
+            partComponent.name = partData.partName;
             layerManager.AddPart(partComponent);
 
-            partGameObject.layer = LayerMask.NameToLayer(layerComponent.name);
-            var sprite = SpriteLibControl.Instance.GetHinhSprite(currentLevelID,false, partData.spriteName);
-
-            Debug.Log($"  Loading part '{partData.partName}' with sprite '{partData.spriteName}', sprite {sprite == null}");
-            var outline = SpriteLibControl.Instance.GetHinhSprite(currentLevelID, true   ,partData.spriteName);
-
-            
-            partComponent.Renderer.sprite = sprite;
-            partComponent.Outline.sprite = outline;
+            string layerName = layerComponent.name; ;
+            SetupPartSprite(partComponent, partData, layerName);
             if (TryHexToColor(partData.colorString, out Color color))
             {
                 partComponent.Renderer.color = color;
             }
-            partComponent.name = partData.partName;
-            partComponent.GenerateColliderFromSprite();
-            partComponent.SetSortingLayer(partData.layer);
+            SetupPartPhysics(partComponent, partData); 
             layerComponent.Parts.Add(partComponent);
 
         }
@@ -356,6 +347,31 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             $" and layer {partData.layer}, and real layer {partComponent.Renderer.sortingLayerName}");
 
         yield return null;
+    }
+
+    private void SetupPartTransform(BasePart part, BodyPartScriptable data, Transform parent)
+    {
+        part.transform.SetParent(parent.transform);
+        part.transform.SetLocalPositionAndRotation(data.partPosition, data.partRotation);
+        part.transform.localScale = data.partLocalScale;
+    }
+    private void SetupPartSprite(BasePart part, BodyPartScriptable data, string layerName)
+    {
+        part.gameObject.layer = LayerMask.NameToLayer(layerName);
+        var sprite = spriteService.GetPartSprite(currentLevelID, data.spriteName, false);
+
+        Debug.Log($"  Loading part '{data.partName}' with sprite '{data.spriteName}', sprite {sprite == null}");
+        var outline = spriteService.GetPartSprite(currentLevelID, data.spriteName, true);
+
+        part.Renderer.sprite = sprite;
+        part.Outline.sprite = outline;
+    }
+    private void SetupPartPhysics(BasePart part, BodyPartScriptable data)
+    {
+        part.GenerateColliderFromSprite();
+        part.SetSortingLayer(data.layer);
+        part.Body.bodyType = RigidbodyType2D.Static;
+
     }
     private IEnumerator LoadScrewManagerAndScrews(Level.Level levelData)
     {

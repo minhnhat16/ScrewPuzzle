@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Unity.Jobs;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -47,7 +48,7 @@ public class ResourceManager : SingletonMono<ResourceManager>
             Debug.LogError("Error loading addressable assets: " + loadTask.Exception);
             yield break;
         }
-
+        Task loadPSB = LoadPSB("level_screw/1.psb");
         Debug.Log($"Loaded {allKeys.Count} addressable assets from {labels.Count} labels successfully.");
         callback?.Invoke();
     }
@@ -61,8 +62,8 @@ public class ResourceManager : SingletonMono<ResourceManager>
         {
             if (!assetCache.ContainsKey(key))
             {
-                 if(key.Contains("/HINH/"))
-                 {
+                if (key.Contains("/HINH1/"))
+                {
                     Debug.Log($"[ResourceManager] Loading asset with key '{key}'");
                     AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(key);
                     await handle.Task;
@@ -82,7 +83,7 @@ public class ResourceManager : SingletonMono<ResourceManager>
                         assetCache[key] = handle.Result;
                     }
                 }
-              
+
             }
         }
     }
@@ -236,5 +237,39 @@ public class ResourceManager : SingletonMono<ResourceManager>
     public IReadOnlyDictionary<string, Object> GetAllCachedAssets()
     {
         return assetCache;
+        }
+
+        Dictionary<string, Sprite> spriteDict = new();
+        public async Task LoadPSB(string psbKey)
+        {
+            var handle = Addressables.LoadAssetAsync<GameObject>(psbKey);
+            await handle.Task;
+
+        var obj = handle.Result;
+
+        // Lấy tất cả SpriteRenderer trong prefab
+        var renderers = obj.GetComponentsInChildren<SpriteRenderer>();
+
+        foreach (var r in renderers)
+        {
+            string key = $"{obj.name}_{r.sprite.name}";
+            if (r.sprite != null && !spriteDict.ContainsKey(r.sprite.name))
+            {
+                spriteDict.Add(key, r.sprite);
+                Debug.Log($"Added sprite: {key}");
+            }
+        }
+
+        Debug.Log($"[LoadPSB] Loaded {spriteDict.Count} sprites from PSB");
+    }
+
+
+    public Sprite GetSprite(string layerName)
+    {
+        if (spriteDict.TryGetValue(layerName, out var s))
+            return s;
+
+        Debug.LogError($"Sprite not found: {layerName}");
+        return null;
     }
 }
