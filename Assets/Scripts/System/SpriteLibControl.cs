@@ -50,7 +50,7 @@ public class SpriteLibControl : MonoBehaviour
         UnityEngine.Object[] layerFolders = UnityEngine.Resources.LoadAll("Sprites/HINH");
         // Nhưng vì Unity không load thư mục, ta chỉ cần gọi riêng 2 nhánh: a và b
 
-        for (int i = 1; i <= 40; i++) // ví dụ 10 layer
+        for (int i = 1; i <= 13; i++) // ví dụ 10 layer
         {
             Sprite[] groupA = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/a");
             foreach (var s in groupA)
@@ -59,6 +59,19 @@ public class SpriteLibControl : MonoBehaviour
             Sprite[] groupB = UnityEngine.Resources.LoadAll<Sprite>($"Sprites/HINH/{i}/b");
             foreach (var s in groupB)
                 outLineDict[s.name] = s;
+        }
+
+        GameObject[] psbFolder = Resources.LoadAll<GameObject>("Sprites/LevelSprite");
+        foreach (var psb in psbFolder)
+        {
+           var sprites =  psb.GetComponentsInChildren<SpriteRenderer>();
+
+            foreach(var sprite in sprites)
+            {
+
+                Debug.Log($"[PSB] adding sprite {sprite.name} to dict");
+                spriteDict[sprite.name] = sprite.sprite;
+            }
         }
 
         Debug.Log($"Loaded {spriteDict.Count} main sprites and {outLineDict.Count} outlines.");
@@ -84,7 +97,8 @@ public class SpriteLibControl : MonoBehaviour
     }
     public void AddSprite(Sprite sprite)
     {
-        Debug.Log("Add sprite " + sprite.name); 
+        Debug.Log("Add sprite " + sprite.name);
+        if (sprites.Contains(sprite)) return;
         sprites.Add(sprite);
     }
     public Sprite GetSprite(string name, bool outline = false)

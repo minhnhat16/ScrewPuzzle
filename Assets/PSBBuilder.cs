@@ -39,7 +39,7 @@ namespace PSB
         public void SpawnScrewManager()
         {
             var screwManagerPrefab = Resources.Load("Prefabs/ScrewManager");
-            var screwManagerObj = Instantiate(screwManagerPrefab, this.transform);
+            var screwManagerObj = Instantiate(screwManagerPrefab,Vector3.zero, Quaternion.identity,this.transform);
             screwManager = screwManagerObj.GetComponent<ScrewManager>();
             levelObj.ScrewManager = screwManager;
         }
@@ -93,6 +93,7 @@ namespace PSB
 
         internal void ImportPSB()
         {
+            transform.GetChild(0).gameObject.SetActive(false);
             AddLayer(transform.GetChild(1));
             
             layerManager = GetComponent<LayerManager>();

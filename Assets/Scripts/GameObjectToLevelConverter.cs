@@ -111,7 +111,11 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
 
         allLevels.Add(currentLoadedLevel);
         allLevels[this.currentLoadedLevel] = newLevelData;
-        newLevelData.boxConfig  = CreateBoxConfig(newLevelData.levelId,newLevelData);
+
+        int id = allLevels.FindIndex(l => l.levelId == newLevelData.levelId);
+        allLevels[id] = newLevelData;
+
+        newLevelData.boxConfig = CreateBoxConfig(newLevelData.levelId, newLevelData);
         AssetDatabase.CreateAsset(newLevelData, assetPath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh(); // Refresh the AssetDatabase to see the changes
@@ -128,7 +132,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         newLevelData.levelId = nextLevelId++;
 
         newLevelData.layers = new List<LayerData>();
-        var layerManager= levelObject.GetComponent<LayerManager>();
+        var layerManager = levelObject.GetComponent<LayerManager>();
         layerManager.ActiveAllLayers();
         var layers = levelObject.GetComponentsInChildren<BaseLayer>(true);
 
@@ -152,7 +156,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 var parComponent = partTransform.GetComponent<BasePart>();
                 BodyPartScriptable partData = new BodyPartScriptable
                 {
-                    
+
                     idBodyPart = partIndex++,
                     partName = parComponent.uniqueID,
                     partPosition = partTransform.transform.localPosition,
@@ -172,7 +176,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         var screws = levelObject.GetComponentsInChildren<Screw>();
         newLevelData.screws = new List<ScrewScriptable>();
         int idScrew = 0;
-      
+
         foreach (var screw in screws)
         {
             ScrewScriptable screwData = new ScrewScriptable()
@@ -201,6 +205,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 idBody++;
                 listHingeObject.Add(hingeConnection);
             }
+            screwData.hingeConnection = listHingeObject.First();
             idScrew++;
 
             screwData.hingeConnections = listHingeObject;
@@ -300,7 +305,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             if (remainderScrews == 2)
             {
                 BoxConfigRecord newRecord = new BoxConfigRecord();
-                newRecord.NumberOfScrewHoles =remainderScrews ;
+                newRecord.NumberOfScrewHoles = remainderScrews;
                 newRecord.BoxColor = (ColorEnum)colorId;
                 boxRecords.Add(newRecord);
             }
@@ -325,7 +330,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         var records = CalculateScrewsDivisibleBy3AndSpawnBoxes(level);
 
         // Define the path and generate the name with the counter (idLevel)
-        string path = GameConstants.BOX_CONFIGS+ idLevel + ".asset";
+        string path = GameConstants.BOX_CONFIGS + idLevel + ".asset";
 
         // Check if a BoxConfig asset already exists at the path
         BoxConfig existingConfig = AssetDatabase.LoadAssetAtPath<BoxConfig>(path);
@@ -394,8 +399,8 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             // Create a new GameObject for the layer
 
             layerManager.screwDict.Add(layerData.layerId, new List<Screw>());
-            GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero , Quaternion.identity);
-            var layerName = $"Layer {layerData.layerId+1}";
+            GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero, Quaternion.identity);
+            var layerName = $"Layer {layerData.layerId + 1}";
             layerGameObject.name = layerName;
             layerGameObject.transform.SetParent(levelObject.transform);
             layerGameObject.layer = LayerMask.NameToLayer(layerName);
@@ -410,7 +415,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 if (partGameObject != null)
                 {
                     partGameObject.transform.SetParent(layerGameObject.transform);
-                    partGameObject.transform.SetPositionAndRotation(partData.partPosition , partData.partRotation);
+                    partGameObject.transform.SetPositionAndRotation(partData.partPosition, partData.partRotation);
                     partGameObject.transform.localScale = partData.partLocalScale;
                     var sprite = SpriteLibControl.Instance.GetSpriteByName(partData.spriteName);
                     var partComponent = partGameObject.GetComponent<BasePart>();
@@ -466,12 +471,12 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
 
             foreach (var hingeConnection in screwData.hingeConnections)
             {
-               // Debug.Log($"Level data with ID {levelId} loaded.");
+                // Debug.Log($"Level data with ID {levelId} loaded.");
                 var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
-                screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(),hingeConnection);
+                screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(), hingeConnection);
 
                 Debug.Log(
-                    $"Hinge connected to part {connectedPart.PartLayer()} at position {connectedPart.uniqueID   }");
+                    $"Hinge connected to part {connectedPart.PartLayer()} at position {connectedPart.uniqueID}");
             }
             var connection = screwData.hingeConnections.First();
             var part = layerManager.GetPartByKey(connection.bodyPartUniqueID);
@@ -487,11 +492,11 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             {
                 layerManager.screwDict[partLayerID].Add(screwComponent);
             }
-            yield return null; 
+            yield return null;
             StartCoroutine(screwComponent.InitOnLevelMaker());
 
         }
-        
+
         this.levelData = levelData;
         UpdateScrewTotal();
         Debug.Log($"Level data with ID {levelId} loaded.");
@@ -527,7 +532,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         Debug.Log("Screw Layer ID: " + layerID);
 
         var list = lmanager.screwDict.GetValueOrDefault(layerID);
-        if(list == null)
+        if (list == null)
         {
             lmanager.screwDict[layerID] = new List<Screw>();
         }
@@ -603,7 +608,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         var screwMnger = levelObj.ScrewManager;
         var screws = screwMnger.GetScrews();
 
-        foreach(var s in screws)
+        foreach (var s in screws)
         {
             var sLv = (ScrewLevelMaker)s;
             sLv.ResetScrew();
@@ -639,12 +644,13 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     {
         var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
         var screws = screwManager.GetScrews();
-        foreach (var s in screws) {
+        foreach (var s in screws)
+        {
             var sm = s as ScrewLevelMaker;
             RemoveScrew(sm);
             Destroy(sm);
         }
-    
+
     }
 
     public int GetScrewTotal(ColorEnum color)
@@ -661,7 +667,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     internal void RemoveScrew(ScrewLevelMaker screwLevelMaker)
     {
         screwLevelMaker.ResetHinge();
-       
+
         lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.layerMask);
         Destroy(screwLevelMaker.gameObject);
     }

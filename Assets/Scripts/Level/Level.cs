@@ -71,6 +71,7 @@ namespace Level
         public int idScrew;
         public int idColor;
         public Vector3 screwPosition;
+        public HingeConnection hingeConnection;
         public List<HingeConnection> hingeConnections;
     }
 
