@@ -251,16 +251,39 @@ public class ResourceManager : SingletonMono<ResourceManager>
 
         foreach (var r in renderers)
         {
-            string key = $"{obj.name}_{r.sprite.name}";
-            if (r.sprite != null && !spriteDict.ContainsKey(r.sprite.name))
+            string key = $"{r.sprite.name}";
+            if (r.sprite != null && !spriteDict.ContainsKey(key))
             {
                 spriteDict.Add(key, r.sprite);
-                Debug.Log($"Added sprite: {key}");
+                Debug.Log($"Added sprite: {key} + {r.sprite.name}");
             }
         }
 
-        Debug.Log($"[LoadPSB] Loaded {spriteDict.Count} sprites from PSB");
+        Debug.Log($"[LoadPSB] Loaded {spriteDict.Count} sprites from PSB, renderer count {renderers.Count()}");
     }
+
+    //public async Task LoadPSB(string psbKey)
+    //{
+    //    var handle = Addressables.LoadAssetAsync<GameObject>(psbKey);
+    //    await handle.Task;
+
+    //    var obj = handle.Result;
+
+    //    // Lấy tất cả SpriteRenderer trong prefab
+    //    var renderers = obj.GetComponentsInChildren<SpriteRenderer>();
+
+    //    foreach (var r in renderers)
+    //    {
+    //        string key = $"{obj.name}_{r.sprite.name}";
+    //        if (r.sprite != null && !spriteDict.ContainsKey(r.sprite.name))
+    //        {
+    //            spriteDict.Add(key, r.sprite);
+    //            Debug.Log($"Added sprite: {key}");
+    //        }
+    //    }
+
+    //    Debug.Log($"[LoadPSB] Loaded {spriteDict.Count} sprites from PSB");
+    //}
 
 
     public Sprite GetSprite(string layerName)

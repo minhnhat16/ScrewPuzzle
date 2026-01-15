@@ -108,6 +108,7 @@ public static class GameUtils
         return path;
     }
 
+  
     public static string NormalizeShapeName(string input)
     {
         if (string.IsNullOrEmpty(input))

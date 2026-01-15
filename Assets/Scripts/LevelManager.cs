@@ -127,8 +127,18 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     }
     public IEnumerator TaskLoadSpriteIngame()
     {
-        Task loadPSB = ResourceManager.ins.LoadPSB("level_screw/6.psb");
-        yield return loadPSB.IsCompletedSuccessfully;
+        Task loadPSB = ResourceManager.ins.LoadPSB("level_screw/6.psb"); // ❗ KHÔNG .psb
+
+        while (!loadPSB.IsCompleted)
+            yield return null;
+
+        if (loadPSB.IsFaulted)
+        {
+            Debug.LogError(loadPSB.Exception);
+            yield break;
+        }
+
+        Debug.Log("Load psb SUCCESS");
     }
     public IEnumerator TaskLoadObjectFromLevel(int levelID)
     {
@@ -366,10 +376,11 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         part.gameObject.layer = LayerMask.NameToLayer(layerName);
         string fixedName = layerName.Replace(" ", "_");
 
-        var sprite = spriteService.GetPartSprite(currentLevelID, data.spriteName, fixedName, false);
+        var sprite = spriteService.GetPartSprite(6, data.spriteName, fixedName, false);
 
         Debug.Log($"  Loading part '{data.partName}' with sprite '{data.spriteName}', sprite {sprite == null}");
-        var outline = spriteService.GetPartSprite(currentLevelID, data.spriteName, fixedName, false);
+
+        var outline = spriteService.GetPartSprite(6, data.spriteName, fixedName, true);
 
         part.Renderer.sprite = sprite;
         part.Outline.sprite = outline;

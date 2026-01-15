@@ -81,7 +81,9 @@ namespace Level
         public Vector3 screwPosition;
 
         public HingeConnection hinge;
-        public List<HingeConnection> connections;
+
+        
+        public List<HingeConnection> hingeConnections;
     }
 
     [System.Serializable]

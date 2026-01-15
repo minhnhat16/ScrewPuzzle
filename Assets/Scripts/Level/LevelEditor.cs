@@ -101,7 +101,7 @@ public class LevelEditor : Editor
         {
             if (screw == null)
                 continue;
-         //   screw.hinge = screw.hingeConnections[0];
+            screw.hinge = screw.hingeConnections[0];
             migrated++;
            
         }

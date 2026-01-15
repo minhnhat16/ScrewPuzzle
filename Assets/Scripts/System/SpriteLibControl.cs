@@ -154,13 +154,7 @@ public class SpriteLibControl : MonoBehaviour
     public Sprite GetSpritePSB(int level, SpriteGroup group, string layer, string name)
     {
         if (string.IsNullOrEmpty(name)) return null;
-
-        char groupType;
-        if (group == SpriteGroup.Main) groupType = 'a';
-        else if (group == SpriteGroup.Outline) groupType = 'b';
-        else groupType = ' ';
-        string partname = $"{level}_{layer}_{name}_{groupType}";
-
+        string partname = $"{name}";
         var sprite = ResourceManager.ins.GetSprite(partname);
         return sprite;
     }
