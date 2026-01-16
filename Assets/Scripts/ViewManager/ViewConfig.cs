@@ -37,6 +37,8 @@ public class ShopViewParam : ViewParam
 public class MainScreenViewParam : ViewParam
 {
     public long totalGold;
+    internal int ticket;
+    internal int level;
 }
 public class CollectionParam : ViewParam
 {

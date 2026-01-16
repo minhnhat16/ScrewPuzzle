@@ -22,7 +22,7 @@ namespace UIScript.UI.UI
         [SerializeField] private Text goldLB;
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private long gold;
-
+        [SerializeField] private Text level_txt;
 
         [SerializeField] private Text txt_gold;
         [SerializeField] private Text txt_ticket;
@@ -64,6 +64,7 @@ namespace UIScript.UI.UI
         {
             int currentPlayerLevel = DataAPIController.instance.GetPlayerLevel();
             LevelManager.ins.currentLevelID = currentPlayerLevel;
+            SetUpLevel(currentPlayerLevel);
             base.OnStartShowView();
             SetLevelPanelIs(true);
         }
@@ -82,12 +83,23 @@ namespace UIScript.UI.UI
             if (param != null)
             {
                 long userGold = gold = param.totalGold;
-
+                int ticket = param.ticket;
                 SetUpGold(userGold);
+                SetUpTicket(ticket);
                 SetLevelPanelIs(true);
+                SetUpLevel(param.level);
             }
 
 
+        }
+
+        private void SetUpTicket(int ticket)
+        {
+            txt_ticket.text = $"{ticket}";
+        }
+        private void SetUpLevel(int level)
+        {
+            level_txt.text = $"Level {++level}";
         }
 
         private void SetUpGold(long userGold)

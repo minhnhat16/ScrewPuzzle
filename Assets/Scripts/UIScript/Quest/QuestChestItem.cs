@@ -1,10 +1,12 @@
 ﻿using DG.Tweening;
+using Spine.Unity;
 using System;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static Unity.Burst.Intrinsics.X86;
 
 public class QuestChestItem : MonoBehaviour
 {
@@ -19,13 +21,15 @@ public class QuestChestItem : MonoBehaviour
     [SerializeField] private CanvasGroup detailCanvasGroup;
     [Header("Button")]
     [SerializeField] private Toggle tgle;
-
+    [SerializeField] private SkeletonGraphic ske;
     private List<PackMiniItem> items;
     private QuestChestParam param;
 
     private Animator animController;
     private Action animCallBack;
 
+
+    
     // Tween reference so we can stop/kill it safely
     private Tween shakeTween;
     public int ChestId => param.chestId;
@@ -37,7 +41,7 @@ public class QuestChestItem : MonoBehaviour
         items = GetComponentsInChildren<PackMiniItem>(true).ToList();
         animController = GetComponent<Animator>();
 
-
+        ske = GetComponentInChildren<SkeletonGraphic>(true);    
         if (detailRoot != null)
             detailRoot.SetActive(false);
     }
@@ -76,7 +80,9 @@ public class QuestChestItem : MonoBehaviour
         lockIcon.SetActive(!param.isUnlocked);
         doneIcon.SetActive(param.isClaimed);
 
-
+        Color color = param.isUnlocked ? Color.white : GameConstants.FadeColor;
+        if(color == null ) ske.color = Color.white;
+        else ske.color = color;
         tgle.group = param.toggleGroup;
         // rewards preview
         LoadItemDetail(param.rewards);

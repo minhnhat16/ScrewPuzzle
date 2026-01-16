@@ -1,4 +1,5 @@
-﻿using Spine.Unity;
+﻿using DG.Tweening;
+using Spine.Unity;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class GiftClaimDialog : BaseDialog
 
     public Transform itemContainer;      // chứa các item spawn ra
     public GameObject itemPrefab;        // prefab icon + text
-
+    public GameObject light;
     [Header("Animation")]
     public SkeletonGraphic spineBox;
     public string animOpen = "open";

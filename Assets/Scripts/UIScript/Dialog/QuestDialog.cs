@@ -35,6 +35,14 @@ public class QuestDialog : BaseDialog
     private Transform normalChestParent;
 
 
+
+    public override void OnInit(Action callback = null)
+    {
+        base.OnInit(callback);
+        SetupChestTrack();
+
+    }
+
     // =====================================================
     // LIFECYCLE
     // =====================================================
@@ -75,7 +83,6 @@ public class QuestDialog : BaseDialog
         SetupStageTabs();
         RefreshStageTabs();
 
-        SetupChestTrack();
 
         CacheAllStageMissions();
 
@@ -90,7 +97,6 @@ public class QuestDialog : BaseDialog
         if (stageId != currentStage)
             return;
 
-        SetupChestTrack();
     }
 
     private void OnStageUnlocked(int stageId)
@@ -151,7 +157,7 @@ public class QuestDialog : BaseDialog
         currentStage = stageIndex;
 
         RefreshStageTabs();
-        SetupChestTrack();
+        //SetupChestTrack();
         LoadMissions_WithSlide(stageIndex, instant: false);
     }
 

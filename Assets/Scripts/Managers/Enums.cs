@@ -119,6 +119,9 @@ public enum MissionType
     ScoreReached,
     CompleteLevel,
     CompleteSpecialLevel,
+    UseBreaker,
+    UseMagnet,
+    UseDrill,
 }
 
 public enum MissionState

@@ -35,7 +35,9 @@ public class BootLoader : MonoBehaviour
             LoadSceneManager.ins.TimeWait = progressTime;
             MainScreenViewParam param = new()
             {
-                totalGold = GameManager.instance.GetPlayerGold()
+                totalGold = DataAPIController.instance.GetGold(),
+                ticket = (int)DataAPIController.instance.GetTicket(),
+                level  = DataAPIController.instance.GetPlayerLevel(),
             };
 
             ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>

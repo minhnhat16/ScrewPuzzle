@@ -7,6 +7,7 @@ public class QuestStageTab : MonoBehaviour
     [Header("UI")]
     [SerializeField] private Text label;
     [SerializeField] private GameObject lockedIcon;
+    [SerializeField] private GameObject unlockedUI;
     [SerializeField] private Button button;
 
     public int StageIndex { get; private set; }
@@ -71,7 +72,7 @@ public class QuestStageTab : MonoBehaviour
     private void ApplyState()
     {
         lockedIcon.SetActive(!unlocked);
-
+        unlockedUI.SetActive(unlocked);
         // selected tab không cho click
         button.interactable = unlocked ;
     }

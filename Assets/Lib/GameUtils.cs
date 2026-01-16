@@ -34,6 +34,8 @@ public static class GameConstants
     public static float MINI_SIZE = 150f;
 
     public static string SPRITE_PART_PATH = "HINH/";
+
+    public static Color FadeColor { get => new Color(0.5f, 0.5f, 0.5f); }
 }
 
 public static class TaskExtensions

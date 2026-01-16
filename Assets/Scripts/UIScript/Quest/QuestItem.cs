@@ -120,7 +120,7 @@ public class QuestItem : MonoBehaviour
                 break;
 
             case MissionState.Completed:
-                doneIcon.SetActive(true);
+                doneIcon.SetActive(false);
                 actionButton.interactable = true;
                 actionButton.gameObject.SetActive(true);
                 actionButton.GetComponentInChildren<Text>().text = "Claim";
