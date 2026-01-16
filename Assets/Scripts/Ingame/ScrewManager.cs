@@ -127,7 +127,7 @@ namespace Ingame
         }
         public int GetScrewTotalByColor(ColorEnum color)
         {
-            var screws = GetComponentsInChildren<Screw.Screw>();
+            var screws = GetComponentsInChildren<Screw.Screw>(true);
             var listColor = screws.Where(s => s.Color == color).ToList();  
             int total = listColor.Count;
             return total;

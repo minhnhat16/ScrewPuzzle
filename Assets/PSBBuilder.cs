@@ -39,11 +39,11 @@ namespace PSB
         public void SpawnScrewManager()
         {
             var screwManagerPrefab = Resources.Load("Prefabs/ScrewManager");
-            var screwManagerObj = Instantiate(screwManagerPrefab,Vector3.zero, Quaternion.identity,this.transform);
+            var screwManagerObj = Instantiate(screwManagerPrefab, Vector3.zero, Quaternion.identity, this.transform);
             screwManager = screwManagerObj.GetComponent<ScrewManager>();
             levelObj.ScrewManager = screwManager;
         }
-            
+
 
         public void AddLayer(Transform level)
         {
@@ -95,13 +95,16 @@ namespace PSB
         {
             transform.GetChild(0).gameObject.SetActive(false);
             AddLayer(transform.GetChild(1));
-            
+
             layerManager = GetComponent<LayerManager>();
             levelObj = GetComponent<BaseLevelObject>();
 
             GameObjectToLevelConverter.ins.levelObject = this.gameObject;
             GameObjectToLevelConverter.ins.lmanager = this.layerManager;
-            LevelMaker.instance.layerDropdown.OnValueChange((v)=> this.layerManager.ActivateSingleLayer(v));  
+            LevelMaker.instance.layerDropdown.OnValueChange((v) =>
+            {
+                this.layerManager.ActivateSingleLayer(v);
+            });
             SpawnScrewManager();
         }
 

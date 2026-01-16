@@ -655,7 +655,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
 
     public int GetScrewTotal(ColorEnum color)
     {
-        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        var screwManager = levelObject.GetComponentInChildren<ScrewManager>(true);
         return screwManager.GetScrewTotalByColor(color);
     }
 
