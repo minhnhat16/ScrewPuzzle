@@ -188,7 +188,7 @@ namespace RejectedGames
 
 				position.x = position.x - 18;
 				position.width = 20;
-				if (GUI.Button(position, "", ToolbarSeachTextFieldPopup))
+				if (GUI.Button(position, "", ToolbarSearchTextFieldPopup))
 				{
 					GenericMenu options = new GenericMenu();
 					options.AddItem(new GUIContent("All"), SearchFilter == SearchFilterType.All, OnSearchAllClicked);
@@ -197,9 +197,9 @@ namespace RejectedGames
 					options.DropDown(position);
 				}
 
-				position = GUILayoutUtility.GetRect(10, 10, ToolbarSeachCancelButton);
+				position = GUILayoutUtility.GetRect(10, 10, ToolbarSearchCancelButton);
 				position.x -= 5;
-				if (GUI.Button(position, "", ToolbarSeachCancelButton))
+				if (GUI.Button(position, "", ToolbarSearchCancelButton))
 				{
 					SearchString = string.Empty;
 				}
@@ -1030,10 +1030,10 @@ namespace RejectedGames
 		}
 
 		//Unity Build-in styles
-		private GUIStyle ToolbarSearchField { get { return GetStyle("ToolbarSeachTextField"); } }
-		private GUIStyle ToolbarSeachTextFieldPopup { get { return GetStyle("ToolbarSeachTextFieldPopup"); } }
-		private GUIStyle ToolbarSeachCancelButton { get { return GetStyle("ToolbarSeachCancelButton"); } }
-		private GUIStyle ToolbarSeachCancelButtonEmpty { get { return GetStyle("ToolbarSeachCancelButtonEmpty"); } }
+		private GUIStyle ToolbarSearchField { get { return GetStyle("ToolbarSearchTextField"); } }
+		private GUIStyle ToolbarSearchTextFieldPopup { get { return GetStyle("ToolbarSearchTextFieldPopup"); } }
+		private GUIStyle ToolbarSearchCancelButton { get { return GetStyle("ToolbarSearchCancelButton"); } }
+		private GUIStyle ToolbarSeachCancelButtonEmpty { get { return GetStyle("ToolbarSearchCancelButtonEmpty"); } }
 
 		private GUIStyle GetStyle(string styleName)
 		{
