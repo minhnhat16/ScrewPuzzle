@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4952531218894370065}
-  - component: {fileID: 3516665999576138921}
   - component: {fileID: 8403960294274828544}
   - component: {fileID: 5736997501819644903}
   m_Layer: 5
@@ -32,39 +31,15 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 2, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &3516665999576138921
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2641576457663777519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 689a474cb87bbf24da6d3b0a503f598b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rect: {fileID: 0}
-  dealer: {fileID: 0}
-  goldLb: {fileID: 0}
-  target_Position: {x: 0, y: 0, z: 0}
-  animator: {fileID: 8403960294274828544}
-  goldPrefab: {fileID: 6670851475694884436, guid: 109f70418a6d52344ae5d78a704d7d89, type: 3}
-  radius: 10
-  anchor3D: {x: 0, y: 0, z: 0}
-  goldClaimEvent:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!95 &8403960294274828544
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -78,6 +53,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -100,7 +76,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 1
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: -971369375
   m_SortingOrder: 10
   m_TargetDisplay: 0

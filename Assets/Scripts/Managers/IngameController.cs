@@ -33,7 +33,7 @@ namespace Managers
         [HideInInspector] public UnityEvent<int> onGemChanged;
         [HideInInspector] public UnityEvent<float> onExpChange;
         [HideInInspector] public UnityEvent<bool> onCompleteLevel;
-        [HideInInspector] public UnityEvent<ItemType> onItemInvoke;
+        [HideInInspector] public UnityEvent<ItemType,Vector3> onItemInvoke;
 
         public bool isPause;
 
@@ -142,14 +142,14 @@ namespace Managers
             return mask;
         }
 
-        private void ItemIvoked(ItemType item)
+        private void ItemIvoked(ItemType item, Vector3 targetpos)
         {
             itemJustInvoke = true;
             ItemController.ins.IsHandlingHammer = itemJustInvoke;
-            StartCoroutine(ItemCoroutine(item));
+            StartCoroutine(ItemCoroutine(item, targetpos));
         }
 
-        private IEnumerator ItemCoroutine(ItemType itemType)
+        private IEnumerator ItemCoroutine(ItemType itemType,Vector3 targetpos)
         {
             yield return new WaitUntil(() => itemJustInvoke);
             Debug.Log("x " + itemType);
@@ -160,14 +160,14 @@ namespace Managers
             switch (itemType)
             {
                 case ItemType.Magnet:
-                    ItemController.ins.ClearArrayState.Use();
+                    ItemController.ins.ClearArrayState.Use(targetpos);
                     break;
                 case ItemType.Breaker:
                     AddBox(null);
-                    ItemController.ins.RemovePartState.Use();
+                    ItemController.ins.RemovePartState.Use(targetpos);
                     break;
                 case ItemType.Drill:
-                    ItemController.ins.AddOneHold.Use();
+                    ItemController.ins.AddOneHold.Use(targetpos);
                     break;
                 default:
                     break;
@@ -298,24 +298,24 @@ namespace Managers
                 {
                     Debug.LogWarning("Key 1 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.Breaker);
+                    onItemInvoke.Invoke(ItemType.Breaker,Vector3.zero);
                 }
                 else if (Input.GetKey(KeyCode.Alpha2))
                 {
                     Debug.LogWarning("Key 2 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.Magnet);
+                    onItemInvoke.Invoke(ItemType.Magnet, Vector3.zero);
                 }
                 else if (Input.GetKey(KeyCode.Alpha3))
                 {
                     Debug.LogWarning("Key 3 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.Drill);
+                    onItemInvoke.Invoke(ItemType.Drill, Vector3.zero);
                 }
                 else if (Input.GetKey(KeyCode.Alpha4))
                 {
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.AddBox);
+                    onItemInvoke.Invoke(ItemType.AddBox, Vector3.zero);
                 }
                 // Chờ một khung hình trước khi kiểm tra tiếp
                 yield return null;
@@ -325,6 +325,7 @@ namespace Managers
         {
             CurrentStar += addedStar;
             float percentStart = (float)CurrentStar / (float)totalStarInLevel;
+            Debug.Log($"StarChanging: CurrentStar={CurrentStar}, TotalStarInLevel={totalStarInLevel}, Percent={percentStart}");
 
             onStarChange?.Invoke(percentStart);
         }
@@ -364,7 +365,8 @@ namespace Managers
         {
             // minuss 1 life heart
             IsGameOver = true;
-            int currentLevel = LevelManager.ins.currentLevelID;
+            CurrentStar = 0;
+            int currentLevel = LevelManager.ins.currentLevelID - 1;
             Player.instance.IsInputLocked = true;
             LevelManager.ins.OnReset();
             ArrayScrew.Instance.ClearAllScrewsOnArray();

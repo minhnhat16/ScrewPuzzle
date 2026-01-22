@@ -60,9 +60,7 @@ namespace UIScript
         public virtual void OnClick()
         {
             Debug.Log("on button click");
-
-          
-            IngameController.ins.onItemInvoke?.Invoke(type);
+            IngameController.ins.onItemInvoke?.Invoke(type,Vector3.one);
         }
 
         public virtual void OnAddQuantity()

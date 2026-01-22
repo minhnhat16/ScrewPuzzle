@@ -1,4 +1,5 @@
 ﻿using Enums;
+using Ingame;
 using Managers;
 using System;
 using System.Collections;
@@ -13,7 +14,7 @@ using UnityEngine.UI;
 public class GameView : BaseView
 {
     [SerializeField] private RectTransform anchor;
-    [SerializeField] private bool isShowingBreak;
+    //[SerializeField] private bool isShowingBreak;
 
     [SerializeField] private RectTransform goldParent;
     [SerializeField] private RectTransform gemParent;
@@ -37,6 +38,9 @@ public class GameView : BaseView
     public Text GoldLb => gold_lb;
     public RectTransform Anchor => anchor;
 
+    // Keep track of which item type's description is currently shown (if any)
+    private ItemType? currentDescriptionItem;
+
     private void OnEnable()
     {
 
@@ -44,9 +48,14 @@ public class GameView : BaseView
         btn_hammer.AddListener(HammerClicked);
         btn_magnet.AddListener(MagnetClicked);
         settingBtn.onClick.AddListener(SettingButton);
-        itemPerformed = ItemController.ins.itemPerformed; 
+        itemPerformed = ItemController.ins.itemPerformed;
         itemPerformed.AddListener(ItemPerformededHandler);
 
+        // Register to be notified when the item dictionary or its entries change.
+        DataTrigger.RegisterValueChange(DataPath.ITEMDICT, OnItemDictChanged);
+
+        // Initialize display once on enable
+        RefreshAllItemDisplays();
     }
 
 
@@ -58,12 +67,15 @@ public class GameView : BaseView
         btn_hammer.RemoveListener(HammerClicked);
         btn_magnet.RemoveListener(MagnetClicked);
         settingBtn.onClick.RemoveListener(SettingButton);
+
+        // Unregister the value change handler to avoid leaks
+        DataTrigger.UnRegisterValueChange(DataPath.ITEMDICT, OnItemDictChanged);
     }
     public override void OnInit(Action callback = null)
     {
         base.OnInit(callback);
         var anchor = SpecialBoxManager.ins.SpecialBoxAnchor;
-        anchor.position = ViewManager.Instance.UIToWorld(txt_specialScrew.rectTransform,CameraMain.instance.main) + Vector3.up *0.5f;
+        anchor.position = ViewManager.Instance.UIToWorld(txt_specialScrew.rectTransform, CameraMain.instance.main) + Vector3.up * 0.5f;
     }
     public override void Setup(ViewParam viewParam)
     {
@@ -71,6 +83,7 @@ public class GameView : BaseView
 
         long gold = WalletManager.ins.Get(Currency.Gold);
 
+        starBottle.OnReset();
 
     }
 
@@ -78,10 +91,10 @@ public class GameView : BaseView
     {
         base.OnStartShowView();
         starBottle.OnReset();
-        txt_specialScrew.text = "0";    
+        txt_specialScrew.text = "0";
         IngameController.ins.onStarChange = starBottle.fillChange;
         starBottle.OnReset();
-        
+
     }
     public override void OnEndHideView()
     {
@@ -119,13 +132,17 @@ public class GameView : BaseView
     }
     public void ShowDescription(ItemType itemType)
     {
+        // Set current selection so description can be refreshed when item totals change
+        currentDescriptionItem = itemType;
+
         var itemConfig = ConfigFileManager.Instance.GetItemConfig(itemType);
         var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, itemType.ToString());
-        string detail = itemConfig.Detail;  
+        string detail = itemConfig?.Detail ?? string.Empty;
 
+        if (txt_description != null)
+            txt_description.text = detail;
 
-        txt_description.text = detail;
-       var anim = this.BaseViewAnimation as GamePlayAnim;
+        var anim = this.BaseViewAnimation as GamePlayAnim;
         anim.ShowDescription(null);
     }
     /// <summary>
@@ -160,8 +177,8 @@ public class GameView : BaseView
         {
             // đủ item → sử dụng item
             ShowDescription(itemType);
-
-            IngameController.ins.onItemInvoke?.Invoke(itemType);
+            var pos = itemType == ItemType.Breaker ? Vector3.zero : ArrayScrew.Instance.GetHoldPos() + new Vector3(1, -0.5f);
+            IngameController.ins.onItemInvoke?.Invoke(itemType, pos);
             button.interactable = true;
         }
     }
@@ -169,10 +186,13 @@ public class GameView : BaseView
 
     private void ItemPerformededHandler(bool isPerformed)
     {
-        if(isPerformed)
+        if (isPerformed)
         {
             GamePlayAnim anim = this.BaseViewAnimation as GamePlayAnim;
             anim.HideDescription(null);
+
+            // Optionally clear current selection when description is hidden
+            // currentDescriptionItem = null;
         }
     }
     public void SettingButton()
@@ -191,12 +211,62 @@ public class GameView : BaseView
     {
         DialogManager.ins.ShowDialog(DialogIndex.BreakDialog, null, () =>
         {
-            isShowingBreak = false;
         });
     }
 
     internal void UpdateSpecialBoxCount(ColorEnum color, int v)
     {
         txt_specialScrew.text = v.ToString();
+    }
+
+    // ============================================================
+    // DataTrigger handler / helpers
+    // ============================================================
+    // Called when DataPath.ITEMDICT or its children are updated via DataModel triggers.
+    private void OnItemDictChanged(object arg)
+    {
+        RefreshAllItemDisplays();
+
+        // If a description is currently shown for an item, refresh its text (useful
+        // if description depends on item config or quantity)
+        RefreshDescriptionIfVisible();
+    }
+
+    private void RefreshAllItemDisplays()
+    {
+        UpdateItemDisplay(ItemType.Magnet, btn_magnet);
+        UpdateItemDisplay(ItemType.Breaker, btn_hammer);
+        UpdateItemDisplay(ItemType.Drill, btn_drill);
+    }
+
+    private void UpdateItemDisplay(ItemType type, ItemButtonIngame button)
+    {
+        if (button == null) return;
+
+        var itemData = DataAPIController.instance.GetItemData(type);
+        if (itemData == null) return;
+
+        try
+        {
+            if (button.TextLB != null)
+            {
+                // use ItemButtonIngame helper to update UI and interactivity
+                button.SetItemQuantity(itemData.total);
+            }
+
+        }
+        catch (Exception)
+        {
+            // Fail silently — UI update shouldn't crash game
+        }
+    }
+
+    private void RefreshDescriptionIfVisible()
+    {
+        if (!currentDescriptionItem.HasValue || txt_description == null)
+            return;
+
+        var cfg = ConfigFileManager.Instance.GetItemConfig(currentDescriptionItem.Value);
+        txt_description.text = cfg?.Detail ?? string.Empty;
     }
 }

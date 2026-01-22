@@ -141,46 +141,7 @@ namespace Ingame
             boxesStack.Clear();
         }
 
-        private void InitAndShuffleColor()
-        {
-            var threeHoldList = configRecords.Where(r => r.NumberOfScrewHoles == 3).ToList();
-            var twoHoldList = configRecords.Where(r => r.NumberOfScrewHoles == 2).ToList();
-            var oneHoldList = configRecords.Where(r => r.NumberOfScrewHoles == 1).ToList();
-
-            // tránh 2 box 3-hole liền kề cùng màu
-            for (int i = 1; i < threeHoldList.Count; i++)
-            {
-                if (threeHoldList[i].BoxColor == threeHoldList[i - 1].BoxColor)
-                {
-                    int swapIndex = i + 1;
-                    while (swapIndex < threeHoldList.Count &&
-                           threeHoldList[swapIndex].BoxColor == threeHoldList[i].BoxColor)
-                    {
-                        swapIndex++;
-                    }
-
-                    if (swapIndex < threeHoldList.Count)
-                    {
-                        (threeHoldList[i], threeHoldList[swapIndex]) =
-                            (threeHoldList[swapIndex], threeHoldList[i]);
-                    }
-                }
-            }
-
-            var finalList = new List<BoxConfigRecord>();
-            finalList.AddRange(threeHoldList);
-            finalList.AddRange(twoHoldList);
-            finalList.AddRange(oneHoldList);
-
-            int totalStar = threeHoldList.Count * 3 +
-                            twoHoldList.Count * 2 +
-                            oneHoldList.Count;
-
-            IngameController.ins.TotalStarInLevel = totalStar;
-
-            configRecords = finalList;
-            ConfigStack = new Stack<BoxConfigRecord>(configRecords);
-        }
+       
         private Dictionary<ColorEnum, int> GetDesignWeight()
         {
             return configRecords
@@ -263,16 +224,6 @@ namespace Ingame
 
                 switch (config.NumberOfScrewHoles)
                 {
-                    case 1:
-                        box = OneHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        box.OnInit(Vector2.one * leftCamPos, color, false, config.NumberOfScrewHoles);
-                        break;
-
-                    case 2:
-                        box = TwoHoldBoxPool.Instance.pool.SpawnNonGravity();
-                        box.OnInit(Vector3.left * leftCamPos, color, false, config.NumberOfScrewHoles);
-                        break;
-
                     case 3:
                     default:
                         box = ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
@@ -420,7 +371,6 @@ namespace Ingame
                     var lockBox = ThreeHoldBoxPool.Instance.Spawn();
                     lockBox.SetIsLocked(true);
                     lockBox.SetActive(true);
-
                     slot.Initialize(pos, true, lockBox);
                     StartCoroutine(MoveToSlot(lockBox, slot));
                 }
@@ -773,7 +723,9 @@ namespace Ingame
                 box != null &&
                 box.Color == screw.Color &&
                 !box.isMoving &&
-                !box.IsBoxFull;
+                !box.IsBoxFull &&
+                box.isActiveAndEnabled && 
+                !box.IsLocked;
 
             // -------------------------------
             // CASE 2: Ưu tiên Active Boxes
@@ -865,7 +817,7 @@ namespace Ingame
 
                 totalMoved += toMove.Count;
 
-                Debug.Log($"✔ Moved {toMove.Count}/{groupList.Count} screw vào box {box.Color}");
+                //Debug.Log($"✔ Moved {toMove.Count}/{groupList.Count} screw vào box {box.Color}");
 
                 // Nếu còn dư → cho hiding (nhưng KHÔNG hiding Rainbow)
                 var remain = groupList.Skip(toMove.Count).ToList();
@@ -878,7 +830,7 @@ namespace Ingame
 
 
 
-            Debug.Log($"[TryMove] Tổng move = {totalMoved}");
+            //Debug.Log($"[TryMove] Tổng move = {totalMoved}");
             return totalMoved > 0;
         }
 

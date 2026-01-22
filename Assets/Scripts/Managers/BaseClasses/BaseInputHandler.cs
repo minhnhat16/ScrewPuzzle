@@ -72,7 +72,46 @@ public abstract class BaseInputHandler : MonoBehaviour
     // ============================
     // GENERIC PICKER
     // ============================
-    protected T PickAtScreenPos<T>(Vector3 screenPos, string requiredTag = null) where T : Component
+    protected T PickAtScreenPos<T>(
+    Vector3 screenPos,
+    string requiredTag = null
+) where T : Component
+    {
+        if (mainCam == null) return null;
+
+        Vector2 worldPos = mainCam.ScreenToWorldPoint(screenPos);
+        var hits = Physics2D.RaycastAll(worldPos, Vector2.zero);
+
+        int bestLayer = int.MaxValue; // layer nhỏ hơn = ưu tiên cao
+        T best = null;
+
+        foreach (var hit in hits)
+        {
+            if (hit.collider == null) continue;
+
+            var obj = hit.collider.gameObject;
+
+            if (requiredTag != null && !obj.CompareTag(requiredTag))
+                continue;
+
+            if (!obj.TryGetComponent<T>(out var comp)) continue;
+
+            int layer = obj.layer;
+
+            if (layer < bestLayer)
+            {
+                bestLayer = layer;
+                best = comp;
+            }
+        }
+
+        return best;
+    }
+
+    protected T PickAtScreenPosScrew<T>(Vector3 screenPos, string requiredTag = null) where T : Component
+
+
+
     {
         if (mainCam == null) return null;
 
@@ -104,7 +143,6 @@ public abstract class BaseInputHandler : MonoBehaviour
 
         return best;
     }
-
     // ============================
     // ABSTRACT FOR CHILDREN
     // ============================

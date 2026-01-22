@@ -535,6 +535,18 @@ namespace System.DataBase
             return stage.isUnlocked;
         }
 
+        public void UnlockChest(int chestId)
+        {
+
+
+            Debug.Log("Unlock chest id " + chestId);    
+            var state = GetChestState(chestId);
+
+            state.isUnlocked = true;
+            UpdateChestState(state);
+            // 🔥 fire event
+            ChestEvent.OnChestUnlock?.Invoke(chestId);
+        }
         internal void SetCurrentStage(int v)
         {
 
@@ -632,10 +644,7 @@ namespace System.DataBase
 
         public void AddNewChestStage(ChestStageData data, Action<bool> isDone = null)
         {
-            var chestDict = dataModel.ReadData<Dictionary<int, ChestStageData>>(DataPath.CHESTSTAGE);
-
-            chestDict.Add(data.chestId, data);
-            dataModel.UpdateData(DataPath.CHESTSTAGE, data);
+            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, data.chestId.ToString(), data);
             isDone?.Invoke(true);
         }
         public StageProgress GetStageProgress(int stageId)
@@ -769,7 +778,10 @@ namespace System.DataBase
         internal void UpdateChestState(ChestStageData chestState)
         {
             string chestID = chestState.chestId.ToString();
-            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, chestID, chestState);
+            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, chestID, chestState, () =>
+            {
+                Debug.Log($"[DataAPI] Chest {chestID} state updated: unlocked={chestState.isUnlocked}, claimed={chestState.isClaimed}");
+            });
         }
         public void SetChestUnlock(int chestId, bool isUnlocked)
         {
@@ -780,6 +792,8 @@ namespace System.DataBase
         }
         public void SetChestClaimed(int chestId, bool isClaimed = true)
         {
+
+            Debug.Log("Set chest claimed id " + chestId + " to " + isClaimed);
             var chest = GetChestState(chestId);
             if (chest == null) return;
             chest.isClaimed = isClaimed;

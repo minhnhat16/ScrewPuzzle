@@ -30,11 +30,11 @@ public class BuyDialog : BaseDialog
         base.Setup(dialogParam);
         if (dialogParam != null)
         {
-            BuyConfirmDialogParam param = (BuyConfirmDialogParam)dialogParam;
-            onConfirm = param.onConfirmAction;
-            onCancel = param.onCancleAction;
-            cost = param.cost;
-            explain_lb.text = param.plaintext;
+            BuyConfirmDialogParam param =dialogParam as BuyConfirmDialogParam;
+            //onConfirm = param.onConfirmAction;
+            //onCancel = param.onCancleAction;
+            //cost = param.cost;
+            //explain_lb.text = param.plaintext;
         }
     }
     public override void OnStartShowDialog()

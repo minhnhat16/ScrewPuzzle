@@ -57,6 +57,8 @@ public class ProgressBarMultipleTarget: ProgressBar
         foreach (var record in configs.GetAllRecord())
         {
             dataMap.TryGetValue(record.Id, out var chestData);
+
+            Debug.Log($"[ProgressMultipleTarget] Initializing Chest {record.Id}");
             ChestInit(record, chestData);
         }
 
@@ -130,16 +132,16 @@ public class ProgressBarMultipleTarget: ProgressBar
         // ===============================
         // SETUP PARAM
         // ===============================
-        item.Setup(new QuestChestParam
-        {
-            chestId = record.Id,
-            icon = ChestTierHelper.GetSpriteName(record.Tier),
-            isClaimed = state.isClaimed,
-            isUnlocked = state.isUnlocked,
-            progress = state.progress,
-            rewards = record.Rewards,
-            toggleGroup = toggleGroup,
-        });
+        //item.Setup(new QuestChestParam
+        //{
+        //    chestId = record.Id,
+        //    icon = ChestTierHelper.GetSpriteName(record.Tier),
+        //    isClaimed = state.isClaimed,
+        //    isUnlocked = state.isUnlocked,
+        //    progress = state.progress,
+        //    rewards = record.Rewards,
+        //    toggleGroup = toggleGroup,
+        //});
 
         chestItems.Add(item);
 

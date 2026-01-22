@@ -22,12 +22,13 @@ public class QuestChestItem : MonoBehaviour
     [Header("Button")]
     [SerializeField] private Toggle tgle;
     [SerializeField] private SkeletonGraphic ske;
+    [SerializeField]
     private List<PackMiniItem> items;
+    [SerializeField]
     private QuestChestParam param;
 
     private Animator animController;
     private Action animCallBack;
-
 
     
     // Tween reference so we can stop/kill it safely
@@ -56,46 +57,52 @@ public class QuestChestItem : MonoBehaviour
         // ensure toggle cleaned up
         tgle.isOn = false;
         tgle.onValueChanged.RemoveAllListeners();
-
-        // stop any running shake tween to avoid leaks/continued animation
-        StopCanReward();
     }
 
     // =====================================================
     // SETUP
     // =====================================================
-    public void Setup(QuestChestParam param)
+    public virtual void Setup(QuestChestParam param)
     {
         this.param = param;
-
-        // progress
-        if (progressFill != null)
-        {
-            float percent = param.target > 0 ? param.progress / param.target : 0f;
-            progressFill.SetProgress(Mathf.Clamp01(percent));
-            progressFill.gameObject.SetActive(param.isUnlocked);
-        }
-
-        // state
-        lockIcon.SetActive(!param.isUnlocked);
-        doneIcon.SetActive(param.isClaimed);
-
-        Color color = param.isUnlocked ? Color.white : GameConstants.FadeColor;
-        if(color == null ) ske.color = Color.white;
-        else ske.color = color;
+        SetProgress(param.progress, param.target);
+        SetUnlocked(param.isUnlocked);
+        SetClaimed(param.isClaimed);
         tgle.group = param.toggleGroup;
-        // rewards preview
         LoadItemDetail(param.rewards);
-        if (param.isUnlocked && !param.isClaimed) PlayCanReward();
-        else StopCanReward();
+        Debug.Log("Setup chest id: " + param.chestId + " param null: " + param ==null);
     }
+
+    public void SetClaimed(bool claimed)
+    {
+        param.isClaimed = claimed;
+
+        if (doneIcon != null)
+            doneIcon.SetActive(claimed);
+            ske.AnimationState.SetAnimation(0,"idle",true); 
+        if (claimed)
+            StopCanReward();
+    }
+
+    public void SetProgress(float progress, float target)
+    {
+        param.progress = progress;
+        param.target = target;
+
+        if (progressFill == null) return;
+
+        float percent = target > 0 ? (float)progress / target : 0f;
+        progressFill.SetProgress(Mathf.Clamp01(percent));
+    }
+
+    
 
     // =====================================================
     // REWARD PREVIEW
     // =====================================================
     private void LoadItemDetail(List<RewardItem> rewards)
     {
-        if (rewards == null || rewards.Count == 0)
+        if (rewards == null || rewards.Count == 0 || items == null)
             return;
 
         for (int i = 0; i < items.Count; i++)
@@ -121,6 +128,7 @@ public class QuestChestItem : MonoBehaviour
     // =====================================================
     public void OnQuestChestClick(bool clicked)
     {
+        Debug.Log("On quest clickedd");
         if (!clicked)
         {
             HideDetail();
@@ -142,6 +150,7 @@ public class QuestChestItem : MonoBehaviour
     {
         lockIcon.SetActive(!isUnlocked);
         progressFill.gameObject.SetActive(!isUnlocked);
+        PlayUnlockAnim();
     }
     // =====================================================
     // UI ACTIONS
@@ -184,7 +193,7 @@ public class QuestChestItem : MonoBehaviour
         lockIcon.SetActive(false);
         tgle.isOn = false;
         progressFill.gameObject.SetActive(false);
-        DataAPIController.instance.SetChestClaimed(ChestId,true);
+        DataAPIController.instance.SetChestClaimed(param.chestId,true);
         if (isClaim) PlayCanReward();
         else StopCanReward();
             // stop any reward animation when claimed
@@ -200,37 +209,46 @@ public class QuestChestItem : MonoBehaviour
     public void PlayCanReward()
     {
         // Kill existing tween if present
-        if (shakeTween != null && shakeTween.IsActive())
-        {
-            shakeTween.Kill();
-            shakeTween = null;
-        }
-
+        ske.AnimationState.SetAnimation(0, "idle", true);
         progressFill.gameObject.SetActive(false);   
         // Create a 0.8s shake and loop it infinitely. This avoids using Mathf.Infinity as duration.
-        shakeTween = transform
-                .DOShakeRotation(0.8f, strength: 10f, vibrato: 10, randomness: 90f)
-                .SetLoops(-1, LoopType.Restart)
-                .SetEase(Ease.Linear)
-                .SetId(this);
-        shakeTween.OnUpdate(() => Debug.Log("Shaking chesst"));
+     
     }
 
     // Stop and kill the shake tween safely
     public void StopCanReward()
     {
-        if (shakeTween != null)
-        {
-            if (shakeTween.IsActive())
-                shakeTween.Kill();
-            shakeTween = null;
+        ske.AnimationState.SetAnimation(0, "open_idle", true);
+    }
 
-            // reset transform rotation to identity to avoid leftover rotation
-            transform.localRotation = Quaternion.identity;
-        }
+    public void SetUnlocked(bool unlocked)
+    {
+        param.isUnlocked = unlocked;
+
+        // progress
+        if (progressFill != null)
+            progressFill.gameObject.SetActive(!unlocked);
+
+        // lock icon
+        if (lockIcon != null)
+            lockIcon.SetActive(!unlocked);
+
+        // color
+        if (ske != null)
+            ske.color = unlocked ? Color.white : GameConstants.FadeColor;
+
+        // reward FX
+        if (unlocked && !param.isClaimed)
+            PlayCanReward();
+        else
+            StopCanReward();
+    }
+
+    internal void PlayUnlockAnim()
+    {
     }
 }
-
+[Serializable]
 public class QuestChestParam
 {
     public int chestId;

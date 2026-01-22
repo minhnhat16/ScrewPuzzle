@@ -65,6 +65,7 @@ public class BuyConfirmDialogParam : DialogParam
 public class SettingParam : DialogParam
 {
     public long totalGold;
+    internal long totalTicket;
     public bool isMainScreen;
     public string title;
 }

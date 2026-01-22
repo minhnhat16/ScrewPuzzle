@@ -27,6 +27,7 @@ public class QuestDialog : BaseDialog
     private QuestChestItem currentOpenChest;
     private readonly List<QuestItem> activeMissionItems = new();
     private readonly Dictionary<int, List<MissionConfigRecord>> cachedStageMissions = new();
+    private readonly Dictionary<int, QuestChestItem> chestItems = new();
 
     private int currentStage;
     [SerializeField]
@@ -52,8 +53,11 @@ public class QuestDialog : BaseDialog
         StageEvents.OnStageUnlocked += OnStageUnlocked;
         MissionEvents.OnActiveMissionChanged += OnActiveMissionChanged;
         MissionEvents.OnMissionCompleted += OnMissionCompleted;
-
+        MissionEvents.OnMissionClaimed += OnMissionClaimed;
         QuestDialogEvents.OnChestDetailOpened += OnChestDetailOpened;
+
+        ChestEvent.OnChestUnlock += OnChestUnlocked;
+
         outsideClickCatcher.onClick.AddListener(OnOutsideClicked);
     }
 
@@ -64,6 +68,8 @@ public class QuestDialog : BaseDialog
         StageEvents.OnStageUnlocked -= OnStageUnlocked;
         MissionEvents.OnActiveMissionChanged -= OnActiveMissionChanged;
         MissionEvents.OnMissionCompleted -= OnMissionCompleted;
+        ChestEvent.OnChestUnlock -= OnChestUnlocked;
+        MissionEvents.OnMissionClaimed -= OnMissionClaimed;
 
         QuestDialogEvents.OnChestDetailOpened -= OnChestDetailOpened;
         outsideClickCatcher.onClick.RemoveAllListeners();
@@ -96,7 +102,6 @@ public class QuestDialog : BaseDialog
     {
         if (stageId != currentStage)
             return;
-
     }
 
     private void OnStageUnlocked(int stageId)
@@ -116,6 +121,27 @@ public class QuestDialog : BaseDialog
     {
 
     }
+
+     private void OnMissionClaimed(MissionConfigRecord record)
+    {
+        // When a mission is claimed update the chest progress UI for the current stage
+        int stageId = DataAPIController.instance.GetCurrentStage();
+        var stageProgress = DataAPIController.instance.GetStageProgress(stageId);
+        if (stageProgress == null)
+            return;
+
+        var chestConfig = ConfigFileManager.Instance.GetConfig<ChestConfig>();
+        var chest = chestConfig?.GetRecordByKeySearch(stageId)
+                    ?? chestConfig?.GetAllRecord().FirstOrDefault(c => c.Id == stageId);
+
+        int required = chest != null ? chest.RequiredProgress : 0;
+
+        if (chestItems.TryGetValue(stageId, out var chestItem))
+        {
+            chestItem.SetProgress(1, required);
+        }
+    }
+
     // =====================================================
     // STAGE TABS
     // =====================================================
@@ -176,18 +202,17 @@ public class QuestDialog : BaseDialog
     private void SetupChestTrack()
     {
         ClearChildren(chestTrackParent);
-
+        chestItems.Clear();
 
         var chestConfig = ConfigFileManager.Instance.GetConfig<ChestConfig>();
         var chests = chestConfig.GetAllRecord();
-        bool isMaxTierChestCreated = false;
+
         for (int i = 0; i < chests.Count; i++)
         {
-            isMaxTierChestCreated = i == chests.Count - 1;
-            CreateChestItem(chests[i], isMaxTierChestCreated);
+            bool isMaxTier = i == chests.Count - 1;
+            CreateChestItem(chests[i], isMaxTier);
         }
     }
-
     private void CreateChestItem(ChestRecord chest,bool isMaxtier = false)
     {
         Transform parent = isMaxtier
@@ -195,18 +220,35 @@ public class QuestDialog : BaseDialog
             : normalChestParent;
         var prefab = isMaxtier ? specialChestPrefab : chestItemPrefab;
         var obj = Instantiate(prefab, parent);
-        var item = obj.GetComponent<QuestChestItem>();
+        if(!obj.TryGetComponent<QuestChestItem>(out var item))
+        {
+            Debug.LogError("Chest item is null for chest id " + chest.Id);
+            item = obj.GetComponent<SpecialChestItem>();
+            return;
+        }
         var state = DataAPIController.instance.GetChestState(chest.Id);
-        obj.transform.localScale = isMaxtier ?  Vector3.one * 3f : Vector3.one;
+        obj.transform.localScale = isMaxtier ?  Vector3.one * 2f : Vector3.one;
 
+
+        Debug.Log($"Item {item == null}, id {chest.Id} is special {isMaxtier}");
         item.Setup(new QuestChestParam
         {
-            icon = ChestTierHelper.GetSpriteName(chest.Tier),
+            //icon = ChestTierHelper.GetSpriteName(chest.Tier),
+            chestId = chest.Id,
             isClaimed = state.isClaimed,
             isUnlocked = state.isUnlocked,
             progress = state.progress,
             rewards = chest.Rewards,
         });
+        chestItems[chest.Id] = item;
+    }
+    private void OnChestUnlocked(int chestId)
+    {
+        if (!chestItems.TryGetValue(chestId, out var item))
+            return;
+        Debug.Log("ON chest unlocked " + chestId);
+        item.SetUnlocked(true);   // UI update
+        item.PlayUnlockAnim();    // FX / anim
     }
 
 
@@ -386,6 +428,7 @@ public class QuestDialog : BaseDialog
     {
         int stage = DataAPIController.instance.GetCurrentStage();
         DataAPIController.instance.UnlockStage(stage + 1);
+        DataAPIController.instance.UnlockChest(stage);
         StageEvents.OnStageUnlocked?.Invoke(stage + 1);
     }
 
@@ -396,6 +439,8 @@ public class QuestDialog : BaseDialog
         {
             DataAPIController.instance.UnlockStage(i);
             StageEvents.OnStageUnlocked?.Invoke(i);
+            ChestEvent.OnChestUnlock?.Invoke(i);
+
         }
     }
 #endif
@@ -419,7 +464,7 @@ public class QuestDialog : BaseDialog
         currentOpenChest = item;
         outsideClickCatcher.gameObject.SetActive(true);
     }
-
+  
     private void OnOutsideClicked()
     {
         if (currentOpenChest != null)

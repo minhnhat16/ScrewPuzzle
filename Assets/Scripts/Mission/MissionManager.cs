@@ -310,10 +310,9 @@ public class MissionManager : SingletonMono<MissionManager>
 
         // ===== UNLOCK STAGE =====
         DataAPIController.instance.UnlockStage(nextStage);
+        DataAPIController.instance.CheckStageUnlocked(stageId);
         StageEvents.OnStageUnlocked?.Invoke(nextStage);
-
         Debug.Log($"<color=cyan>[Stage]</color> Unlocked stage {nextStage}");
-
         // ===== UNLOCK CHEST =====
         UnlockStageChest(stageId);
     }
@@ -339,7 +338,7 @@ public class MissionManager : SingletonMono<MissionManager>
             return;
 
         chestState.isUnlocked = true;
-        DataAPIController.instance.UpdateChestState(chestState);
+        DataAPIController.instance.UnlockChest(stageId );
 
         Debug.Log(
             $"<color=gold>[Chest]</color> Unlocked chest {chest.Id} for stage {stageId}"
@@ -351,6 +350,7 @@ public class MissionManager : SingletonMono<MissionManager>
             chestState.progress,
             chest.RequiredProgress
         );
+        
     }
     private void ReplaceCompletedMission(MissionConfigRecord completed)
     {

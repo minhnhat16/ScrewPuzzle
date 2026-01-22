@@ -13,11 +13,10 @@ public class BootLoader : MonoBehaviour
     [SerializeField] private GameObject uiRoot;
     [SerializeField] private UIRootControlScale uiRootControl;
 
-    IEnumerator Start()
+    void Start()
     {
         DontDestroyOnLoad(this.gameObject);
         ScreenSetup();
-        yield return new WaitForSeconds(0.1f);
         TaskManager.ins.AddTask(Task_LoadRemoteAsset);
         // ----- REGISTER BOOT TASKS -----
         TaskManager.ins.AddTask(Task_InitConfig);

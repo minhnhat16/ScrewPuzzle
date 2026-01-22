@@ -34,7 +34,7 @@ public class ResourceManager : SingletonMono<ResourceManager>
 
             foreach (var key in keysTask.Result)
             {
-                Debug.Log($"[ResourceManager] Found key '{key}' for label '{label}'");
+             //   Debug.Log($"[ResourceManager] Found key '{key}' for label '{label}'");
                 allKeys.Add(key); // thêm vào set để tránh trùng
             }
         }
@@ -291,7 +291,7 @@ public class ResourceManager : SingletonMono<ResourceManager>
         if (spriteDict.TryGetValue(layerName, out var s))
             return s;
 
-        Debug.LogError($"Sprite not found: {layerName}");
+        //Debug.LogError($"Sprite not found: {layerName}");
         return null;
     }
 }

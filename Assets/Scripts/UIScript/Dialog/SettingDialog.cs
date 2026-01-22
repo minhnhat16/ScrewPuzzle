@@ -20,6 +20,7 @@ public class SettingDialog : BaseDialog
     [SerializeField] private Button homeButton;
 
     [SerializeField] private GoldDisplay goldDisplay;
+    [SerializeField] private GoldDisplay ticketDisplay;
 
     [SerializeField] private Text titleLB;
     [SerializeField] RectTransform below;
@@ -53,9 +54,14 @@ public class SettingDialog : BaseDialog
     {
         SettingParam param = (SettingParam)dialogParam;
         long userGold = param.totalGold;
+        long userTicket = param.totalTicket;
         bool isMainScreen = param.isMainScreen;
         SetupButton(isMainScreen);
+
+
+        Debug.Log("Usser gold " + userGold);    
         goldDisplay.SetGoldToLable(userGold);
+        ticketDisplay.SetGoldToLable(userTicket);
         SetupPauseGame(isMainScreen);
     
         //isMainScreen = param.isMainScreen;

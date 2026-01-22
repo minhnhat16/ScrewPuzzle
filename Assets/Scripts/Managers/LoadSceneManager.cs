@@ -15,7 +15,7 @@ public class LoadSceneManager : MonoBehaviour
 
     private string sceneName;
 
-    List<Func<IEnumerator>> preTask =null;
+    //List<Func<IEnumerator>> preTask =null;
 
     public float TimeWait { get => timeWait; set => timeWait = value; }
 
@@ -33,7 +33,6 @@ public class LoadSceneManager : MonoBehaviour
         this.sceneName = sceneName;
         ViewManager.Instance.SwitchView(ViewIndex.LoadingView, null, () =>
         {
-            Debug.Log("Switch loading view ");
             StartCoroutine(RunFullLoadProcess());
         });
     }

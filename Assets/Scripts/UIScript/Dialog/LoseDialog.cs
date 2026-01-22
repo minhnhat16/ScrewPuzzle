@@ -1,4 +1,5 @@
-﻿using Managers;
+﻿using Ingame;
+using Managers;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -31,7 +32,8 @@ public class LoseDialog : BaseDialog
         DialogManager.ins.HideDialog(DialogIndex.LoseDialog, () =>
         {
             IngameController.ins.OnRevive();
-            IngameController.ins.onItemInvoke.Invoke(ItemType.Magnet);
+            var pos = ArrayScrew.Instance.GetHoldPos() ;
+            IngameController.ins.onItemInvoke.Invoke(ItemType.Magnet, pos);
         });
         //    }   
         //    DialogManager.ins.HideDialog(DialogIndex.LoseDialog);

@@ -1,5 +1,6 @@
 ﻿using DG.Tweening;
 using Spine.Unity;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,13 +9,19 @@ using UnityEngine.UI;
 
 public class GiftClaimDialog : BaseDialog
 {
+    private bool isClaimed;
     [Header("UI")]
     public Button openButton;
     public Button claimButton;
+    [SerializeField]
+    private Text helperTxt;
 
     public Transform itemContainer;      // chứa các item spawn ra
     public GameObject itemPrefab;        // prefab icon + text
-    public GameObject light;
+
+    [SerializeField]    
+    private RectTransform arrow;
+
     [Header("Animation")]
     public SkeletonGraphic spineBox;
     public string animOpen = "open";
@@ -29,11 +36,15 @@ public class GiftClaimDialog : BaseDialog
     private bool boxOpened = false;
     private bool revealing = false;
 
+
+    private UnityEvent<bool> onRewardNotClaim = new();
+
     private void OnEnable()
     {
         openButton.onClick.AddListener(OnClickOpen);
         claimButton.onClick.AddListener(OnClickClaim);
         claimButton.gameObject.SetActive(false);
+        onRewardNotClaim.AddListener(ShowHelper);
     }
 
     private void OnDisable()
@@ -58,6 +69,9 @@ public class GiftClaimDialog : BaseDialog
             lootQueue.Enqueue(r);
         boxOpened = false;
         claimButton.gameObject.SetActive(false);
+        isClaimed = false;
+        ShowHelper(false);
+
     }
     public void Setup(List<RewardItem> rewards, UnityAction onClaimCallback)
     {
@@ -76,6 +90,15 @@ public class GiftClaimDialog : BaseDialog
     {
         // vào dialog là idle trước khi open
         AnimationHelper.PlaySpineAnimation(spineBox, animIdle, true);
+
+        StartCoroutine(PlayerClaimCouroutine());
+    }
+
+    private IEnumerator PlayerClaimCouroutine()
+    {
+        if(boxOpened || isClaimed) yield break;
+        yield return new WaitForSeconds(5f);
+        ShowHelper(true);
     }
 
     //============================================================
@@ -85,14 +108,15 @@ public class GiftClaimDialog : BaseDialog
     {
         if (boxOpened) return;
         boxOpened = true;
-
-
+        isClaimed = true;
+        StopCoroutine(PlayerClaimCouroutine());
         // Play OPEN → OPEN_IDLE
         AnimationHelper.PlaySpineAnimation(spineBox, animOpen, false, () =>
         {
             AnimationHelper.PlaySpineAnimation(spineBox, animOpenIdle, true);
             StartCoroutine(RevealNextItem());
         });
+
     }
 
     //============================================================
@@ -189,6 +213,21 @@ public class GiftClaimDialog : BaseDialog
         onClaim?.Invoke();
         DialogManager.ins.HideDialog(DialogIndex.GiftClaimDialog);
     }
+
+
+    private void ShowHelper(bool arg0)
+    {
+        if(!arg0) return;
+        Debug.Log("Show helper");
+        helperTxt.gameObject.SetActive(arg0);
+        ArrowHelper(arg0);
+    }
+
+    private void ArrowHelper(bool active)
+    {
+        arrow.gameObject.SetActive(active);
+    }
+
 }
 
 

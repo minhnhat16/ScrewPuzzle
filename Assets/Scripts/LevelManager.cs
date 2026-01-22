@@ -112,6 +112,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         var arrayScrew = ArrayScrew.Instance;
         IngameController.ins.IsGameOver = false;
         boxManager.activeBoxCount = 2;
+        currentLevelID = levelID;
         arrayScrew.ShowArrayScrew();
         OnReset();
         arrayScrew.HoldAlignment();
@@ -127,7 +128,9 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     }
     public IEnumerator TaskLoadSpriteIngame()
     {
-        Task loadPSB = ResourceManager.ins.LoadPSB("level_screw/6.psb"); // ❗ KHÔNG .psb
+
+        Debug.Log("current level " + currentLevelID); 
+        Task loadPSB = ResourceManager.ins.LoadPSB($"level_screw/{currentLevelID}.psb"); // ❗ KHÔNG .psb
 
         while (!loadPSB.IsCompleted)
             yield return null;
@@ -229,6 +232,8 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         //Debug.Log("Step 6 complete");
 
         InitSpecial();
+
+        StartCoroutine(layerManager.ChangePartState());
         BoxQueue.ins.InitBoxToSlot();
         Debug.Log("Level loading complete.");
         callback?.Invoke();
@@ -350,10 +355,13 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
             string layerName = layerComponent.name; ;
             SetupPartSprite(partComponent, partData, layerName);
-            if (TryHexToColor(partData.colorString, out Color color))
-            {
-                partComponent.Renderer.color = color;
-            }
+            //if (TryHexToColor(partData.colorString, out Color color))
+            //{
+            //    color.a = 0.5f;
+
+            //    Debug.Log("Color in part " + color.a);
+            //    partComponent.Renderer.color = color;
+            //}
             SetupPartPhysics(partComponent, partData);
             layerComponent.Parts.Add(partComponent);
 
@@ -471,6 +479,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     }
     public void OnReset()
     {
+        IngameController.ins.CurrentStar = 0;   
         if (transform.childCount > 0)
         {
             LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
@@ -538,7 +547,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         layerManager.RemoveScrewsOnDict(listScrews);
         layerManager.RemovePart(bp.uniqueID);
         bp.gameObject.SetActive(false);
-
+        bp.OnStateChanged.Invoke(true,bp);
     }
 
 

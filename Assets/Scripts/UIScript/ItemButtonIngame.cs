@@ -19,6 +19,7 @@ namespace UIScript
 
         private void OnItemQuantityChanged(object arg0)
         {
+
         }
 
         public override void OnDisable()
@@ -31,8 +32,15 @@ namespace UIScript
         {
             IsItemAvailable();
         }
+        public void SetItemQuantity(int qty)
+        {
+            Quantity = qty;
+            TextLB.text = Quantity.ToString();
+            IsItemAvailable();
+        }
         public bool IsItemAvailable()
         {
+            TextLB.gameObject.SetActive(Quantity > 0);
             AddQuantityBtn.gameObject.SetActive(Quantity <= 0);
             return Quantity > 0;
         }

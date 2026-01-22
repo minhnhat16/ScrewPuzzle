@@ -13,8 +13,8 @@ namespace UIScript.UI.UI
 {
     public class ShopView : BaseView
     {
-        [SerializeField] private Text txt_gold;
-        [SerializeField] private Text txt_ticket;
+        [SerializeField] private GoldDisplay txt_gold;
+        [SerializeField] private GoldDisplay txt_ticket;
 
         [SerializeField] private RectTransform packRectTransform;
         [SerializeField] private RectTransform coinRectTransform;
@@ -85,13 +85,14 @@ namespace UIScript.UI.UI
         private void OnTicketChanged(object arg0)
         {
            long ticket = DataAPIController.instance.GetTicket();
-            txt_ticket.text = ticket.ToString();
+            txt_ticket.SetGoldToLable(ticket);
+
         }
 
         private void OnGoldChanged(object arg0)
         {
-            long ticket = DataAPIController.instance.GetGold();
-            txt_gold.text = ticket.ToString();
+            long gold = DataAPIController.instance.GetGold();
+            txt_gold.SetGoldToLable(gold);
         }
 
         public override void Setup(ViewParam viewParam)
@@ -99,9 +100,10 @@ namespace UIScript.UI.UI
             base.Setup(viewParam);
 
             long ticket = DataAPIController.instance.GetTicket();
-            txt_ticket.text = ticket.ToString();
+            txt_ticket.SetGoldToLable(ticket);
             long gold = DataAPIController.instance.GetGold();
-            txt_gold.text = gold.ToString();
+            txt_gold.SetGoldToLable(gold);
+
         }
     }
 

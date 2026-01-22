@@ -66,12 +66,15 @@ MonoBehaviour:
       amount: 1000
     - itemType: 0
       icon_name: Magnet
-      amount: 1
+      amount: 5
     - itemType: 1
       icon_name: Breaker
-      amount: 2
+      amount: 5
     - itemType: 2
       icon_name: Drill
-      amount: 3
+      amount: 5
+    - itemType: 5
+      icon_name: Drill
+      amount: 4
     requiredProgress: 3
     tier: 4

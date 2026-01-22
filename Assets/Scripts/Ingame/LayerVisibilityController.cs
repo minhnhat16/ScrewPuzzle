@@ -120,7 +120,7 @@ public class LayerVisibilityController : MonoBehaviour
         Debug.Log("Fading to gray: " + renderer.gameObject.name);
         Color startColor = renderer.material.color;
         Color targetColor = startColor;
-        targetColor.a = 0.4f;
+        targetColor.a = 0.6f;
         float t = 0f;
         while (t < duration)
         {

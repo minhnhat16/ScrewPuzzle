@@ -19,13 +19,12 @@ namespace UIScript.UI.UI
         [SerializeField] private Button specialButton;
         [SerializeField] private Button settingButton;
         [SerializeField] private Button adsRemover;
-        [SerializeField] private Text goldLB;
         [SerializeField] private LevelPanel levelPanel;
         [SerializeField] private long gold;
         [SerializeField] private Text level_txt;
 
-        [SerializeField] private Text txt_gold;
-        [SerializeField] private Text txt_ticket;
+        [SerializeField] private GoldDisplay goldDp;
+        [SerializeField] private GoldDisplay ticketDp;
         private void OnEnable()
         {
             /*playBtn.onClick.AddListener(OnPlayButton);
@@ -53,7 +52,7 @@ namespace UIScript.UI.UI
             rateButton.onClick.RemoveListener(RateButton);
             playBtn.onClick.RemoveListener(OnPlayButton);
             levelButton.onClick.RemoveAllListeners();
-
+            settingButton.onClick.RemoveAllListeners();
             adsRemover.onClick.RemoveAllListeners();
 
 
@@ -85,7 +84,8 @@ namespace UIScript.UI.UI
                 long userGold = gold = param.totalGold;
                 int ticket = param.ticket;
                 SetUpGold(userGold);
-                SetUpTicket(ticket);
+                goldDp.SetGoldToLable(userGold);
+                ticketDp.SetGoldToLable(ticket);
                 SetLevelPanelIs(true);
                 SetUpLevel(param.level);
             }
@@ -93,13 +93,9 @@ namespace UIScript.UI.UI
 
         }
 
-        private void SetUpTicket(int ticket)
-        {
-            txt_ticket.text = $"{ticket}";
-        }
         private void SetUpLevel(int level)
         {
-            level_txt.text = $"Level {++level}";
+            level_txt.text = $"Level {level}";
         }
 
         private void SetUpGold(long userGold)
@@ -182,8 +178,8 @@ namespace UIScript.UI.UI
         {
             SettingParam param = new();
             param.isMainScreen = viewIndex.Equals(ViewIndex.MainScreenView);
-            param.totalGold = GameManager.instance.GetPlayerGold();
-            //if (param.totalGold == null) Debug.Log("total gold is null");
+            param.totalGold = WalletManager.ins.Get(Currency.Gold);
+            param.totalTicket = WalletManager.ins.Get(Currency.Ticket);
             param.title = "SETTING";
             DialogManager.ins.ShowDialog(DialogIndex.SettingDialog, param);
         }
@@ -236,13 +232,13 @@ namespace UIScript.UI.UI
         private void OnTicketChanged(object arg0)
         {
             long ticket = DataAPIController.instance.GetTicket();
-            txt_ticket.text = GameUtils.FormatPrice(ticket);
+            ticketDp.SetGoldToLable(ticket);
         }
 
         private void OnGoldChanged(object arg0)
         {
             long ticket = DataAPIController.instance.GetGold();
-            txt_gold.text = GameUtils.FormatPrice(ticket);
+            ticketDp.SetGoldToLable(ticket);
         }
 
     }

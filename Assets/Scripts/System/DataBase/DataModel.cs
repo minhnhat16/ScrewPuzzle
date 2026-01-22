@@ -505,7 +505,7 @@ public class DataModel : MonoBehaviour
             userData.stageProgress[i] = new StageProgress
             {
                 stageId = i,
-                isUnlocked = i < 1,
+                isUnlocked = false,
                 isCompleted = false,
                 rewardClaimed = false,
                 chestProgress = 0
@@ -523,7 +523,7 @@ public class DataModel : MonoBehaviour
             userData.chestStates[chest.Id] = new ChestStageData
             {
                 chestId = chest.Id,
-                isUnlocked = chest.Id == 0,
+                isUnlocked = false,
                 isClaimed = false,
                 progress = 0
             };

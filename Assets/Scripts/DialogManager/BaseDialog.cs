@@ -6,7 +6,7 @@ public class BaseDialog : MonoBehaviour
 {
     public bool isInitDone = false;
     public DialogIndex dialogIndex;
-    [SerializeField] private BaseDialogAnimation baseDialogAnim;
+    [SerializeField] internal BaseDialogAnimation baseDialogAnim;
 
     public BaseDialogAnimation BaseDialogAnim { get => baseDialogAnim; set => baseDialogAnim = value; }
 

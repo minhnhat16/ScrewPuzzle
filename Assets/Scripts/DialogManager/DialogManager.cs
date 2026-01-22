@@ -88,19 +88,19 @@ public class DialogManager : SingletonMono<DialogManager>
     {
         if (result.success)
         {
-            DialogManager.ins.ShowDialog(DialogIndex.BuyConfirmDialog, new NotifyDialog()
-            {
-                header = "Completed",
-                message = result.message
-            });
+            //DialogManager.ins.ShowDialog(DialogIndex.NotifyDialog, new NotifyDialog()
+            //{
+            //    header = "Completed",
+            //    message = result.message
+            //});
         }
         else
         {
-            DialogManager.ins.ShowDialog(DialogIndex.BuyConfirmDialog, new NotifyDialog()
-            {
-                header = "Failed",
-                message = result.message
-            });
+            //DialogManager.ins.ShowDialog(DialogIndex.NotifyDialog, new NotifyDialog()
+            //{
+            //    header = "Failed",
+            //    message = result.message
+            //});
         }
     }
 }

@@ -75,13 +75,23 @@ namespace Ingame.Board
             visibilityController.ShowNextLayer();
         }
 
-        public IEnumerator ChangePartState()
+        public IEnumerator ChangePartState(float timeout = 0.5f)
         {
             foreach (var part in parts)
-            {
                 part.UpdateFallingState();
+
+            float timer = 0f;
+
+            while (timer < timeout)
+            {
+                if (parts.TrueForAll(p => !p.IsFalling))
+                    yield break;
+
+                timer += Time.deltaTime;
                 yield return null;
             }
+
+            Debug.LogWarning("⚠ Falling timeout – force stop");
         }
 
 

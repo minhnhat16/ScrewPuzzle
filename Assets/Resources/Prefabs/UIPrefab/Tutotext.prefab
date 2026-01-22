@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3812584848055070200}
   - component: {fileID: 3812584848055070202}
   - component: {fileID: 3812584848055070203}
-  - component: {fileID: 4201563700087781342}
   m_Layer: 5
   m_Name: Tutotext
   m_TagString: Untagged
@@ -32,7 +31,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -81,20 +79,3 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Tap to SELECT
---- !u!114 &4201563700087781342
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3812584848055070201}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0848bff101191904ead4bb831f7084db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BlurFactor: 1
-  m_Style: 4
-  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
-  m_EffectDistance: {x: 2, y: -2}
-  m_UseGraphicAlpha: 1

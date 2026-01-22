@@ -14,8 +14,9 @@ public class LoadingView : BaseView
     }
 
     public override void OnStartShowView()
-    {
+    {   
         base.OnStartShowView();
+        loadingProgress.value = 0;
     }
 
     private void Update()

@@ -63,12 +63,8 @@ namespace Ingame
 
         private void Start()
         {
-            // No coroutine needed — using FixedUpdate instead
         }
 
-        private void FixedUpdate()
-        {
-        }
 
         //-----------------------------
         // FALLING LOGIC (STABLE VERSION)
@@ -81,7 +77,7 @@ namespace Ingame
                 return;
             }
 
-            bool falling = body.linearVelocity.y <=0f;
+            bool falling = body.linearVelocity.y < -0.1f;
 
             if (falling != isFalling)
                 SetFalling(falling);
@@ -90,6 +86,8 @@ namespace Ingame
         private void SetFalling(bool newState)
         {
             isFalling = newState;
+
+            Debug.Log("set falling part " + isFalling + " part id " + uniqueID);
             OnStateChanged?.Invoke(newState, this);
 
             if (newState)
@@ -134,6 +132,7 @@ namespace Ingame
 
             int layer = gameObject.layer;
             SetIgnoreColliderLayer(false, layer, layer);
+            OnStateChanged.Invoke(true,this);
         }
 
         //-----------------------------
@@ -164,7 +163,7 @@ namespace Ingame
         {
             var sprite = activeSprite.sprite;
 
-            if (activeSprite == null || col == null || sprite== null)
+            if (activeSprite == null || col == null || sprite == null)
                 return;
 
             int shapeCount = sprite.GetPhysicsShapeCount();
@@ -223,8 +222,6 @@ namespace Ingame
 
         void OnCollisionStay2D(Collision2D col)
         {
-            //Debug.Log("Stay: vẫn đang chạm");
-
             StartCoroutine(ApplyForceAfter(2f));
         }
 
@@ -232,7 +229,7 @@ namespace Ingame
         {
             //if (!isFalling) yield break;
             yield return new WaitForSeconds(v);
-            body.AddForceAtPosition(Vector2.up,transform.position);
+            body.AddForceAtPosition(Vector2.up, transform.position);
 
         }
     }

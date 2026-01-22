@@ -62,10 +62,10 @@ namespace Ingame
             var hold = holdScrews.FirstOrDefault(hold => !hold.gameObject.activeSelf);
             if (hold == null) return;
             hold.gameObject.SetActive(true);
-
+            totalWidth += 0.5f;
             HoldAlignment(() =>
-            {
-            });
+{
+});
         }
         public void ShowArrayScrew()
         {
@@ -179,7 +179,7 @@ namespace Ingame
             }
         }
 
-       
+
         private void CheckIfHoldScrewsFull()
         {
 
@@ -214,6 +214,7 @@ namespace Ingame
             var emptyHoldScrew = FindEmptyHoldScrew();
             if (emptyHoldScrew != null)
             {
+
                 AddScrewToHoldScrew(screw, emptyHoldScrew);
             }
             else
@@ -233,12 +234,12 @@ namespace Ingame
         {
             var screwMng = LevelManager.ins.ScrewManager;
 
-            
-            var suitableBox = BoxQueue.ins.FindSuitableBox(screw,false);
+
+            var suitableBox = BoxQueue.ins.FindSuitableBox(screw, false);
             bool canAdd = false;
 
 
-            Debug.Log("suitableBox: " + suitableBox);   
+            Debug.Log("suitableBox: " + suitableBox?.Color);
             if (suitableBox != null)
             {
                 screw.SetSortingOrderAndLayer(4, "Box");
@@ -263,7 +264,7 @@ namespace Ingame
             {
                 // Kiểm tra nếu tất cả holdScrew đã đầy
 
-                Debug.Log("Added screw to holdScrew");  
+                Debug.Log("Added screw to holdScrew");
                 CheckIfHoldScrewsFull();
             });
 
@@ -272,9 +273,6 @@ namespace Ingame
             screwMng.RemoveScrew(screw);
 
         }
-
-
-       
 
         public void ClearAllScrewsOnArray()
         {
@@ -317,6 +315,7 @@ namespace Ingame
 
         public void OnReset()
         {
+            totalWidth = GameConstants.ArrayWidth;
             holdRoutine = null;
             ShowArrayActive(5);
             ClearAllScrewsOnArray();
@@ -344,6 +343,14 @@ namespace Ingame
                 yield return null;
             }
             screws.Clear();
+        }
+
+        internal Vector3 GetHoldPos()
+        {
+            var hold = holdScrews.Last(h => h.gameObject.activeSelf);
+            Vector3 target = hold.transform.position;
+            target.y += 0.5f;
+            return target;
         }
     }
 }

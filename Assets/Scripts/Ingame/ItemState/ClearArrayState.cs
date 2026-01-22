@@ -1,6 +1,7 @@
 using Ingame;
 using Managers;
 using System;
+using UnityEngine;
 
 public class ClearArrayState : FSMState<ItemController>
 {
@@ -10,14 +11,19 @@ public class ClearArrayState : FSMState<ItemController>
         Setup(itemController);
     }
 
-    internal void Use(Action callback = null)
+    internal void Use(Vector3 targetPos, Action callback = null)
     {
-        MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
+        sys.IsHandlingHammer = false;
+        sys.PlaySkeAnimOnTarget(ItemType.Magnet, new UnityEngine.Vector3(0, -5, 0), targetPos, () =>
+        {
+            MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
 
-        ArrayScrew.Instance.StartClearHiding();
-        callback?.Invoke();
-        sys.WaitFor(1, () => {
-            sys.itemPerformed?.Invoke(true);
+            ArrayScrew.Instance.StartClearHiding();
+            sys.WaitFor(1, () =>
+            {
+                sys.itemPerformed?.Invoke(true);
+            });
+            callback?.Invoke();
         });
     }
 }

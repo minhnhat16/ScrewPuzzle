@@ -40,7 +40,7 @@ namespace Ingame
         {
             bool poiterOver = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
             bool isHandlingItem = ItemController.ins.IsHandlingHammer;
-            Debug.Log("is pointer over UI: " + poiterOver + ", handling item " + isHandlingItem);
+            //Debug.Log("is pointer over UI: " + poiterOver + ", handling item " + isHandlingItem);
             if (poiterOver)
                 return;
 
@@ -51,12 +51,15 @@ namespace Ingame
                 if (part != null)
                 {
                     ItemController.ins.IsHandlingHammer = false;
-                    ItemController.ins.RemovePartState.Peform(part);
+                    var pos = mainCam.ScreenToWorldPoint(screenPos) + Vector3.right * 1.4f;
+                    ItemController.ins.RemovePartState.Peform(part, pos);
                 }
                 return;
             }
 
-            var screw = PickAtScreenPos<Screw.Screw>(screenPos, "Player");
+            var screw = PickAtScreenPosScrew<Screw.Screw>(screenPos, "Player");
+
+            Debug.Log("Clicked screw " + screw);
             if (screw != null)
             {
                 _screw.Add(screw);

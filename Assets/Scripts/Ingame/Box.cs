@@ -29,6 +29,7 @@ namespace Ingame
         [SerializeField] private Vector3 position;
         [SerializeField] private Vector3 scale;
         [SerializeField] private Collider2D _collider;
+        [SerializeField] private ColorEnum color;
 
         [SerializeField] private bool isBoxFull;
         [SerializeField] private bool isAddingScrew = false;
@@ -58,7 +59,6 @@ namespace Ingame
         public UnityEvent<int, List<Vector3>> spawnStartEvent = new();
         public List<HoldScrew> holdScrews; // Mảng các lỗ Screw
         public UnityEvent<bool> onScrewBoxFull;
-        [SerializeField] private ColorEnum color;
         public BoxSlot boxSlot;
         private bool isLocked;
 
@@ -366,6 +366,7 @@ namespace Ingame
 
         private void AddScrewListImmediate(List<Screw.Screw> screws, bool isTele)
         {
+            if (isMoving && IsLocked) return;
             var screwManager = LevelManager.ins.ScrewManager;
 
             foreach (var screw in screws)
@@ -373,7 +374,6 @@ namespace Ingame
                 bool canAdd;
                 screw.gameObject.SetActive(true);
 
-                Debug.Log("screw game obejct " + screw.isActiveAndEnabled);
                 AddScrewToSlot(screw, out canAdd, isTele);
             }
 

@@ -7,7 +7,7 @@ public class BaseDialogAnimation : MonoBehaviour
 {
     private CanvasGroup canvasGroup;
 
-    private void Awake()
+    public virtual void Awake()
     {
 
         /*canvasGroup = gameObject.GetComponent<CanvasGroup>();
