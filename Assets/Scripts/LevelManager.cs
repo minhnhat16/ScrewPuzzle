@@ -325,8 +325,10 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
         layerManager.Layers = listBaseLayer;
         layerManager.CoverDictToList();
-        layerManager.visibilityController.RePreviewMax = listBaseLayer.Count;
-        layerManager.visibilityController.layerQueue = queue;
+        LayerVisibilityController vs = layerManager.visibilityController;
+        vs.PreViewMin = 0;
+        vs.RePreviewMax = listBaseLayer.Count - 3;
+        vs.layerQueue = queue;
         Debug.Log("Applying layer visibility settings..." + listBaseLayer.Count);
 
     }

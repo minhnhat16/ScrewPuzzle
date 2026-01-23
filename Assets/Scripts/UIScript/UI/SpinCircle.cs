@@ -94,7 +94,6 @@ public class SpinCircle : MonoBehaviour
             {
                 if (!hasPlayedSound)
                 {
-                    SoundManager.instance.PlaySFX(SoundManager.SFX.SpinSFX);
                     hasPlayedSound = true;
                 }
             }

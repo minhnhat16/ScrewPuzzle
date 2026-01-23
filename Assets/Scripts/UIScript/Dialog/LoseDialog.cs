@@ -19,6 +19,12 @@ public class LoseDialog : BaseDialog
         btn_retry.onClick.AddListener(OnRetryButtonClicked);
         btn_Watch.onClick.AddListener(OnWatchButtonClicked);
     }
+    public override void Setup(DialogParam dialogParam)
+    {
+        base.Setup(dialogParam);
+        IngameController.ins.PauseGame();
+        SoundHelper.PlaySFX(SoundManager.SFX.Lose);
+    }
 
     private void OnWatchButtonClicked()
     {

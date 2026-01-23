@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,54 +29,116 @@ public class SoundManager : MonoBehaviour
     public enum SFX
     {
         NULL,
-        CardSFX,
-        DealCardSFX_1,
-        DealCardSFX_2,
-        DealCardSFX_3,
-        DealCardSFX_4,
-        CoinSFX,
-        UIClickSFX,
-        UIClickSFX_2,
-        UIClickSFX_3,
-        UIPopSFX,
-        SpinSFX,
-        SPLASHCARD,
-        UpgradeSFX,
-        UnlockSlotSFX,
-        NewCardPevealeSFX,
-        PickCardSFX,
-        MoveWrong,
+
+        ScrewClicked,
+        ScrewFaild,
+
+        BoxClose,
+        BuyConfirm,
+        BuyCancel,
+        ButtonClick,
+
+
+        Win,
+        Lose,
+        GiftBoxOpen,
+        GiftItemAppear,
+
+        AddBox,
+        Drill,
+        Breaker,
+        Magnet,
+
+        Button,
+        Close,
+        Slide,
+
+
     }
 
     [SerializeField] public SoundFactory soundFactory;
 
+    // cooldown values (from SoundFactory.Sound_SFX.timer)
     private Dictionary<SFX, float> sfxTimerDictionary;
 
+    // time-to-despawn values (from SoundFactory.Sound_SFX.timeToDespawn)
     public Dictionary<SFX, float> sfxTimerDespawnDictionary;
+
+    // last time a given SFX was played (tracked at runtime)
+    private Dictionary<SFX, float> sfxLastPlayed;
 
     public MusicGameObject musicObject;
 
     public bool musicSetting;
     public bool sfxSetting;
 
-    public void Init()
+    public void Init(Action callback)
     {
+        // Load factory (guard against missing config)
         soundFactory = ConfigFileManager.Instance.GetConfig<SoundFactory>();
+        if (soundFactory == null)
+        {
+            Debug.LogError("[SoundManager] SoundFactory config not found!");
+            // still call callback so boot won't hang
+            callback?.Invoke();
+            return;
+        }
+
+        // Prepare dictionaries
         sfxTimerDictionary = new Dictionary<SFX, float>();
         sfxTimerDespawnDictionary = new Dictionary<SFX, float>();
+        sfxLastPlayed = new Dictionary<SFX, float>();
 
+        // Fill dictionaries from ScriptableObject safely
         for (int i = 0; i < soundFactory.sfxList.Count; i++)
         {
-            sfxTimerDictionary.Add(soundFactory.sfxList[i].sfx, soundFactory.sfxList[i].timer);
+            var entry = soundFactory.sfxList[i];
+            if (entry == null) continue;
+
+            // store cooldown (timer) and despawn values
+            sfxTimerDictionary[entry.sfx] = entry.timer;
+            sfxTimerDespawnDictionary[entry.sfx] = entry.timeToDespawn;
+
+            // initialize last-played time so the SFX is immediately playable
+            sfxLastPlayed[entry.sfx] = -Mathf.Infinity;
         }
-        for (int i = 0; i < soundFactory.sfxList.Count; i++)
+
+        // Load saved user settings (0 = false, 1 = true). default to enabled.
+        musicSetting = PlayerPrefs.GetInt("musicSetting", 1) == 1;
+        sfxSetting = PlayerPrefs.GetInt("sfxSetting", 1) == 1;
+
+        // Ensure a MusicGameObject exists with an AudioSource
+        if (musicObject == null)
         {
-            sfxTimerDespawnDictionary.Add(soundFactory.sfxList[i].sfx, soundFactory.sfxList[i].timeToDespawn);
+            musicObject = FindAnyObjectByType<MusicGameObject>();
+            if (musicObject == null)
+            {
+                var go = new GameObject("MusicGameObject");
+                musicObject = go.AddComponent<MusicGameObject>();
+                var src = go.AddComponent<AudioSource>();
+                src.playOnAwake = false;
+                src.loop = true;
+            }
         }
-        musicSetting = true;
-        sfxSetting = true;
+        else
+        {
+            // ensure AudioSource exists
+            var srcCheck = musicObject.GetComponent<AudioSource>();
+            if (srcCheck == null)
+            {
+                var src = musicObject.gameObject.AddComponent<AudioSource>();
+                src.playOnAwake = false;
+                src.loop = true;
+            }
+        }
+
+        // Apply initial volumes/mute according to settings
+        SettingMusicVolume(musicSetting);
+        SettingSFXVolume(sfxSetting);
+
+        // Invoke callback to signal completion
+        callback?.Invoke();
     }
-
     public void VolumeSetting(bool musicSetting, bool sfxSetting)
     {
         this.musicSetting = musicSetting;
@@ -84,244 +147,37 @@ public class SoundManager : MonoBehaviour
         SettingSFXVolume(this.sfxSetting);
     }
 
+    // Optimized, data-driven cooldown check.
+    // Uses sfxTimerDictionary as cooldown (seconds) and sfxLastPlayed to track last play time.
     private bool CanPlaySFX(SFX sfx)
     {
-        //Debug.Log("Can Play SFX");
-        switch (sfx)
+        if (!sfxSetting)
+            return false;
+
+        // get configured cooldown (default 0 = no throttle)
+        float cooldown = 0f;
+        sfxTimerDictionary?.TryGetValue(sfx, out cooldown);
+
+        // get last played timestamp (default -inf => immediately playable)
+        float lastPlayed = -Mathf.Infinity;
+        if (sfxLastPlayed != null && sfxLastPlayed.TryGetValue(sfx, out var lp))
+            lastPlayed = lp;
+
+        // if no cooldown configured or cooldown <= 0 → always allow and record play time
+        if (cooldown <= 0f)
         {
-            case SFX.CardSFX:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.UIClickSFX_3:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.DealCardSFX_1:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.DealCardSFX_2:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.DealCardSFX_3:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.DealCardSFX_4:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.UpgradeSFX:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.UnlockSlotSFX:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.SpinSFX:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            case SFX.MoveWrong:
-                if (sfxTimerDictionary.ContainsKey(sfx))
-                {
-                    float lastTimePlayed = sfxTimerDictionary[sfx];
-                    float mainBackgroundMaxTimer = -1.0f;
-
-                    if (lastTimePlayed + mainBackgroundMaxTimer < Time.time)
-                    {
-                        sfxTimerDictionary[sfx] = Time.time;
-                        //Debug.Log("Can Play SFX");
-
-                        return true;
-                    }
-                    else
-                    {
-                        //Debug.Log("Cant Play SFX");
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            default:
-                return true;
+            if (sfxLastPlayed != null) sfxLastPlayed[sfx] = Time.time;
+            return true;
         }
+
+        // allow only if enough time has passed since last play
+        if (Time.time - lastPlayed >= cooldown)
+        {
+            if (sfxLastPlayed != null) sfxLastPlayed[sfx] = Time.time;
+            return true;
+        }
+
+        return false;
     }
 
     public void PlayMusic(Music music)
@@ -339,14 +195,14 @@ public class SoundManager : MonoBehaviour
         if (CanPlaySFX(sfx))
         {
             SFXGameObj soundGameObj = SoundGameObjPool.instance.pool.SpawnNonGravity();
-            soundGameObj.AutoDespawnSFX(sfx);   
+            soundGameObj.AutoDespawnSFX(sfx);
             soundGameObj.sfx = sfx;
             AudioSource audioSource = soundGameObj.gameObject.GetComponent<AudioSource>();
             SettingSFXVolume(sfxSetting);
             audioSource.PlayOneShot(GetSFXAudioClip(sfx));
         }
     }
-    public void PlaySFXWithVolume(SFX sfx,float value)
+    public void PlaySFXWithVolume(SFX sfx, float value)
     {
         if (CanPlaySFX(sfx))
         {
@@ -354,7 +210,7 @@ public class SoundManager : MonoBehaviour
             soundGameObj.sfx = sfx;
             AudioSource audioSource = soundGameObj.gameObject.GetComponent<AudioSource>();
             //Debug.Log(soundGameObj.name.ToString());
-            SettingSFXVolumeWithValue(sfxSetting,value);
+            SettingSFXVolumeWithValue(sfxSetting, value);
             audioSource.PlayOneShot(GetSFXAudioClip(sfx));
             //Debug.Log("SFX " + sfx + " played!");
         }
@@ -387,7 +243,7 @@ public class SoundManager : MonoBehaviour
             audioSource.volume = 1f;
         }
         else
-        {   
+        {
             //Debug.Log("mute music");
             audioSource.volume = 0f;
         }
@@ -412,7 +268,7 @@ public class SoundManager : MonoBehaviour
             }
         }
     }
-    public void SettingSFXVolumeWithValue(bool valid,float value)
+    public void SettingSFXVolumeWithValue(bool valid, float value)
     {
         foreach (SFXGameObj obj in SoundGameObjPool.instance.pool.list)
         {

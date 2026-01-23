@@ -54,7 +54,7 @@ namespace UIScript.Dialog
         {
 
             base.OnStartShowDialog();
-
+            SoundHelper.PlaySFX(SoundManager.SFX.Win);
             Debug.Log("Win Dialog On Start Show Dialog");
             SetRewardProgressCount(Random.Range(0f, 1f), () =>
             {

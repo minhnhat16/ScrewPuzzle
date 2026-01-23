@@ -136,14 +136,14 @@ public class LableChooseDialog : BaseDialog
     }
     public void SettingDialogButton()
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+        //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         SettingParam param = new();
         param.isMainScreen = true;
         DialogManager.ins.ShowDialog(DialogIndex.SettingDialog, param, null);
     }
     public void DailyDialogButton()
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+        //SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
         DialogManager.ins.ShowDialog(DialogIndex.DailyRewardDialog, null);
 
     }

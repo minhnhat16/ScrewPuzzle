@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using SFX = SoundManager.SFX;
 namespace Ingame
 {
     public class ArrayScrew : MonoBehaviour, IResetable
@@ -214,7 +215,7 @@ namespace Ingame
             var emptyHoldScrew = FindEmptyHoldScrew();
             if (emptyHoldScrew != null)
             {
-
+                SoundHelper.PlaySFX(SFX.ScrewClicked);
                 AddScrewToHoldScrew(screw, emptyHoldScrew);
             }
             else

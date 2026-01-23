@@ -25,8 +25,7 @@ public class BootLoader : MonoBehaviour
         TaskManager.ins.AddTask(Task_InitMission);
         TaskManager.ins.AddTask(Task_SetupUI);
         TaskManager.ins.AddTask(Task_FinishBoot);
-
-
+        TaskManager.ins.AddTask(Task_InitSound);
         LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
         {
             Debug.Log("task run done");
@@ -42,13 +41,21 @@ public class BootLoader : MonoBehaviour
             ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
             {
                 Debug.Log("task run done switch view");
-
+                SoundManager.instance.PlayMusic(SoundManager.Music.MainScreenMusic);
                 DayTimeController.instance.CheckNewDay();
             });
         });
         // ----- RUN TASKS -----
      
       
+    }
+
+    private IEnumerator Task_InitSound()
+    {
+        Debug.Log("[BOOT] InitSound...");
+        bool done = false;
+        SoundManager.instance.Init(() => done = true);
+        yield return new WaitUntil(() => done);
     }
 
     private IEnumerator Task_InitMission()

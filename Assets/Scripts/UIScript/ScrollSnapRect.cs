@@ -230,13 +230,11 @@ public class ScrollSnapRect : MonoBehaviour, IBeginDragHandler, IEndDragHandler,
 
     //------------------------------------------------------------------------
     private void NextScreen() {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
         LerpToPage(CurrentPage + 1);
     }
 
     //------------------------------------------------------------------------
     private void PreviousScreen() {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
         LerpToPage(CurrentPage - 1);
     }
 

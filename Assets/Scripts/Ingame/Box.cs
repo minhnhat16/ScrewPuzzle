@@ -15,6 +15,7 @@ using UnityEditor.Analytics;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
+using static SoundManager;
 using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame
@@ -170,7 +171,7 @@ namespace Ingame
             }
             else
             {
-                renderUpper.transform.localScale = Vector2.one * 3.5f;
+                renderUpper.transform.localScale = Vector2.one;
 
             }
 
@@ -203,6 +204,7 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull) =>
             {
+               SoundHelper.PlaySFX(SFX.BoxClose);
                 callback?.Invoke(boxFull);
             }, time);
         }
@@ -222,6 +224,7 @@ namespace Ingame
         {
             Sequence mySequence = DOTween.Sequence();
             renderUpper.gameObject.SetActive(true);
+            //renderUpper.enabled = true;
             var color = ColorEnumExtensions.ToColor(this.color);
             color.a = 0.4f;
             renderUpper.color = color;

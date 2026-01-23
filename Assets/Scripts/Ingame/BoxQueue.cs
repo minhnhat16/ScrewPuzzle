@@ -141,7 +141,7 @@ namespace Ingame
             boxesStack.Clear();
         }
 
-       
+
         private Dictionary<ColorEnum, int> GetDesignWeight()
         {
             return configRecords
@@ -204,7 +204,7 @@ namespace Ingame
             }
 
 
-            int totalStar = result.Sum(r => r.NumberOfScrewHoles);  
+            int totalStar = result.Sum(r => r.NumberOfScrewHoles);
             IngameController.ins.TotalStarInLevel = totalStar;
             configRecords = result;
             ConfigStack = new Stack<BoxConfigRecord>(configRecords);
@@ -594,20 +594,7 @@ namespace Ingame
         public void ReturnBoxToPool(Box box)
         {
             if (box == null) return;
-
-            int totalHold = box.holdScrews.Count;
-            switch (totalHold)
-            {
-                case 1:
-                    OneHoldBoxPool.Instance.pool.ReturnToPool(box as BoxOneHold);
-                    break;
-                case 2:
-                    TwoHoldBoxPool.Instance.pool.ReturnToPool(box as BoxTwoHold);
-                    break;
-                case 3:
-                    ThreeHoldBoxPool.Instance.pool.ReturnToPool(box as BoxThreeHold);
-                    break;
-            }
+            ThreeHoldBoxPool.Instance.pool.ReturnToPool(box as BoxThreeHold);
         }
 
         #endregion
@@ -724,7 +711,7 @@ namespace Ingame
                 box.Color == screw.Color &&
                 !box.isMoving &&
                 !box.IsBoxFull &&
-                box.isActiveAndEnabled && 
+                box.isActiveAndEnabled &&
                 !box.IsLocked;
 
             // -------------------------------
@@ -854,7 +841,7 @@ namespace Ingame
         public void UnlockedBox()
         {
             var slot = boxSlots.FirstOrDefault(s => s.screwBox != null && s.screwBox.IsLocked);
-            Debug.Log("unlock box");
+            Debug.Log("unlock box ");
 
             if (slot == null)
             {
@@ -889,7 +876,7 @@ namespace Ingame
                 if (newBox != null)
                     StartCoroutine(MoveWithFade(newBox, slot, fpos, 1f, 0.25f));
 
-                MissionManager.ins.ProcessBoxClosed(ColorEnum.Clear,1) ;
+                MissionManager.ins.ProcessBoxClosed(ColorEnum.Clear, 1);
             });
         }
 
@@ -958,8 +945,6 @@ namespace Ingame
         {
             activeBoxCount = 2;
             ThreeHoldBoxPool.Instance.ReturnAll();
-            TwoHoldBoxPool.Instance.pool.DeSpawnAll();
-            OneHoldBoxPool.Instance.pool.DeSpawnAll();
             screwBoxes.Clear();
             boxesStack.Clear();
             hidingScrews?.Clear();
@@ -979,7 +964,7 @@ namespace Ingame
 
         #region Mission Updates
 
-     
+
 
         private void OnScrewCollected(ColorEnum color, int amount)
         {

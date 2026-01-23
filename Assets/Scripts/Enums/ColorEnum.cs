@@ -65,6 +65,7 @@ namespace Enums
                 ColorEnum.Orange => new Color(1f, 0.5f, 0f, 1f),// RGB for orange
                 ColorEnum.Pink => new Color(1f, 0.4f, 0.7f, 1f),// RGB for pink
                 ColorEnum.Purple => new Color(0.5f, 0f, 0.5f, 1f),// RGB for purple
+                ColorEnum.Brown => new Color(0.60f, 0.30f, 0.10f, 1f), // Brown
                 ColorEnum.Cyan => Color.cyan,
                 _ => Color.clear,
             };

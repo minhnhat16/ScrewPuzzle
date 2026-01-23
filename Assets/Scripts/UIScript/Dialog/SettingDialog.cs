@@ -92,7 +92,7 @@ public class SettingDialog : BaseDialog
     }
     public void PlayButton()
     {
-        SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
+        SoundHelper.PlaySFX(SoundManager.SFX.ButtonClick);
         DialogManager.ins.HideDialog(dialogIndex, () =>
         {
 
