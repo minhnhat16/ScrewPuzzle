@@ -37,5 +37,7 @@ public class DataPath
     public static string TIMESAVEMETA = "timeMeta";
     public static string LASTRESETTIME = TIMESAVEMETA+ "/lastResetUtcTicks";
     public static string CURPUZZLEID = "currentPuzzleID";   
+    public static string SOUNDFX = "music";
+    public static string MUSICFX = "sfx";
 
 }

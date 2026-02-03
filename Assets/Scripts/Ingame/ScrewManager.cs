@@ -123,7 +123,7 @@ namespace Ingame
             // Nếu không còn hinge nào thuộc về part này → gọi HandleNoHingesLeft()
             bool hasAnyHingeConnected = HasAnyHingeConnected(part);
             part.Body.gravityScale = 1.0f;
-            Debug.Log("Has any hinge connect " + hasAnyHingeConnected + " partId" + part.uniqueID);
+            //Debug.Log("Has any hinge connect " + hasAnyHingeConnected + " partId" + part.uniqueID);
             if (!hasAnyHingeConnected)
                 part.HandleNoHingesLeft();
         }

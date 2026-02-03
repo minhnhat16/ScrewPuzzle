@@ -1,11 +1,6 @@
 using DG.Tweening;
 using Ingame.Board;
-using NUnit.Framework;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Ingame
@@ -27,9 +22,28 @@ namespace Ingame
             }
         }
 
+        /// <summary>
+        /// Activate/deactivate screws using a BaseLayer reference (keeps index mapping stable).
+        /// </summary>
+        public static void ActiveObjectInLayer(bool isOn, BaseLayer layer, LayerManager lm)
+        {
+            if (lm == null || layer == null) return;
+            if (lm.Layers == null) return;
+
+            int index = lm.Layers.IndexOf(layer);
+            if (index < 0)
+            {
+                Debug.LogWarning($"[LayerUtils] ActiveObjectInLayer: layer not found in LayerManager.Layers: {layer.name}");
+                return;
+            }
+
+            ActiveObjectInLayer(isOn, index, lm);
+        }
+
         public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm)
         {
             if (lm == null) return;
+            if (lm.Layers == null) return;
             if (layer < 0 || layer >= lm.Layers.Count) return;
 
             if (!lm.screwDict.TryGetValue(layer, out var screws) || screws == null || screws.Count == 0)
@@ -37,8 +51,39 @@ namespace Ingame
 
             foreach (var screw in screws)
             {
-                if (screw != null)
-                    screw.gameObject.SetActive(isOn);
+                if (screw == null) continue;
+
+                // If we're turning objects ON, do not activate screws whose connected part is inactive.
+                if (isOn)
+                {
+                    var hinge = screw.HingeController;
+                    if (hinge != null)
+                    {
+                        var body = hinge.BodyConnect;
+                        if (body != null && !body.gameObject.activeSelf)
+                        {
+                            Debug.Log($"[LayerUtils] Skipping screw activation because connected part is inactive: {body.name}");
+                            screw.gameObject.SetActive(false);
+                            // Part is inactive → skip enabling this screw
+                            continue;
+                        }
+
+                        // Part is active (or no body) → enable screw
+                        screw.gameObject.SetActive(true);
+                        continue;
+                    }
+
+                    // No hinge controller → enable screw
+                    screw.gameObject.SetActive(true);
+                }
+                else
+                {
+                    // Always allow disabling screws regardless of part state
+                    // Guard against null HingeController when logging
+                    var bodyName = screw.HingeController?.BodyConnect?.gameObject?.name ?? "unknown";
+                    Debug.Log($"[LayerUtils] Deactivating screw (connected body: {bodyName})");
+                    screw.gameObject.SetActive(false);
+                }
             }
         }
 

@@ -367,7 +367,8 @@ public class DataModel : MonoBehaviour
             name = ZenSDK.instance.GetConfigString("userName", "player"),
             isNewPlayer = true
         };
-
+        userData.music = true;
+        userData.sfx = true;
         // ===============================
         // INVENTORY (ITEMS)
         // ===============================

@@ -24,6 +24,10 @@ namespace Managers
         [SerializeField] private int totalStarInLevel;
         internal int requireCount = 3;
 
+
+        //[SerializeField] private int lastPlayedIndex = -1;
+        [SerializeField] private Coroutine playRoutine;
+
         [SerializeField] private float exp_Current;
         [SerializeField] private Player player;
         [SerializeField] private BoxQueue boxManager;
@@ -68,6 +72,8 @@ namespace Managers
             {
                 inputCoroutine = StartCoroutine(ListenForResetInput());
             }
+            StarMoveCounter.OnAllStarsFinished += OnAllStarsDone;
+
         }
 
 
@@ -81,8 +87,13 @@ namespace Managers
             }
 
             onItemInvoke.RemoveAllListeners();
+            StarMoveCounter.OnAllStarsFinished -= OnAllStarsDone;
+
         }
 
+    
+
+       
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
@@ -187,6 +198,12 @@ namespace Managers
             callback?.Invoke();
         }
 
+        private void OnAllStarsDone()
+        {
+
+            Debug.Log("All stars done");
+            SoundHelper.PlaySFX(SoundManager.SFX.Star_3);
+        }
         public void LoadIngameAsset(Action callback)
         {
             StartCoroutine(LoadIngameAssetCoroutine(callback));
@@ -340,7 +357,7 @@ namespace Managers
         {
 
             LevelManager.ins.OnReset();
-            // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX_2);
+          SoundManager.instance.PlaySFX(SoundManager.SFX.UI_Normal);
             DialogManager.ins.HideDialog(dialogIndex, () =>
             {
                 Debug.Log($"HideDialog {dialogIndex} ");
@@ -366,7 +383,7 @@ namespace Managers
             // minuss 1 life heart
             IsGameOver = true;
             CurrentStar = 0;
-            int currentLevel = LevelManager.ins.currentLevelID - 1;
+            int currentLevel = LevelManager.ins.currentLevelID;
             Player.instance.IsInputLocked = true;
             LevelManager.ins.OnReset();
             ArrayScrew.Instance.ClearAllScrewsOnArray();

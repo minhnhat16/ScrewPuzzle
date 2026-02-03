@@ -95,6 +95,10 @@ PrefabInstance:
       propertyPath: m_UpdateMode
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 2227564997949451605, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
+      propertyPath: m_CullingMode
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2227564997949565697, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
       propertyPath: m_IsOn
       value: 1
@@ -102,7 +106,7 @@ PrefabInstance:
     - target: {fileID: 2227564997949565697, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
       propertyPath: graphic
       value: 
-      objectReference: {fileID: 3045731935069525604}
+      objectReference: {fileID: 3045731935069419910}
     - target: {fileID: 2227564997949565697, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
       propertyPath: m_Interactable
       value: 1
@@ -167,6 +171,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 6308264801367439915, guid: 2bf9e60d18b517044be065dbd3792adc, type: 3}
+    - target: {fileID: 2227564997949573975, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2227564997949596853, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -174,6 +182,10 @@ PrefabInstance:
     - target: {fileID: 2227564997949596853, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
       propertyPath: m_Color.a
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2227564997949596853, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2227564997953257395, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
       propertyPath: m_SizeDelta.x
@@ -295,7 +307,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2227564997949451605, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
     m_RemovedGameObjects:
     - {fileID: 2227564997939947531, guid: 444684115c4054b5fa990aad1a51ada2, type: 3}
     m_AddedGameObjects:

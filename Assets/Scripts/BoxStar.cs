@@ -34,48 +34,40 @@ public class BoxStar : MonoBehaviour
 
         Vector3 startScale = transform.localScale;
 
-        // Reset trạng thái
+        // ⭐ REGISTER STAR MOVING
+
         transform.localScale = Vector3.zero;
         render.color = new Color(render.color.r, render.color.g, render.color.b, 1f);
 
         Sequence seq = DOTween.Sequence();
 
-        // ⭐ 1. Popup scale
         seq.Append(transform.DOScale(popupScale, popupDuration * 0.5f).SetEase(Ease.OutBack));
         seq.Append(transform.DOScale(startScale, popupDuration * 0.5f).SetEase(Ease.InBack));
 
-        // ⭐ 2. Move tới target
         seq.Append(transform.DOMove(targetPos, moveDuration * 0.7f).SetEase(Ease.InQuad));
 
-        //// ⭐ 3. FadeOut khi gần chạm
-        //seq.Join(render.DOFade(0f, moveDuration * 0.4f).SetEase(Ease.OutSine));
-
-        // ⭐ 4. Charging effect (tại target)
         seq.AppendCallback(() =>
         {
-            // gọi tăng star
-            IngameController.ins.StarChanging(1);
 
-            // hiệu ứng charge (scale pulse + flash)
+            Debug.Log("BoxStar: Reached target position. Returning to pool. And adding star");
+            IngameController.ins.StarChanging(1);
             Sequence charge = DOTween.Sequence();
             charge.Append(transform.DOScale(1.35f, 0.15f).SetEase(Ease.OutBack));
             charge.Append(transform.DOScale(1f, 0.12f).SetEase(Ease.InSine));
 
-            // nếu có particle nổ sáng
             if (particle != null)
                 particle.Play();
         });
 
-        // ⭐ 5. Delay 1 chút để charge xong
         seq.AppendInterval(0.05f);
 
-        // ⭐ 6. Return pool sau charging
         seq.AppendCallback(() =>
         {
             onComplete?.Invoke();
+
+
             StarPool.Instance.pool.ReturnToPool(this);
 
-            // Reset trước khi return
             transform.localScale = startScale;
             render.color = new Color(render.color.r, render.color.g, render.color.b, 1f);
         });

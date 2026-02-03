@@ -149,7 +149,7 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()
         {
-            Debug.Log("HoldScrews are full! Game Over!");
+            //Debug.Log("HoldScrews are full! Game Over!");
             IngameController.ins.GameEndInvoker();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
@@ -163,7 +163,7 @@ namespace Ingame
 
                 if (allFull)
                 {
-                    Debug.Log("All holdScrews are full!");
+                    //Debug.Log("All holdScrews are full!");
                     yield return new WaitForSeconds(2f);
 
                     allFull = holdScrews.All(h => h != null && !h.IsEmpty());
@@ -184,7 +184,7 @@ namespace Ingame
         private void CheckIfHoldScrewsFull()
         {
 
-            Debug.Log("Check if holdScrews full" + holdRoutine);
+            //Debug.Log("Check if holdScrews full" + holdRoutine);
             if (holdRoutine != null)
                 StopCoroutine(holdRoutine);
 
@@ -240,7 +240,7 @@ namespace Ingame
             bool canAdd = false;
 
 
-            Debug.Log("suitableBox: " + suitableBox?.Color);
+            //Debug.Log("suitableBox: " + suitableBox?.Color);
             if (suitableBox != null)
             {
                 screw.SetSortingOrderAndLayer(4, "Box");
@@ -265,7 +265,7 @@ namespace Ingame
             {
                 // Kiểm tra nếu tất cả holdScrew đã đầy
 
-                Debug.Log("Added screw to holdScrew");
+                //Debug.Log("Added screw to holdScrew");
                 CheckIfHoldScrewsFull();
             });
 

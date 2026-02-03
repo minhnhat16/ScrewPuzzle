@@ -24,6 +24,7 @@ public class SettingDialog : BaseDialog
 
     [SerializeField] private Text titleLB;
     [SerializeField] RectTransform below;
+    private SettingParam param;
 
     private void OnEnable()
     {
@@ -41,29 +42,39 @@ public class SettingDialog : BaseDialog
     }
     private void SettingSFX(bool value)
     {
-        SoundManager.instance.SettingSFXVolume(value);
+        SoundHelper.SettingSFXVolume(value);
+        SoundHelper.PlaySFX(SoundManager.SFX.UI_Toggle);
     }
 
     private void SettingMusic(bool value)
     {
-        SoundManager.instance.SettingMusicVolume(value);
+        SoundHelper.SetMusic(value);
+        SoundHelper.PlaySFX(SoundManager.SFX.UI_Toggle);
+
     }
 
 
     public override void Setup(DialogParam dialogParam)
     {
-        SettingParam param = (SettingParam)dialogParam;
+         param = (SettingParam)dialogParam;
         long userGold = param.totalGold;
         long userTicket = param.totalTicket;
         bool isMainScreen = param.isMainScreen;
         SetupButton(isMainScreen);
 
 
-        Debug.Log("Usser gold " + userGold);    
+        Debug.Log("Usser gold " + userGold);
         goldDisplay.SetGoldToLable(userGold);
         ticketDisplay.SetGoldToLable(userTicket);
         SetupPauseGame(isMainScreen);
-    
+
+
+        tg_soundSfx.m_Toggle.isOn = param.sfx_enable;
+        tg_music.m_Toggle.isOn = param.music_enable;
+
+
+        tg_soundSfx.SwapSprite(param.sfx_enable);
+        tg_music.SwapSprite(param.music_enable);
         //isMainScreen = param.isMainScreen;
         //        below.gameObject.SetActive(!param.isMainScreen);
     }
@@ -72,17 +83,14 @@ public class SettingDialog : BaseDialog
     {
         base.OnStartShowDialog();
         ZenSDK.instance.ShowFullScreen();
-        //tg_music.SwapSprite(true);
-        //tg_soundSfx.SwapSprite(true);
 
-        //tg_soundVib.SwapSprite(true);
+        Debug.Log($"SFX: {param.sfx_enable}, Music: {param.music_enable}");
+
     }
     public override void OnEndShowDialog()
     {
         base.OnEndShowDialog();
-        tg_soundVib.m_Toggle.isOn = true;
-        tg_soundSfx.m_Toggle.isOn = true;
-        tg_music.m_Toggle.isOn = true;
+
 
     }
     public override void OnEndHideDialog()
@@ -131,14 +139,6 @@ public class SettingDialog : BaseDialog
     {
         if (isMainScreen) return;
         IngameController.ins.PauseGame();
-    }
-    private void OnDropdownValueChanged(int index)
-    {
-        // Get the selected option text
-        string selectedOption = language_dr.options[index].text;
-
-        // Display the selected option
-        //Debug.Log("Selected Option: " + selectedOption + " with index " + language_dr.options[index]);
     }
 
 }

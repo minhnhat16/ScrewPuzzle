@@ -1,11 +1,14 @@
 using Managers;
-using Spine;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
-using System.Threading.Tasks;
 using UnityEngine;
+using System;
+
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class BootLoader : MonoBehaviour
 {
@@ -13,48 +16,55 @@ public class BootLoader : MonoBehaviour
     [SerializeField] private GameObject uiRoot;
     [SerializeField] private UIRootControlScale uiRootControl;
 
+    private void Awake()
+    {
+        ScreenSetup();
+    }
     void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-        ScreenSetup();
-        TaskManager.ins.AddTask(Task_LoadRemoteAsset);
         // ----- REGISTER BOOT TASKS -----
+        TaskManager.ins.AddTask(Task_LoadRemoteAsset);
         TaskManager.ins.AddTask(Task_InitConfig);
-
         TaskManager.ins.AddTask(Task_InitData);
         TaskManager.ins.AddTask(Task_InitMission);
         TaskManager.ins.AddTask(Task_SetupUI);
-        TaskManager.ins.AddTask(Task_FinishBoot);
         TaskManager.ins.AddTask(Task_InitSound);
+
+        TaskManager.ins.AddTask(Task_FinishBoot);
+
         LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
         {
-            Debug.Log("task run done");
             float progressTime = TaskManager.ins.TotalProgress;
             LoadSceneManager.ins.TimeWait = progressTime;
             MainScreenViewParam param = new()
             {
                 totalGold = DataAPIController.instance.GetGold(),
                 ticket = (int)DataAPIController.instance.GetTicket(),
-                level  = DataAPIController.instance.GetPlayerLevel(),
+                level = DataAPIController.instance.GetPlayerLevel(),
             };
 
             ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
             {
                 Debug.Log("task run done switch view");
-                SoundManager.instance.PlayMusic(SoundManager.Music.MainScreenMusic);
                 DayTimeController.instance.CheckNewDay();
             });
         });
         // ----- RUN TASKS -----
-     
-      
+
+
     }
 
     private IEnumerator Task_InitSound()
     {
-        Debug.Log("[BOOT] InitSound...");
         bool done = false;
+
+        bool musicData = DataAPIController.instance.GetMusicSetting();
+        bool sfxData = DataAPIController.instance.GetSoundSetting();
+        SoundHelper.SetEnabled(musicData, sfxData);
         SoundManager.instance.Init(() => done = true);
+
+        SoundHelper.PlayMusic(SoundManager.Music.MainScreenMusic);
         yield return new WaitUntil(() => done);
     }
 
@@ -68,7 +78,8 @@ public class BootLoader : MonoBehaviour
 
     private void ScreenSetup()
     {
-        Screen.orientation = ScreenOrientation.AutoRotation;
+
+        Screen.orientation = ScreenOrientation.Portrait;
 
         // Ch? cho phép xoay ngang
         Screen.autorotateToLandscapeLeft = false;
@@ -77,12 +88,26 @@ public class BootLoader : MonoBehaviour
         Screen.autorotateToPortraitUpsideDown = false;
     }
 
+
     IEnumerator Task_InitConfig()
     {
         Debug.Log("[BOOT] InitConfig...");
         bool done = false;
-        ConfigFileManager.Instance.Init(() => done = true);
-        LevelManager.ins.Init();
+
+        try
+        {
+            ConfigFileManager.Instance.Init(() =>
+            {
+                done = true;
+            });
+
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("[BOOT] InitConfig FAILED\n" + e);
+            done = true; // tránh treo boot
+        }
+
         yield return new WaitUntil(() => done);
     }
     IEnumerator Task_InitData()
@@ -107,11 +132,12 @@ public class BootLoader : MonoBehaviour
     {
         bool done = false;
 
+
+        Debug.Log("Task load remote asset");    
         yield return ResourceManager.ins.Init(
             new List<string>
             {
-            "Image_Level",
-            "Config_Level",
+                "level",
             "UI"
             },
             () => done = true
@@ -134,7 +160,7 @@ public class BootLoader : MonoBehaviour
         gameManager = GetComponentInChildren<GameManager>();
         gameManager.SetUpIngame();
         gameManager.TrackLevelStart = 0;
-
+        LevelManager.ins.Init();
         ZenSDK.instance.TrackLevelStart(gameManager.TrackLevelStart);
 
         yield return null;

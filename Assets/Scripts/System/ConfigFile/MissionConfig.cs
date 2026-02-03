@@ -7,7 +7,6 @@ using UnityEngine;
 [Serializable]
 public class MissionConfigRecord
 {
-
     [SerializeField]
     private int id;
     [SerializeField]

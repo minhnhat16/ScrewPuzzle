@@ -1,6 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using SFX = SoundManager.SFX;
 using Music = SoundManager.Music;
+using System;
+using System.DataBase;
 
 public static class SoundHelper
 {
@@ -76,7 +78,43 @@ public static class SoundHelper
             Debug.LogWarning("[SoundHelper] SoundManager.instance is null. Cannot SetEnabled.");
             return;
         }
-
+        Debug.Log("[SoundHelper] SetEnabled → music: " + musicEnabled + ", sfx: " + sfxEnabled);
         sm.VolumeSetting(musicEnabled, sfxEnabled);
+    }
+
+    internal static void SettingSFXVolume(bool value)
+    {
+        var sm = SoundManager.instance;
+        if (sm == null)
+        {
+            Debug.LogWarning("[SoundHelper] SoundManager.instance is null. Cannot SettingSFXVolume.");
+            return;
+        }
+        sm.SettingSFXVolume(value);
+        DataAPIController.instance.SaveSFXSetting(value);
+    }
+
+    internal static void SetMusic(bool value)
+    {
+        var sm = SoundManager.instance;
+        if (sm == null)
+        {
+            Debug.LogWarning("[SoundHelper] SoundManager.instance is null. Cannot SettingSFXVolume.");
+            return;
+        }
+
+        Debug.Log("[SoundHelper] SetMusic → " + value);
+        sm.SettingMusicVolume(value);
+        DataAPIController.instance.SaveMusicSetting(value);
+    }
+
+    internal static bool IsMusicEnabled()
+    {
+        return DataAPIController.instance.GetMusicSetting();
+    }
+
+    internal static bool IsSFXEnabled()
+    {
+        return DataAPIController.instance.GetSoundSetting();
     }
 }

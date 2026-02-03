@@ -38,6 +38,9 @@ public class SoundManager : MonoBehaviour
         BuyCancel,
         ButtonClick,
 
+        Star_1,
+        Star_2,
+        Star_3,
 
         Win,
         Lose,
@@ -52,8 +55,15 @@ public class SoundManager : MonoBehaviour
         Button,
         Close,
         Slide,
-
-
+        Swoosh,
+        Dialog_Appear,
+        Dialog_Swipe,
+        UI_Toggle,
+        UI_Normal,
+        Shop_Purchase_Fail,
+        Shop_Purchase_Success,
+        GoldCollect,
+        TicketCollect,
     }
 
     [SerializeField] public SoundFactory soundFactory;
@@ -103,9 +113,6 @@ public class SoundManager : MonoBehaviour
             sfxLastPlayed[entry.sfx] = -Mathf.Infinity;
         }
 
-        // Load saved user settings (0 = false, 1 = true). default to enabled.
-        musicSetting = PlayerPrefs.GetInt("musicSetting", 1) == 1;
-        sfxSetting = PlayerPrefs.GetInt("sfxSetting", 1) == 1;
 
         // Ensure a MusicGameObject exists with an AudioSource
         if (musicObject == null)
@@ -184,7 +191,6 @@ public class SoundManager : MonoBehaviour
     {
         musicObject.music = music;
         AudioSource audioSource = musicObject.GetComponent<AudioSource>();
-        SettingMusicVolume(musicSetting);
         audioSource.clip = GetMusicAudioClip(music);
         audioSource.Play();
         //Debug.Log("Music " + music + " played!");
@@ -239,18 +245,20 @@ public class SoundManager : MonoBehaviour
 
         if (valid)
         {
-            //Debug.Log("UnMute music");
             audioSource.volume = 1f;
+            audioSource.Play();
         }
         else
         {
             //Debug.Log("mute music");
             audioSource.volume = 0f;
+            audioSource.Pause();
         }
     }
 
     public void SettingSFXVolume(bool valid)
     {
+       this.sfxSetting = valid;
         foreach (SFXGameObj obj in SoundGameObjPool.instance.pool.list)
         {
             if (obj.sfx != SFX.NULL && obj.gameObject.activeSelf)

@@ -33,6 +33,9 @@ public static class ConfigExtensions
     public static List<MissionConfigRecord> GetMissionsByID(this ConfigFileManager cfg, List<int> idMissions)
     {
         var missions = cfg.GetConfig<MissionConfig>().GetAllRecord();
+
+
+        Debug.Log("Get Missions by ID: " + string.Join(",", idMissions) + " mission count " + missions.Count);
         var missionMatch = missions
             .FindAll(m => idMissions.Contains(m.Id));
         return missionMatch;

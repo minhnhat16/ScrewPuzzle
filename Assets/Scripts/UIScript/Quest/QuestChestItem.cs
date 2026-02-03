@@ -90,7 +90,6 @@ public class QuestChestItem : MonoBehaviour
         param.target = target;
 
         if (progressFill == null) return;
-
         float percent = target > 0 ? (float)progress / target : 0f;
         progressFill.SetProgress(Mathf.Clamp01(percent));
     }
@@ -223,10 +222,8 @@ public class QuestChestItem : MonoBehaviour
 
     public void SetUnlocked(bool unlocked)
     {
-        param.isUnlocked = unlocked;
-
         // progress
-        if (progressFill != null)
+        if (progressFill != null )
             progressFill.gameObject.SetActive(!unlocked);
 
         // lock icon

@@ -300,3 +300,34 @@ public static class ChestTierHelper
         }
     }
 }
+
+public class StarMoveCounter
+{
+    public static int ActiveStarCount { get; private set; }
+
+    public static event Action OnAllStarsFinished;
+
+
+    public static void AddStar()
+    {
+        ActiveStarCount++;
+    }
+
+    public static void RemoveStar()
+    {
+        ActiveStarCount--;
+
+        if (ActiveStarCount <= 2)
+        {
+            ActiveStarCount = 0;
+            OnAllStarsFinished?.Invoke();
+
+        }
+    }
+
+    public static void Reset()
+    {
+        ActiveStarCount = 0;
+    }
+}
+

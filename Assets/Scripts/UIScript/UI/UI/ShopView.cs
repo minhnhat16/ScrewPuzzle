@@ -146,11 +146,10 @@ public class ShopController
         // Kiểm tra lỗi payment
         if (!result.success)
         {
-            Debug.LogWarning("Payment failed or cancelled.");
+            SoundHelper.PlaySFX(SoundManager.SFX.Shop_Purchase_Fail);
             return;
         }
-
-        Debug.Log("Payment success!");
+        SoundHelper.PlaySFX(SoundManager.SFX.Shop_Purchase_Success);
     }
 }
 

@@ -13,7 +13,8 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
-        public Dictionary<int, List<Screw.Screw>> screwDict = new();
+        public Dictionary<int, List<Screw.Screw>> screwDict = new();                 // existing usage (by layer index)
+        public Dictionary<BaseLayer, List<Screw.Screw>> screwDictByLayer = new();   // new keyed-by-object map
         public List<BasePart> Parts
         {
             get => parts;
@@ -72,7 +73,9 @@ namespace Ingame.Board
         // Gọi khi một layer thực hiện hành động clear
         public void OnLayerCleared(BaseLayer clearedLayer)
         {
+
             visibilityController.ShowNextLayer();
+            //visibilityController.ShowNextLayer();
         }
 
         public IEnumerator ChangePartState(float timeout = 0.5f)

@@ -35,6 +35,11 @@ public class UserData
 
     [SerializeField]
     public int currentPuzzleID;
+
+    [SerializeField]
+    public bool music;
+    [SerializeField]
+    public bool sfx;
 }
 [Serializable]
 public class UserInfo

@@ -5,7 +5,7 @@ public class RateAnim : BaseDialogAnimation
 {
     public Animator animator;
     private Action callback;
-    private void Awake()
+    public override void Awake()
     {
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
     }

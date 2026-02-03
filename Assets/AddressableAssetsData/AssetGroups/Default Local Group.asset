@@ -13,43 +13,61 @@ MonoBehaviour:
   m_Name: Default Local Group
   m_EditorClassIdentifier: 
   m_GroupName: Default Local Group
-  m_GUID: 1f4c128c091a4db42b074294a273be3c
+  m_GUID: 1eb0daa68aaea114db1322e547be0cf6
   m_SerializeEntries:
-  - m_GUID: 11ab088b770f19a459153977b28dd014
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Orange 1.png
+  - m_GUID: 063ca2c075db7cc498db6d46a0bb092c
+    m_Address: Assets/Resources_moved/Config/MissionConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 100b8d59be2be904fb727ff511a7eb06
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Hole.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11ab088b770f19a459153977b28dd014
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Orange.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 188e6099558f3824c8c5a4d7c163b1b8
+    m_Address: Config/QuestConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2003e7aa64f710943b0cd37be895ac78
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Red 1.png
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Red.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 28ae9d47069942b48aa2f22844cb7efa
-    m_Address: Assets/Resources_moved/Levels/Level_49.asset
+  - m_GUID: 3518a5e9a5bbd654494a465ce723ed7b
+    m_Address: Config/ShopPrefabDB.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3356ac8e0c6ba89448c55229b1f30e18
-    m_Address: Assets/Resources_moved/Levels/Level_3.asset
+  - m_GUID: 36bdcf1d777c7c340b9564d211cec515
+    m_Address: Assets/Sprites/GAMEPLAY/HOP/box_them.png
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40b839e0886bbbc4cbe7ea0428560245
+    m_Address: Config/BoxConfigs/BoxLevel9.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4228eb7c61ce7c94e8e54504d05d6632
     m_Address: Assets/Resources_moved/Sprites/UI/item/Green.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4698757a66aea6441b5b2ed4464eb656
-    m_Address: level_screw
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Image_Level
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4701fdca99ea1ac4191ea6827f537d97
     m_Address: Assets/Resources_moved/Sprites/UI/item/Red.png
@@ -58,7 +76,7 @@ MonoBehaviour:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 51075159b83d1594b9e026b2a79f7c36
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Green 1.png
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Green.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
@@ -75,11 +93,17 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 59feda349cad3214b99d6088ff89b5e6
-    m_Address: Assets/Resources_moved/Levels/Level_8.asset
+  - m_GUID: 53f7159c858ee794384687f89c5a72f0
+    m_Address: Config/ItemConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58066a6439ab1b0438622795f5b7817b
+    m_Address: Config/BoxConfigs/BoxLevel3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5aeb9d96be28c8846865be1874152174
     m_Address: Assets/Resources_moved/Sprites/UI/item/Purple.png
@@ -87,29 +111,41 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5b5f496b2ebb2e34c9137979217947a3
-    m_Address: Assets/Resources_moved/Levels/Level_7.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Config_Level
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5f1bf6f29673b724f9019b90f3676cca
-    m_Address: Assets/Resources_moved/Sprites/lose/Ticket.png
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Ticket.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5ffc0b07a1da1784b8779e92e69cc1f0
-    m_Address: Levels/Level_1.asset
+  - m_GUID: 6ad0d06ff91876c4eb78287b9f2bbe57
+    m_Address: Config/ChestConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 760d970fbe92eda4da9a0bc33e2b2915
+    m_Address: Config/BoxConfigs/BoxLevel5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77bbfc37a4bb12e45ae544c1fa1b4a04
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Cyan.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7a777cf96a041e242b3c2b342ce11587
-    m_Address: Sprites/GAMEPLAY/item/Drill
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Drill.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7bf03dcc146559f45bf69160a3a5092e
+    m_Address: Config/BoxConfigs/BoxLevel4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7ceb584b636f12b40aa7949982b65f99
     m_Address: Assets/Resources_moved/Sprites/UI/item/Cyan.png
@@ -117,20 +153,32 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8324dbb8eeae7604b80da87136646adc
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Pink 1.png
+  - m_GUID: 80f6af0380290ed47b630ae0ed9e8c12
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Upper.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8b6669ff2fc02904186275c7f5d56513
-    m_Address: Levels
+  - m_GUID: 8324dbb8eeae7604b80da87136646adc
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Pink.png
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d434cc868bc6f4469d11bebd2531670
+    m_Address: Config/BoxConfigs/BoxLevel7.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 900b21dc2d94f6b4aa327d9bc4bd2ffd
+    m_Address: Config/BoxConfigs/BoxLevel8.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 91461538c652d2f4389c5469998068b8
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Rainbow 1.png
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Rainbow.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
@@ -141,17 +189,47 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 98892ae98a1971440b4610400a2fd03f
+    m_Address: Config/PriceConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b91fd719928cfc4eba63113c8d816f5
+    m_Address: Config/BoxConfigs/BoxLevel10.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a211c8c02cfe9564f9410fa3ccace797
+    m_Address: Assets/Resources_moved/Sprites/UI/item
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a6427facc49cefc4c9485d93f3cc92de
-    m_Address: Sprites/UI_Wood nuts & bolts puzzle/03_UI level/level_Complete
+    m_Address: Assets/Resources_moved/Sprites/UI_Wood nuts & bolts puzzle/03_UI level/level_Complete.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a69e8df30a5aab640a557fc373505e72
-    m_Address: Sprites/GAMEPLAY/item/Breaker
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Breaker.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6b4e66ba77ecbd4c9af9985319a8242
+    m_Address: Config/BoxConfigs/BoxLevel1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a756183aa6989c1478f2322c11cdc652
+    m_Address: Config/DailyRewardConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: acb7ed02641c2f74da6bf2cd60868c17
     m_Address: Assets/Resources_moved/Sprites/UI/item/Rainbow.png
@@ -159,11 +237,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: afe3afc8fb5d6fd4a95a87ae8c6e2d39
-    m_Address: Assets/Resources_moved/Levels/Level_4.asset
+  - m_GUID: ad0294e8e3438a941b8f22cf21c53a53
+    m_Address: Factory/SoundFactory
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b084e5432da9c1f469d64273f693da55
     m_Address: Assets/Resources_moved/Sprites/UI/item/Brown.png
@@ -171,17 +249,35 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b13abc54cc4d42449b7f8b07fdb073d6
+    m_Address: Config/PuzzleConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b154d275384d79b44ae46ce29de68271
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Gray 1.png
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Gray.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ba02b7daf5b6c59459ad258928a6ab1e
-    m_Address: Assets/Resources_moved/Levels/Level_5.asset
+  - m_GUID: b3667c17b825d5141a4541a7464047cd
+    m_Address: Config/ColorConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b72a0a7add11f054883e69b86618be83
+    m_Address: Config/BoxConfigs/BoxLevel6.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b854fb7373b29774e88b75d95ff0207a
+    m_Address: Config/BoxConfigs/BoxLevel49.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb41e10d501f6994b98524963a70dc74
     m_Address: Assets/Resources_moved/Sprites/UI/item/Orange.png
@@ -195,47 +291,77 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cf96d90bcc4239040a24a7c25805f6a7
-    m_Address: Assets/Resources_moved/Levels/Level_0.asset
+  - m_GUID: ccb0414bae88a3744bc9237ed695ef85
+    m_Address: Config/BoxConfigs/BoxLevel2.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d1d812b956a9fe243849a0d858b09439
-    m_Address: Sprites/GAMEPLAY/item/Magnet
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Magnet.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d96c8269b79644941877137988d9dad5
-    m_Address: Assets/Resources_moved/Sprites/UI/item/Purple 1.png
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Purple.png
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: eb6f841150cf50b4ea319984a30f9b29
-    m_Address: Assets/Resources_moved/Levels/Level_10.asset
+  - m_GUID: de5a2e3f76ad005498c97df34b51b764
+    m_Address: Config/PuzzleParternConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f01ed4f90d0eb844a8f1cca425166441
-    m_Address: Assets/Resources_moved/Levels/Level_6.asset
+  - m_GUID: e01fd0a85719aea40adc00c91b2be4c7
+    m_Address: Config/RewardConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f2b019b7cd4cea344aec6f779ffdf7b3
-    m_Address: Assets/Resources_moved/Levels/Level_9.asset
+  - m_GUID: e1d0cd3e72b6b8c4a8abfde09ebede6c
+    m_Address: Config/CollectionConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f9f70613566e43d4398c406b90c5ba40
-    m_Address: Assets/Resources_moved/Levels/Level_2.asset
+  - m_GUID: e389268b067322b4299e1e57db4c059e
+    m_Address: Config/PackConfig.asset
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Config_Level
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4c8536b071fdba4a939e0496ef40fc4
+    m_Address: Config/TutorialConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e90a0e8a483e0654890b2a1a4b9dc408
+    m_Address: Config/LevelConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f1ecdb9c165998a4184331270e2d2645
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Blue.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2318617493155b4bb0d9b348b1865d4
+    m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Brown.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f444650102338354b8d32f206a1e1337
+    m_Address: Config/BoxConfigs/BoxLevel0.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: a91ec6d147716da4abc380b8b110cf0d, type: 2}

@@ -60,12 +60,6 @@ namespace Ingame.Screw
             isClicked = false;
             StartCoroutine(Init());
         }
-
-        private void OnEnable()
-        {
-
-        }
-
         public IEnumerator Init()
         {
             IsInHold = false;

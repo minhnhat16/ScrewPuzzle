@@ -27,6 +27,8 @@ public class LoadSceneManager : MonoBehaviour
     // Hàm chính gọi load
     public void LoadSceneByName(string sceneName, Action callback)
     {
+
+        Debug.Log("Start Load Scene: " + sceneName);
         StopAllCoroutines();
         this.callback = callback;
 
@@ -36,34 +38,35 @@ public class LoadSceneManager : MonoBehaviour
             StartCoroutine(RunFullLoadProcess());
         });
     }
-     IEnumerator RunFullLoadProcess()
+    IEnumerator RunFullLoadProcess()
     {
-        yield return TaskManager.ins.RunTasks(callback);
+        // Run TaskManager's runner (it yields each registered task).
+        yield return StartCoroutine(TaskManager.ins.RunTasks());
+
         Debug.Log("Run task done");
-        // 2. Load scene progress + fake progress
-        yield return StartCoroutine(LoadSceneProgress(sceneName));
+
+        // After tasks finished, run scene load progress (we pass the original callback to invoke after load)
+        yield return StartCoroutine(LoadSceneProgress(sceneName, callback));
     }
 
-
-    private IEnumerator LoadSceneProgress(string sceneName)
+    private IEnumerator LoadSceneProgress(string sceneName, Action onComplete = null)
     {
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
         op.allowSceneActivation = false;
 
-        float smooth = 0;
-        float target = TaskManager.ins.CurrentTaskProgress;
+        float smooth = 0f;
+
         while (!op.isDone)
         {
-            target = Mathf.Clamp01(op.progress / 0.9f);
-
+            float target = Mathf.Clamp01(op.progress / 0.9f);
             smooth = Mathf.MoveTowards(smooth, target, Time.deltaTime * 0.8f);
 
-            // Gửi progress đến LoadingView
+            // Publish progress so LoadingView can read it from TaskManager (or update LoadingView directly)
+            TaskManager.ins.SetCurrentTaskProgress(smooth);
 
-           progress = smooth;
+            // also keep a local copy if needed
+            progress = smooth;
 
-
-            //Debug.Log("Progress " + progress); ;
             if (smooth >= 0.99f)
             {
                 op.allowSceneActivation = true;
@@ -71,6 +74,10 @@ public class LoadSceneManager : MonoBehaviour
 
             yield return null;
         }
+
+        // ensure full progress and invoke callback
+        TaskManager.ins.SetCurrentTaskProgress(1f);
+        onComplete?.Invoke();
     }
 
 }

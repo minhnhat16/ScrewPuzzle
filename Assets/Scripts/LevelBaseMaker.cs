@@ -7,21 +7,6 @@ using UnityEngine;
 public class LevelBaseMaker : BaseLevelObject
 {
 
-     public ScrewManager screwManager;
-
- 
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        ScrewManager = GetComponentInChildren<ScrewManager>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+   
 }
 #endif

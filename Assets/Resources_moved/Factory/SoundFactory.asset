@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c470b1d36bc0d54b9c126dd8bd8bc44, type: 3}
+  m_Name: SoundFactory
+  m_EditorClassIdentifier: 
+  musicList:
+  - music: 1
+    audioClip: {fileID: 8300000, guid: 4dab24adaa3c1444dacfd519c17e96ac, type: 3}
+  - music: 2
+    audioClip: {fileID: 8300000, guid: 4dab24adaa3c1444dacfd519c17e96ac, type: 3}
+  sfxList:
+  - sfx: 1
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 25f195c24c97ed7488f12d3200a32cde, type: 3}
+  - sfx: 2
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 20394b20bec41064c856af878da96c68, type: 3}
+  - sfx: 7
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: d5c776591a3d81d41baa9ba6963b2a0a, type: 3}
+  - sfx: 3
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 20ccd6d243c30a44ebc0a5b68cf4d3a1, type: 3}
+  - sfx: 18
+    timer: 0.1
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 9ca38b6400c7bad45b653619487d15d7, type: 3}
+  - sfx: 17
+    timer: 0.01
+    timeToDespawn: 3
+    audioClip: {fileID: 8300000, guid: 07cab98055ffa8443a1b9d7fd7a80642, type: 3}
+  - sfx: 19
+    timer: 0
+    timeToDespawn: 1.5
+    audioClip: {fileID: 8300000, guid: 75393868dba9d7e4e92fa5406f1755c2, type: 3}
+  - sfx: 20
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 7ef5feec5e0314e4d8c54bf5c0939bbd, type: 3}
+  - sfx: 22
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 9ca38b6400c7bad45b653619487d15d7, type: 3}
+  - sfx: 21
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 7e909dff8640fed49b3886717bc742b6, type: 3}
+  - sfx: 24
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: fd4680a44f1a00f44b5fbaa22eeb0e4b, type: 3}
+  - sfx: 23
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: e25a899ee02cbd9418c2d024fa8d10be, type: 3}
+  - sfx: 8
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: d5c776591a3d81d41baa9ba6963b2a0a, type: 3}
+  - sfx: 9
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 77bfb22c47403ef41b2ce463cff18c39, type: 3}
+  - sfx: 11
+    timer: 0
+    timeToDespawn: 3
+    audioClip: {fileID: 8300000, guid: b03976de4fdf4864b9a4cf63d2b7d336, type: 3}
+  - sfx: 25
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 870eeb881dd08f24d9652e778e137b3f, type: 3}
+  - sfx: 15
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 91997a72648c2234aaf04ede5c7f94d0, type: 3}
+  - sfx: 16
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: d1d3155936f58a34ca99c50dfd0a0856, type: 3}
+  - sfx: 10
+    timer: 0
+    timeToDespawn: 1
+    audioClip: {fileID: 8300000, guid: 04147416f9c979e40ac6428349d21a64, type: 3}

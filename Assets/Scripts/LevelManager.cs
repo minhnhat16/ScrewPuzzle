@@ -26,7 +26,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     public Level.Level currentLevel;
 
     [SerializeField] private GameObject screwManagerPrefb;
-    [SerializeField] private ScrewManager screwManager;
+   private ScrewManager screwManager;
 
     [SerializeField] private BaseLevelObject currentLevelObject;
 
@@ -130,7 +130,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     {
 
         Debug.Log("current level " + currentLevelID); 
-        Task loadPSB = ResourceManager.ins.LoadPSB($"level_screw/{currentLevelID}.psb"); // ❗ KHÔNG .psb
+        Task loadPSB = ResourceManager.ins.LoadPSB($"{currentLevelID}"); // ❗ KHÔNG .psb
 
         while (!loadPSB.IsCompleted)
             yield return null;
@@ -433,7 +433,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             connectedPart = lm.GetPartByKey(hingeConnection.bodyPartUniqueID);
         }
 
-        Debug.Log("Connected part " + connectedPart);
+        //Debug.Log("Connected part " + connectedPart);
 
         Rigidbody2D connectedRigidBody = null;
         if (connectedPart != null)
@@ -547,7 +547,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         var boxQueue = BoxQueue.ins; ;
         boxQueue.TryMoveScrewsGroupedByColor(listScrews, true);
         layerManager.RemoveScrewsOnDict(listScrews);
-        layerManager.RemovePart(bp.uniqueID);
         bp.gameObject.SetActive(false);
         bp.OnStateChanged.Invoke(true,bp);
     }

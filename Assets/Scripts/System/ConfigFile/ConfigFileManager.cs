@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ConfigFileManager : MonoBehaviour
 {
@@ -16,27 +18,55 @@ public class ConfigFileManager : MonoBehaviour
 
     public void Init(Action callback)
     {
-        StartCoroutine(LoadAllConfigs(callback));
+        StartCoroutine(LoadAllConfigs_Addressable("Config",callback));
     }
 
-    private IEnumerator LoadAllConfigs(Action callback)
+    public IEnumerator LoadAllConfigs_Addressable(string label, Action callback)
     {
         IsDone = false;
+        configMap.Clear();
 
-        // Load tất cả ScriptableObject trong Resources/Config/*
-        ScriptableObject[] configs = Resources.LoadAll<ScriptableObject>("Config");
+        // 1) Init
+        var init = Addressables.InitializeAsync();
+        yield return init;
 
-        foreach (var cfg in configs)
+        // 2) Check label có location không
+        var locHandle = Addressables.LoadResourceLocationsAsync(label, typeof(ScriptableObject));
+        yield return locHandle;
+
+        if (locHandle.Status != AsyncOperationStatus.Succeeded || locHandle.Result == null || locHandle.Result.Count == 0)
         {
-            configMap[cfg.GetType()] = cfg;
-            Debug.Log("Loaded Config: " + cfg.GetType().Name);
+            Debug.LogError($"[Config] Label '{label}' has no locations. " +
+                           $"Did you assign label + build addressables + reinstall app?");
+            Addressables.Release(locHandle);
+            IsDone = true;
+            callback?.Invoke();
+            yield break;
         }
 
-        // Load Factory
-        var factory = Resources.Load<SoundFactory>("Factory/SoundFactory");
-        configMap[typeof(SoundFactory)] = factory;
+        Addressables.Release(locHandle);
 
-        yield return null;
+        // 3) Load assets theo label
+        var handle = Addressables.LoadAssetsAsync<ScriptableObject>(
+            label,
+            cfg =>
+            {
+                if (cfg == null) return;
+                configMap[cfg.GetType()] = cfg;
+                Debug.Log("Loaded Config: " + cfg.GetType().Name);
+                if (cfg is MissionConfig missionCfg)
+                {
+                    Debug.Log($" - MissionConfig has {missionCfg.GetAllRecord().Count} levels");
+                }
+
+            });
+
+        yield return handle;
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogError($"[Config] Load failed: {handle.OperationException}");
+        }
 
         IsDone = true;
         callback?.Invoke();
@@ -52,5 +82,5 @@ public class ConfigFileManager : MonoBehaviour
         return null;
     }
 
- 
+
 }

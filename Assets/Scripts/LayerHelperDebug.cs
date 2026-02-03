@@ -44,10 +44,11 @@ public class LayerHelperDebug : MonoBehaviour
 
     private void TryHideTopLayer()
     {
+
         var lm = LayerManager;
         if (lm == null)
         {
-            Debug.LogWarning("LayerManager not found when trying to hide top layer.");
+            Debug.LogWarning("LayerManager not found when trying to show next layer.");
             return;
         }
 
@@ -58,6 +59,5 @@ public class LayerHelperDebug : MonoBehaviour
             return;
         }
 
-        vc.HideTopLayer();
     }
 }

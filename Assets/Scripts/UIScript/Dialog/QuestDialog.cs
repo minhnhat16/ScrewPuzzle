@@ -339,8 +339,10 @@ public class QuestDialog : BaseDialog
         if (questConfig == null)
             return;
 
+        var records = questConfig.GetAllRecord();
 
-        foreach (var stage in questConfig.GetAllRecord())
+        Debug.Log("[Mission] Caching all stage missions..." + records.Count);
+        foreach (var stage in records)
         {
 
             if (cachedStageMissions.ContainsKey(stage.Id)) continue;

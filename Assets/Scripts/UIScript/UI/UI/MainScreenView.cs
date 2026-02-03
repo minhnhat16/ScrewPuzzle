@@ -31,7 +31,7 @@ namespace UIScript.UI.UI
         dailyReward.onClick.AddListener(OnDailyReward);*/
             shopButton.onClick.AddListener(ShopButton);
             levelButton.onClick.AddListener(LevelButton);
-            dailyReward.onClick.AddListener(SpinView);
+            dailyReward.onClick.AddListener(Daily);
             rateButton.onClick.AddListener(RateButton);
             playBtn.onClick.AddListener(OnPlayButton);
             specialButton.onClick.AddListener(OnClickSpecialButton);
@@ -48,7 +48,7 @@ namespace UIScript.UI.UI
         {
             shopButton.onClick.RemoveListener(ShopButton);
             levelButton.onClick.RemoveListener(LevelButton);
-            dailyReward.onClick.RemoveListener(SpinView);
+            dailyReward.onClick.RemoveListener(Daily);
             rateButton.onClick.RemoveListener(RateButton);
             playBtn.onClick.RemoveListener(OnPlayButton);
             levelButton.onClick.RemoveAllListeners();
@@ -137,7 +137,7 @@ namespace UIScript.UI.UI
             param.currency = "VND";
             param.totalGold = GameManager.instance.GetPlayerGold();
             List<ShopItem> specialItems = new List<ShopItem>();
-
+            SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
             DialogManager.ins.ShowDialog(DialogIndex.SpecialDialog, param, null);
         }
         private void RateButton()
@@ -157,20 +157,21 @@ namespace UIScript.UI.UI
         {
             int currentLevel = LevelManager.ins.currentLevelID;
 
-
+            SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
             LevelManager.ins.LoadLevel(currentLevel, () =>
             {
                 IngameController.ins.PauseGame();
             });
         }
 
-        public void SpinView()
+        public void Daily()
         {
             PuzzleParam param = new PuzzleParam();  
             param.idPuzzle = 2; // Example puzzle ID for spin view
             param.progress = 0f;
             param.target = 10f;
             param.currentTool = 100;
+            SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
             ViewManager.Instance.SwitchView(ViewIndex.PuzzleView,param);
         }
 
@@ -181,6 +182,9 @@ namespace UIScript.UI.UI
             param.totalGold = WalletManager.ins.Get(Currency.Gold);
             param.totalTicket = WalletManager.ins.Get(Currency.Ticket);
             param.title = "SETTING";
+            SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
+            param.music_enable = SoundHelper.IsMusicEnabled();
+            param.sfx_enable = SoundHelper.IsSFXEnabled();
             DialogManager.ins.ShowDialog(DialogIndex.SettingDialog, param);
         }
         public void ShopButton()
@@ -200,6 +204,7 @@ namespace UIScript.UI.UI
             param.price = 600000;
             param.currency = "VND";
             param.totalGold = GameManager.instance.GetPlayerGold();
+            SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
 
             DialogManager.ins.ShowDialog(DialogIndex.QuestDialog, param, null);
         }

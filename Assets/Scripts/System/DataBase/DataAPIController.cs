@@ -953,5 +953,26 @@ namespace System.DataBase
             return result;
         }
         #endregion
+        #region Sound and music
+        internal void SaveMusicSetting(bool value)
+        {
+            dataModel.UpdateData(DataPath.MUSICFX, value);
+        }
+        internal void SaveSFXSetting(bool value)
+        {
+            dataModel.UpdateData(DataPath.SOUNDFX, value);
+        }
+
+        internal bool GetMusicSetting()
+        {
+            return dataModel.ReadData<bool>(DataPath.MUSICFX);
+        }
+
+        internal bool GetSoundSetting()
+        {
+            return dataModel.ReadData<bool>(DataPath.SOUNDFX);
+        }
+        #endregion
+
     }
 }

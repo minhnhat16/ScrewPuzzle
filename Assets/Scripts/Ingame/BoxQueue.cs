@@ -12,6 +12,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using static SoundManager;
 
 namespace Ingame
 {
@@ -118,7 +119,7 @@ namespace Ingame
         {
             this.boxConfig = boxConfig;
             Debug.Log("Load box config record, null? " + (boxConfig == null));
-
+            if (!boxConfig) return;
             var allRecord = boxConfig.GetAllRecord();
             configRecords.AddRange(allRecord);
         }
@@ -456,7 +457,6 @@ namespace Ingame
 
             movingBox = true;
             MissionManager.ins.ProcessBoxClosed(screwBox.Color, 1); // increment ClearNormalBoxes missions by 1 
-
             screwBox.CloseBox(time, _ =>
             {
                 Debug.Log("Closed box");
@@ -467,9 +467,6 @@ namespace Ingame
                 int specialScrew = SideMissionManager.ins.currentMission.requiredCount;
                 int currentScrew = SideMissionManager.ins.currentMission.currentCount;
                 bool missionComplete = currentScrew >= specialScrew;
-
-
-
                 if (screwBoxes.Count <= 0 && missionComplete)
                 {
                     OnLastBoxClearScrew();
@@ -662,11 +659,12 @@ namespace Ingame
         public void AddToHidingList(List<Screw.Screw> screws)
         {
             if (screws == null || screws.Count == 0) return;
-
+            Debug.Log("[AddToHiding] Adding screw to hiding list.");    
             foreach (var screwItem in screws)
             {
                 hidingScrews.Add(screwItem);
                 screwItem.gameObject.SetActive(false);
+                Debug.Log("Screw is active " + screwItem.gameObject.activeSelf);
             }
 
             int total = hidingScrews.Count;
@@ -680,7 +678,6 @@ namespace Ingame
             var indexed = hidingScrews
                 .Select((s, i) => $"{i}:{(s == null ? "null" : s.Color.ToString())}")
                 .ToList();
-
             Debug.Log($"[HidingScrews] Total={total}; Breakdown=[{string.Join(", ", breakdown)}]; Items=[{string.Join(", ", indexed)}]");
         }
 
@@ -749,10 +746,6 @@ namespace Ingame
             if (validScrews.Count == 0)
                 return false;
 
-            // -------------------------------
-            // NEW: Nếu level dùng Special Box → đưa hết screw vào SpecialBoxManager,
-            // không dùng box thường / rainbow nữa.
-            // -------------------------------
 
             int totalMoved = 0;
 
@@ -763,12 +756,14 @@ namespace Ingame
                 var color = group.Key;
                 var groupList = group.ToList();
                 var screw = groupList[0];
-                var box = FindSuitableBox(screw, false);
+                var box = FindSuitableBox(screw, includeInactive);
 
                 if (box == null && group.Key != ColorEnum.Rainbow)
                 {
+
+                    Debug.Log($"❌ Không tìm thấy box {color}, đưa {groupList.Count}  screw vào hiding.Group list {group.Count()}");
                     AddToHidingList(groupList);
-                    Debug.Log($"❌ Không tìm thấy box {color}, đưa {groupList.Count} screw vào hiding.");
+                    
                     continue;
                 }
 

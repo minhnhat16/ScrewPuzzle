@@ -26,4 +26,9 @@ public class QuitDialog : BaseDialog
         _btnContinue.onClick.RemoveAllListeners();
         _quitBtn.onClick.RemoveAllListeners();
     }
+    public override void OnStartShowDialog()
+    {
+        base.OnStartShowDialog();
+        SoundHelper.PlaySFX(SoundManager.SFX.Lose);
+    }
 }

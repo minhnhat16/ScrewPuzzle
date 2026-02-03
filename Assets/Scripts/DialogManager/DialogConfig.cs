@@ -68,6 +68,8 @@ public class SettingParam : DialogParam
     internal long totalTicket;
     public bool isMainScreen;
     public string title;
+    internal bool music_enable;
+    internal bool sfx_enable;
 }
 
 public class DailyParam : DialogParam

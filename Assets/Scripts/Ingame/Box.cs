@@ -160,9 +160,9 @@ namespace Ingame
 
             if (IsLocked)
             {
-                string path = $"{GameConstants.BOX_SPRITE_PATH}/box_them";
-                var sprite = Resources.Load<Sprite>($"{path}");
-                renderUpper.sprite = sprite;
+               
+                renderUpper.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, "Them");
+;
                 renderUpper.transform.localPosition = Vector2.zero;
                 renderUpper.color = ColorEnum.White.ToColor();
                 renderUpper.transform.localScale = Vector2.one;
@@ -204,55 +204,73 @@ namespace Ingame
         {
             DoUpperBoxMove((boxFull) =>
             {
-               SoundHelper.PlaySFX(SFX.BoxClose);
                 callback?.Invoke(boxFull);
             }, time);
         }
 
         private void TunOffScrews()
         {
-            if(holdScrews.Count ==0) return;
+            if (holdScrews.Count == 0) return;
 
             //Debug.Log("Turn off Screww");
             foreach (var t in holdScrews)
             {
-                if(t.Screw == null) continue;
+                if (t.Screw == null) continue;
                 ScrewPool.Instance.Pool.ReturnToPool(t.Screw);
             }
         }
-        private void DoUpperBoxMove(Action<bool> callback, float time = 0.5f)
+
+        // Split DoUpperBoxMove into prepare + execute to make flow clearer
+        private (int totalHold, List<Vector3> holdPositions, Vector3 targetPos) PrepareUpperBoxMove()
         {
-            Sequence mySequence = DOTween.Sequence();
             renderUpper.gameObject.SetActive(true);
-            //renderUpper.enabled = true;
+            renderUpper.enabled = true;
+
             var color = ColorEnumExtensions.ToColor(this.color);
             color.a = 0.4f;
             renderUpper.color = color;
-            int totalHold = holdScrews.Count;
 
+            int totalHold = holdScrews?.Count ?? 0;
             Vector3 pos = CameraMain.instance.GetTopRight();
-            var holdPosition = holdScrews.Select(p => p.transform.position)
-                                          .ToList();
-            mySequence.Append(renderUpper.transform.DOLocalMoveY(0, time)
-                .SetEase(Ease.InCirc).OnComplete(() =>
-                {
-                    //TunOffScrews();
-                    //Debug.Log($"Processing Hold Screw at { totalHold}");
-                }))
+            var holdPosition = (holdScrews ?? new List<HoldScrew>()).Select(p => p.transform.position).ToList();
+
+            return (totalHold, holdPosition, pos);
+        }
+
+        private void ExecuteUpperBoxMoveSequence((int totalHold, List<Vector3> holdPositions, Vector3 targetPos) data, Action<bool> callback, float time)
+        {
+            var (totalHold, holdPosition, pos) = data;
+
+            Sequence mySequence = DOTween.Sequence();
+
+            mySequence.Append(renderUpper.transform.DOLocalMoveY(0, time).OnStart(() =>
+                    {
+                        SoundHelper.PlaySFX(SFX.BoxClose);
+                    })
+                .SetEase(Ease.InCirc))
                 .Append(transform.DOPunchScale(new Vector3(1.1f, 1.1f, 1.1f), time, 1)
-                    .OnStart(() => spawnStartEvent?.Invoke(totalHold, holdPosition))
-                    .SetEase(Ease.InBack).OnComplete(() =>
+                    .OnStart(() =>
                     {
 
-                        callback.Invoke(true);
-                    }))
+                        spawnStartEvent?.Invoke(totalHold, holdPosition);
+                    })
+                    .SetEase(Ease.InBack)
+                    .OnComplete(() => callback?.Invoke(true)))
+                .SetDelay(0.2f)
                 .Append(transform.DOMove(pos, time * 2, false)
-                    .SetEase(Ease.OutSine)).OnComplete(() =>
-                    {
-                        Reset();
-                        gameObject.SetActive(false);
-                    });
+                    .SetEase(Ease.OutSine))
+                .OnComplete(() =>
+                {
+                    Reset();
 
+                    gameObject.SetActive(false);
+                });
+        }
+
+        private void DoUpperBoxMove(Action<bool> callback, float time = 0.5f)
+        {
+            var data = PrepareUpperBoxMove();
+            ExecuteUpperBoxMoveSequence(data, callback, time);
         }
 
         public virtual void SetActive(bool isActive)
@@ -287,13 +305,12 @@ namespace Ingame
                 Vector3 starScale = GameManager.instance.StarScale;
                 var gameView = ViewManager.Instance.currentView;
                 var startRect = ViewManager.Instance.GetUIObject<StarBottleFill>(gameView).GetComponent<RectTransform>();
-
+                StarMoveCounter.AddStar();
                 Vector3 newPosition = ViewManager.Instance.UIToWorld(startRect, Camera.main);
                 yield return new WaitForSeconds(0.05f);
                 star.PopingStar(starScale, newPosition, () =>
                 {
-
-
+                    StarMoveCounter.RemoveStar();
                     Debug.Log("Star pop complete");
                     newStarAdded++;
                 });
@@ -323,7 +340,7 @@ namespace Ingame
                 isAddingScrew = !isAddingScrew;
                 return;
             }
-            if (gameObject.activeSelf )
+            if (gameObject.activeSelf)
             {
                 var added = false;
 
@@ -411,7 +428,7 @@ namespace Ingame
 
                     Debug.Log("Adding screw at" + nextEmptyIndex);
                     canAdd = true;
-                    screw.SetSortingOrderAndLayer(render.sortingOrder+2,render.sortingLayerName);
+                    screw.SetSortingOrderAndLayer(render.sortingOrder + 2, render.sortingLayerName);
                     holdScrews[nextEmptyIndex].AddScrew(screw, isTele, (onComplete) =>
                     {
                         ArrayScrew.Instance.RemoveScrewOutHold(screw);
@@ -471,7 +488,7 @@ namespace Ingame
         {
             // Đặt màu cho box (có thể thêm logic cập nhật màu)
             this.color = color;
-            render.enabled =true;
+            render.enabled = true;
             render.sprite = color.ToBoxSprite();
         }
         public void FindScrew()
@@ -484,7 +501,8 @@ namespace Ingame
             foreach (var h in holdScrews)
             {
                 h.ClearScrewOnHold(); // should put reset here
-            };
+            }
+            ;
         }
         public IEnumerator FindScrewCoroutine()
         {

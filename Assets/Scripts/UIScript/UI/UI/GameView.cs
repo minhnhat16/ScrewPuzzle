@@ -201,7 +201,9 @@ public class GameView : BaseView
         {
             isMainScreen = false,
             totalGold = WalletManager.ins.Get(Currency.Gold),
-            title = "PAUSE"
+            title = "PAUSE",
+            music_enable = SoundHelper.IsMusicEnabled(),
+            sfx_enable = SoundHelper.IsSFXEnabled(),
         };
 
         DialogManager.ins.ShowDialog(DialogIndex.SettingDialog, param);

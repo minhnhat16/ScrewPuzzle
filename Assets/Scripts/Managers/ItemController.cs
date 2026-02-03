@@ -6,6 +6,7 @@ using Spine;
 using Spine.Unity;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -112,13 +113,27 @@ public class ItemController : FSMSystem
             .DOMove(targetPos, 0.6f)
             .SetEase(Ease.InOutCubic).OnComplete(() =>
             {
-
+                PlaySound(type);
             });
 
 
     }
+    readonly Dictionary<ItemType,SoundManager.SFX> itemSoundDict = new Dictionary<ItemType, SoundManager.SFX>()
+    {
+        { ItemType.Magnet, SoundManager.SFX.Magnet },
+        { ItemType.Breaker, SoundManager.SFX.Breaker },
+        { ItemType.Drill, SoundManager.SFX.Drill },
+        { ItemType.AddBox, SoundManager.SFX.AddBox },
+        { ItemType.Gold, SoundManager.SFX.GoldCollect },
+        { ItemType.Ticket, SoundManager.SFX.TicketCollect },
+    };
+    private void PlaySound(ItemType type)
+    {
 
-
+        Debug.Log("Play sound for item type: " + type); 
+        SoundManager.SFX sfx = itemSoundDict.GetValueOrDefault(type, SoundManager.SFX.Button);
+        SoundHelper.PlaySFX(sfx);
+    }
 
     private string GetAnimName(ItemType type)
     {

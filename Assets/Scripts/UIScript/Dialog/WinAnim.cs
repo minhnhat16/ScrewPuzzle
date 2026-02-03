@@ -34,5 +34,10 @@ namespace UIScript.Dialog
 
             callback();
         }
+
+        public virtual void PlaySound() {
+            SoundHelper.PlaySFX(SoundManager.SFX.Dialog_Appear);
+        
+        }
     }
 }

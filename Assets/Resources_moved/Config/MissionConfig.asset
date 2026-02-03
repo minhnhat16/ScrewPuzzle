@@ -1,0 +1,815 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd254148dc15598468d6a4b58256fcf9, type: 3}
+  m_Name: MissionConfig
+  m_EditorClassIdentifier: 
+  records:
+  - id: 1
+    missionType: 0
+    description: CollectScrew 5
+    iconName: Clear 1
+    target: 5
+    color: 0
+    rewardItemType: 0
+    rewardAmount: 10
+  - id: 2
+    missionType: 1
+    description: ClearBox 10
+    iconName: Empty
+    target: 10
+    color: 1
+    rewardItemType: 1
+    rewardAmount: 20
+  - id: 3
+    missionType: 2
+    description: CompleteLevel 15
+    iconName: Complete
+    target: 15
+    color: 2
+    rewardItemType: 2
+    rewardAmount: 30
+  - id: 4
+    missionType: 3
+    description: Rainbow 20
+    iconName: Rainbow
+    target: 20
+    color: 3
+    rewardItemType: 3
+    rewardAmount: 40
+  - id: 5
+    missionType: 0
+    description: CollectScrew 25
+    iconName: Gray 1
+    target: 25
+    color: 4
+    rewardItemType: 4
+    rewardAmount: 50
+  - id: 6
+    missionType: 1
+    description: ClearBox 30
+    iconName: Clear
+    target: 30
+    color: 0
+    rewardItemType: 5
+    rewardAmount: 10
+  - id: 7
+    missionType: 2
+    description: CompleteLevel 35
+    iconName: Complete
+    target: 35
+    color: 1
+    rewardItemType: 0
+    rewardAmount: 20
+  - id: 8
+    missionType: 3
+    description: Rainbow 40
+    iconName: Rainbow
+    target: 40
+    color: 2
+    rewardItemType: 1
+    rewardAmount: 30
+  - id: 9
+    missionType: 0
+    description: CollectScrew 45
+    iconName: Blue 1
+    target: 45
+    color: 3
+    rewardItemType: 2
+    rewardAmount: 40
+  - id: 10
+    missionType: 1
+    description: ClearBox 50
+    iconName: Gray
+    target: 50
+    color: 4
+    rewardItemType: 3
+    rewardAmount: 50
+  - id: 11
+    missionType: 2
+    description: CompleteLevel 5
+    iconName: Complete
+    target: 5
+    color: 0
+    rewardItemType: 4
+    rewardAmount: 10
+  - id: 12
+    missionType: 3
+    description: Rainbow 10
+    iconName: Rainbow
+    target: 10
+    color: 1
+    rewardItemType: 5
+    rewardAmount: 20
+  - id: 13
+    missionType: 0
+    description: CollectScrew 15
+    iconName: Red 1
+    target: 15
+    color: 2
+    rewardItemType: 0
+    rewardAmount: 30
+  - id: 14
+    missionType: 1
+    description: ClearBox 20
+    iconName: Blue
+    target: 20
+    color: 3
+    rewardItemType: 1
+    rewardAmount: 40
+  - id: 15
+    missionType: 2
+    description: CompleteLevel 25
+    iconName: Complete
+    target: 25
+    color: 4
+    rewardItemType: 2
+    rewardAmount: 50
+  - id: 16
+    missionType: 3
+    description: Rainbow 30
+    iconName: Rainbow
+    target: 30
+    color: 0
+    rewardItemType: 3
+    rewardAmount: 10
+  - id: 17
+    missionType: 0
+    description: CollectScrew 35
+    iconName: Empty 1
+    target: 35
+    color: 1
+    rewardItemType: 4
+    rewardAmount: 20
+  - id: 18
+    missionType: 1
+    description: ClearBox 40
+    iconName: Red
+    target: 40
+    color: 2
+    rewardItemType: 5
+    rewardAmount: 30
+  - id: 19
+    missionType: 2
+    description: CompleteLevel 45
+    iconName: Complete
+    target: 45
+    color: 3
+    rewardItemType: 0
+    rewardAmount: 40
+  - id: 20
+    missionType: 3
+    description: Rainbow 50
+    iconName: Rainbow
+    target: 50
+    color: 4
+    rewardItemType: 1
+    rewardAmount: 50
+  - id: 21
+    missionType: 0
+    description: CollectScrew 5
+    iconName: Clear 1
+    target: 5
+    color: 0
+    rewardItemType: 2
+    rewardAmount: 10
+  - id: 22
+    missionType: 1
+    description: ClearBox 10
+    iconName: Empty
+    target: 10
+    color: 1
+    rewardItemType: 3
+    rewardAmount: 20
+  - id: 23
+    missionType: 2
+    description: CompleteLevel 15
+    iconName: Complete
+    target: 15
+    color: 2
+    rewardItemType: 4
+    rewardAmount: 30
+  - id: 24
+    missionType: 3
+    description: Rainbow 20
+    iconName: Rainbow
+    target: 20
+    color: 3
+    rewardItemType: 5
+    rewardAmount: 40
+  - id: 25
+    missionType: 0
+    description: CollectScrew 25
+    iconName: Gray 1
+    target: 25
+    color: 4
+    rewardItemType: 0
+    rewardAmount: 50
+  - id: 26
+    missionType: 1
+    description: ClearBox 30
+    iconName: Clear
+    target: 30
+    color: 0
+    rewardItemType: 1
+    rewardAmount: 10
+  - id: 27
+    missionType: 2
+    description: CompleteLevel 35
+    iconName: Complete
+    target: 35
+    color: 1
+    rewardItemType: 2
+    rewardAmount: 20
+  - id: 28
+    missionType: 3
+    description: Rainbow 40
+    iconName: Rainbow
+    target: 40
+    color: 2
+    rewardItemType: 3
+    rewardAmount: 30
+  - id: 29
+    missionType: 0
+    description: CollectScrew 45
+    iconName: Blue 1
+    target: 45
+    color: 3
+    rewardItemType: 4
+    rewardAmount: 40
+  - id: 30
+    missionType: 1
+    description: ClearBox 50
+    iconName: Gray
+    target: 50
+    color: 4
+    rewardItemType: 5
+    rewardAmount: 50
+  - id: 31
+    missionType: 2
+    description: CompleteLevel 5
+    iconName: Complete
+    target: 5
+    color: 0
+    rewardItemType: 0
+    rewardAmount: 10
+  - id: 32
+    missionType: 3
+    description: Rainbow 10
+    iconName: Rainbow
+    target: 10
+    color: 1
+    rewardItemType: 1
+    rewardAmount: 20
+  - id: 33
+    missionType: 0
+    description: CollectScrew 15
+    iconName: Red 1
+    target: 15
+    color: 2
+    rewardItemType: 2
+    rewardAmount: 30
+  - id: 34
+    missionType: 1
+    description: ClearBox 20
+    iconName: Blue
+    target: 20
+    color: 3
+    rewardItemType: 3
+    rewardAmount: 40
+  - id: 35
+    missionType: 2
+    description: CompleteLevel 25
+    iconName: Complete
+    target: 25
+    color: 4
+    rewardItemType: 4
+    rewardAmount: 50
+  - id: 36
+    missionType: 3
+    description: Rainbow 30
+    iconName: Rainbow
+    target: 30
+    color: 0
+    rewardItemType: 5
+    rewardAmount: 10
+  - id: 37
+    missionType: 0
+    description: CollectScrew 35
+    iconName: Empty 1
+    target: 35
+    color: 1
+    rewardItemType: 0
+    rewardAmount: 20
+  - id: 38
+    missionType: 1
+    description: ClearBox 40
+    iconName: Red
+    target: 40
+    color: 2
+    rewardItemType: 1
+    rewardAmount: 30
+  - id: 39
+    missionType: 2
+    description: CompleteLevel 45
+    iconName: Complete
+    target: 45
+    color: 3
+    rewardItemType: 2
+    rewardAmount: 40
+  - id: 40
+    missionType: 3
+    description: Rainbow 50
+    iconName: Rainbow
+    target: 50
+    color: 4
+    rewardItemType: 3
+    rewardAmount: 50
+  - id: 41
+    missionType: 0
+    description: CollectScrew 5
+    iconName: Clear 1
+    target: 5
+    color: 0
+    rewardItemType: 4
+    rewardAmount: 10
+  - id: 42
+    missionType: 1
+    description: ClearBox 10
+    iconName: Empty
+    target: 10
+    color: 1
+    rewardItemType: 5
+    rewardAmount: 20
+  - id: 43
+    missionType: 2
+    description: CompleteLevel 15
+    iconName: Complete
+    target: 15
+    color: 2
+    rewardItemType: 0
+    rewardAmount: 30
+  - id: 44
+    missionType: 3
+    description: Rainbow 20
+    iconName: Rainbow
+    target: 20
+    color: 3
+    rewardItemType: 1
+    rewardAmount: 40
+  - id: 45
+    missionType: 0
+    description: CollectScrew 25
+    iconName: Gray 1
+    target: 25
+    color: 4
+    rewardItemType: 2
+    rewardAmount: 50
+  - id: 46
+    missionType: 1
+    description: ClearBox 30
+    iconName: Clear
+    target: 30
+    color: 0
+    rewardItemType: 3
+    rewardAmount: 10
+  - id: 47
+    missionType: 2
+    description: CompleteLevel 35
+    iconName: Complete
+    target: 35
+    color: 1
+    rewardItemType: 4
+    rewardAmount: 20
+  - id: 48
+    missionType: 3
+    description: Rainbow 40
+    iconName: Rainbow
+    target: 40
+    color: 2
+    rewardItemType: 5
+    rewardAmount: 30
+  - id: 49
+    missionType: 0
+    description: CollectScrew 45
+    iconName: Blue 1
+    target: 45
+    color: 3
+    rewardItemType: 0
+    rewardAmount: 40
+  - id: 50
+    missionType: 1
+    description: ClearBox 50
+    iconName: Gray
+    target: 50
+    color: 4
+    rewardItemType: 1
+    rewardAmount: 50
+  - id: 51
+    missionType: 2
+    description: CompleteLevel 5
+    iconName: Complete
+    target: 5
+    color: 0
+    rewardItemType: 2
+    rewardAmount: 10
+  - id: 52
+    missionType: 3
+    description: Rainbow 10
+    iconName: Rainbow
+    target: 10
+    color: 1
+    rewardItemType: 3
+    rewardAmount: 20
+  - id: 53
+    missionType: 0
+    description: CollectScrew 15
+    iconName: Red 1
+    target: 15
+    color: 2
+    rewardItemType: 4
+    rewardAmount: 30
+  - id: 54
+    missionType: 1
+    description: ClearBox 20
+    iconName: Blue
+    target: 20
+    color: 3
+    rewardItemType: 5
+    rewardAmount: 40
+  - id: 55
+    missionType: 2
+    description: CompleteLevel 25
+    iconName: Complete
+    target: 25
+    color: 4
+    rewardItemType: 0
+    rewardAmount: 50
+  - id: 56
+    missionType: 3
+    description: Rainbow 30
+    iconName: Rainbow
+    target: 30
+    color: 0
+    rewardItemType: 1
+    rewardAmount: 10
+  - id: 57
+    missionType: 0
+    description: CollectScrew 35
+    iconName: Empty 1
+    target: 35
+    color: 1
+    rewardItemType: 2
+    rewardAmount: 20
+  - id: 58
+    missionType: 1
+    description: ClearBox 40
+    iconName: Red
+    target: 40
+    color: 2
+    rewardItemType: 3
+    rewardAmount: 30
+  - id: 59
+    missionType: 2
+    description: CompleteLevel 45
+    iconName: Complete
+    target: 45
+    color: 3
+    rewardItemType: 4
+    rewardAmount: 40
+  - id: 60
+    missionType: 3
+    description: Rainbow 50
+    iconName: Rainbow
+    target: 50
+    color: 4
+    rewardItemType: 5
+    rewardAmount: 50
+  - id: 61
+    missionType: 0
+    description: CollectScrew 5
+    iconName: Clear 1
+    target: 5
+    color: 0
+    rewardItemType: 0
+    rewardAmount: 10
+  - id: 62
+    missionType: 1
+    description: ClearBox 10
+    iconName: Empty
+    target: 10
+    color: 1
+    rewardItemType: 1
+    rewardAmount: 20
+  - id: 63
+    missionType: 2
+    description: CompleteLevel 15
+    iconName: Complete
+    target: 15
+    color: 2
+    rewardItemType: 2
+    rewardAmount: 30
+  - id: 64
+    missionType: 3
+    description: Rainbow 20
+    iconName: Rainbow
+    target: 20
+    color: 3
+    rewardItemType: 3
+    rewardAmount: 40
+  - id: 65
+    missionType: 0
+    description: CollectScrew 25
+    iconName: Gray 1
+    target: 25
+    color: 4
+    rewardItemType: 4
+    rewardAmount: 50
+  - id: 66
+    missionType: 1
+    description: ClearBox 30
+    iconName: Clear
+    target: 30
+    color: 0
+    rewardItemType: 5
+    rewardAmount: 10
+  - id: 67
+    missionType: 2
+    description: CompleteLevel 35
+    iconName: Complete
+    target: 35
+    color: 1
+    rewardItemType: 0
+    rewardAmount: 20
+  - id: 68
+    missionType: 3
+    description: Rainbow 40
+    iconName: Rainbow
+    target: 40
+    color: 2
+    rewardItemType: 1
+    rewardAmount: 30
+  - id: 69
+    missionType: 0
+    description: CollectScrew 45
+    iconName: Blue 1
+    target: 45
+    color: 3
+    rewardItemType: 2
+    rewardAmount: 40
+  - id: 70
+    missionType: 1
+    description: ClearBox 50
+    iconName: Gray
+    target: 50
+    color: 4
+    rewardItemType: 3
+    rewardAmount: 50
+  - id: 71
+    missionType: 2
+    description: CompleteLevel 5
+    iconName: Complete
+    target: 5
+    color: 0
+    rewardItemType: 4
+    rewardAmount: 10
+  - id: 72
+    missionType: 3
+    description: Rainbow 10
+    iconName: Rainbow
+    target: 10
+    color: 1
+    rewardItemType: 5
+    rewardAmount: 20
+  - id: 73
+    missionType: 0
+    description: CollectScrew 15
+    iconName: Red 1
+    target: 15
+    color: 2
+    rewardItemType: 0
+    rewardAmount: 30
+  - id: 74
+    missionType: 1
+    description: ClearBox 20
+    iconName: Blue
+    target: 20
+    color: 3
+    rewardItemType: 1
+    rewardAmount: 40
+  - id: 75
+    missionType: 2
+    description: CompleteLevel 25
+    iconName: Complete
+    target: 25
+    color: 4
+    rewardItemType: 2
+    rewardAmount: 50
+  - id: 76
+    missionType: 3
+    description: Rainbow 30
+    iconName: Rainbow
+    target: 30
+    color: 0
+    rewardItemType: 3
+    rewardAmount: 10
+  - id: 77
+    missionType: 0
+    description: CollectScrew 35
+    iconName: Empty 1
+    target: 35
+    color: 1
+    rewardItemType: 4
+    rewardAmount: 20
+  - id: 78
+    missionType: 1
+    description: ClearBox 40
+    iconName: Red
+    target: 40
+    color: 2
+    rewardItemType: 5
+    rewardAmount: 30
+  - id: 79
+    missionType: 2
+    description: CompleteLevel 45
+    iconName: Complete
+    target: 45
+    color: 3
+    rewardItemType: 0
+    rewardAmount: 40
+  - id: 80
+    missionType: 3
+    description: Rainbow 50
+    iconName: Rainbow
+    target: 50
+    color: 4
+    rewardItemType: 1
+    rewardAmount: 50
+  - id: 81
+    missionType: 0
+    description: CollectScrew 5
+    iconName: Clear 1
+    target: 5
+    color: 0
+    rewardItemType: 2
+    rewardAmount: 10
+  - id: 82
+    missionType: 1
+    description: ClearBox 10
+    iconName: Empty
+    target: 10
+    color: 1
+    rewardItemType: 3
+    rewardAmount: 20
+  - id: 83
+    missionType: 2
+    description: CompleteLevel 15
+    iconName: Complete
+    target: 15
+    color: 2
+    rewardItemType: 4
+    rewardAmount: 30
+  - id: 84
+    missionType: 3
+    description: Rainbow 20
+    iconName: Rainbow
+    target: 20
+    color: 3
+    rewardItemType: 5
+    rewardAmount: 40
+  - id: 85
+    missionType: 0
+    description: CollectScrew 25
+    iconName: Gray 1
+    target: 25
+    color: 4
+    rewardItemType: 0
+    rewardAmount: 50
+  - id: 86
+    missionType: 1
+    description: ClearBox 30
+    iconName: Clear
+    target: 30
+    color: 0
+    rewardItemType: 1
+    rewardAmount: 10
+  - id: 87
+    missionType: 2
+    description: CompleteLevel 35
+    iconName: Complete
+    target: 35
+    color: 1
+    rewardItemType: 2
+    rewardAmount: 20
+  - id: 88
+    missionType: 3
+    description: Rainbow 40
+    iconName: Rainbow
+    target: 40
+    color: 2
+    rewardItemType: 3
+    rewardAmount: 30
+  - id: 89
+    missionType: 0
+    description: CollectScrew 45
+    iconName: Blue 1
+    target: 45
+    color: 3
+    rewardItemType: 4
+    rewardAmount: 40
+  - id: 90
+    missionType: 1
+    description: ClearBox 50
+    iconName: Gray
+    target: 50
+    color: 4
+    rewardItemType: 5
+    rewardAmount: 50
+  - id: 91
+    missionType: 2
+    description: CompleteLevel 5
+    iconName: Complete
+    target: 5
+    color: 0
+    rewardItemType: 0
+    rewardAmount: 10
+  - id: 92
+    missionType: 3
+    description: Rainbow 10
+    iconName: Rainbow
+    target: 10
+    color: 1
+    rewardItemType: 1
+    rewardAmount: 20
+  - id: 93
+    missionType: 0
+    description: CollectScrew 15
+    iconName: Red 1
+    target: 15
+    color: 2
+    rewardItemType: 2
+    rewardAmount: 30
+  - id: 94
+    missionType: 1
+    description: ClearBox 20
+    iconName: Blue
+    target: 20
+    color: 3
+    rewardItemType: 3
+    rewardAmount: 40
+  - id: 95
+    missionType: 2
+    description: CompleteLevel 25
+    iconName: Complete
+    target: 25
+    color: 4
+    rewardItemType: 4
+    rewardAmount: 50
+  - id: 96
+    missionType: 3
+    description: Rainbow 30
+    iconName: Rainbow
+    target: 30
+    color: 0
+    rewardItemType: 5
+    rewardAmount: 10
+  - id: 97
+    missionType: 0
+    description: CollectScrew 35
+    iconName: Empty 1
+    target: 35
+    color: 1
+    rewardItemType: 0
+    rewardAmount: 20
+  - id: 98
+    missionType: 1
+    description: ClearBox 40
+    iconName: Red
+    target: 40
+    color: 2
+    rewardItemType: 1
+    rewardAmount: 30
+  - id: 99
+    missionType: 2
+    description: CompleteLevel 45
+    iconName: Complete
+    target: 45
+    color: 3
+    rewardItemType: 2
+    rewardAmount: 40
+  - id: 100
+    missionType: 3
+    description: Rainbow 50
+    iconName: Rainbow
+    target: 50
+    color: 4
+    rewardItemType: 3
+    rewardAmount: 50

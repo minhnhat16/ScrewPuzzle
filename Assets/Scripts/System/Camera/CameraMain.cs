@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ public class CameraMain : MonoBehaviour
     public GameObject _obj;
     private const float baseAspect = 9f / 16f;
     public float rate;
-    public virtual  void Awake()
+    public virtual void Awake()
     {
         instance = this;
         GetCamera();
@@ -25,20 +25,21 @@ public class CameraMain : MonoBehaviour
     public virtual void Start()
     {
         rate = baseAspect;
+        GetCamera();
         GetCameraAspect();
-
     }
     public void GetCamera()
     {
         if (_obj == null)
         {
-            _obj = Instantiate(Resources.Load("Prefabs/Camera/MainCamera", typeof(GameObject)),transform) as GameObject;
+            _obj = Instantiate(Resources.Load("Prefabs/Camera/MainCamera", typeof(GameObject)), transform) as GameObject;
             _obj.transform.SetParent(transform.parent);
         }
         main = _obj.GetComponent<Camera>();
     }
     public Camera GetCam()
-    {   GetCamera();
+    {
+        GetCamera();
         return main;
     }
     public void GetCameraAspect()
@@ -58,7 +59,7 @@ public class CameraMain : MonoBehaviour
     }
     public float GetTop()
     {
-        return main.transform.position.y + height* 0.5f;
+        return main.transform.position.y + height * 0.5f;
     }
     public float GetBottom()
     {
@@ -67,6 +68,6 @@ public class CameraMain : MonoBehaviour
 
     public Vector3 GetTopRight()
     {
-        return new Vector3(GetRight(),GetTop());
+        return new Vector3(GetRight(), GetTop());
     }
 }

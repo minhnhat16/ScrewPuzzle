@@ -30,8 +30,8 @@ namespace Enums
         }
         public static Sprite ToScrewSprite(this ColorEnum colorEnum)
         {
-            string path = $"{GameConstants.SCREW_SPRITE_PATH}/{colorEnum.ToColorString()}";
-            var sprite = Resources.Load<Sprite>($"{path}");
+            string path = $"Screw_{colorEnum.ToColorString()}";
+            var sprite = SpriteLibControl.Instance.GetSprite(0,SpriteGroup.UI,path);
 
 
             Debug.Assert(sprite != null, $"Sprite not found for color: {colorEnum.ToColorString()} at path: {path}");
@@ -42,11 +42,12 @@ namespace Enums
         public static Sprite ToBoxSprite(this ColorEnum colorEnum)
         {
             if(colorEnum == ColorEnum.Clear ) return null;
-            string path = $"{GameConstants.BOX_SPRITE_PATH}/{colorEnum.ToColorString()}";
+            string path = $"{colorEnum.ToColorString()}";
 
-            var sprite = Resources.Load<Sprite>($"{path}");
-            if(sprite ==null ) sprite = Resources.Load<Sprite>($"{GameConstants.BOX_SPRITE_PATH}/Green");
-            
+            var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, path);
+
+
+            if (sprite == null) sprite = Resources.Load<Sprite>($"{GameConstants.BOX_SPRITE_PATH}/Green");
 
 
             return sprite;

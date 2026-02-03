@@ -1,13 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class TaskManager : SingletonMono<TaskManager>
 {
 
+    // include current task progress in overall progress
     public float TotalProgress =>
-            tasks.Count == 0 ? 0 : currentTaskIndex / (float)tasks.Count;
+            tasks.Count == 0 ? 0 : (currentTaskIndex + CurrentTaskProgress) / (float)tasks.Count;
 
     public readonly List<Func<IEnumerator>> tasks = new();
     private int currentTaskIndex = 0;
@@ -33,8 +34,14 @@ public class TaskManager : SingletonMono<TaskManager>
             var task = tasks[i];
             float start = Time.realtimeSinceStartup;
 
-            // Run task
+            // reset current-task progress before starting
+            SetCurrentTaskProgress(0f);
+
+            // Run task (task coroutine should call SetCurrentTaskProgress as it progresses)
             yield return StartCoroutine(task());
+
+            // ensure task shows completed
+            SetCurrentTaskProgress(1f);
 
             float duration = Time.realtimeSinceStartup - start;
             Debug.Log($"[BOOT] Task {i + 1}/{tasks.Count} finished in {duration:0.00} sec");
@@ -47,10 +54,9 @@ public class TaskManager : SingletonMono<TaskManager>
 
         // Clear task list
         tasks.Clear();
-
         // Invoke callback once
         callback?.Invoke();
     }
 
-    
+
 }

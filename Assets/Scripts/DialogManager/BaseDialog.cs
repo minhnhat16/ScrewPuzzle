@@ -42,6 +42,7 @@ public class BaseDialog : MonoBehaviour
 
     public void HideDialogAnimation(Action callback)
     {
+        SoundHelper.PlaySFX(SoundManager.SFX.Close);
         baseDialogAnim.HideDialogAnimation(() =>
         {
             //Debug.Log("Hide dialog anim");
@@ -55,7 +56,7 @@ public class BaseDialog : MonoBehaviour
 
     public virtual void OnEndShowDialog() { }
 
-    public virtual void OnStartHideDialog() { }
+    public virtual void OnStartHideDialog() {  }
 
     public virtual void OnEndHideDialog() { }
 
