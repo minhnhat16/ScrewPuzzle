@@ -1,4 +1,5 @@
 ﻿using ConfigFile;
+using Managers;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -30,7 +31,10 @@ namespace System.DataBase
             });
             Debug.Log("==========> BOOT DATA DONE <==========");
         }
-
+        public void SetNewPlayer(bool isNew)
+        {
+            dataModel.UpdateData(DataPath.NEWPLAYER, isNew);
+        }
         public bool IsNewPlayer()
         {
             return dataModel.ReadData<bool>(DataPath.NEWPLAYER);
@@ -45,6 +49,7 @@ namespace System.DataBase
         {
             var current = dataModel.ReadData<int>(DataPath.CURRENTPLAYERLEVEL);
             current += 1;
+            if(current > 0) SetNewPlayer(current <=0);  
             SavePlayerLevel(current);
         }
         public int GetPlayerLevel()
@@ -971,6 +976,46 @@ namespace System.DataBase
         internal bool GetSoundSetting()
         {
             return dataModel.ReadData<bool>(DataPath.SOUNDFX);
+        }
+
+        internal List<LevelData> GetLevelProgress()
+        {
+            var levelProgress = dataModel.ReadData<List<LevelData>>(DataPath.ALLLEVEL);
+            return levelProgress ?? new List<LevelData>();
+        }
+
+        internal void SaveSpecial(Special special)
+        {
+            dataModel.UpdateData(DataPath.SPECIAL, special, () =>
+            {
+                if(special.currentSpecial >= special.targetSpecial)
+                {
+                    IngameController.ins.onSpecialDone.Invoke();
+                }
+            });
+           
+        }
+
+        internal Special GetSpecial()
+        {
+            return dataModel.ReadData<Special>(DataPath.SPECIAL);
+        }
+
+        internal void AddSpecial(int amount)
+        {
+            var special = GetSpecial();
+            if (special == null)
+            {
+                special = new Special { currentSpecial = 0 };
+            }
+            special.currentSpecial += amount;
+            SaveSpecial(special);   
+        }
+
+        internal bool ClaimSpecialToday()
+        {
+            var special = GetSpecial();
+            return special.claimed;
         }
         #endregion
 

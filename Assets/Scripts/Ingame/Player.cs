@@ -35,10 +35,26 @@ namespace Ingame
             onScrewClicked.RemoveListener(ScrewClicked);
             base.OnDisable();
         }
+        bool IsPointerOverBlockingUI(Vector2 screenPos)
+        {
+            PointerEventData eventData = new PointerEventData(EventSystem.current);
+            eventData.position = screenPos;
 
+            List<RaycastResult> results = new();
+            EventSystem.current.RaycastAll(eventData, results);
+
+            foreach (var r in results)
+            {
+                // chỉ block nếu KHÔNG phải spotlight
+                if (r.gameObject.GetComponent<SpotlightRaycastBlocker>() == null)
+                    return true;
+            }
+
+            return false;
+        }
         protected override void HandleInput(Vector3 screenPos)
         {
-            bool poiterOver = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            bool poiterOver = EventSystem.current != null && IsPointerOverBlockingUI(screenPos);
             bool isHandlingItem = ItemController.ins.IsHandlingHammer;
             //Debug.Log("is pointer over UI: " + poiterOver + ", handling item " + isHandlingItem);
             if (poiterOver)
@@ -69,7 +85,7 @@ namespace Ingame
 
             var box = PickAtScreenPos<BoxThreeHold>(screenPos, "Player");
 
-            Debug.Log("is box null" + box);
+           // Debug.Log("is box null" + box);
             if (box != null && box.IsLocked)
             {
                 IngameController.ins.ShowAddBox();

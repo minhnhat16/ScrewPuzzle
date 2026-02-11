@@ -37,7 +37,7 @@ namespace Managers
         [HideInInspector] public UnityEvent<int> onGemChanged;
         [HideInInspector] public UnityEvent<float> onExpChange;
         [HideInInspector] public UnityEvent<bool> onCompleteLevel;
-        [HideInInspector] public UnityEvent<ItemType,Vector3> onItemInvoke;
+        [HideInInspector] public UnityEvent<ItemType, Vector3> onItemInvoke;
 
         public bool isPause;
 
@@ -54,7 +54,7 @@ namespace Managers
         }
 
         public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
-        public UnityEvent<float> onStarChange = new();
+        public UnityEvent onSpecialDone = new();
         public int CurrentStar { get => currentStar; set => currentStar = value; }
         public int TotalStarInLevel { get => totalStarInLevel; set => totalStarInLevel = value; }
         public UnityEvent OnRainbowGoalCompleted { get; internal set; }
@@ -63,6 +63,8 @@ namespace Managers
 
 
         private SideMission currentMission;
+        internal UnityEvent<float> onStarChange;
+        internal UnityEvent specialClaim;
 
         private void OnEnable()
         {
@@ -74,8 +76,20 @@ namespace Managers
             }
             StarMoveCounter.OnAllStarsFinished += OnAllStarsDone;
 
+            onSpecialDone.AddListener(() =>
+            {
+                MissionParam param = new MissionParam();
+                var special = DataAPIController.instance.GetSpecial();
+                param.current = special.currentSpecial;
+                param.target = special.targetSpecial;
+                param.totalGold = DataAPIController.instance.GetGold();
+                param.totalTicket = DataAPIController.instance.GetTicket();
+                DialogManager.ins.ShowDialog(DialogIndex.MissionDialog, param);
+            });
+
         }
 
+ 
 
         private void OnDisable()
         {
@@ -85,25 +99,30 @@ namespace Managers
                 StopCoroutine(inputCoroutine);
                 inputCoroutine = null;
             }
-
+            onSpecialDone.RemoveAllListeners();
             onItemInvoke.RemoveAllListeners();
             StarMoveCounter.OnAllStarsFinished -= OnAllStarsDone;
 
         }
 
-    
 
-       
+
+
         private static void CompleteLevel(bool onComplete)
         {
             Debug.Log("Level complete");
             int level = LevelManager.ins.currentLevelID;
-            int totalGold = GameManager.instance.GoldCalculation(level);
-            WinParam param = new();
+            long totalGold = DataAPIController.instance.GetGold();
+            WinParam param = new()
+            {
+                level= level,
+                totalGold = DataAPIController.instance.GetGold(),
+            };
+            
             param.totalGold = DataAPIController.instance.GetGold();
 
             DataAPIController.instance.AddOneCurrent();
-            DialogManager.ins.ShowDialog(DialogIndex.WinDialog);
+            DialogManager.ins.ShowDialog(DialogIndex.WinDialog,param);
             MissionManager.ins.ProcessLevelComplete();
         }
 
@@ -120,7 +139,11 @@ namespace Managers
             {
                 Reset();
             }
-            ;
+
+            if (Input.GetKey(KeyCode.F1))
+            {
+
+            }
         }
 
         public void ActivateBG(bool isActive)
@@ -160,7 +183,7 @@ namespace Managers
             StartCoroutine(ItemCoroutine(item, targetpos));
         }
 
-        private IEnumerator ItemCoroutine(ItemType itemType,Vector3 targetpos)
+        private IEnumerator ItemCoroutine(ItemType itemType, Vector3 targetpos)
         {
             yield return new WaitUntil(() => itemJustInvoke);
             Debug.Log("x " + itemType);
@@ -239,28 +262,28 @@ namespace Managers
             callback?.Invoke();
         }
 
-        protected IEnumerator LoadBoxManager(Action callback)
-        {
-            if (boxManager != null) yield return null;
-            var boxManagerGO = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager"), transform);
-            yield return new WaitUntil(() => boxManagerGO != null);
-            boxManagerGO.TryGetComponent(out boxManager);
-            callback?.Invoke();
-        }
+        //protected IEnumerator LoadBoxManager(Action callback)
+        //{
+        //    if (boxManager != null) yield return null;
+        //    var boxManagerGO = Instantiate(Resources.Load<GameObject>($"Prefabs/BoxManager"), transform);
+        //    yield return new WaitUntil(() => boxManagerGO != null);
+        //    boxManagerGO.TryGetComponent(out boxManager);
+        //    callback?.Invoke();
+        //}
 
-        protected IEnumerator LoadArrayScrew(Action callback)
-        {
-            if (arrayScrew != null) yield return null;
-            var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrews"), transform);
-            yield return new WaitUntil(() => arrayScrew != null);
-            arrayScrewObj.TryGetComponent<ArrayScrew>(out arrayScrew);
-            callback?.Invoke();
-        }
+        //protected IEnumerator LoadArrayScrew(Action callback)
+        //{
+        //    if (arrayScrew != null) yield return null;
+        //    var arrayScrewObj = Instantiate(Resources.Load<GameObject>($"Prefabs/ArrayScrews"), transform);
+        //    yield return new WaitUntil(() => arrayScrew != null);
+        //    arrayScrewObj.TryGetComponent<ArrayScrew>(out arrayScrew);
+        //    callback?.Invoke();
+        //}
 
-        public void ClearAllScrewOnArray(Action callback)
-        {
-            
-        }
+        //public void ClearAllScrewOnArray(Action callback)
+        //{
+
+        //}
 
         private void ClearOneScrew(Action callback)
         {
@@ -315,7 +338,7 @@ namespace Managers
                 {
                     Debug.LogWarning("Key 1 pressed");
                     itemJustInvoke = true;
-                    onItemInvoke.Invoke(ItemType.Breaker,Vector3.zero);
+                    onItemInvoke.Invoke(ItemType.Breaker, Vector3.zero);
                 }
                 else if (Input.GetKey(KeyCode.Alpha2))
                 {
@@ -357,12 +380,12 @@ namespace Managers
         {
 
             LevelManager.ins.OnReset();
-          SoundManager.instance.PlaySFX(SoundManager.SFX.UI_Normal);
+            SoundManager.instance.PlaySFX(SoundManager.SFX.UI_Normal);
             DialogManager.ins.HideDialog(dialogIndex, () =>
             {
                 Debug.Log($"HideDialog {dialogIndex} ");
-               
-            
+
+
             });
 
             LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
@@ -414,13 +437,17 @@ namespace Managers
         public void SetSideMission(SideMission mission)
         {
             currentMission = mission;
-
-            if (mission != null)
+            bool missionAvailable = MissionManager.ins.IsMissionAvailable(mission);
+            if (mission != null && missionAvailable)
             {
+
                 MissionParam param = new MissionParam();
-                param.SideMission = mission;
-                param.current = 0;
-                param.target = mission.requiredCount;
+
+                var special = DataAPIController.instance.GetSpecial();
+                param.current = special.currentSpecial;
+                param.target = special.targetSpecial;
+                param.totalGold = DataAPIController.instance.GetGold();
+                param.totalTicket = DataAPIController.instance.GetTicket();
                 DialogManager.ins.ShowDialog(DialogIndex.MissionDialog, param);
             }
 

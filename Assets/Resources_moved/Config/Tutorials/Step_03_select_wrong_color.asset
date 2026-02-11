@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
+  m_Name: Step_03_select_wrong_color
+  m_EditorClassIdentifier: 
+  stepId: select_wrong_color
+  stepType: 1
+  message: "Th\u1EED ch\u1ECDn m\u1ED9t con \u1ED1c KH\xC1C m\xE0u"
+  targetKey: screw_green_1
+  blockInput: 0
+  completeEventKey: Screw.Selected
+  requiredPayload: blue_1

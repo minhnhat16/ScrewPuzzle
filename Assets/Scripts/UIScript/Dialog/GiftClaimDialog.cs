@@ -90,7 +90,7 @@ public class GiftClaimDialog : BaseDialog
     {
         // vào dialog là idle trước khi open
         AnimationHelper.PlaySpineAnimation(spineBox, animIdle, true);
-
+        SoundHelper.PlaySFX(SoundManager.SFX.GiftBoxOpen);
         StartCoroutine(PlayerClaimCouroutine());
     }
 
@@ -131,13 +131,15 @@ public class GiftClaimDialog : BaseDialog
 
         while (lootQueue.Count > 0)
         {
-            yield return new WaitForSeconds(0.35f);
+            yield return new WaitForSeconds(1f);
 
             var reward = lootQueue.Dequeue();
             var rewardItem = SpawnRewardItem(reward);
+
+            SoundHelper.PlaySFX(SoundManager.SFX.GiftItemAppear);
             yield return PlayPopAnimation(itemContainer.GetChild(itemContainer.childCount - 1));
 
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(1f);
             rewardItem.gameObject.SetActive(false);
         }
 

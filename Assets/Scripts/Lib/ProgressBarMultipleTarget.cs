@@ -66,7 +66,7 @@ public class ProgressBarMultipleTarget: ProgressBar
         SetProgress(param.TargetProgress);
     }
 
-    public override void SetProgress(float value)
+    public override void SetProgress(float value,bool bytime= true)
     {
         base.SetProgress(value);
         CheckUnlockStages(value);

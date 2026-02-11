@@ -1,7 +1,40 @@
 <linker>
   <assembly fullname="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="ChestConfig" preserve="all" />
+    <type fullname="CollectionConfig" preserve="all" />
+    <type fullname="ColorConfig" preserve="all" />
     <type fullname="ConfigFile.BoxConfig" preserve="all" />
+    <type fullname="ConfigFile.PackConfig" preserve="all" />
+    <type fullname="ConfigFile.TutorialConfig" preserve="all" />
+    <type fullname="DailyRewardConfig" preserve="all" />
+    <type fullname="ItemConfig" preserve="all" />
     <type fullname="Level.Level" preserve="all" />
+    <type fullname="MissionConfig" preserve="all" />
+    <type fullname="PriceConfig" preserve="all" />
+    <type fullname="PuzzleConfig" preserve="all" />
+    <type fullname="PuzzleParternConfig" preserve="all" />
+    <type fullname="QuestConfig" preserve="all" />
+    <type fullname="RewardConfig" preserve="all" />
+    <type fullname="SoundFactory" preserve="all" />
+    <type fullname="System.ConfigFile.LevelConfig" preserve="all" />
+    <type fullname="TutorialStep" preserve="all" />
+    <type fullname="ChestRecord" preserve="nothing" serialized="true" />
+    <type fullname="CollectionConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="ColorConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="ConfigFile.PackConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="ConfigFile.ShopItemRecord" preserve="nothing" serialized="true" />
+    <type fullname="DailyRewardConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="ItemConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="MissionConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="PriceConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="PuzzleBoardRecord" preserve="nothing" serialized="true" />
+    <type fullname="PuzzlePartenRecord" preserve="nothing" serialized="true" />
+    <type fullname="QuestRecord" preserve="nothing" serialized="true" />
+    <type fullname="RewardConfigRecord" preserve="nothing" serialized="true" />
+    <type fullname="RewardItem" preserve="nothing" serialized="true" />
+    <type fullname="SoundFactory/Music_SFX" preserve="nothing" serialized="true" />
+    <type fullname="SoundFactory/Sound_SFX" preserve="nothing" serialized="true" />
+    <type fullname="System.ConfigFile.LevelConfigRecord" preserve="nothing" serialized="true" />
     <type fullname="ConfigFile.BoxConfigRecord" preserve="nothing" serialized="true" />
     <type fullname="Level.BodyPartScriptable" preserve="nothing" serialized="true" />
     <type fullname="Level.HingeConnection" preserve="nothing" serialized="true" />
@@ -24,6 +57,9 @@
     <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
     <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
   </assembly>
+  <assembly fullname="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AudioClip" preserve="all" />
+  </assembly>
   <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UnityEngine.GameObject" preserve="all" />
     <type fullname="UnityEngine.Material" preserve="all" />
@@ -33,5 +69,6 @@
     <type fullname="UnityEngine.SpriteRenderer" preserve="all" />
     <type fullname="UnityEngine.Texture2D" preserve="all" />
     <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.U2D.SpriteAtlas" preserve="all" />
   </assembly>
 </linker>

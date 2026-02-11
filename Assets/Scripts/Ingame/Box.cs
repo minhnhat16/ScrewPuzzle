@@ -6,6 +6,7 @@ using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
@@ -14,6 +15,7 @@ using UnityEditor;
 using UnityEditor.Analytics;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using static SoundManager;
 using Sequence = DG.Tweening.Sequence;
@@ -191,6 +193,7 @@ namespace Ingame
             // set box active fasle
             //Debug.Log("Box full invoker " + gameObject.name);
             StartCoroutine(InactiveBoxCoroutine());
+
         }
 
         IEnumerator InactiveBoxCoroutine()
@@ -480,7 +483,7 @@ namespace Ingame
             }
 
 
-            Debug.Log("Next empty index " + nextEmptyIndex);
+            //Debug.Log("Next empty index " + nextEmptyIndex);
         }
 
         // Hàm để thay đổi màu của CrewBox
@@ -528,10 +531,17 @@ namespace Ingame
         public void OnReset()
         {
             Reset();
-            holdScrews.RemoveAll(h => !h.IsEmpty());
             SetIsLocked(false);
             StopAllCoroutines();
             ClearScrewOnHold();
+            foreach (var item in holdScrews)
+            {
+                if(item.Screw != null)
+                {
+                    ScrewPool.Instance.Pool.ReturnToPool(item.Screw);
+                    item.Screw = null;
+                }
+            }
         }
     }
 }

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
+  m_Name: Step_04_wrong_color_to_queue
+  m_EditorClassIdentifier: 
+  stepId: wrong_color_to_queue
+  stepType: 1
+  message: "\u1ED0c kh\xE1c m\xE0u s\u1EBD \u0111\u01B0\u1EE3c \u0111\u01B0a v\xE0o
+    h\xE0ng \u0111\u1EE3i"
+  targetKey: array_1
+  blockInput: 0
+  completeEventKey: Screw.InsertedToQueue
+  requiredPayload: array

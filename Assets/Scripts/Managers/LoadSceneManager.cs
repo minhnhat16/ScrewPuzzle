@@ -28,24 +28,21 @@ public class LoadSceneManager : MonoBehaviour
     public void LoadSceneByName(string sceneName, Action callback)
     {
 
-        Debug.Log("Start Load Scene: " + sceneName);
+        Debug.Log("Start Load Scene: " + sceneName + " current view " + ViewManager.Instance.currentView);
         StopAllCoroutines();
         this.callback = callback;
-
         this.sceneName = sceneName;
         ViewManager.Instance.SwitchView(ViewIndex.LoadingView, null, () =>
         {
+            Debug.Log("Loading View shown, start load process");
             StartCoroutine(RunFullLoadProcess());
         });
     }
     IEnumerator RunFullLoadProcess()
     {
-        // Run TaskManager's runner (it yields each registered task).
+        Debug.Log("Run task start");
         yield return StartCoroutine(TaskManager.ins.RunTasks());
-
         Debug.Log("Run task done");
-
-        // After tasks finished, run scene load progress (we pass the original callback to invoke after load)
         yield return StartCoroutine(LoadSceneProgress(sceneName, callback));
     }
 

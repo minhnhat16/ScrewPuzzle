@@ -1,9 +1,11 @@
 using Enums;
+using Ingame.Screw;
 using Managers;
 using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -65,11 +67,12 @@ namespace Ingame
             hold.gameObject.SetActive(true);
             totalWidth += 0.5f;
             HoldAlignment(() =>
-{
-});
+            {
+            });
         }
         public void ShowArrayScrew()
         {
+            if (!gameObject.activeSelf) gameObject.SetActive(true);
             coutHoldActive = 5;
             //spriteRenderer.enabled = true;
             for (int i = 0; i < coutHoldActive; i++)
@@ -217,10 +220,11 @@ namespace Ingame
             {
                 SoundHelper.PlaySFX(SFX.ScrewClicked);
                 AddScrewToHoldScrew(screw, emptyHoldScrew);
+
+
             }
             else
             {
-                // Nếu không có holdScrew trống, reset trạng thái của screw
                 screw.ResetClickedFlag();
             }
         }
@@ -239,10 +243,30 @@ namespace Ingame
             var suitableBox = BoxQueue.ins.FindSuitableBox(screw, false);
             bool canAdd = false;
 
-
+            bool isnewPlayer = DataAPIController.instance.IsNewPlayer();
             //Debug.Log("suitableBox: " + suitableBox?.Color);
             if (suitableBox != null)
             {
+                if (isnewPlayer)
+                {
+                    if (suitableBox.NextEmptyIndex < 1)
+                    {
+                        TutorialTargetRegistry.Register("box_1", suitableBox.transform);
+                        TutorialEventBus.Emit(
+                         "Screw.Selected",
+                         "red_1");
+                    }
+
+                    if (suitableBox.NextEmptyIndex >1)
+                    {
+                        TutorialTargetRegistry.Register("box_close", suitableBox.transform);
+                        TutorialEventBus.Emit(
+                         "Screw.Selected",
+                         "red_2");
+
+                    }
+
+                }
                 screw.SetSortingOrderAndLayer(4, "Box");
 
                 BoxQueue.ins.AddScrewToBox(screw, suitableBox, out canAdd);
@@ -260,10 +284,16 @@ namespace Ingame
             }
             if (canAdd) return;
             screw.SetSortingOrderAndLayer(4, "Box");
-
             holdScrew.AddScrew(screw, false, (onMoved) =>
             {
                 // Kiểm tra nếu tất cả holdScrew đã đầy
+                if (isnewPlayer)
+                {
+                    TutorialTargetRegistry.Register("array_1", holdScrew.transform);
+                    TutorialEventBus.Emit(
+                    "Screw.Selected",
+                    "blue_1");
+                }
 
                 //Debug.Log("Added screw to holdScrew");
                 CheckIfHoldScrewsFull();

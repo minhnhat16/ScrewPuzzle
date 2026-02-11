@@ -24,36 +24,31 @@ public class BootLoader : MonoBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
         // ----- REGISTER BOOT TASKS -----
-        TaskManager.ins.AddTask(Task_LoadRemoteAsset);
-        TaskManager.ins.AddTask(Task_InitConfig);
-        TaskManager.ins.AddTask(Task_InitData);
+        TaskManager.ins.AddDataInitTask(Task_LoadRemoteAsset);
+        TaskManager.ins.AddDataInitTask(Task_InitConfig);
+        TaskManager.ins.AddDataInitTask(Task_InitData);
         TaskManager.ins.AddTask(Task_InitMission);
         TaskManager.ins.AddTask(Task_SetupUI);
         TaskManager.ins.AddTask(Task_InitSound);
 
-        TaskManager.ins.AddTask(Task_FinishBoot);
+        StartCoroutine(TaskManager.ins.RunDataInitTask(() =>
+          {
+              Debug.Log("BootLoader: Load Scene after initdata  Done");
 
-        LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
-        {
-            float progressTime = TaskManager.ins.TotalProgress;
-            LoadSceneManager.ins.TimeWait = progressTime;
-            MainScreenViewParam param = new()
-            {
-                totalGold = DataAPIController.instance.GetGold(),
-                ticket = (int)DataAPIController.instance.GetTicket(),
-                level = DataAPIController.instance.GetPlayerLevel(),
-            };
+              bool isNew = DataAPIController.instance.IsNewPlayer();
+              string sceneName = isNew ? "InGame" : "Buffer";
+              LoadSceneManager.ins.LoadSceneByName(sceneName, () =>
+              {
 
-            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
-            {
-                Debug.Log("task run done switch view");
-                DayTimeController.instance.CheckNewDay();
-            });
-        });
-        // ----- RUN TASKS -----
-
+                  Debug.Log("BootLoader: Load Scene Done");
+                  float progressTime = TaskManager.ins.TotalProgress;
+                  LoadSceneManager.ins.TimeWait = progressTime;
+                  ViewManager.Instance.SwitchViewForNewPlayer(isNew);
+              });
+          }));
 
     }
+
 
     private IEnumerator Task_InitSound()
     {
@@ -107,6 +102,7 @@ public class BootLoader : MonoBehaviour
             Debug.LogError("[BOOT] InitConfig FAILED\n" + e);
             done = true; // tránh treo boot
         }
+        LevelManager.ins.Init();
 
         yield return new WaitUntil(() => done);
     }
@@ -133,7 +129,7 @@ public class BootLoader : MonoBehaviour
         bool done = false;
 
 
-        Debug.Log("Task load remote asset");    
+        Debug.Log("Task load remote asset");
         yield return ResourceManager.ins.Init(
             new List<string>
             {
@@ -149,6 +145,7 @@ public class BootLoader : MonoBehaviour
 
         }
         SpriteLibControl.Instance.LoadAllPartSprites(true);
+        Shader.WarmupAllShaders();
 
     }
 
@@ -160,7 +157,6 @@ public class BootLoader : MonoBehaviour
         gameManager = GetComponentInChildren<GameManager>();
         gameManager.SetUpIngame();
         gameManager.TrackLevelStart = 0;
-        LevelManager.ins.Init();
         ZenSDK.instance.TrackLevelStart(gameManager.TrackLevelStart);
 
         yield return null;

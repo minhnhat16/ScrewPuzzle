@@ -26,7 +26,6 @@ public class LayerVisibilityController : MonoBehaviour
     public int RePreviewMax { get => rePreviewMax; set => rePreviewMax = value; }
     public int PreViewMin { get => preViewMin; set => preViewMin = value; }
 
-
     internal void ApplyLayerVisibility()
     {
         // Use indexedLayers (preserves indices). Fallback to queue->list for legacy usage.
@@ -39,7 +38,7 @@ public class LayerVisibilityController : MonoBehaviour
 
         // ensure ranges valid for current count
         preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count));
-        previewMax = Mathf.Clamp(previewMax, preViewMin, count);
+        previewMax = Mathf.Clamp(previewMax + 1, preViewMin, count);
         rePreviewMax = Mathf.Clamp(rePreviewMax, previewMax, count);
 
         for (int i = 0; i < layers.Count; i++)
@@ -63,12 +62,7 @@ public class LayerVisibilityController : MonoBehaviour
             {
                 SetLayerHidden(layer, i, lm);
             }
-            else
-            {
-                // out-of-window -> disable
-                layer.gameObject.SetActive(false);
-                LayerUtils.ActiveObjectInLayer(false, layer, lm);
-            }
+           
         }
     }
 
@@ -163,6 +157,7 @@ public class LayerVisibilityController : MonoBehaviour
             go.SetActive(false);
 
         // Deactivate by BaseLayer
+
         LayerUtils.ActiveObjectInLayer(false, layer, lm);
         PreviewHiddenLayer(index);
     }
@@ -256,7 +251,7 @@ public class LayerVisibilityController : MonoBehaviour
         if (nextIndex < 0)
         {
             // fallback: keep previous behavior of incrementing by 1 (but clamped)
-            preViewMin = Mathf.Clamp(preViewMin + 1, 0, Math.Max(0, count - 1));
+            preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count - 1));
         }
         else
         {

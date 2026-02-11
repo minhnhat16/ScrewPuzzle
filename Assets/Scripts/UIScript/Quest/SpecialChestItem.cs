@@ -7,7 +7,7 @@ public class SpecialChestItem : QuestChestItem
     private UIEffect questParticle;
 
 
-    internal override void Awake()
+    public override void Awake()
     {
         base.Awake();
         questParticle = GetComponentInChildren<UIEffect>();

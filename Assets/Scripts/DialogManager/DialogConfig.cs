@@ -103,6 +103,10 @@ public class WinParam : DialogParam
     public int reward;
     public float score;
     public ItemType typeReward;
+    internal long ticket;
+
+    public int targetLevel;
+    public int currentLevel;
 }
 public class AddItemDialogParam : DialogParam
 {
@@ -156,6 +160,8 @@ public class NotifyDialog : DialogParam
 }
 public class MissionParam : DialogParam
 {
+    public long totalGold;
+    public long totalTicket;
     public int current;
     public int target;
     public SideMission SideMission;

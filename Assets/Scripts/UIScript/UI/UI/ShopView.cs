@@ -43,7 +43,7 @@ namespace UIScript.UI.UI
 
         IEnumerator InitView(Action callback)
         {
-            prefabDB = ConfigFileManager.Instance.GetConfig<ShopPrefabDatabase>();
+            prefabDB = Resources.Load<ShopPrefabDatabase>("Config/ShopPrefabDB");
             var config = ConfigFileManager.Instance.GetAllPackConfig();
             var packs = config.Where(p => p.Id == PackEnum.Pack).ToList();
             yield return null;

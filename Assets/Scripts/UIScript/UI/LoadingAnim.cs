@@ -24,8 +24,7 @@ public class LoadingAnim : BaseViewAnimation
     }
     public void ShowAnim()
     {
-        Debug.Log("show anim loading");
-
+        Debug.Log("show anim loading" + callback == null);
         callback?.Invoke();
     }
 

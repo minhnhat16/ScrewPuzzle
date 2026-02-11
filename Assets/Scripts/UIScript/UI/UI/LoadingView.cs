@@ -20,13 +20,18 @@ public class LoadingView : BaseView
     public override void Setup(ViewParam viewParam)
     {
         base.Setup(viewParam);
-        // Do not reset displayedProgress here; ResetProgress() called explicitly when a new load starts.
         ResetProgress();
+    }
+
+    public  void ShowViewAnimation()
+    {
+        base.ShowViewAnimation(() => { Debug.Log("Show loading anim"); });
     }
 
     public override void OnStartShowView()
     {
         base.OnStartShowView();
+        Debug.Log("ON start show view  loading ");
         // Do not reset displayedProgress here either.
     }
 
@@ -49,6 +54,7 @@ public class LoadingView : BaseView
 
     private void UpdateLoadingProgress()
     {
+
         if (TaskManager.ins == null)
             return;
 
@@ -77,7 +83,7 @@ public class LoadingView : BaseView
             loadingProgress.value = displayedProgress;
 
 #if UNITY_EDITOR
-        //Debug.Log($"Loading Progress target={target * 100f:0.0}% shown={displayedProgress * 100f:0.0}%");
+       //Debug.Log($"Loading Progress target={target * 100f:0.0}% shown={displayedProgress * 100f:0.0}%");
 #endif
 
         // =====================

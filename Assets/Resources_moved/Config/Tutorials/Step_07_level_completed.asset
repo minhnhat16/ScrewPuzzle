@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
+  m_Name: Step_07_level_completed
+  m_EditorClassIdentifier: 
+  stepId: level_completed
+  stepType: 0
+  message: "Tuy\u1EC7t v\u1EDDi! B\u1EA1n \u0111\xE3 hi\u1EC3u c\xE1ch ch\u01A1i
+    r\u1ED3i \u0111\xF3!!!"
+  targetKey: 
+  blockInput: 0
+  completeEventKey: Level.Completed
+  requiredPayload: 

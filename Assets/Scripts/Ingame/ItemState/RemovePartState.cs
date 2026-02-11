@@ -19,6 +19,7 @@ public class RemovePartState : FSMState<ItemController>
     {
         sys.PlaySkeAnimOnTarget(ItemType.Breaker, target, target, () =>
         {
+            SoundHelper.PlaySFX(SoundManager.SFX.Breaker);
             MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
             LevelManager.ins.RemovePartItem(part);
             sys.IsHandlingHammer = false;

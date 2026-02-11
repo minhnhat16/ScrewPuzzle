@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public static class CanvasPositioningExtensions
 {
@@ -138,5 +140,20 @@ public class ScreenToWorld : MonoBehaviour
     {
         Vector3 vect = CanvasPositioningExtensions.WorldToCanvasPosition(m_viewCanvas, position, m_WCamera, false);
         return vect;
+    }
+
+    internal Vector2 WorldToScreenCanvas(Transform target, Canvas canvas, out Vector2 localPos)
+    {
+        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(
+            Camera.main,
+            target.position
+        );
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvas.transform as RectTransform,
+            screenPos,
+            canvas.worldCamera,
+            out localPos
+        );
+        return localPos;
     }
 }

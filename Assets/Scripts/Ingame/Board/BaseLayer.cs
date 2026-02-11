@@ -20,6 +20,8 @@ namespace Ingame.Board
 
 
         public UnityEvent<bool, BasePart> onPartClear = new();
+        private bool isLayerClear;
+
         public Transform Transform
         {
             get => _transform;
@@ -43,6 +45,7 @@ namespace Ingame.Board
             get => dropPart;
             set => dropPart = value;
         }
+        public bool IsLayerClear { get => isLayerClear; set => isLayerClear = value; }
 
 
 
@@ -51,7 +54,7 @@ namespace Ingame.Board
 
         private void OnEnable()
         {
-            
+            IsLayerClear =false;
         }
         private void OnDisable()
         {
@@ -113,7 +116,7 @@ namespace Ingame.Board
 
         public void ClearLayer()
         {
-            // Ẩn hoặc xóa layer này
+            IsLayerClear = true;
             gameObject.SetActive(false);
             layerManager.OnLayerCleared(this);
         }
@@ -132,6 +135,7 @@ namespace Ingame.Board
         public void Reset()
         {
             parts.Clear();
+            IsLayerClear = false;
             dropPart = 0;
         }
     }

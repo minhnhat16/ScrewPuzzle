@@ -6,7 +6,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class ProgressBar : MonoBehaviour
 {
-   
+
 
     [Header("Assign the fill image (type: Filled)")]
     [SerializeField] internal Image fillImage;
@@ -38,9 +38,14 @@ public class ProgressBar : MonoBehaviour
     /// <summary>
     /// Set the progress value (0 to 1).
     /// </summary>
-    public virtual void SetProgress(float value)
+    public virtual void SetProgress(float value, bool bytime = true)
     {
         progress = value;
+        if (bytime)
+        {
+            UpdateProgressByTime(value, 0.5f, null);
+            return;
+        }
         UpdateProgress();
     }
 
@@ -52,7 +57,7 @@ public class ProgressBar : MonoBehaviour
         if (progressText != null)
             progressText.text = $"Loading {Mathf.RoundToInt(progress * 100)}%";
     }
-    public virtual void UpdateProgressByTime(float targetProgress, float duration = 1f,Action callback = null)
+    public virtual void UpdateProgressByTime(float targetProgress, float duration = 1f, Action callback = null)
     {
         if (fillImage != null)
         {
@@ -68,7 +73,7 @@ public class ProgressBar : MonoBehaviour
                          if (progressText != null)
                              progressText.text = $"Loading {Mathf.RoundToInt(progress * 100)}%";
                      })
-                     .OnComplete(()=>callback?.Invoke());
+                     .OnComplete(() => callback?.Invoke());
         }
     }
     private void ApplyFillDirection()

@@ -1,6 +1,7 @@
 using Enums;
 using Ingame.Screw;
 using PoolManager;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -304,5 +305,41 @@ namespace Ingame.Board
                 PartPool.Instance.pool.ReturnToPool(part);
             }
         }
+
+        internal int GetTopVisibleLayer()
+        {
+            if (screwDict == null || screwDict.Count == 0)
+                return -1;
+
+            int top = int.MaxValue;
+
+            foreach (var kv in screwDict)
+            {
+                int layer = kv.Key;
+                var list = kv.Value;
+
+                if (list == null || list.Count == 0)
+                    continue;
+
+                bool hasValid = false;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var s = list[i];
+                    if (s == null) continue;
+                    if (s.IsInHold) continue;
+
+                    hasValid = true;
+                    break;
+                }
+
+                if (!hasValid) continue;
+
+                if (layer < top)
+                    top = layer;
+            }
+
+            return top == int.MaxValue ? -1 : top ;
+        }
+
     }
 }

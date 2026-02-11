@@ -1,4 +1,5 @@
-﻿using ConfigFile;
+﻿using Coffee.UIExtensions;
+using ConfigFile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,8 @@ namespace UIScript
         [SerializeField] internal Image itemIcon;
         [SerializeField] internal Image ribon;
 
+
+        [SerializeField] internal UIParticle particles;
         [SerializeField]
         private RectTransform itemContainer;
 
@@ -41,6 +44,7 @@ namespace UIScript
 
         public Action<PackConfigRecord> OnBuyClicked;
         internal PackConfigRecord packData;
+
 
         public PackItem()
         {
@@ -64,6 +68,8 @@ namespace UIScript
 
         private void OnEnable()
         {
+            if(particles != null)
+                particles.SetMaterialDirty();
             purchaseButton.onClick.AddListener(() =>
             {
 

@@ -34,23 +34,34 @@ namespace UIScript.UI.UI
         public override void OnInit(Action callback = null)
         {
             base.OnInit(callback);
-            var  baseConfig= LevelManager.ins.levelConfig;
+
+            var baseConfig = LevelManager.ins.levelConfig
+                .OrderBy(c => c.levelId)
+                .ToList();
+
+            var data = DataAPIController.instance.GetLevelProgress(); // ví dụ
             List<BaseLevelItem> listLevel = new();
-            var data = DataAPIController.instance.GetAllLevelData();
 
-
-            baseConfig = baseConfig.OrderBy(level => level.levelId).ToList();
             foreach (var levelConfig in baseConfig)
             {
                 int id = levelConfig.levelId;
-                var currentLevel = data.Find((data) => data.levelID == id);
-                bool isComplete = currentLevel?.isCompleted == true;
-                BaseLevelItem newItem = new (id, isComplete, false);
+                var progress = data?.Find(d => d.levelID == id);
+
+                bool isComplete = progress?.isCompleted ?? false;
+
+                BaseLevelItem newItem = new(
+                    id,
+                    isComplete,
+                    false // locked / selected tuỳ logic
+                );
+
                 listLevel.Add(newItem);
             }
-            baseLevelItems= listLevel;
+            Debug.Log("Total levels initialized: " + listLevel.Count + " level config count " + baseConfig.Count    );
+            baseLevelItems = listLevel;
             InitListLevelItem(listLevel);
         }
+
         public override void Setup(ViewParam param)
         {
             if (param == null) return;
@@ -68,7 +79,7 @@ namespace UIScript.UI.UI
             foreach (var level in items)
             {
                 var levelOnPool = LevelItemPool.Instance.pool.SpawnNonGravity();
-                levelOnPool.IDLevel = level.IdLevel;
+                levelOnPool.IDLevel = level.IdLevel ;
                 levelOnPool.IsCompleted  = true;
                 levelOnPool.Init();
                 newItems.Add(levelOnPool);

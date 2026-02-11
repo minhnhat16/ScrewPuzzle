@@ -20,6 +20,12 @@ namespace Managers
 
         public Transform SpecialBoxAnchor { get => specialBoxAnchor; set => specialBoxAnchor = value; }
 
+
+
+        public void Init()
+        {
+            specialBoxAnchor.gameObject.SetActive(true);
+        }
         /// <summary>
         /// Lấy tổng số screw của 1 màu đã gom vào special box.
         /// </summary>
@@ -125,8 +131,6 @@ namespace Managers
                             {
                                 screw.gameObject.SetActive(false);
                                 ViewManager.Instance.UpdateSpecialBoxCount(color, screwCounts[color]);
-
-                                Debug.Log("screw collected and update mission " + color);
                                 MissionManager.ins.ProcessCollectScrew(color, 1);
                             }
                         });

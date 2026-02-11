@@ -102,6 +102,12 @@ public class QuestDialog : BaseDialog
     {
         if (stageId != currentStage)
             return;
+        if (chestItems.TryGetValue(stageId, out var chestItem))
+        {
+            chestItem.ApplyState();
+            chestItem.SetProgress(progress, required);
+
+        }
     }
 
     private void OnStageUnlocked(int stageId)
@@ -138,8 +144,11 @@ public class QuestDialog : BaseDialog
 
         if (chestItems.TryGetValue(stageId, out var chestItem))
         {
-            chestItem.SetProgress(1, required);
+            int progress = chestItem.Progress + 1;
+            chestItem.SetProgress(progress, required);
         }
+
+        SoundHelper.PlaySFX(SoundManager.SFX.MissionComplete);
     }
 
     // =====================================================
@@ -213,42 +222,51 @@ public class QuestDialog : BaseDialog
             CreateChestItem(chests[i], isMaxTier);
         }
     }
-    private void CreateChestItem(ChestRecord chest,bool isMaxtier = false)
+    private void CreateChestItem(ChestRecord chest, bool isMaxtier = false)
     {
         Transform parent = isMaxtier
             ? topChestParent
             : normalChestParent;
-        var prefab = isMaxtier ? specialChestPrefab : chestItemPrefab;
+
+        GameObject prefab = isMaxtier
+            ? specialChestPrefab
+            : chestItemPrefab;
+
         var obj = Instantiate(prefab, parent);
-        if(!obj.TryGetComponent<QuestChestItem>(out var item))
+
+        QuestChestItem item = obj.GetComponent<QuestChestItem>();
+        if (item == null)
         {
-            Debug.LogError("Chest item is null for chest id " + chest.Id);
-            item = obj.GetComponent<SpecialChestItem>();
+            Debug.LogError($"[Quest] Chest item missing QuestChestItem, id = {chest.Id}");
             return;
         }
+
         var state = DataAPIController.instance.GetChestState(chest.Id);
-        obj.transform.localScale = isMaxtier ?  Vector3.one * 2f : Vector3.one;
 
+        obj.transform.localScale = isMaxtier
+            ? Vector3.one * 2f
+            : Vector3.one;
 
-        Debug.Log($"Item {item == null}, id {chest.Id} is special {isMaxtier}");
         item.Setup(new QuestChestParam
         {
-            //icon = ChestTierHelper.GetSpriteName(chest.Tier),
             chestId = chest.Id,
             isClaimed = state.isClaimed,
             isUnlocked = state.isUnlocked,
             progress = state.progress,
+            target = chest.RequiredProgress,
             rewards = chest.Rewards,
         });
+
         chestItems[chest.Id] = item;
+
+        Debug.Log($"[Quest] Create chest id={chest.Id} special={isMaxtier}");
     }
+
     private void OnChestUnlocked(int chestId)
     {
         if (!chestItems.TryGetValue(chestId, out var item))
             return;
-        Debug.Log("ON chest unlocked " + chestId);
-        item.SetUnlocked(true);   // UI update
-        item.PlayUnlockAnim();    // FX / anim
+        item.SetChestUnlocked(true);  // FX / anim
     }
 
 

@@ -102,7 +102,6 @@ namespace UIScript
 
         private void SetLevelText(int id)
         {
-            id++;
             textLevel.text = id.ToString();
         }
 
@@ -126,7 +125,7 @@ namespace UIScript
         private void SetLevelSpriteByType(int id, LevelEnum type)
         {
             // Get the sprite based on the level type
-            var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, $"level_{type.ToString()}");
+            var sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, $"level_Complete");
             if (sprite == null) return;
             levelBG.sprite = sprite;
 

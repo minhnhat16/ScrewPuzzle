@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
+  m_Name: Step_02_correct_color_to_box
+  m_EditorClassIdentifier: 
+  stepId: correct_color_to_box
+  stepType: 2
+  message: "\u1ED0c \u0111\xFAng m\xE0u s\u1EBD t\u1EF1 \u0111\u1ED9ng v\xE0o h\u1ED9p"
+  targetKey: box_1
+  blockInput: 0
+  completeEventKey: Screw.InsertedToBox
+  requiredPayload: red

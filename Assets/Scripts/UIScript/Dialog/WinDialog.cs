@@ -4,6 +4,8 @@ using DG.Tweening;
 using Managers;
 using System;
 using System.DataBase;
+using System.Net.Sockets;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -17,9 +19,8 @@ namespace UIScript.Dialog
         [SerializeField] private Image rewardImg;
         [SerializeField] private Text levelLb;
         [SerializeField] private Text rewardLB;
-        [SerializeField] private Text goldLb;
-        [SerializeField] private Text ticketLb;
         [SerializeField] private GoldDisplay goldDisplay;
+        [SerializeField] private GoldDisplay ticket;
         [SerializeField] private Image fillCorn;
         [SerializeField] private RectTransform piggy;
 
@@ -36,23 +37,25 @@ namespace UIScript.Dialog
         }
         public override void Setup(DialogParam dialogParam)
         {
+            base.Setup(dialogParam);
             this.param = (WinParam)dialogParam;
             string levelStr = param.level.ToString();
-            string scoreStr = param.score.ToString();
+            //string scoreStr = param.score.ToString();
             long userGold = param.totalGold;
+            long ticketParam = param.ticket;
             string rewardString = param.reward.ToString();
             SetLevelLB(levelStr);
-            SetScore(scoreStr);
+            //SetScore(scoreStr);
             SetReward(rewardString);
 
-            goldDisplay = GetComponentInChildren<GoldDisplay>();
             goldDisplay.SetGoldToLable(userGold);
+            ticket.SetGoldToLable(ticketParam);
             IngameController.ins.PauseGame();
         }
 
         public override void OnStartShowDialog()
         {
-
+            Debug.Log("On start show dialog Win dialog");
             base.OnStartShowDialog();
             SoundHelper.PlaySFX(SoundManager.SFX.Win);
             SetRewardProgressCount(Random.Range(0f, 1f), () =>
@@ -64,7 +67,7 @@ namespace UIScript.Dialog
         private void PoppIcon()
         {
             piggy.DOPunchScale(new Vector3(1.2f, 1.2f), 0.1f);
-            effect.Play();
+            effect?.Play();
         }
 
         private void SetButtonInteractAble(bool isInteractable)
@@ -76,6 +79,7 @@ namespace UIScript.Dialog
 
         public void SetLevelLB(string text)
         {
+            if (levelLb == null) return;
             levelLb.text = $"Level: {text}";
         }
         public void SetScore(string scoreString)
@@ -85,6 +89,7 @@ namespace UIScript.Dialog
 
         private void SetReward(string rewardString)
         {
+            if (rewardLB == null) return;
             rewardLB.text = $"x{rewardString}";
         }
         public override void OnEndHideDialog()
@@ -98,11 +103,12 @@ namespace UIScript.Dialog
         [SerializeField]
         private UIParticle effect;
 
-        // Updated: tween fill amount and update percent text during tween
         private void SetRewardProgressCount(float progress, Action callback = null)
         {
             progress = Mathf.Clamp01(progress);
 
+
+            Debug.Log("Set progress count ");
             fillTween?.Kill();
 
             // ensure initial percent text matches current fill

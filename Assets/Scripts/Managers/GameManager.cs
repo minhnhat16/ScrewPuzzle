@@ -1,9 +1,11 @@
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.DataBase;
-using DG.Tweening;
+using System.Net.Sockets;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Managers
 {
@@ -25,6 +27,8 @@ namespace Managers
         [SerializeField] private bool isNewPlayer;
         public List<CardColorPallet> listCurrentCardColor;
         public UIRootControlScale UIRoot;
+        internal UnityEvent specialClaim = new UnityEvent();
+
         public int TrackLevelStart { get => trackLevelStart; set => trackLevelStart = value; }
         public bool IsNewPlayer { get => isNewPlayer; set => isNewPlayer = value; }
         public int TotalLevel { get => totalLevel; set => totalLevel = value; }
@@ -32,6 +36,13 @@ namespace Managers
         public float StarMoveDuration { get => starMoveDuration; set => starMoveDuration = value; }
         public Vector3 StarScale { get => starScale; set => starScale = value; }
 
+
+        private void OnEnable()
+        {
+            specialClaim.AddListener(() => { SpecialClaimAndSaveData(); });
+        }
+
+       
         private void Awake()
         {
             if (instance == null) instance = this;
@@ -121,5 +132,19 @@ namespace Managers
                 return $"{currency}k";
             }
         }
+
+
+        private void SpecialClaimAndSaveData()
+        {
+
+            var ticket = DataAPIController.instance.GetTicket();
+            DataAPIController.instance.SaveTicket(ticket + 1);
+
+
+            var claimSpecial = DataAPIController.instance.GetSpecial();
+            claimSpecial.claimed = true;
+            DataAPIController.instance.SaveSpecial(claimSpecial);
+        }
+
     }
 }

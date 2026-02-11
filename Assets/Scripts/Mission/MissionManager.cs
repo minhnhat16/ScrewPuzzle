@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEngine;
 using ConfigFile;
 using System.DataBase;
+using JetBrains.Annotations;
 
 public class MissionManager : SingletonMono<MissionManager>
 {
@@ -150,6 +151,10 @@ public class MissionManager : SingletonMono<MissionManager>
 
     internal void ProcessCollectScrew(ColorEnum color, int amount)
     {
+        if(color == ColorEnum.Rainbow)
+        {
+            DataAPIController.instance.AddSpecial(amount);
+        }
         // Only update missions of type CollectColor that match the collected color
         foreach (var mission in activeMissions.ToList())
         {
@@ -347,7 +352,7 @@ public class MissionManager : SingletonMono<MissionManager>
         // notify UI
         StageEvents.OnChestProgressChanged?.Invoke(
             stageId,
-            chestState.progress,
+             chest.RequiredProgress,
             chest.RequiredProgress
         );
         
@@ -499,4 +504,10 @@ public class MissionManager : SingletonMono<MissionManager>
         Debug.Log($"[DEBUG][Mission] Add {amount} progress to mission {missionId}");
     }
 #endif
+
+    public bool IsMissionAvailable(SideMission mission)
+    {
+        var newPlayer = DataAPIController.instance.IsNewPlayer();
+        return !newPlayer;
+    }
 }

@@ -68,7 +68,6 @@ public class GameView : BaseView
         btn_magnet.RemoveListener(MagnetClicked);
         settingBtn.onClick.RemoveListener(SettingButton);
 
-        // Unregister the value change handler to avoid leaks
         DataTrigger.UnRegisterValueChange(DataPath.ITEMDICT, OnItemDictChanged);
     }
     public override void OnInit(Action callback = null)

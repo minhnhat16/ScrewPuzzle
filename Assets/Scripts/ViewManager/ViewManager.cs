@@ -1,7 +1,9 @@
 using Enums;
+using Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +19,7 @@ public class ViewManager : MonoBehaviour
         Instance = this;
         canvas = GetComponent<Canvas>();
         LoadingView loadingView = GetComponentInChildren<LoadingView>(true);
-        Debug.Log("loading view " + loadingView);   
+        Debug.Log("loading view " + loadingView);
         dicView.Add(ViewIndex.LoadingView, loadingView);
     }
 
@@ -26,7 +28,7 @@ public class ViewManager : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         foreach (ViewIndex viewIndex in ViewConfig.viewArray)
         {
-            if(dicView.ContainsKey(viewIndex))  continue;
+            if (dicView.ContainsKey(viewIndex)) continue;
             string viewName = viewIndex.ToString();
             GameObject view = Instantiate(Resources.Load("Prefabs/UIPrefab/Views/" + viewName, typeof(GameObject))) as GameObject;
             view.transform.SetParent(anchorView, false);
@@ -38,6 +40,8 @@ public class ViewManager : MonoBehaviour
     }
     public void SwitchView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
+
+        Debug.Log("SwitchView to " + newView + " from " + (currentView != null ? currentView.viewIndex.ToString() : "null"));   
         if (currentView != null)
         {
             currentView.HideViewAnimation(() =>
@@ -54,16 +58,32 @@ public class ViewManager : MonoBehaviour
 
     private void ShowNextView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
-        currentView = dicView[newView];
+
+        var nextView = dicView[newView];
+
+        // SAME VIEW
+        if (currentView == nextView)
+        {
+            currentView.gameObject.SetActive(true);
+            Debug.Log("SwitchView: same view " + newView + "callback " + callback == null);
+            currentView.ShowViewAnimation(() =>
+            {
+                callback?.Invoke();
+            });
+            return;
+        }
+
+        // SWITCH VIEW
+        currentView = nextView;
         currentView.gameObject.SetActive(true);
-        //Debug.Log("Show Next View call back " + currentView);
-            
+
         currentView.Setup(viewParam);
         currentView.ShowViewAnimation(() =>
         {
             callback?.Invoke();
         });
     }
+
 
 
     public Vector3 UIToWorld(RectTransform uiObj, Camera worldCam)
@@ -84,9 +104,37 @@ public class ViewManager : MonoBehaviour
     internal void UpdateSpecialBoxCount(ColorEnum color, int v)
     {
 
-        if(currentView is GameView gameview)
+        if (currentView is GameView gameview)
         {
             gameview.UpdateSpecialBoxCount(color, v);
         }
+    }
+
+
+    public void SwitchViewForNewPlayer(bool isNewPlayer)
+    {
+        if (isNewPlayer)
+        {
+            LevelManager.ins.LoadLevel(0, () =>
+            {
+                IngameController.ins.PauseGame();
+            });
+        }
+        else
+        {
+            MainScreenViewParam param = new()
+            {
+                totalGold = DataAPIController.instance.GetGold(),
+                ticket = (int)DataAPIController.instance.GetTicket(),
+                level = DataAPIController.instance.GetPlayerLevel(),
+            };
+
+            ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
+            {
+                Debug.Log("task run done switch view");
+                DayTimeController.instance.CheckNewDay();
+            });
+        }
+
     }
 }

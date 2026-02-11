@@ -22,13 +22,15 @@ namespace UIScript.Dialog
             ticketPayButton.onClick.AddListener(TickeAccept);
             watchButton.onClick.AddListener(WatchAccept);
             retryButton.onClick.AddListener(ReplayButton);
-
+            closeDialogButton.onClick.AddListener(()=> HideDialog());
         }
         private void OnDisable()
         {
             ticketPayButton.onClick.RemoveListener(TickeAccept);
             watchButton.onClick.RemoveListener(WatchAccept);
             retryButton.onClick.RemoveListener(ReplayButton);
+            closeDialogButton.onClick.RemoveListener(() => HideDialog());
+
         }
 
         private void Awake()

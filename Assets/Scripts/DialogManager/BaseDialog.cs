@@ -27,7 +27,7 @@ public class BaseDialog : MonoBehaviour
     }
 
     public virtual void OnInit(Action callback = null) { callback?.Invoke(); }
-    public virtual void Setup(DialogParam dialogParam) { }
+    public virtual void Setup(DialogParam dialogParam) { if (dialogParam == null) return; }
 
     public void ShowDialogAnimation(Action callback)
     {

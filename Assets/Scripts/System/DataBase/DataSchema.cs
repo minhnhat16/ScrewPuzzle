@@ -31,7 +31,8 @@ public class UserData
     public Dictionary<int, BlockData> puzzleBlockData = new();
     [SerializeField]
     public TimeSaveMeta timeMeta;
-
+    [SerializeField]
+    public Special specialData;
 
     [SerializeField]
     public int currentPuzzleID;
@@ -195,9 +196,7 @@ public class StageProgress
     public bool isUnlocked;    // đã mở chưa
     public bool isCompleted;   // hoàn thành chưa
     public bool rewardClaimed; // nếu có chest ở cuối stage
-
     public int chestProgress;  // tiến trình mở rương của stage
-
     public int claimedMissions = 0;
 }
 
@@ -222,4 +221,12 @@ public class BlockData
 public class TimeSaveMeta
 {
     public long lastResetUtcTicks;
+}
+
+[SerializeField]
+public class Special
+{
+    public bool claimed;
+    public int currentSpecial;
+    public int targetSpecial;   
 }

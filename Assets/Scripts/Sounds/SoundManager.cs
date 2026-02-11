@@ -52,6 +52,9 @@ public class SoundManager : MonoBehaviour
         Breaker,
         Magnet,
 
+
+        MissionComplete,
+
         Button,
         Close,
         Slide,

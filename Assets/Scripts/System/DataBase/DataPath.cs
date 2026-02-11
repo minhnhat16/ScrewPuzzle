@@ -40,4 +40,8 @@ public class DataPath
     public static string SOUNDFX = "music";
     public static string MUSICFX = "sfx";
 
+    public static string SPECIAL = "specialData";
+
+    public static string SPECIAL_CURRENT = "specialData/currentSpecial";
+    public static string SPECIAL_TARGET = "specialData/targetSpecial";
 }

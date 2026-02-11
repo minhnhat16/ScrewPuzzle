@@ -7,11 +7,14 @@ using Ingame.Screw;
 using Level;
 using Managers;
 using PoolManager;
+using Spine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Jobs;
 using UnityEngine;
 
 public class LevelManager : SingletonMono<LevelManager>, IResetable
@@ -26,11 +29,15 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     public Level.Level currentLevel;
 
     [SerializeField] private GameObject screwManagerPrefb;
-   private ScrewManager screwManager;
+    private ScrewManager screwManager;
 
     [SerializeField] private BaseLevelObject currentLevelObject;
 
     private PartSpriteService spriteService;
+
+    [SerializeField]
+    private ArrayScrew arrayScrew;
+
     public bool IsInitDone
     {
         get => isInitDone;
@@ -107,9 +114,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
 
     public void LoadLevel(int levelID, Action callback = null)
     {
-        Debug.LogWarning("Start loading level ");
         var boxManager = BoxQueue.ins;
-        var arrayScrew = ArrayScrew.Instance;
         IngameController.ins.IsGameOver = false;
         boxManager.activeBoxCount = 2;
         currentLevelID = levelID;
@@ -129,8 +134,9 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     public IEnumerator TaskLoadSpriteIngame()
     {
 
-        Debug.Log("current level " + currentLevelID); 
-        Task loadPSB = ResourceManager.ins.LoadPSB($"{currentLevelID}"); // ❗ KHÔNG .psb
+        Debug.Log("current level " + currentLevelID);
+        int id = currentLevelID == 0 ? 0 : currentLevelID;
+        Task loadPSB = ResourceManager.ins.LoadPSB($"{id}"); // ❗ KHÔNG .psb
 
         while (!loadPSB.IsCompleted)
             yield return null;
@@ -151,6 +157,11 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
               GamePlayViewParam param = new();
               param.totalGold = userGold;
               ViewManager.Instance.SwitchView(ViewIndex.GameView, param);
+              var newPlayer = DataAPIController.instance.IsNewPlayer();
+              if (newPlayer)
+              {
+                  TutorialManager.ins.StartTutorial();
+              }
           }));
     }
     public Dictionary<int, int> GetScrewCountByColor()
@@ -209,29 +220,24 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             yield break;
         }
         currentLevel = levelData;
-        //Debug.Log("Step 2 complete");
 
         Debug.Log("Step 3: Initializing Box Queue");
-        // Step 3: Load Box Configuration
         InitializeBoxQueue(levelData);
-        //Debug.Log("Step 3 complete");
 
         Debug.Log("Step 4: Loading Layers");
-        // Step 4: Load Layers
         yield return LoadLayers(levelData);
-        //Debug.Log("Step 4 complete");
 
         Debug.Log("Step 5: Loading Screw Manager and Screws");
-        // Step 5: Load Screw Manager and Screws
         yield return LoadScrewManagerAndScrews(levelData);
-        //Debug.Log("Step 5 complete");
 
         Debug.Log("Step 6: Activating All Parts");
-        // Step 6: Activate Parts
         yield return ActivateAllParts();
-        //Debug.Log("Step 6 complete");
 
-        InitSpecial();
+        bool specialClaim = DataAPIController.instance.GetSpecial().claimed;
+        if (levelId > 0 && specialClaim)
+        {
+            InitSpecial();
+        }
 
         StartCoroutine(layerManager.ChangePartState());
         BoxQueue.ins.InitBoxToSlot();
@@ -239,6 +245,11 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         callback?.Invoke();
         //Debug.Log($"Level data with ID {levelId} loaded.");
     }
+
+  
+
+
+
     public void InitSpecial()
     {
         int requireSpecial = IngameController.ins.requireCount;
@@ -292,7 +303,8 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     private void InitializeBoxQueue(Level.Level levelData)
     {
         BoxQueue.ins.LoadBoxConfigRecord(levelData.boxConfig);
-        BoxQueue.ins.Init();
+
+        BoxQueue.ins.Init(levelData.levelId == 0);
     }
     private IEnumerator LoadLayers(Level.Level levelData)
     {
@@ -308,6 +320,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
             {
                 yield return LoadPart(layerComponent, partData, layerManager);
             }
+            layerComponent.IsLayerClear = false;
             layerComponent.RegisterPartListener();
             listBaseLayer.Add(layerComponent);
 
@@ -412,6 +425,54 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         {
             yield return LoadScrew(screwData);
         }
+        if (DataAPIController.instance.IsNewPlayer())
+        {
+            HashSet<Screw> used = new();
+
+            yield return null;
+            var blue1 = FindScrewBy(ColorEnum.Blue, used);
+            used.Add(blue1);
+            TutorialTargetRegistry.Register("screw_blue_1", blue1.transform);
+
+            yield return null;
+            var blue2 = FindScrewBy(ColorEnum.Blue, used);
+            used.Add(blue2);
+            TutorialTargetRegistry.Register("screw_blue_2", blue2.transform);
+
+            yield return null;
+            var green1 = FindScrewBy(ColorEnum.Brown);
+            TutorialTargetRegistry.Register("screw_green_1", green1.transform);
+
+        }
+
+    }
+    public Screw FindScrewBy(
+    ColorEnum color,
+    HashSet<Screw> exclude = null
+)
+    {
+        if (layerManager == null)
+            return null;
+
+        int topLayer = layerManager.GetTopVisibleLayer();
+
+        if (!layerManager.screwDict.TryGetValue(topLayer, out var screws))
+            return null;
+
+        foreach (var screw in screws)
+        {
+            screw.SetClickable(true);
+            if (screw == null) continue;
+            if (exclude != null && exclude.Contains(screw)) continue;
+            if (screw.IsInHold) continue;
+            if (screw.IsMoving()) continue;
+            if (screw.Color != color) continue;
+
+            screw.SetClickable(false);
+            return screw;
+        }
+
+        return null;
     }
 
     private IEnumerator LoadScrew(ScrewScriptable screwData)
@@ -432,8 +493,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         {
             connectedPart = lm.GetPartByKey(hingeConnection.bodyPartUniqueID);
         }
-
-        //Debug.Log("Connected part " + connectedPart);
 
         Rigidbody2D connectedRigidBody = null;
         if (connectedPart != null)
@@ -481,7 +540,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
     }
     public void OnReset()
     {
-        IngameController.ins.CurrentStar = 0;   
+        IngameController.ins.CurrentStar = 0;
         if (transform.childCount > 0)
         {
             LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();
@@ -548,7 +607,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable
         boxQueue.TryMoveScrewsGroupedByColor(listScrews, true);
         layerManager.RemoveScrewsOnDict(listScrews);
         bp.gameObject.SetActive(false);
-        bp.OnStateChanged.Invoke(true,bp);
+        bp.OnStateChanged.Invoke(true, bp);
     }
 
 

@@ -547,7 +547,12 @@ public class DataModel : MonoBehaviour
         {
             lastResetUtcTicks = DateTime.MinValue.Ticks
         };
-
+        
+        userData.specialData = new Special
+        {
+            currentSpecial = 0,
+            targetSpecial = 15
+        };
 
         Debug.Log("Time save meta " + userData.timeMeta.lastResetUtcTicks);
         Debug.Log("(BOOT) // NEW PLAYER DATA CREATED");

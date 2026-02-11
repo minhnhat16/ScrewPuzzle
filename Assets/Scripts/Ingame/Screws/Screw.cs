@@ -3,8 +3,10 @@ using Enums;
 using Level;
 using System;
 using System.Linq.Expressions;
+using Unity.VisualScripting;
 using UnityEngine;
 using IEnumerator = System.Collections.IEnumerator;
+using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame.Screw
 {
@@ -87,7 +89,6 @@ namespace Ingame.Screw
             render = GetComponentInChildren<SpriteRenderer>();
             layerMask = gameObject.layer;
         }
-
         public void ResetRender()
         {
             render.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
@@ -98,9 +99,7 @@ namespace Ingame.Screw
 
             basePartLayerID = layer;
             render.sortingLayerName = layer;
-            //cross.sortingLayerName = layer;
             render.sortingOrder = order + 1;
-            // cross.sortingOrder = order + 2;
 
             int layerIndex = SortingLayer.GetLayerValueFromName(layer);
             float z = 0.2f * (layerIndex + 1);
@@ -157,6 +156,7 @@ namespace Ingame.Screw
         {
             yield return new WaitForSeconds(delay);  // Wait for the specified delay
             isClicked = false;
+            Debug.Log("Reset isClicked flag for screw: " + gameObject.name);
             CircleCollider2D.enabled = !isClicked;
         }
 
@@ -344,6 +344,12 @@ namespace Ingame.Screw
             SetSortingOrderAndLayer(0, LayerEnum.Default.ToString());
             hingeController.Reset();
             ResetRender();
+        }
+
+        internal void SetClickable(bool canSelect)
+        {
+            this.isClicked = !canSelect;
+            Debug.Log("Set screw click able " + this.isClicked);    
         }
     }
 }

@@ -70,4 +70,9 @@ public class BaseView : MonoBehaviour
     {
 
     }
+
+    internal void Refresh(ViewParam viewParam)
+    {
+        Setup(viewParam);
+    }
 }

@@ -40,6 +40,7 @@ public class LoseDialog : BaseDialog
             IngameController.ins.OnRevive();
             var pos = ArrayScrew.Instance.GetHoldPos() ;
             IngameController.ins.onItemInvoke.Invoke(ItemType.Magnet, pos);
+            IngameController.ins.ResumeGame();
         });
         //    }   
         //    DialogManager.ins.HideDialog(DialogIndex.LoseDialog);

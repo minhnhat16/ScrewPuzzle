@@ -12,8 +12,8 @@ namespace Ingame
         [SerializeField] private bool isDragging = false; // Track if the object is being dragged
         [SerializeField] private bool isEditColor  =false;
         private Camera mainCamera;
-        [SerializeField] private ScrewManager screwManager;
-        [SerializeField] private Dictionary<string,HingeJoint2D> screwByPart;
+            [SerializeField] private ScrewManager screwManager;
+            [SerializeField] private Dictionary<string,HingeJoint2D> screwByPart;
 
         public ScrewManager ScrewManager
         {

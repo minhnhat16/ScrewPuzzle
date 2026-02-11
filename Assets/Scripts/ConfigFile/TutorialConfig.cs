@@ -1,29 +1,22 @@
-using UnityEngine;
+﻿using Enums;
 using System;
-using System.ConfigFile;
-using Enums;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace ConfigFile
 {
-    [Serializable]
-    public class TutorialConfigRecord
+    
+
+    public class TutorialConfig : BYDataTable<TutorialStep>
     {
-        [SerializeField]
-        public int stepID;
-        [SerializeField]
-        public string tutorialString;
-        [SerializeField]
-        public Vector3 cusorPosition;
-        [SerializeField]
-        public bool isStepDone;
-    }
-    public class TutorialConfig : BYDataTable<TutorialConfigRecord>
-    {
-        // Custom method for comparing config, can be adjusted
-        public override ConfigCompare<TutorialConfigRecord> DefineConfigCompare()
+        public override ConfigCompare<TutorialStep> DefineConfigCompare()
         {
-            var configCompare = new ConfigCompare<TutorialConfigRecord>("stepID");
-            return configCompare;
+            // tutorialId + stepID = unique
+            return new ConfigCompare<TutorialStep>(
+                nameof(TutorialStep.stepId)
+            );
         }
+   
     }
 }

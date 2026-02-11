@@ -62,10 +62,6 @@ public class QuestItem : MonoBehaviour
         RefreshState(state);
     }
 
-
-    // =======================================================
-    // EVENT HANDLERS
-    // =======================================================
     private void OnMissionProgressChanged(MissionConfigRecord mission, MissionProgress progress)
     {
 

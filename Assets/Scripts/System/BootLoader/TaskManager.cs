@@ -2,7 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
-
+enum TaskPhase
+{
+    None,
+    DataInit,
+    SceneInit
+}
 public class TaskManager : SingletonMono<TaskManager>
 {
 
@@ -11,6 +16,7 @@ public class TaskManager : SingletonMono<TaskManager>
             tasks.Count == 0 ? 0 : (currentTaskIndex + CurrentTaskProgress) / (float)tasks.Count;
 
     public readonly List<Func<IEnumerator>> tasks = new();
+    public readonly List<Func<IEnumerator>> dataInitTasks = new();
     private int currentTaskIndex = 0;
 
     public float CurrentTaskProgress { get; private set; }
@@ -19,6 +25,11 @@ public class TaskManager : SingletonMono<TaskManager>
     public void SetCurrentTaskProgress(float v)
     {
         CurrentTaskProgress = Mathf.Clamp01(v);
+    }
+    public void AddDataInitTask(Func<IEnumerator> task) => dataInitTasks.Add(task);
+    internal void AddDataInitTask(List<Func<IEnumerator>> preTasks)
+    {
+        for (int i = 0; i < preTasks.Count; i++) dataInitTasks.Add(preTasks[i]);
     }
     public void AddTask(Func<IEnumerator> task) => tasks.Add(task);
     internal void AddTask(List<Func<IEnumerator>> preTasks)
@@ -29,11 +40,12 @@ public class TaskManager : SingletonMono<TaskManager>
     {
         currentTaskIndex = 0;
 
+        Debug.Log("task count " + tasks.Count);
         for (int i = 0; i < tasks.Count; i++)
         {
             var task = tasks[i];
             float start = Time.realtimeSinceStartup;
-
+            Debug.Log($"[BOOT] Starting task {i + 1}/{tasks.Count}");
             // reset current-task progress before starting
             SetCurrentTaskProgress(0f);
 
@@ -55,6 +67,37 @@ public class TaskManager : SingletonMono<TaskManager>
         // Clear task list
         tasks.Clear();
         // Invoke callback once
+        callback?.Invoke();
+    }
+
+    internal IEnumerator RunDataInitTask(Action callback)
+    {
+        Debug.Log("[TaskManager] RunDataInitTask START");
+
+        int count = dataInitTasks.Count;
+        if (count == 0)
+        {
+            callback?.Invoke();
+            yield break;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            var task = dataInitTasks[i];
+            if (task == null) continue;
+
+            Debug.Log($"[DATA] Starting data task {i + 1}/{count}");
+
+            SetCurrentTaskProgress(0f);
+            yield return StartCoroutine(task.Invoke());
+            SetCurrentTaskProgress(1f);
+
+            currentTaskIndex++;
+        }
+
+        dataInitTasks.Clear();
+
+        Debug.Log("[TaskManager] RunDataInitTask DONE");
         callback?.Invoke();
     }
 
