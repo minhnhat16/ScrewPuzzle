@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using ConfigFile;
+using EditorTools;
 using Enums;
 using Ingame;
 using Ingame.Board;
@@ -169,40 +170,40 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         }
 
         // Collect screw data
-        var screws = levelObject.GetComponentsInChildren<Screw>();
+        var screws = levelObject.GetComponentsInChildren<ScrewController>();
         newLevelData.screws = new List<ScrewScriptable>();
         int idScrew = 0;
       
         foreach (var screw in screws)
         {
-            ScrewScriptable screwData = new ScrewScriptable()
-            {
-                screwPosition = screw.transform.localPosition,
-                idScrew = idScrew,
-                idColor = (int)screw.Color,
-                hinge =new HingeConnection()
-            };
+            //ScrewScriptable screwData = new ScrewScriptable()
+            //{
+            //    screwPosition = screw.transform.localPosition,
+            //    idScrew = idScrew,
+            //    idColor = (int)screw.Color,
+            //    hinge =new HingeConnection()
+            //};
 
-            var hinge = screw.HingeController.HingeJoint2D;
-            var listHingeObject = new List<HingeConnection>();
-            if (hinge == null) continue;
-            int idBody = 0;
+            //var hinge = screw.HingeController.HingeJoint2D;
+            //var listHingeObject = new List<HingeConnection>();
+            //if (hinge == null) continue;
+            //int idBody = 0;
           
-            var pos = hinge.transform.localPosition;
-            var body = $"{screw.HingeController.BodyConnect?.GetComponent<BasePart>().uniqueID}";
-            var hingPos = hinge.connectedBody.transform.localPosition;
-            HingeConnection hingeConnection = new HingeConnection()
-            {
-                hingePosition = pos,
-                bodyPartUniqueID = body,
-                bodyPartHingePosition = hingPos,
-            };
-            idBody++;
-            listHingeObject.Add(hingeConnection);
-            idScrew++;
+            //var pos = hinge.transform.localPosition;
+            //var body = $"{screw.HingeController.BodyConnect?.GetComponent<BasePart>().uniqueID}";
+            //var hingPos = hinge.connectedBody.transform.localPosition;
+            //HingeConnection hingeConnection = new HingeConnection()
+            //{
+            //    hingePosition = pos,
+            //    bodyPartUniqueID = body,
+            //    bodyPartHingePosition = hingPos,
+            //};
+            //idBody++;
+            //listHingeObject.Add(hingeConnection);
+            //idScrew++;
 
-            screwData.hinge = hingeConnection;
-            newLevelData.screws.Add(screwData);
+            //screwData.hinge = hingeConnection;
+            //newLevelData.screws.Add(screwData);
         }
         // Save the new level data as a ScriptableObject in the Resources folder
         return newLevelData;
@@ -383,7 +384,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             Debug.LogWarning($"Level with ID {levelId} not found!");
             yield break;
         }
-        layerManager.screwDict = new Dictionary<int, List<Screw>>();
+        layerManager.screwDict = new Dictionary<int, List<ScrewController>>();
         BoxQueue.ins.boxConfig = levelData.boxConfig;
         List<BaseLayer> listBaseLayer = new();
         // Loop through all layers in the level data
@@ -391,7 +392,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         {
             // Create a new GameObject for the layer
 
-            layerManager.screwDict.Add(layerData.layerId, new List<Screw>());
+            layerManager.screwDict.Add(layerData.layerId, new List<ScrewController>());
             GameObject layerGameObject = Instantiate(layerBase.gameObject, Vector3.zero , Quaternion.identity);
             var layerName = $"Layer {layerData.layerId+1}";
             layerGameObject.name = layerName;
@@ -461,7 +462,6 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             Debug.Log("Screw is null " + screwData.idColor==null);
             ScrewLevelMaker screwComponent = screwGameObject.GetComponent<ScrewLevelMaker>();
             var color = (ColorEnum)screwData.idColor; // Assuming ScrewColor is your enum
-            screwComponent.Color = color;
             screwComponent.ChangeScrewColor(color);
             // Handle hinge connections
 
@@ -480,7 +480,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             Debug.Log($"Part Layer ID: {partLayerID} + {part.PartLayer()}");
             if (!layerManager.screwDict.ContainsKey(partLayerID))
             {
-                layerManager.screwDict[partLayerID] = new List<Screw>();
+                layerManager.screwDict[partLayerID] = new List<ScrewController>();
             }
 
             if (!layerManager.screwDict[partLayerID].Contains(screwComponent))
@@ -488,7 +488,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
                 layerManager.screwDict[partLayerID].Add(screwComponent);
             }
             yield return null; 
-            StartCoroutine(screwComponent.InitOnLevelMaker());
+            StartCoroutine(screwComponent.Init());
             screwManager.GetComponent<ScrewManager>().AddScrew(screwComponent);
         }
         
@@ -507,42 +507,42 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     public void ResetScrewHinge()
     {
         var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
-        screwManager.ResetHinge();
+        screwManager.Reset();
     }
     public void SpawnScrew()
     {
 
-        Debug.Log("Spawn Screw");
-        if (LevelMaker.instance.isInputData) return;
-        var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
-        var screw = Instantiate(screwLevelPrefab,
-            screwManager.transform);
-        var screwComp = screw.GetComponent<ScrewLevelMaker>();
-        screwComp.Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
-        screwComp.ChangeScrewColor(screwComp.Color);
-        StartCoroutine(screwComp.InitOnLevelMaker());
-        int layerID = LevelMaker.instance.layerDropdown.Value();
-        layerID -= 1;
-        UpdateScrewTotal();
-        Debug.Log("Screw Layer ID: " + layerID);
+        //Debug.Log("Spawn Screw");
+        //if (LevelMaker.instance.isInputData) return;
+        //var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
+        //var screw = Instantiate(screwLevelPrefab,
+        //    screwManager.transform);
+        //var screwComp = screw.GetComponent<ScrewLevelMaker>();
+        //screwComp.Color = (ColorEnum)LevelMaker.instance.currentScrewColorID;
+        //screwComp.ChangeScrewColor(screwComp.Color);
+        //StartCoroutine(screwComp.InitOnLevelMaker());
+        //int layerID = LevelMaker.instance.layerDropdown.Value();
+        //layerID -= 1;
+        //UpdateScrewTotal();
+        //Debug.Log("Screw Layer ID: " + layerID);
 
-        var list = lmanager.screwDict.GetValueOrDefault(layerID);
-        if(list == null)
-        {
-            lmanager.screwDict[layerID] = new List<Screw>();
-        }
-        lmanager.screwDict[layerID].Add(screwComp);
-        //Debug.Assert(screw != null, nameof(screw) + " != null");
-        bool isMouseOnScreen = IsMouseOnScreen();
-        if (isMouseOnScreen)
-        {
-            var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            screwComp.Position = new Vector3(mousePos.x, mousePos.y, screwComp.Position.z);
-            return;
-        }
+        //var list = lmanager.screwDict.GetValueOrDefault(layerID);
+        //if(list == null)
+        //{
+        //    lmanager.screwDict[layerID] = new List<Screw>();
+        //}
+        //lmanager.screwDict[layerID].Add(screwComp);
+        ////Debug.Assert(screw != null, nameof(screw) + " != null");
+        //bool isMouseOnScreen = IsMouseOnScreen();
+        //if (isMouseOnScreen)
+        //{
+        //    var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //    screwComp.Position = new Vector3(mousePos.x, mousePos.y, screwComp.Position.z);
+        //    return;
+        //}
 
-        screw.transform.position = new Vector3(-5, 0, 0);
-        screwManager.AppendScrew(screwComp);
+        //screw.transform.position = new Vector3(-5, 0, 0);
+        //screwManager.AppendScrew(screwComp);
 
     }
 
@@ -606,7 +606,6 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
         foreach(var s in screws)
         {
             var sLv = (ScrewLevelMaker)s;
-            sLv.ResetScrew();
         }
     }
     private bool IsMouseOnScreen()
@@ -661,7 +660,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     internal void RemoveScrew(ScrewLevelMaker screwLevelMaker)
     {
         screwLevelMaker.ResetHinge();
-        lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.layerMask);
+        lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.ScrewLayerMask);
         var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
         screwManager.RemoveScrew(screwLevelMaker);
         Destroy(screwLevelMaker.gameObject);

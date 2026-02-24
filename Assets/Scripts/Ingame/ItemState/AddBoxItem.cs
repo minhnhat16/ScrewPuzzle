@@ -32,7 +32,7 @@ public class AddBoxItem : FSMState<ItemController>, IItem
     {
         sys.IsHandlingHammer = false;
         MissionManager.ins.ProcessUseItem(ItemType, 1);
-        IngameController.ins.OnRevive();
+        IngameController.ins.Revive();
         sys.itemPerformed?.Invoke(true);
     }
 }

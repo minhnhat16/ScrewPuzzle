@@ -1,4 +1,4 @@
-using Managers;
+ï»¿using Managers;
 using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
@@ -11,7 +11,7 @@ using UnityEditor;
 #endif
 
 public class BootLoader : MonoBehaviour
-{
+{   
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject uiRoot;
     [SerializeField] private UIRootControlScale uiRootControl;
@@ -20,155 +20,157 @@ public class BootLoader : MonoBehaviour
     {
         ScreenSetup();
     }
+
     void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-        // ----- REGISTER BOOT TASKS -----
-        TaskManager.ins.AddDataInitTask(Task_LoadRemoteAsset);
-        TaskManager.ins.AddDataInitTask(Task_InitConfig);
-        TaskManager.ins.AddDataInitTask(Task_InitData);
-        TaskManager.ins.AddTask(Task_InitMission);
-        TaskManager.ins.AddTask(Task_SetupUI);
-        TaskManager.ins.AddTask(Task_InitSound);
 
-        StartCoroutine(TaskManager.ins.RunDataInitTask(() =>
-          {
-              Debug.Log("BootLoader: Load Scene after initdata  Done");
+        // Prepare ordered boot tasks
+        var bootTasks = new List<IBootTask>
+        {
+            new LoadRemoteAssetsTask(),
+            new InitConfigTask(),
+            new InitDataTask(),
+            new InitMissionTask(),
+            new SetupUITask(),
+            new InitSoundTask()
+        };
 
-              bool isNew = DataAPIController.instance.IsNewPlayer();
-              string sceneName = isNew ? "InGame" : "Buffer";
-              LoadSceneManager.ins.LoadSceneByName(sceneName, () =>
-              {
-
-                  Debug.Log("BootLoader: Load Scene Done");
-                  float progressTime = TaskManager.ins.TotalProgress;
-                  LoadSceneManager.ins.TimeWait = progressTime;
-                  ViewManager.Instance.SwitchViewForNewPlayer(isNew);
-              });
-          }));
-
+        // Run tasks sequentially
+        StartCoroutine(RunBootTasks(bootTasks));
     }
 
-
-    private IEnumerator Task_InitSound()
+    private IEnumerator RunBootTasks(List<IBootTask> tasks)
     {
-        bool done = false;
+        if (tasks == null || tasks.Count == 0)
+        {
+            Debug.LogWarning("[BOOT] No tasks to execute");
+            yield break;
+        }
 
-        bool musicData = DataAPIController.instance.GetMusicSetting();
-        bool sfxData = DataAPIController.instance.GetSoundSetting();
-        SoundHelper.SetEnabled(musicData, sfxData);
-        SoundManager.instance.Init(() => done = true);
+        int completedCount = 0;
+        float bootStartTime = Time.realtimeSinceStartup;
 
-        SoundHelper.PlayMusic(SoundManager.Music.MainScreenMusic);
-        yield return new WaitUntil(() => done);
+        foreach (var task in tasks)
+        {
+            if (task == null)
+            {
+                Debug.LogWarning("[BOOT] Null task encountered, skipping");
+                continue;
+            }
+
+            float taskStartTime = Time.realtimeSinceStartup;
+            Debug.Log($"[BOOT] Starting task ({completedCount + 1}/{tasks.Count}): {task.Name}");
+
+            // Use SafeExecute to catch exceptions thrown inside the IEnumerator
+            bool success = true;
+            yield return StartCoroutine(SafeExecute(task, (ex) =>
+            {
+                Debug.LogError($"[BOOT] Task {task.Name} failed: {ex.Message}\n{ex.StackTrace}");
+                success = false;
+            }));
+
+            if (success)
+            {
+                float taskDuration = Time.realtimeSinceStartup - taskStartTime;
+                Debug.Log($"[BOOT] âœ“ Completed task: {task.Name} ({taskDuration:F2}s)");
+                completedCount++;
+            }
+            else
+            {
+                // current policy: continue to next task. Could implement retry/abort here.
+            }
+        }
+
+        float totalBootDuration = Time.realtimeSinceStartup - bootStartTime;
+        Debug.Log($"[BOOT] Boot complete: {completedCount}/{tasks.Count} succeeded in {totalBootDuration:F2}s");
+
+        yield return new WaitForEndOfFrame();
+
+        bool isNew = DataAPIController.instance.IsNewPlayer();
+        string sceneName = isNew ? "InGame" : "Buffer";
+        LoadSceneManager.ins.LoadSceneByName(sceneName, () =>
+        {
+            Debug.Log("BootLoader: Load Scene Done");
+            ViewManager.Instance.SwitchViewForNewPlayer(isNew);
+
+            // After scene is loaded, request level load from the scene's LevelLoaderService (if present)
+            StartCoroutine(LoadLevelFromService(isNew));
+        });
     }
 
-    private IEnumerator Task_InitMission()
+    /// <summary>
+    /// Safely execute the task's IEnumerator and invoke onError if any exception occurs during iteration.
+    /// This captures exceptions thrown inside coroutines (across yields).
+    /// </summary>
+    private IEnumerator SafeExecute(IBootTask task, System.Action<Exception> onError)
     {
-        Debug.Log("[BOOT] InitMission...");
-        bool done = false;
-        yield return MissionManager.ins.Init(() => done = true);
-        yield return new WaitUntil(() => done);
+        var enumerator = task.Execute();
+        if (enumerator == null) yield break;
+
+        try
+        {
+            while (true)
+            {
+                object current = null;
+                try
+                {
+                    if (!enumerator.MoveNext())
+                        break;
+                    current = enumerator.Current;
+                }
+                catch (Exception ex)
+                {
+                    onError?.Invoke(ex);
+                    yield break;
+                }
+                yield return current;
+            }
+        }
+        finally
+        {
+            (enumerator as IDisposable)?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Find LevelLoaderService in the loaded scene and run its load routine.
+    /// Adjust logic that chooses the target level id if you store last-played level in player data.
+    /// </summary>
+    private IEnumerator LoadLevelFromService(bool isNewPlayer)
+    {
+        // Choose level id: new players typically start at 0. Replace the fallback for returning players
+        // with your real "last played level" lookup (DataAPIController, player profile, etc.)
+        int levelId = isNewPlayer ? 0 : 1;
+
+        // Wait a frame to ensure scene objects have been initialized
+        yield return null;
+
+        var loader = FindAnyObjectByType<LevelLoaderService>();
+        if (loader == null)
+        {
+            Debug.LogWarning("[BOOT] LevelLoaderService not found in scene. Skipping level load.");
+            yield break;
+        }
+
+        Debug.Log($"[BOOT] Loading level {levelId} via LevelLoaderService");
+        // This yields until the service completes the load routine
+        yield return StartCoroutine(loader.LoadLevelRoutine(levelId, () => Debug.Log("[BOOT] LevelLoaderService finished load")));
+        Debug.Log("[BOOT] Level load from service completed");
     }
 
     private void ScreenSetup()
     {
-
         Screen.orientation = ScreenOrientation.Portrait;
-
-        // Ch? cho phép xoay ngang
         Screen.autorotateToLandscapeLeft = false;
         Screen.autorotateToLandscapeRight = false;
         Screen.autorotateToPortrait = true;
         Screen.autorotateToPortraitUpsideDown = false;
     }
 
-
-    IEnumerator Task_InitConfig()
-    {
-        Debug.Log("[BOOT] InitConfig...");
-        bool done = false;
-
-        try
-        {
-            ConfigFileManager.Instance.Init(() =>
-            {
-                done = true;
-            });
-
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("[BOOT] InitConfig FAILED\n" + e);
-            done = true; // tránh treo boot
-        }
-        LevelManager.ins.Init();
-
-        yield return new WaitUntil(() => done);
-    }
-    IEnumerator Task_InitData()
-    {
-        Debug.Log("[BOOT] InitData...");
-        bool done = false;
-
-        DataAPIController.instance.InitData(() => done = true);
-        yield return new WaitUntil(() => done);
-    }
-    IEnumerator Task_SetupUI()
-    {
-        Debug.Log("[BOOT] Setup UI...");
-        uiRoot.SetActive(true);
-        yield return ViewManager.Instance.Init();
-        Debug.Log("[BOOT] VIEW LOAD DONE ");
-        yield return DialogManager.ins.Init();
-        Debug.Log("[BOOT] DIALOG LOAD DONE ");
-    }
-
-    IEnumerator Task_LoadRemoteAsset()
-    {
-        bool done = false;
-
-
-        Debug.Log("Task load remote asset");
-        yield return ResourceManager.ins.Init(
-            new List<string>
-            {
-                "level",
-            "UI"
-            },
-            () => done = true
-        );
-
-        while (!done)
-        {
-            yield return null;
-
-        }
-        SpriteLibControl.Instance.LoadAllPartSprites(true);
-        Shader.WarmupAllShaders();
-
-    }
-
-
-    IEnumerator Task_FinishBoot()
-    {
-        Debug.Log("[BOOT] Finalizing...");
-
-        gameManager = GetComponentInChildren<GameManager>();
-        gameManager.SetUpIngame();
-        gameManager.TrackLevelStart = 0;
-        ZenSDK.instance.TrackLevelStart(gameManager.TrackLevelStart);
-
-        yield return null;
-    }
     private void OnApplicationPause(bool pause)
     {
-        if (pause)
-        {
-            Time.timeScale = 0;
-        }
-        else
-            Time.timeScale = 1;
+        Time.timeScale = pause ? 0 : 1;
     }
     private void OnApplicationFocus(bool focus)
     {

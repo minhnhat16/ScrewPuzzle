@@ -1,28 +1,23 @@
 using ConfigFile;
 using DG.Tweening;
 using Enums;
+using Ingame.Screw;
 using Managers;
 using PoolManager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.DataBase;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.Analytics;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
-using UnityEngine.UIElements;
 using static SoundManager;
+using static Unity.Collections.AllocatorManager;
 using Sequence = DG.Tweening.Sequence;
 
 namespace Ingame
 {
-    public class Box : FSMSystem, IResetable
+    public class Box : FSMSystem, IResetable, ILockable
     {
         public BoxConfig config; // ScriptableObject chứa cấu hình cho CrewBox
         [SerializeField] private SpriteRenderer render;
@@ -38,6 +33,8 @@ namespace Ingame
         [SerializeField] private bool isAddingScrew = false;
         [SerializeField] private int totalHold;
 
+
+        [SerializeField] private LockStateHandler lockStateHandler;
         public bool IsAddingScrew
         {
             get => isAddingScrew;
@@ -63,8 +60,7 @@ namespace Ingame
         public List<HoldScrew> holdScrews; // Mảng các lỗ Screw
         public UnityEvent<bool> onScrewBoxFull;
         public BoxSlot boxSlot;
-        private bool isLocked;
-
+        public bool IsLocked => lockStateHandler.IsLocked;
         public bool IsBoxFull
         {
             get => isBoxFull;
@@ -92,7 +88,7 @@ namespace Ingame
             set => transform.position = value;
         }
         public int TotalHold { get => totalHold; set => totalHold = value; }
-        public bool IsLocked { get => isLocked; set => isLocked = value; }
+        public Action<Box> OnBoxFull { get; internal set; }
 
         public void Awake()
         {
@@ -128,7 +124,7 @@ namespace Ingame
         {
             _transform.localScale = scale;
             color = ColorEnum.Empty;
-            isLocked = false;
+            lockStateHandler.SetLocked(false);
             var upperGameObj = renderUpper.gameObject;
             upperGameObj.transform.localPosition = 10 * Vector3.up;
             renderUpper.enabled = false;
@@ -143,28 +139,39 @@ namespace Ingame
             renderUpper.gameObject.SetActive(false);
             foreach (var h in holdScrews)
             {
-                h.ClearScrewOnHold(); // should put reset here
+                h.RemoveScrew(); // should put reset here
             }
             ;
             gameObject.SetActive(false);
         }
+        private void OnLocked()
+        {
+            renderUpper.gameObject.SetActive(true);
+            render.enabled = false;
+        }
 
+        private void OnUnlocked()
+        {
+            renderUpper.gameObject.SetActive(false);
+            render.enabled = true;
+        }
         // Hàm kiểm tra xem các lỗ trong CrewBox có đầy đủ Screw không
         public bool AreAllHolesFilled()
         {
             return holdScrews.All(screw => !screw.IsEmpty());
         }
-        public void SetIsLocked(bool isLocked)
+
+        public void SetLocked(bool isLocked)
         {
-            this.isLocked = isLocked;
+            lockStateHandler.SetLocked(isLocked);
             renderUpper.enabled = IsLocked;
             renderUpper.gameObject.SetActive(IsLocked);
 
             if (IsLocked)
             {
-               
+
                 renderUpper.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, "Them");
-;
+                ;
                 renderUpper.transform.localPosition = Vector2.zero;
                 renderUpper.color = ColorEnum.White.ToColor();
                 renderUpper.transform.localScale = Vector2.one;
@@ -200,7 +207,7 @@ namespace Ingame
         {
             yield return new WaitForSeconds(0.5f);
             yield return new WaitUntil(() => !isMoving);
-            BoxQueue.ins.DeactivateAndMoveQueue(this);
+            OnBoxFull?.Invoke(this);
         }
 
         public void CloseBox(float time = 0.5f, Action<bool> callback = null)
@@ -331,13 +338,13 @@ namespace Ingame
 
 
         // Hàm di chuyển Screw vào một lỗ trống trong CrewBox
-        public virtual void AddScrew(Screw.Screw screw, out bool canAdd, bool isTele = false)
+        public virtual void AddScrew(ScrewController screw, out bool canAdd, bool isTele = false)
         {
             isAddingScrew = true;
             canAdd = false;
 
             // Nếu màu screw không khớp, kết thúc ngay
-            if (screw.Color != color)
+            if (screw.GetColor() != color)
             {
                 Debug.LogWarning("Screw color mismatch!");
                 isAddingScrew = !isAddingScrew;
@@ -363,7 +370,7 @@ namespace Ingame
             }
         }
 
-        public virtual void AddScrew(List<Screw.Screw> screws, bool isTele = false)
+        public virtual void AddScrew(List<ScrewController> screws, bool isTele = false)
         {
             if (screws == null || screws.Count == 0)
                 return;
@@ -379,7 +386,7 @@ namespace Ingame
                 AddScrewListImmediate(screws, isTele);
             }
         }
-        private IEnumerator WaitForBoxStopAndAddList(List<Screw.Screw> screws, bool isTele)
+        private IEnumerator WaitForBoxStopAndAddList(List<ScrewController> screws, bool isTele)
         {
             // chờ box đứng yên
             yield return new WaitUntil(() => !isMoving);
@@ -387,7 +394,7 @@ namespace Ingame
             AddScrewListImmediate(screws, isTele);
         }
 
-        private void AddScrewListImmediate(List<Screw.Screw> screws, bool isTele)
+        private void AddScrewListImmediate(List<ScrewController> screws, bool isTele)
         {
             if (isMoving && IsLocked) return;
             var screwManager = LevelManager.ins.ScrewManager;
@@ -411,10 +418,10 @@ namespace Ingame
         }
 
 
-        private void AddScrewToSlot(Screw.Screw screw, out bool canAdd, bool isTele = false)
+        private void AddScrewToSlot(ScrewController screw, out bool canAdd, bool isTele = false)
         {
             canAdd = false;
-            if (isBoxFull || isLocked)
+            if (isBoxFull || IsLocked)
             {
                 canAdd = false;
                 return;
@@ -503,7 +510,7 @@ namespace Ingame
         {
             foreach (var h in holdScrews)
             {
-                h.ClearScrewOnHold(); // should put reset here
+                h.RemoveScrew(); // should put reset here
             }
             ;
         }
@@ -512,7 +519,7 @@ namespace Ingame
             while (gameObject.activeInHierarchy)
             {
 
-                var screws = ArrayScrew.Instance.Screws.Where(s => s.Color == color && !s.IsMoving() && s.isActiveAndEnabled).ToList();
+                var screws = ArrayScrew.Instance.Screws.Where(s => s.GetColor() == color && !s.IsMoving && s.isActiveAndEnabled).ToList();
 
                 if (screws.Count == 0)
                 {
@@ -531,12 +538,12 @@ namespace Ingame
         public void OnReset()
         {
             Reset();
-            SetIsLocked(false);
+            SetLocked(false);
             StopAllCoroutines();
             ClearScrewOnHold();
             foreach (var item in holdScrews)
             {
-                if(item.Screw != null)
+                if (item.Screw != null)
                 {
                     ScrewPool.Instance.Pool.ReturnToPool(item.Screw);
                     item.Screw = null;

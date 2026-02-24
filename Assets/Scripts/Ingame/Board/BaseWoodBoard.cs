@@ -92,7 +92,7 @@ public class BaseWoodBoard : FSMSystem
     }
 
     // Hàm thêm screw vào bảng gỗ
-    public virtual void AddScrew(Screw screw)
+    public virtual void AddScrew(ScrewController screw)
     {
         screwManager.AddScrew(screw);
     }

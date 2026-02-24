@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Ingame.Board;
+using Ingame.Screw;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,58 +41,52 @@ namespace Ingame
             ActiveObjectInLayer(isOn, index, lm);
         }
 
-        public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm)
-        {
-            if (lm == null) return;
-            if (lm.Layers == null) return;
-            if (layer < 0 || layer >= lm.Layers.Count) return;
+		public static void ActiveObjectInLayer(bool isOn, int layer, LayerManager lm)
+		{
+			if (lm == null || lm.Layers == null) return;
+			if (layer < 0 || layer >= lm.Layers.Count) return;
 
-            if (!lm.screwDict.TryGetValue(layer, out var screws) || screws == null || screws.Count == 0)
-                return;
+			// Lấy danh sách ScrewController theo layer
+			if (!lm.screwDict.TryGetValue(layer, out var screws) || screws == null || screws.Count == 0)
+				return;
 
-            foreach (var screw in screws)
-            {
-                if (screw == null) continue;
+			foreach (var screw in screws)
+			{
+				if (screw == null) continue;
 
-                // If we're turning objects ON, do not activate screws whose connected part is inactive.
-                if (isOn)
-                {
-                    var hinge = screw.HingeController;
-                    if (hinge != null)
-                    {
-                        var body = hinge.BodyConnect;
-                        if (body != null && !body.gameObject.activeSelf)
-                        {
-                            Debug.Log($"[LayerUtils] Skipping screw activation because connected part is inactive: {body.name}");
-                            screw.gameObject.SetActive(false);
-                            // Part is inactive → skip enabling this screw
-                            continue;
-                        }
+				var hinge = screw.hingeController;
+				var body = hinge?.BodyConnect;
 
-                        // Part is active (or no body) → enable screw
-                        screw.gameObject.SetActive(true);
-                        continue;
-                    }
+				if (isOn)
+				{
+					// Nếu Connected Part đang tắt → không bật Screw
+					if (body != null && !body.gameObject.activeSelf)
+					{
+						Debug.Log($"[LayerUtils] Skip Activate Screw ({screw.name}) — connected part inactive: {body.name}");
+						screw.gameObject.SetActive(false);
+						continue;
+					}
 
-                    // No hinge controller → enable screw
-                    screw.gameObject.SetActive(true);
-                }
-                else
-                {
-                    // Always allow disabling screws regardless of part state
-                    // Guard against null HingeController when logging
-                    var bodyName = screw.HingeController?.BodyConnect?.gameObject?.name ?? "unknown";
-                    Debug.Log($"[LayerUtils] Deactivating screw (connected body: {bodyName})");
-                    screw.gameObject.SetActive(false);
-                }
-            }
-        }
+					// Connected Part đã bật hoặc không có hinge → bật Screw
+					screw.gameObject.SetActive(true);
+				}
+				else
+				{
+					// Khi tắt layer → tắt tất cả screw, in log mô tả part nếu có
+					string bodyName = body != null ? body.name : "NULL";
+					Debug.Log($"[LayerUtils] Deactivate Screw ({screw.name}) — connected body: {bodyName}");
+
+					screw.gameObject.SetActive(false);
+				}
+			}
+		}
 
 
-        private static void SetLayerRecursively(GameObject obj, int newLayer)
+
+		private static void SetLayerRecursively(GameObject obj, int newLayer)
         {
             // Bỏ qua nếu là Screw hoặc có component Screw
-            if (obj.CompareTag("Screw") || obj.GetComponent<Screw.Screw>() != null)
+            if (obj.CompareTag("Screw") || obj.GetComponent<ScrewController>() != null)
                 return;
 
             // Nếu layer đã đúng thì bỏ qua để tránh gọi thừa
@@ -118,14 +113,14 @@ namespace Ingame
         }
 
 
-        internal static void RemoveScrew(Screw.Screw screw, LayerManager lm)
+        internal static void RemoveScrew(ScrewController screw, LayerManager lm)
         {
             if (screw == null || lm == null) return;
             screw.FreeHinge();
-            lm.RemoveScrewOnDict(screw, screw.sortingOrder);
+            lm.RemoveScrewOnDict(screw, screw.GetSortingOrder());
         }
 
-        public static void RemoveScrews(List<Screw.Screw> screws, LayerManager lm)
+        public static void RemoveScrews(List<ScrewController> screws, LayerManager lm)
         {
             if (screws == null || lm == null) return;
 

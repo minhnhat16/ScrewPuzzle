@@ -14,8 +14,8 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
-        public Dictionary<int, List<Screw.Screw>> screwDict = new();                 // existing usage (by layer index)
-        public Dictionary<BaseLayer, List<Screw.Screw>> screwDictByLayer = new();   // new keyed-by-object map
+        public Dictionary<int, List<ScrewController>> screwDict = new();                 // existing usage (by layer index)
+        public Dictionary<BaseLayer, List<ScrewController>> screwDictByLayer = new();   // new keyed-by-object map
         public List<BasePart> Parts
         {
             get => parts;
@@ -30,19 +30,6 @@ namespace Ingame.Board
 
         [SerializeField] private Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
         public LayerVisibilityController visibilityController;
-
-
-        public void OnEnable()
-        {
-
-        }
-
-
-
-        private void Awake()
-        {
-            visibilityController = GetComponent<LayerVisibilityController>();
-        }
 
         private void Start()
         {
@@ -74,9 +61,18 @@ namespace Ingame.Board
         // Gọi khi một layer thực hiện hành động clear
         public void OnLayerCleared(BaseLayer clearedLayer)
         {
+            if(!gameObject.activeSelf) return;
+            StartCoroutine(ShowNext(clearedLayer));
 
-            visibilityController.ShowNextLayer();
             //visibilityController.ShowNextLayer();
+        }
+        public IEnumerator ShowNext(BaseLayer layer )
+        {
+
+            yield return new WaitForSeconds(1.5f);
+            layer.gameObject.SetActive(false);
+            visibilityController.ShowNextLayer();
+
         }
 
         public IEnumerator ChangePartState(float timeout = 0.5f)
@@ -170,21 +166,21 @@ namespace Ingame.Board
                 LayerUtils.ActiveObjectInLayer(true, i, this);
             }
         }
-        public void RemoveScrewOnDict(Screw.Screw screw, int layer)
+        public void RemoveScrewOnDict(ScrewController screw, int layer)
         {
-            screwDict.TryGetValue(layer, out List<Screw.Screw> listScrews);
+            screwDict.TryGetValue(layer, out List<ScrewController> listScrews);
             //Debug.Log("Remove screw on layer " + layer + " total screws " + (listScrews != null ? listScrews.Count.ToString() : "null"));
             if (listScrews == null) return;
             listScrews.Remove(screw);
             screwDict[layer] = listScrews;
         }
-        public void RemoveScrewsOnDict(List<Screw.Screw> screws)
+        public void RemoveScrewsOnDict(List<ScrewController> screws)
         {
             if (screws == null) return;
 
             var group = screws
                 .Where(s => s != null)
-                .GroupBy(s => s.layerMask);
+                .GroupBy(s => s.GetSortingOrder());
 
             foreach (var g in group)
             {
@@ -200,13 +196,13 @@ namespace Ingame.Board
             }
         }
 
-        public List<Screw.Screw> GetScrewByPart(BasePart part)
+        public List<ScrewController> GetScrewByPart(BasePart part)
         {
             // Check null trước khi đụng vào part.name
             if (part == null)
             {
                 Debug.LogWarning("GetScrewByPart called with null part");
-                return new List<Screw.Screw>();
+                return new List<ScrewController>();
             }
 
             Debug.Log("GetScrewByPart → part: " + part.name);
@@ -217,7 +213,7 @@ namespace Ingame.Board
             if (layer < 0 || !screwDict.TryGetValue(layer, out var screwsInLayer) || screwsInLayer == null || screwsInLayer.Count == 0)
             {
                 Debug.Log($"No screws found in layer {layer}");
-                return new List<Screw.Screw>();
+                return new List<ScrewController>();
             }
 
             // Tìm tất cả screw có body nối với part.Body
@@ -225,9 +221,9 @@ namespace Ingame.Board
 
             var result = screwsInLayer
                 .Where(s =>
-                    s?.HingeController?.BodyConnect != null &&
+                    s.hingeController?.BodyConnect != null &&
                     body != null &&
-                    s.HingeController.BodyConnect == body)
+                    s.hingeController.BodyConnect == body)
                 .ToList();
 
             return result;
@@ -247,9 +243,9 @@ namespace Ingame.Board
             // Kiểm tra có screw nào đang kết nối vào part không
             bool hasConnection = screws.Any(s =>
                 s != null &&
-                s.HingeController != null &&
-                s.HingeController.BodyConnect != null &&
-                s.HingeController.BodyConnect == body);
+                s.hingeController != null &&
+                s.hingeController.BodyConnect != null &&
+                s.hingeController.BodyConnect == body);
 
             return !hasConnection; // return true nếu KHÔNG có screw kết nối
         }
@@ -261,7 +257,7 @@ namespace Ingame.Board
 
             return screws
                 .Where(s => s != null)
-                .Select(s => s.Color)
+                .Select(s => s.GetColor())
                 .ToHashSet();
         }
         public List<ColorEnum> GetScrewColorsByLayer(int layer)
@@ -272,7 +268,7 @@ namespace Ingame.Board
             // Lấy màu của từng screw còn tồn tại
             return screws
                 .Where(s => s != null)
-                .Select(s => s.Color)     // hoặc s.color / s.screwColor tùy class của bạn
+                .Select(s => s.GetColor())     // hoặc s.color / s.screwColor tùy class của bạn
                 .ToList();
         }
         public void ClearPartDict()

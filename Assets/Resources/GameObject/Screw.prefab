@@ -9,10 +9,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4241144412972584126}
-  - component: {fileID: 4241144412972584099}
-  - component: {fileID: 6748274948914760515}
-  - component: {fileID: 3012382608794122584}
-  - component: {fileID: 781120882172530673}
+  - component: {fileID: 5896338528334560481}
+  - component: {fileID: 5695312306601087758}
+  - component: {fileID: 2061017559598585470}
+  - component: {fileID: 8844474242598602764}
+  - component: {fileID: 7088093181112764834}
+  - component: {fileID: 2930788577650165760}
+  - component: {fileID: 8651598400135400847}
+  - component: {fileID: 2632683150145244176}
   m_Layer: 9
   m_Name: Screw
   m_TagString: Player
@@ -36,7 +40,7 @@ Transform:
   - {fileID: 4241144413796154024}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &4241144412972584099
+--- !u!50 &5896338528334560481
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -44,7 +48,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4241144412972584127}
-  m_BodyType: 2
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -63,7 +67,68 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!58 &6748274948914760515
+--- !u!114 &5695312306601087758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e561ddf639d6143459646786502201e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  circleCollider: {fileID: 2930788577650165760}
+  hingeController: {fileID: 8651598400135400847}
+--- !u!114 &2061017559598585470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2c1770c30dba0d409b1b6200f983e2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  render: {fileID: 4241144413796154031}
+  color: 0
+--- !u!114 &8844474242598602764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c05082ca5dfbb614ea015db23e172b6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  renderTransform: {fileID: 4241144413796154024}
+--- !u!114 &7088093181112764834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 996be5952d969be43b3b9086ba62d68d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screwPhysics: {fileID: 5695312306601087758}
+  screwRender: {fileID: 2061017559598585470}
+  screwAnimation: {fileID: 8844474242598602764}
+  hingeController: {fileID: 8651598400135400847}
+  isClicked: 0
+  isInHold: 0
+  isMoving: 0
+  isShaking: 0
+--- !u!58 &2930788577650165760
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73,7 +138,7 @@ CircleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 7ccee8a3b38049146832a2733fa1f8dd, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -93,40 +158,13 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.27
---- !u!114 &3012382608794122584
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4241144412972584127}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37bae65a89228c84c990bb32688eb231, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: 0
-  isInHold: 0
-  isClicked: 0
-  layerMask: 0
-  sortingOrder: 0
-  isMultipleJoint: 0
-  _circleCollider2D: {fileID: 0}
-  rb: {fileID: 0}
-  render: {fileID: 4241144413796154031}
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  hingeController: {fileID: 781120882172530673}
-  isShaking: 0
-  isMoving: 0
---- !u!114 &781120882172530673
+  m_Radius: 0.5
+--- !u!114 &8651598400135400847
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,6 +181,19 @@ MonoBehaviour:
     m_Bits: 0
   bodyConnect: {fileID: 0}
   hingeJoint2D: {fileID: 0}
+--- !u!114 &2632683150145244176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241144412972584127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26071a1a18fee994098f78daf7f71c1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screw: {fileID: 7088093181112764834}
 --- !u!1 &4241144413796154025
 GameObject:
   m_ObjectHideFlags: 0
@@ -154,7 +205,7 @@ GameObject:
   - component: {fileID: 4241144413796154024}
   - component: {fileID: 4241144413796154031}
   m_Layer: 9
-  m_Name: Render
+  m_Name: Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -217,7 +268,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1867890477
-  m_SortingLayer: 18
+  m_SortingLayer: 19
   m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: f706810be19b7bf498c32337c08a9c33, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

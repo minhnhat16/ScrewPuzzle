@@ -103,4 +103,10 @@ public class DialogManager : SingletonMono<DialogManager>
             //});
         }
     }
+
+    internal bool IsShowingDialog(DialogIndex settingDialog)
+    {
+        var dialog = dicDialog[settingDialog];
+        return dialogShowed.Contains(dialog);
+    }
 }

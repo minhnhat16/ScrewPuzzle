@@ -1,65 +1,58 @@
-using PoolManager;
-using System;
-using UnityEngine;
+﻿    using System;
+    using UnityEngine;
+    using Ingame.Screw;
 
-namespace Ingame
-{
     public class HoldScrew : MonoBehaviour
     {
-        [SerializeField] private int index;
-        [SerializeField] private SpriteRenderer _render;
-        [SerializeField] private Transform transf;
-        [SerializeField] private Vector3 postion;
-        [SerializeField] private Screw.Screw screw;
-        public Transform Transf {get { return transf; } set { transf = value; } }
-        public int Index { get { return index; } set { index = value; } }
-        public Screw.Screw Screw { get => screw;
-            set => screw = value;
-        }
+        [SerializeField] private ScrewController screw;  // Slot hiện tại chứa Screw nào
+        [SerializeField] private string sortingLayerName = "Box";
+        [SerializeField] private int sortingOrder = 5;
 
-        public void Start()
-        {
-            transf = gameObject.GetComponent<Transform>();
-            postion = gameObject.GetComponent<Transform>().position;
-            _render = GetComponentInChildren<SpriteRenderer>();
-        }
+        public ScrewController Screw { get => screw; set => screw = value; }
 
-        public void ClearScrewOnHold()
+        /// <summary>
+        /// Thêm một Screw mới vào HoldBox.
+        /// </summary>
+        /// <param name="newScrew">Screw cần thêm</param>
+        /// <param name="isTele">Có teleport trực tiếp hay không (bỏ qua Tween)</param>
+        /// <param name="callback">Callback khi move hoàn tất (tru  e = thành công)</param>
+        public void AddScrew(ScrewController newScrew, bool isTele = false, Action<bool> callback = null)
         {
-            screw = null;
-        }
-        public void AddScrew(Screw.Screw newScrew,bool isTele =false,Action<bool> callback = null)
-        {
-            if (!screw)
+            // Nếu đang rỗng → nhận screw mới
+            if (screw == null)
             {
                 screw = newScrew;
-                screw.SetSortingOrderAndLayer(5,"Box");
-                screw.DoMoveToHold(this, isTele);
+
+                // Đảm bảo sorting đúng layer "Box"
+                screw.SetSortingOrderAndLayer(sortingOrder, sortingLayerName);
+
+                screw.MoveToHold(this, isTele);
+
                 callback?.Invoke(true);
+                return;
             }
-            else
-            {
-                callback?.Invoke(true);
-            }
+
+            // Nếu slot đang có screw → báo callback false (thêm không thành công)
+            Debug.LogWarning($"[HoldScrew] Slot {name} đã có screw! Không thể thêm {newScrew.name}");
+            callback?.Invoke(false);
         }
 
-        public Screw.Screw GetScrew()
-        {
-            return screw == null ? null : screw;
-        }
-        public bool IsEmpty()
-        {
-            return screw == null && gameObject.activeInHierarchy;
-        }
+        /// <summary>
+        /// Kiểm tra slot có đang rỗng không
+        /// </summary>
+        public bool IsEmpty() => screw == null;
 
-        public bool IsContain(Screw.Screw screw)
+        /// <summary>
+        /// Lấy Screw hiện tại (nếu có)
+        /// </summary>
+        public ScrewController GetScrew() => screw;
+
+        /// <summary>
+        /// Xóa Screw ra khỏi slot (nếu cần)
+        /// </summary>
+        public void RemoveScrew()
         {
-            if (this.screw == null) return false;
-            return this.screw == screw;
-        }
-        public void Reset()
-        {
-            ClearScrewOnHold();
+            if (screw == null) return;
+            screw = null;
         }
     }
-}   

@@ -121,7 +121,7 @@ public class LevelMaker : MonoBehaviour
         onScrewClicked.Invoke();
     }
 
-    public void ChosePartCoroutine(ScrewLevelMaker screw)
+    public void ChosePartCoroutine(ScrewController screw)
     {
         StartCoroutine(ChosePart(screw));
     }
@@ -129,7 +129,7 @@ public class LevelMaker : MonoBehaviour
     private bool isChoosingPart = false;
     float timer = 0f;
     float timeout = 3f;
-    private IEnumerator ChosePart(ScrewLevelMaker screw)
+    private IEnumerator ChosePart(ScrewController screw)
     {
         if (isChoosingPart) yield break; // tránh start 2 lần
         isChoosingPart = true;
@@ -143,7 +143,7 @@ public class LevelMaker : MonoBehaviour
         yield return new WaitUntil(() =>
         {
             partChosen = PartGetInput();
-            screw.ScrewChangeColorOnClick(true);
+            //screw.C(true);
             return partChosen != null && partChosen.TryGetComponent(out BasePart _);
         });
 
@@ -193,7 +193,7 @@ public class LevelMaker : MonoBehaviour
             yield break;
         }
         // Tạo hinge
-        screw.CreateHingeWithMousePos(bodyPart, hinge);
+        //screw.CreateHingeWithMousePos(bodyPart, hinge);
         isChoosingPart = false;
     }
 

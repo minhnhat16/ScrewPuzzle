@@ -210,13 +210,13 @@ namespace UIScript.UI.UI
         }
         private void LevelButton()
         {
-            var levelsConfig = LevelManager.ins.levelConfig;
+            var levelsConfig = ConfigExtensions.GetAllLevel(ConfigFileManager.Instance);
             var levelData = DataAPIController.instance.GetAllLevelData();
             List<BaseLevelItem> listLevel = new();
 
             foreach (var levelConfig in levelsConfig)
             {
-                int id = levelConfig.levelId;
+                int id = levelConfig.Id;
                 var currentLevel = levelData.Find((data) => data.levelID == id);
                 bool isComplete = currentLevel?.isCompleted == true;
 

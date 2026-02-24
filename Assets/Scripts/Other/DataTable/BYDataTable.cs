@@ -150,12 +150,11 @@ public abstract class BYDataTable<T> : BYDataBase where T : class, new()
             configCompare = DefineConfigCompare();
             if (configCompare == null)
             {
-                Debug.LogError($"[{GetType().Name}] configCompare is null in GetRecordByKeySearch. Ensure DefineConfigCompare() returns a valid comparer.");
                 return null;
             }
         }
 
-        Debug.Log($"Current config {GetType().Name}<{typeof(T).Name}> Records={records.Count} with compare {configCompare}");
+
         T objectkey = configCompare.SetValueSearch(key);
         int index = records.BinarySearch(objectkey, configCompare);
         //Debug.Log("OBJECT KEY" + objectkey);

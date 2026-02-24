@@ -68,7 +68,7 @@ public class TutorialManager : MonoBehaviour
                 var target = TutorialTargetRegistry.Get(Current.targetKey);
                 TutorialUI.ins.HighlightTarget(target);
 
-                target.TryGetComponent<Screw>(out var s);
+                target.TryGetComponent<ScrewController>(out var s);
                 if (s != null) s.IsClicked = false;
                 break;
 

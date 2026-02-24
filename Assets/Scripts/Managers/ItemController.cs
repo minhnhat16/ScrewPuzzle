@@ -1,101 +1,80 @@
-﻿
-
-using DG.Tweening;
-using Managers;
-using Spine;
+﻿using DG.Tweening;
 using Spine.Unity;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
-public class ItemController : FSMSystem
+public class ItemController : FSMSystem, IItemView
 {
-    [SerializeField]
-    private bool isHandlingHammer;
-    public bool IsHandlingHammer { get => isHandlingHammer; internal set => isHandlingHammer = value; }
-
-    public static ItemController ins;
-    [SerializeField]
-    private SkeletonAnimation skeleton;
-    public Vector3 targetPos = Vector3.zero;
-    public UnityEvent<bool> itemPerformed = new();
-
-    public void Awake()
-    {
-        ins = this;
-
-        AddBoxItem = new AddBoxItem(this);
-        AddOneHold = new AddOneHold(this);
-        ClearArrayState = new ClearArrayState(this);
-        RemovePartState = new RemovePartState(this);
-        IdleItemState = new IdleItemState(this);
-        GotoState(IdleItemState); ;
-    }
-    public AddBoxItem AddBoxItem { get; private set; }
-    public AddOneHold AddOneHold { get; private set; }
-    public ClearArrayState ClearArrayState { get; private set; }
-    public RemovePartState RemovePartState { get; private set; }
-    public IdleItemState IdleItemState { get; private set; }
-
-
-
-    public void WaitFor(float time, System.Action callback)
-    {
-        StartCoroutine(WaitForSeconds(time, callback));
-    }
-
-    private IEnumerator WaitForSeconds(float time, Action callback)
-    {
-        yield return new WaitForSeconds(time);
-        IsHandlingHammer = false;
-        callback?.Invoke();
-    }
-
+    [SerializeField] private SkeletonAnimation skeleton;
 
     private Tween moveTween;
     private Tween fadeTween;
     private Tween scaleTween;
 
-    internal void PlaySkeAnimOnTarget(
+    readonly Dictionary<ItemType, SoundManager.SFX> itemSoundDict =
+        new()
+        {
+            { ItemType.Magnet, SoundManager.SFX.Magnet },
+            { ItemType.Breaker, SoundManager.SFX.Breaker },
+            { ItemType.Drill, SoundManager.SFX.Drill },
+            { ItemType.AddBox, SoundManager.SFX.AddBox },
+            { ItemType.Gold, SoundManager.SFX.GoldCollect },
+            { ItemType.Ticket, SoundManager.SFX.TicketCollect },
+        };
+
+    public void PlayItemEffect(
         ItemType type,
         Vector3 startPos,
         Vector3 targetPos,
-        Action callback = null
-    )
+        Action onComplete = null)
     {
         if (skeleton == null) return;
+
         skeleton.gameObject.SetActive(true);
 
         string animName = GetAnimName(type);
         if (string.IsNullOrEmpty(animName)) return;
 
-        // Kill tween cũ
+        KillTweens();
+
+        SetupTransform(type, startPos);
+
+        skeleton.AnimationState
+            .SetAnimation(0, animName, false)
+            .Complete += _ =>
+            {
+                skeleton.gameObject.SetActive(false);
+                onComplete?.Invoke();
+            };
+
+        PlayTweens(type, targetPos);
+    }
+
+    private void KillTweens()
+    {
         moveTween?.Kill();
         fadeTween?.Kill();
         scaleTween?.Kill();
+    }
 
-
-
-        float zRot = type != ItemType.Magnet ? 0f : 90f;
+    private void SetupTransform(ItemType type, Vector3 startPos)
+    {
+        float zRot = type == ItemType.Magnet ? 90f : 0f;
         skeleton.transform.rotation = Quaternion.Euler(0, 0, zRot);
-        // Reset transform
+
         Transform t = skeleton.transform;
         t.position = startPos;
         t.localScale = Vector3.zero;
 
         var ske = skeleton.Skeleton;
         ske.A = 0f;
+    }
 
-        skeleton.AnimationState
-                     .SetAnimation(0, animName, false)
-                     .Complete += _ =>
-                     {
-                         skeleton.gameObject.SetActive(false);
-                         callback?.Invoke();
-                     };
-
+    private void PlayTweens(ItemType type, Vector3 targetPos)
+    {
+        Transform t = skeleton.transform;
+        var ske = skeleton.Skeleton;
 
         scaleTween = t
             .DOScale(1f, 0.25f)
@@ -105,33 +84,17 @@ public class ItemController : FSMSystem
             () => ske.A,
             a => ske.A = a,
             1f,
-            0.25f
-        );
+            0.25f);
 
-        // 🚀 Move tới target
         moveTween = t
             .DOMove(targetPos, 0.6f)
-            .SetEase(Ease.InOutCubic).OnComplete(() =>
-            {
-                PlaySound(type);
-            });
-
-
+            .SetEase(Ease.InOutCubic)
+            .OnComplete(() => PlaySound(type));
     }
-    readonly Dictionary<ItemType,SoundManager.SFX> itemSoundDict = new Dictionary<ItemType, SoundManager.SFX>()
-    {
-        { ItemType.Magnet, SoundManager.SFX.Magnet },
-        { ItemType.Breaker, SoundManager.SFX.Breaker },
-        { ItemType.Drill, SoundManager.SFX.Drill },
-        { ItemType.AddBox, SoundManager.SFX.AddBox },
-        { ItemType.Gold, SoundManager.SFX.GoldCollect },
-        { ItemType.Ticket, SoundManager.SFX.TicketCollect },
-    };
+
     private void PlaySound(ItemType type)
     {
-
-        Debug.Log("Play sound for item type: " + type); 
-        SoundManager.SFX sfx = itemSoundDict.GetValueOrDefault(type, SoundManager.SFX.Button);
+        var sfx = itemSoundDict.GetValueOrDefault(type, SoundManager.SFX.Button);
         SoundHelper.PlaySFX(sfx);
     }
 

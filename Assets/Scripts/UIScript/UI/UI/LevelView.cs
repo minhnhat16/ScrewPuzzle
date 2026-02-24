@@ -35,8 +35,8 @@ namespace UIScript.UI.UI
         {
             base.OnInit(callback);
 
-            var baseConfig = LevelManager.ins.levelConfig
-                .OrderBy(c => c.levelId)
+            var baseConfig = ConfigExtensions.GetAllLevel(ConfigFileManager.Instance)
+                .OrderBy(c => c.Id)
                 .ToList();
 
             var data = DataAPIController.instance.GetLevelProgress(); // ví dụ
@@ -44,7 +44,7 @@ namespace UIScript.UI.UI
 
             foreach (var levelConfig in baseConfig)
             {
-                int id = levelConfig.levelId;
+                int id = levelConfig.Id;
                 var progress = data?.Find(d => d.levelID == id);
 
                 bool isComplete = progress?.isCompleted ?? false;

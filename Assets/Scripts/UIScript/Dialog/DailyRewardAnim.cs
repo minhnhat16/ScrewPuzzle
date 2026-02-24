@@ -7,7 +7,7 @@ public class DailyRewardAnim : BaseDialogAnimation
 {
     public Animator animator;
     private Action callback;
-    private void Awake()
+    public override void Awake()
     {
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
     }

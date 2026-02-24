@@ -26,6 +26,58 @@ public class LayerVisibilityController : MonoBehaviour
     public int RePreviewMax { get => rePreviewMax; set => rePreviewMax = value; }
     public int PreViewMin { get => preViewMin; set => preViewMin = value; }
 
+    /// <summary>
+    /// Initialize the LayerVisibilityController:
+    /// - populate indexedLayers and layerQueue from parent LayerManager if available,
+    ///   otherwise scan child BaseLayer components (preserving sibling order).
+    /// - clamp range indices to valid bounds and apply visibility immediately.
+    /// </summary>
+    public void Init(Queue<BaseLayer> incomingQueue = null)
+    {
+        // Ensure containers exist
+        indexedLayers ??= new List<BaseLayer>();
+
+        var lm = GetComponentInParent<LayerManager>();
+
+        // 1) Use incoming queue if provided and non-empty (preserves caller intent)
+        if (incomingQueue != null && incomingQueue.Count > 0)
+        {
+            indexedLayers = incomingQueue.ToList();
+            layerQueue = new Queue<BaseLayer>(indexedLayers);
+        }
+        // 2) Fallback to LayerManager.Layers if available
+        else if (lm != null && lm.Layers != null && lm.Layers.Count > 0)
+        {
+            indexedLayers = new List<BaseLayer>(lm.Layers);
+            layerQueue = new Queue<BaseLayer>(indexedLayers);
+        }
+        // 3) Final fallback: scan children (preserve sibling order)
+        else
+        {
+            indexedLayers.Clear();
+            var found = GetComponentsInChildren<BaseLayer>(true)
+                .OrderBy(l => l.transform.GetSiblingIndex())
+                .ToList();
+
+            indexedLayers.AddRange(found);
+            layerQueue = new Queue<BaseLayer>(indexedLayers);
+        }
+
+        // Clamp ranges for current count
+        int count = indexedLayers?.Count ?? 0;
+        preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count));
+        previewMax = Mathf.Clamp(previewMax, preViewMin, count);
+        rePreviewMax = Mathf.Clamp(rePreviewMax, previewMax, count);
+
+        // Keep LayerManager reference in sync (if present)
+        if (lm != null)
+            lm.visibilityController = this;
+
+        Debug.Log($"LayerVisibilityController.Init → layers:{count}, preViewMin:{preViewMin}, previewMax:{previewMax}, rePreviewMax:{rePreviewMax}");
+
+        // Apply visibility immediately so scene reflects initialization
+        ApplyLayerVisibility();
+    }
     internal void ApplyLayerVisibility()
     {
         // Use indexedLayers (preserves indices). Fallback to queue->list for legacy usage.
@@ -62,7 +114,7 @@ public class LayerVisibilityController : MonoBehaviour
             {
                 SetLayerHidden(layer, i, lm);
             }
-           
+
         }
     }
 
@@ -80,7 +132,7 @@ public class LayerVisibilityController : MonoBehaviour
 
         // Start fades for all parts and only activate objects in layer after all fades complete.
         var partsToFade = layer.parts != null && layer.parts.Count > 0 ? layer.parts : new List<BasePart>();
-        if(gameObject.activeSelf == false)
+        if (gameObject.activeSelf == false)
         {
             // If controller is inactive, skip fades and activate immediately
             LayerUtils.ActiveObjectInLayer(true, layer, lm);
@@ -270,7 +322,7 @@ public class LayerVisibilityController : MonoBehaviour
         if (renderer == null) yield break;
         Color startColor = renderer.material.color;
         Color targetColor = startColor;
-        targetColor.a = 0.6f;
+        targetColor.a = 0.8f;
         float t = 0f;
         while (t < duration)
         {
@@ -370,11 +422,11 @@ public class LayerVisibilityController : MonoBehaviour
             .Select((l, i) => l == null ? $"[{i}]=null" : $"[{i}]={l.name}")
             .ToArray();
 
-        Debug.Log($"[PopLayer] indexedLayers after removal: {string.Join(", ", afterNames)}");
-        Debug.Log($"[PopLayer] Ranges after: preViewMin={preViewMin}, previewMax={previewMax}, rePreviewMax={rePreviewMax}");
+        //Debug.Log($"[PopLayer] indexedLayers after removal: {string.Join(", ", afterNames)}");
+        //Debug.Log($"[PopLayer] Ranges after: preViewMin={preViewMin}, previewMax={previewMax}, rePreviewMax={rePreviewMax}");
 
-        // Print stack to help trace caller
-        Debug.Log($"[PopLayer] CallStack:\n{Environment.StackTrace}");
+        //// Print stack to help trace caller
+        //Debug.Log($"[PopLayer] CallStack:\n{Environment.StackTrace}");
 
         // Re-apply visibility using indexedLayers
         ApplyLayerVisibility();

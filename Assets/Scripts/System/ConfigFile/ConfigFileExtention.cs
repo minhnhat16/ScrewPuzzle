@@ -2,6 +2,7 @@ using ConfigFile;
 using Enums;
 using System;
 using System.Collections.Generic;
+using System.ConfigFile;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -56,5 +57,11 @@ public static class ConfigExtensions
     {
         var cells = cfg.GetConfig<PuzzleCellConfig>().GetAllRecord();
         return cells;
+    }
+
+    internal static IEnumerable<LevelConfigRecord> GetAllLevel(this ConfigFileManager cfg)
+    {
+        var levels = cfg.GetConfig<LevelConfig>().GetAllRecord();   
+        return levels;
     }
 }

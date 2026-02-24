@@ -117,7 +117,6 @@ namespace Ingame.Board
         public void ClearLayer()
         {
             IsLayerClear = true;
-            gameObject.SetActive(false);
             layerManager.OnLayerCleared(this);
         }
 

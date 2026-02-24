@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[RequireComponent(typeof(Rigidbody), typeof(HingeJoint2D))]
 public class HingeObject : MonoBehaviour,IResetable
 {
     private Rigidbody rb;
