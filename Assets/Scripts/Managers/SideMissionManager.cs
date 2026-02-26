@@ -4,13 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SideMissionManager : SingletonMono<SideMissionManager>,IResetable
+public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
 {
+    [SerializeField] private MonoBehaviour boxQueueBehaviour;
     public SideMission currentMission;
+    public IBoxQueue boxQueue;
     /// <summary>
     /// Tạo nhiệm vụ 3 vít cùng màu khi level load xong
     /// </summary>
-    public SideMission GenerateColorMission(Level.Level level,BoxQueue queue,int require = 3)
+    /// 
+    private void Awake()
+    {
+
+        boxQueue = FindAnyObjectByType<BoxQueue>();
+    }
+    public SideMission GenerateColorMission(Level.Level level, BoxQueue queue, int require = 3)
     {
         // Đếm số lượng screw theo màu
         var colorCount = level.screws
@@ -41,7 +49,7 @@ public class SideMissionManager : SingletonMono<SideMissionManager>,IResetable
 
         currentMission = mission;
         Debug.Log($"Side mission created: Unscrew 3 screws of color {targetColor}");
-        BoxQueue.ins.RemoveBoxByColor((ColorEnum)targetColor,require/3);
+        boxQueue.RemoveBoxByColor((ColorEnum)targetColor, require / 3);
         return mission;
     }
 
@@ -50,9 +58,9 @@ public class SideMissionManager : SingletonMono<SideMissionManager>,IResetable
         currentMission = null;
     }
 
-    internal void UpdateMission( int count)
+    internal void UpdateMission(int count)
     {
-       this.currentMission.currentCount += count;
+        this.currentMission.currentCount += count;
     }
 
 

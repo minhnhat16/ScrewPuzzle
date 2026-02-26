@@ -117,7 +117,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
     public void LoadLevel(int levelID, Action callback = null)
     {
-        IngameController.ins.IsGameOver = false;
         //boxManager.activeBoxCount = 2;
         currentLevelID = levelID;
         arrayScrew.ShowArrayScrew();
@@ -127,7 +126,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         List<Func<IEnumerator>> preTasks = new List<Func<IEnumerator>>()
         {
             () => TaskLoadSpriteIngame(),
-            () => IngameController.ins.LoadIngameAssetCoroutine(),
             () => TaskLoadObjectFromLevel(levelID),
         };
         TaskManager.ins.AddTask(preTasks);
@@ -250,18 +248,18 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
     public void InitSpecial()
     {
-        int requireSpecial = IngameController.ins.requireCount;
+        //int requireSpecial = IngameController.ins.;
 
-        layerManager.visibilityController.ApplyLayerVisibility();
+        //layerManager.visibilityController.ApplyLayerVisibility();
 
-        SideMission mission =
-            SideMissionManager.ins.GenerateColorMission(
-                currentLevel,
-                requireSpecial);
+        //SideMission mission =
+        //    SideMissionManager.ins.GenerateColorMission(
+        //        currentLevel,
+        //        requireSpecial);
 
-        IngameController.ins.SetSideMission(mission);
+        //IngameController.ins.SetSideMission(mission);
 
-        boxManager.EnableSpecialMode(mission);
+        //boxManager.EnableSpecialMode(mission);
     }
     private IEnumerator InitializeLevelObject()
     {
@@ -602,7 +600,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     }
     public void OnReset()
     {
-        IngameController.ins.CurrentStar = 0;
+        IngameController.ins.RestartLevel(currentLevelID);
         if (transform.childCount > 0)
         {
             LayerManager layerManager = transform.GetChild(0).GetComponent<LayerManager>();

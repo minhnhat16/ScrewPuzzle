@@ -46,12 +46,12 @@ namespace UIScript.Dialog
             ticketPayButton.interactable = newParam.currentTicket > 0;
             SetRevive(newParam.isRevive);
             goldDisplay.SetGoldToLable(userGold);
-            IngameController.ins.PauseGame();
+            IngameController.ins.Pause();
         }
 
         public override void OnEndHideDialog()
         {
-            IngameController.ins.ResumeGame();
+            IngameController.ins.Resume();
 
         }
 
@@ -76,7 +76,7 @@ namespace UIScript.Dialog
 
             DialogManager.ins.HideDialog(dialogIndex, () =>
             {
-                ItemController.ins.AddBoxItem.Use();
+                IngameController.ins.OnItemInvoke.Invoke(ItemType.AddBox, Vector3.zero);
             });
         }
 
@@ -87,9 +87,9 @@ namespace UIScript.Dialog
             bool isSpent = WalletManager.ins.TrySpend(Currency.Ticket, 1);
 
             if (isSpent)
-                IngameController.ins.OnRevive();
+                IngameController.ins.Revive();
             else
-                IngameController.ins.OnGameOver();
+                IngameController.ins.Lose();
             //ZenSDK.instance.ShowVideoReward(onWatch =>
             //{
             //    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
@@ -103,7 +103,7 @@ namespace UIScript.Dialog
                 //Debug.Log($"Hide this dialog {dialogIndex}");
                 if (param.isRevive)
                 {
-                    IngameController.ins.OnGameOver();
+                    IngameController.ins.Lose();
                 }
             });
         }

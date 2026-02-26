@@ -22,7 +22,7 @@ public class LoseDialog : BaseDialog
     public override void Setup(DialogParam dialogParam)
     {
         base.Setup(dialogParam);
-        IngameController.ins.PauseGame();
+        IngameController.ins.Pause();
         SoundHelper.PlaySFX(SoundManager.SFX.Lose);
     }
 
@@ -37,10 +37,10 @@ public class LoseDialog : BaseDialog
 
         DialogManager.ins.HideDialog(DialogIndex.LoseDialog, () =>
         {
-            IngameController.ins.OnRevive();
+            IngameController.ins.Revive();
             var pos = ArrayScrew.Instance.GetHoldPos() ;
-            IngameController.ins.onItemInvoke.Invoke(ItemType.Magnet, pos);
-            IngameController.ins.ResumeGame();
+            IngameController.ins.OnItemInvoke.Invoke(ItemType.Magnet, pos);
+            IngameController.ins.Resume();
         });
         //    }   
         //    DialogManager.ins.HideDialog(DialogIndex.LoseDialog);
@@ -53,7 +53,7 @@ public class LoseDialog : BaseDialog
 
         DialogManager.ins.HideDialog(DialogIndex.LoseDialog, () =>
         {
-            IngameController.ins.OnGameOver();
+            IngameController.ins.Lose();
         });
 
     }

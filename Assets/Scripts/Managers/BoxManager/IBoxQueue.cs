@@ -1,4 +1,5 @@
 using ConfigFile;
+using Enums;
 using Ingame;
 using Ingame.Screw;
 using System;
@@ -11,11 +12,13 @@ public interface IBoxQueue
     event Action<Box> OnBoxSpawned;
     event Action<Box> OnBoxRemoved;
     event Action<SideMission> OnSpecialModeStarted;
-    void LoadLevelBoxes(List<BoxConfigRecord> records);
+    void LoadLevelBoxes(IEnumerable<BoxConfigRecord> records);
     void Initialize(bool isTutorial);
     void ResetQueue();
     void NotifyBoxFull(Box box);
     void EnableSpecialMode(SideMission mission);
     void ProcessScrews(IEnumerable<ScrewController> screws);
     void UnlockNextBox();
+    bool HasLockedBox();
+    void RemoveBoxByColor(ColorEnum targetColor, int v);
 }

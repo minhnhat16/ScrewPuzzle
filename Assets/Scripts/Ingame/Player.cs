@@ -58,6 +58,11 @@ namespace Ingame
 
         protected override void HandleInput(Vector3 screenPos)
         {
+            if (IsClickOverUI()) return;
+
+            var screw = PickAtScreenPos<ScrewController>(screenPos, "Player");
+            if (screw != null)
+                OnScrewSelected?.Invoke(screw);
         }
     }
 }

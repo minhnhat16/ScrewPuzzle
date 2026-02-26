@@ -152,14 +152,13 @@ namespace Ingame
         // Hàm thêm Screw vào một ô trống trong holdScrew
         private void ScrewFullEvent()
         {
-            //Debug.Log("HoldScrews are full! Game Over!");
-            IngameController.ins.GameEndInvoker();
+            IngameController.ins.Revive();
         }
         // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
         private IEnumerator CheckHoldCoroutine()
         {
             stopCheckHold = false;
-
+            var boxQueue = IngameController.ins.BoxQueue;
             while (!stopCheckHold && !IngameController.ins.IsGameOver)
             {
                 bool allFull = holdScrews.All(h => h != null && !h.IsEmpty());
@@ -171,7 +170,7 @@ namespace Ingame
 
                     allFull = holdScrews.All(h => h != null && !h.IsEmpty());
 
-                    if (allFull && BoxQueue.ins.MovingBox == false)
+                    if (allFull && boxQueue.hasMovingBox == false)
                     {
                         stopCheckHold = true;     // <--- STOP TẠI ĐÂY
                         onHoldScrewsFull?.Invoke();
@@ -255,7 +254,8 @@ namespace Ingame
         }
         private bool TryAddToSuitableBox(ScrewController screw)
         {
-            var suitableBox = BoxQueue.ins.FindSuitableBox(screw, false);
+            var boxQueue = IngameController.ins.BoxQueue;
+            var suitableBox = boxQueue.FindSuitableBox(screw.GetColor());
             if (suitableBox == null)
                 return false;
 
@@ -264,7 +264,7 @@ namespace Ingame
             screw.SetSortingOrderAndLayer(4, "Box");
 
             bool canAdd;
-            BoxQueue.ins.AddScrewToBox(screw, suitableBox, out canAdd);
+            boxQueue.CanAddScrew(screw, suitableBox, out canAdd);
 
             if (canAdd)
                 ParentTo(screw, suitableBox.transform);
@@ -383,22 +383,26 @@ namespace Ingame
         // Change the signature of ClearToHidding from void to IEnumerator
         public IEnumerator ClearToHidding()
         {
-            for (int i = 0; i < screws.Count; i++)
-            {
-                var screw = screws[i];
-                screw.gameObject.SetActive(false);
-                yield return null;
-            }
-            BoxQueue.ins.hidingScrews.AddRange(screws);
+            var boxQueue = IngameController.ins.BoxQueue;
 
-            for (int j = 0; j < holdScrews.Count; j++)
+            var copy = screws.ToList();   // clone để tránh modify trong quá trình loop
+
+            foreach (var screw in copy)
             {
-                holdScrews[j].RemoveScrew();
+                screw.SetActive(false);
                 yield return null;
             }
+
+            var screwManager = IngameController.ins.ScrewManager;
+            screwManager.AddHiddenScrews(copy);
+            foreach (var hold in holdScrews.ToList())
+            {
+                hold.RemoveScrew();
+                yield return null;
+            }
+
             screws.Clear();
         }
-
         internal Vector3 GetHoldPos()
         {
             var hold = holdScrews.Last(h => h.gameObject.activeSelf);

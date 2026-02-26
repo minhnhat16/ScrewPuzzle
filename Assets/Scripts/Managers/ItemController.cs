@@ -3,14 +3,46 @@ using Spine.Unity;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ItemController : FSMSystem, IItemView
 {
     [SerializeField] private SkeletonAnimation skeleton;
-
     private Tween moveTween;
     private Tween fadeTween;
     private Tween scaleTween;
+    private RemovePartState removePartState;
+    private AddBoxItem addBoxState;
+    private ClearArrayState magnetState;
+    private IdleItemState idleState;
+    private AddOneHold addOneHold;
+    public bool IsItemExecuting { get; private set; }
+    public bool IsItemSelected { get; private set; }
+    public RemovePartState RemovePartState { get => removePartState;  }
+    public AddBoxItem AddBoxState { get => addBoxState; }
+    public ClearArrayState MagnetState { get => magnetState;  }
+    public IdleItemState IdleState { get => idleState;}
+    public AddOneHold AddOneHold { get => addOneHold; }
+
+    public UnityEvent<bool> itemPerformed;
+
+    public void SetSelected(bool value)
+    {
+        IsItemSelected = value;
+    }
+
+    public void SetExecuting(bool value)
+    {
+        IsItemExecuting = value;
+    }
+    private void Awake()
+    {
+        this.removePartState = new RemovePartState(this);
+        this.addBoxState = new AddBoxItem(this);
+        this.magnetState = new ClearArrayState(this);
+        this.idleState = new IdleItemState(this);
+        this.addOneHold = new AddOneHold(this);
+    }
 
     readonly Dictionary<ItemType, SoundManager.SFX> itemSoundDict =
         new()

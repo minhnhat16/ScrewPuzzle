@@ -1,5 +1,6 @@
 using UnityEngine;
 using Enums;
+using System;
 
 namespace Ingame.Screw
 {
@@ -56,6 +57,11 @@ namespace Ingame.Screw
             render.transform.localRotation = Quaternion.identity;
             render.transform.localScale = Vector3.one;
             render.color = UnityEngine.Color.white;
+        }
+
+        internal void SetActive(bool isActive)
+        {
+            gameObject.SetActive(isActive);
         }
     }
 }

@@ -96,7 +96,7 @@ public class SettingDialog : BaseDialog
     public override void OnEndHideDialog()
     {
         base.OnEndHideDialog();
-        IngameController.ins.ResumeGame();
+        IngameController.ins.Resume();
     }
     public void PlayButton()
     {
@@ -138,7 +138,7 @@ public class SettingDialog : BaseDialog
     private void SetupPauseGame(bool isMainScreen)
     {
         if (isMainScreen) return;
-        IngameController.ins.PauseGame();
+        IngameController.ins.Pause();
     }
 
 }

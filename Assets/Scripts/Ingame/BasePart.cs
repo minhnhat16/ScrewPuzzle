@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 namespace Ingame
 {
-    public class BasePart : MonoBehaviour
+    public class BasePart : MonoBehaviour, IBreakable, ITappable
     {
         public string uniqueID;
         private static readonly HashSet<string> usedIDs = new HashSet<string>();
@@ -24,6 +24,8 @@ namespace Ingame
 
         public UnityEvent<bool, BasePart> OnStateChanged = new();
 
+
+        private IInteractionService _interactionService;
         //-----------------------------
         // PROPERTIES
         //-----------------------------
@@ -46,6 +48,26 @@ namespace Ingame
         }
         public SpriteRenderer Outline { get => outline; set => outline = value; }
 
+        public bool IsInteractable => true;
+
+        public Transform Transform => transform;
+
+        public bool canBreak => true;
+        public bool OnTap(Vector2 screenPosition)
+        {
+            if (_interactionService == null)
+                return false;
+
+            if (_interactionService.CurrentMode != InteractionMode.BreakerSelecting)
+                return false;
+
+            Break();
+
+            _interactionService.ResetMode();
+
+            return true;
+        }
+
         //-----------------------------
         // UNITY LIFECYCLE
         //-----------------------------
@@ -60,12 +82,7 @@ namespace Ingame
                 uniqueID = GenerateUniqueID();
 
         }
-
-        private void Start()
-        {
-        }
-
-
+    
         //-----------------------------
         // FALLING LOGIC (STABLE VERSION)
         //-----------------------------
@@ -132,7 +149,7 @@ namespace Ingame
 
             int layer = gameObject.layer;
             SetIgnoreColliderLayer(false, layer, layer);
-            OnStateChanged.Invoke(true,this);
+            OnStateChanged.Invoke(true, this);
         }
 
         //-----------------------------
@@ -239,6 +256,12 @@ namespace Ingame
             yield return new WaitForSeconds(v);
             body.AddForceAtPosition(Vector2.up, transform.position);
 
+        }
+        public void Break()
+        {
+            Debug.Log("Break part: " + uniqueID);
+
+            Destroy(gameObject);
         }
     }
 }

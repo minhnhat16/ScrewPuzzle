@@ -385,7 +385,8 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
             yield break;
         }
         layerManager.screwDict = new Dictionary<int, List<ScrewController>>();
-        BoxQueue.ins.boxConfig = levelData.boxConfig;
+        //BoxQueue.ins.boxConfig = levelData.boxConfig;
+
         List<BaseLayer> listBaseLayer = new();
         // Loop through all layers in the level data
         foreach (var layerData in levelData.layers)

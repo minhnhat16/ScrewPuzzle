@@ -50,7 +50,7 @@ namespace UIScript.Dialog
 
             goldDisplay.SetGoldToLable(userGold);
             ticket.SetGoldToLable(ticketParam);
-            IngameController.ins.PauseGame();
+            IngameController.ins.Pause();
         }
 
         public override void OnStartShowDialog()
@@ -96,7 +96,7 @@ namespace UIScript.Dialog
         {
             base.OnEndHideDialog();
             SetButtonInteractAble(true);
-            IngameController.ins.ResumeGame();
+            IngameController.ins.Resume();
         }
 
         private Tween fillTween;

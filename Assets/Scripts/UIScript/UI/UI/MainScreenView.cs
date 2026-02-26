@@ -160,7 +160,7 @@ namespace UIScript.UI.UI
             SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
             LevelManager.ins.LoadLevel(currentLevel, () =>
             {
-                IngameController.ins.PauseGame();
+                IngameController.ins.Pause();
             });
         }
 

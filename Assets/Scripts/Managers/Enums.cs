@@ -157,3 +157,9 @@ public enum  ChestLocation
     Quest,
     Puzzle,
 }
+public enum InteractionMode
+{
+    Normal,
+    BreakerSelecting,
+    BoxSelecting,
+}

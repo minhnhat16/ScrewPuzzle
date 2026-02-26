@@ -12,18 +12,22 @@ public class AddOneHold : FSMState<ItemController>
 
     internal void Use(Vector3 targetPos, Action callback = null)
     {
-        sys.IsHandlingHammer = false;
-        sys.PlaySkeAnimOnTarget(ItemType.Drill,new UnityEngine.Vector3(0,-10,0), targetPos, () =>
-        {
-            MissionManager.ins.ProcessUseItem(ItemType.Drill, 1);
-            ArrayScrew.Instance.SpawnNewHold();
-            sys.WaitFor(1, () => {
-                sys.itemPerformed?.Invoke(true);
+        if (!sys.IsItemSelected || sys.IsItemExecuting) return;
+        sys.SetExecuting(true);
+        sys.PlayItemEffect(
+            ItemType.Breaker,
+            Vector3.zero,
+            targetPos,
+            () =>
+            {
+                MissionManager.ins.ProcessUseItem(ItemType.Drill, 1);
+                ArrayScrew.Instance.SpawnNewHold();
+                sys.SetExecuting(false);
+                sys.SetSelected(false);
+                callback?.Invoke();
             });
-            callback?.Invoke();
-        });
-       
+
     }
 
-  
+
 }

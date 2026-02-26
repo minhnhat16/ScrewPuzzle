@@ -87,7 +87,7 @@ public abstract class BaseInputHandler : MonoBehaviour
     // ============================
     // UI CHECK
     // ============================
-    private bool IsClickOverUI()
+    internal bool IsClickOverUI()
     {
 #if UNITY_ANDROID || UNITY_IOS
         if (Input.touchCount > 0)

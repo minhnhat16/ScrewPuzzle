@@ -50,7 +50,7 @@ public class BoxStar : MonoBehaviour
         {
 
             Debug.Log("BoxStar: Reached target position. Returning to pool. And adding star");
-            IngameController.ins.StarChanging(1);
+            IngameController.ins.AddStar(1);
             Sequence charge = DOTween.Sequence();
             charge.Append(transform.DOScale(1.35f, 0.15f).SetEase(Ease.OutBack));
             charge.Append(transform.DOScale(1f, 0.12f).SetEase(Ease.InSine));

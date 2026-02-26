@@ -5,6 +5,7 @@ public class FSMSystem : MonoBehaviour
     public string state;
 
     public IFSMState currentState;
+
     public void GotoState(IFSMState newState)
     {
         this.state = newState.ToString();

@@ -231,13 +231,13 @@ namespace Ingame.Screw
                 hinge.HingeJoint2D.connectedBody = targetPart;
                 hinge.HingeJoint2D.autoConfigureConnectedAnchor = true;
             }
-        
+
             if (hingeController != null)
             {
                 hingeController.HingeJoint2D = hinge.HingeJoint2D;
                 hingeController.BodyConnect = targetPart;
             }
-           
+
 
             return hinge.HingeJoint2D;
         }
@@ -254,6 +254,26 @@ namespace Ingame.Screw
 
             return false;
         }
+
+        internal void SetActive(bool isActive)
+        {
+            gameObject.SetActive(isActive);
+            screwRender.SetActive(isActive);
+        }
+
+        public void EnableColliderAndRig(bool isEnabled)
+        {
+            if (screwPhysics != null)
+            {
+                if (isEnabled)
+                {
+                    screwPhysics.EnableCollider();
+                }
+                else
+                {
+                    screwPhysics.DisableCollider();
+                }
+            }
+        }
     }
 }
-

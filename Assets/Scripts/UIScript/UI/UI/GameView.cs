@@ -35,12 +35,19 @@ public class GameView : BaseView
 
     public UnityEvent<bool> itemPerformed = new();
 
+
+    [SerializeField] private ItemController itemController;
+
     public Text GoldLb => gold_lb;
     public RectTransform Anchor => anchor;
 
     // Keep track of which item type's description is currently shown (if any)
     private ItemType? currentDescriptionItem;
 
+    private void Awake()
+    {
+        itemController = FindAnyObjectByType<ItemController>();
+    }
     private void OnEnable()
     {
 
@@ -48,7 +55,7 @@ public class GameView : BaseView
         btn_hammer.AddListener(HammerClicked);
         btn_magnet.AddListener(MagnetClicked);
         settingBtn.onClick.AddListener(SettingButton);
-        itemPerformed = ItemController.ins.itemPerformed;
+        itemPerformed = itemController.itemPerformed;
         itemPerformed.AddListener(ItemPerformededHandler);
 
         // Register to be notified when the item dictionary or its entries change.
@@ -91,7 +98,7 @@ public class GameView : BaseView
         base.OnStartShowView();
         starBottle.OnReset();
         txt_specialScrew.text = "0";
-        IngameController.ins.onStarChange = starBottle.fillChange;
+        IngameController.ins.OnStarChanged = starBottle.fillChange;
         starBottle.OnReset();
 
     }
@@ -177,7 +184,7 @@ public class GameView : BaseView
             // đủ item → sử dụng item
             ShowDescription(itemType);
             var pos = itemType == ItemType.Breaker ? Vector3.zero : ArrayScrew.Instance.GetHoldPos() + new Vector3(1, -0.5f);
-            IngameController.ins.onItemInvoke?.Invoke(itemType, pos);
+            IngameController.ins.OnItemInvoke?.Invoke(itemType, pos);
             button.interactable = true;
         }
     }
@@ -189,9 +196,6 @@ public class GameView : BaseView
         {
             GamePlayAnim anim = this.BaseViewAnimation as GamePlayAnim;
             anim.HideDescription(null);
-
-            // Optionally clear current selection when description is hidden
-            // currentDescriptionItem = null;
         }
     }
     public void SettingButton()

@@ -3,28 +3,37 @@ using UnityEngine;
 
 public class RemovePartState : FSMState<ItemController>
 {
-    private ItemController itemController;
     private Vector3 targetPos;
+
     public RemovePartState(ItemController itemController)
     {
         Setup(itemController);
     }
 
-    public void Use(Vector3 targetPos)
+    public void Use()
     {
-        sys.IsHandlingHammer = true;
-        this.targetPos = targetPos;
-    }
-    internal void Peform(BasePart part,Vector3 target)
-    {
-        sys.PlaySkeAnimOnTarget(ItemType.Breaker, target, target, () =>
-        {
-            SoundHelper.PlaySFX(SoundManager.SFX.Breaker);
-            MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
-            LevelManager.ins.RemovePart(part);
-            sys.IsHandlingHammer = false;
-            sys.itemPerformed?.Invoke(true);
-        });
+        if (sys.IsItemExecuting) return;
 
+        sys.SetSelected(true);
+    }
+
+    internal void Perform(BasePart part, Vector3 startPos)
+    {
+        if (!sys.IsItemSelected || sys.IsItemExecuting) return;
+
+        sys.SetExecuting(true);
+
+        sys.PlayItemEffect(
+            ItemType.Breaker,
+            startPos,
+            targetPos,
+            () =>
+            {
+                MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
+                LevelManager.ins.RemovePart(part);
+
+                sys.SetExecuting(false);
+                sys.SetSelected(false);
+            });
     }
 }

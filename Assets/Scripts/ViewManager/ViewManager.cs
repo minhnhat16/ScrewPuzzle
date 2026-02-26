@@ -117,7 +117,7 @@ public class ViewManager : MonoBehaviour
         {
             LevelManager.ins.LoadLevel(0, () =>
             {
-                IngameController.ins.PauseGame();
+                IngameController.ins.Pause();
             });
         }
         else

@@ -3,7 +3,8 @@ using Managers;
 public class AddBoxItem : FSMState<ItemController>, IItem
 {
     private bool isHadling;
-    public ItemType ItemType => ItemType.Magnet;
+
+    public ItemType ItemType => ItemType.AddBox;
 
     public bool IsHandling => isHadling;
 
@@ -11,15 +12,7 @@ public class AddBoxItem : FSMState<ItemController>, IItem
     {
         Setup(sys);
     }
-    public override void OnEnter()
-    {
-        base.OnEnter();
-    }
 
-    public override void OnUpdate()
-    {
-        base.OnUpdate();
-    }
     public void Discard()
     {
     }
@@ -30,9 +23,14 @@ public class AddBoxItem : FSMState<ItemController>, IItem
 
     public void Use()
     {
-        sys.IsHandlingHammer = false;
-        MissionManager.ins.ProcessUseItem(ItemType, 1);
-        IngameController.ins.Revive();
-        sys.itemPerformed?.Invoke(true);
+        sys.PlayItemEffect(
+            ItemType,
+            sys.transform.position,
+            sys.transform.position,
+            () =>
+            {
+                MissionManager.ins.ProcessUseItem(ItemType, 1);
+                IngameController.ins.Revive();
+            });
     }
 }
