@@ -1,199 +1,271 @@
-using Enums;
+﻿using Enums;
+using Gameplay.StateMachine;
 using Ingame;
 using Ingame.Screw;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 
 namespace Managers
 {
     public class IngameController : SingletonMono<IngameController>
     {
+        // ─────────────────────────────────────────
+        // Inspector
+        // ─────────────────────────────────────────
+
+        [Header("State Machine")]
+        [SerializeField] private GameStateMachineBootstrapper stateMachineBoot;
+
         [Header("References")]
-        [SerializeField] private MonoBehaviour boxQueueBehaviour;
-        [SerializeField] private MonoBehaviour gameFlowBehaviour;
+        [SerializeField] private BoxQueue boxQueue;   // MonoBehaviour thật → serialize thẳng, không cần cast
         [SerializeField] private Player player;
 
-        private IBoxQueue _boxQueue;
-        private IGameFlowService _gameFlow;
-        private ItemController itemController;
-        private ScrewManager screwManager;
+        // ─────────────────────────────────────────
+        // Private
+        // ─────────────────────────────────────────
 
-        [Header("State")]
-        [SerializeField] private bool isGameOver;
-        [SerializeField] private bool isPaused;
+        private IGameStateMachine _stateMachine;
+        private IBoxQueue _boxQueue;
+        private IArrayScrew _arrayScrew;
+        private IGameFlowService _gameFlow;
+        private ItemController _itemController;
+        private ScrewManager _screwManager;
+
+        // ─────────────────────────────────────────
+        // Star
+        // ─────────────────────────────────────────
 
         [Header("Star")]
         [SerializeField] private int currentStar;
         [SerializeField] private int totalStarInLevel;
 
+        // ─────────────────────────────────────────
+        // Public Events
+        // ─────────────────────────────────────────
 
-        [Header("Item Event")]
-        public UnityEvent<ItemType, Vector3> OnItemInvoke;
-
+        [Header("Events")]
+        public UnityEvent<ItemType, Vector3> OnItemInvoke = new();
         public UnityEvent<float> OnStarChanged = new();
         public UnityEvent<bool> OnLevelCompleted = new();
-        public UnityEvent OnGameOverEvent = new();
 
-        public bool IsGameOver { get => isGameOver; set => isGameOver = value; }
-        public bool IsPaused { get => isPaused; set => isPaused = value; }
-        public BoxQueue BoxQueue => (BoxQueue)_boxQueue;
+        // ─────────────────────────────────────────
+        // Public Properties (đọc state qua machine, không dùng bool)
+        // ─────────────────────────────────────────
 
-        public ScrewManager ScrewManager => screwManager;
+        public bool IsGameOver => _stateMachine.IsIn(GameplayState.Lose);
+        public bool IsPaused => _stateMachine.IsIn(GameplayState.Paused);
+        public bool IsPlaying => _stateMachine.IsPlaying();
 
-        #region Initialization
+        public BoxQueue BoxQueue => boxQueue;
+        public ScrewManager ScrewManager => _screwManager;
+
+        // ─────────────────────────────────────────
+        // Initialization
+        // ─────────────────────────────────────────
 
         public override void Awake()
         {
             base.Awake();
-            _boxQueue = (IBoxQueue)boxQueueBehaviour;
-            _gameFlow = (IGameFlowService)gameFlowBehaviour;
+
+            _stateMachine = stateMachineBoot;
+            _boxQueue = boxQueue;
+            _itemController = GetComponentInChildren<ItemController>();
+            _screwManager = GetComponentInChildren<ScrewManager>();
+            _arrayScrew = ArrayScrew.Instance;
+
+            // Inject vào ArrayScrew — không còn tự lấy singleton trong coroutine
+            ArrayScrew.Instance.Inject(_boxQueue, _screwManager);
+
+            // GameFlowService là pure C# class, khởi tạo thẳng
+            _gameFlow = new GameFlowService(
+                boxQueue: _boxQueue,
+                levelManager: LevelManager.ins,
+                dialogService: DialogManager.ins
+            );
         }
 
         private void OnEnable()
         {
+            _stateMachine.OnStateChanged += HandleStateChanged;
+            _arrayScrew.OnArrayFull += TriggerArrayScrewFull;   // thay ScrewFullEvent cũ
+
             OnLevelCompleted.AddListener(HandleLevelComplete);
             OnItemInvoke.AddListener(InvokeItem);
+
             SpecialBoxManager.ins.OnScrewCollected += HandleScrewCollected;
             SpecialBoxManager.ins.OnBoxColorCountChanged += HandleColorChanged;
         }
 
         private void OnDisable()
         {
+            _stateMachine.OnStateChanged -= HandleStateChanged;
+            _arrayScrew.OnArrayFull -= TriggerArrayScrewFull;
+
             OnLevelCompleted.RemoveListener(HandleLevelComplete);
-            OnItemInvoke.AddListener(InvokeItem);
+            OnItemInvoke.RemoveListener(InvokeItem);
+
+            SpecialBoxManager.ins.OnScrewCollected -= HandleScrewCollected;
+            SpecialBoxManager.ins.OnBoxColorCountChanged -= HandleColorChanged;
         }
 
-        #endregion
+        // ─────────────────────────────────────────
+        // State Change Handler
+        // ─────────────────────────────────────────
 
-        #region Level Flow
+        private void HandleStateChanged(GameplayState prev, GameplayState next)
+        {
+            // Input lock tập trung — không rải rác ở nhiều chỗ
+            player.IsInputLocked = next != GameplayState.Playing
+                                && next != GameplayState.ItemUsing;
+
+            // Báo ArrayScrew game còn đang chạy không
+            // → ArrayScrew dùng để dừng CheckFullCoroutine khi cần
+            ArrayScrew.Instance.SetGameActive(
+                next == GameplayState.Playing || next == GameplayState.ItemUsing
+            );
+
+            switch (next)
+            {
+                case GameplayState.Paused:
+                    _gameFlow.PauseGame();
+                    break;
+
+                case GameplayState.Win:
+                    _gameFlow.CompleteLevel();
+                    break;
+
+                case GameplayState.RevivePrompt:
+                    _gameFlow.HandleRevive();
+                    break;
+
+                case GameplayState.Lose:
+                    _gameFlow.HandleGameOver();
+                    break;
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // Level Flow
+        // ─────────────────────────────────────────
 
         public void StartLevel()
         {
-            IsGameOver = false;
             currentStar = 0;
-            player.IsInputLocked = false;
-
             _boxQueue.Initialize(false);
+            _stateMachine.TransitionTo(GameplayState.Playing);
         }
 
         private void HandleLevelComplete(bool completed)
         {
             if (!completed) return;
-
-            player.IsInputLocked = true;
-            _gameFlow.CompleteLevel();
+            _stateMachine.TransitionTo(GameplayState.Win);
         }
 
-        public void TriggerGameOver()
+        /// <summary>
+        /// Được gọi từ ArrayScrew.OnArrayFull event.
+        /// Quyết định revive hay thua thẳng dựa vào trạng thái box queue.
+        /// </summary>
+        private void TriggerArrayScrewFull()
         {
-            if (IsGameOver) return;
+            if (!_stateMachine.IsPlaying()) return;
 
-            IsGameOver = true;
-            player.IsInputLocked = true;
+            bool canRevive = _boxQueue.ActiveBoxCount < 4;
 
-            OnGameOverEvent?.Invoke();
-            _gameFlow.HandleGameOver();
+            _stateMachine.TransitionTo(canRevive
+                ? GameplayState.RevivePrompt
+                : GameplayState.Lose);
         }
 
         public void RestartLevel(int levelId)
         {
-            IsGameOver = false;
             currentStar = 0;
-
+            _stateMachine.TransitionTo(GameplayState.Loading);
             _gameFlow.RestartLevel(levelId);
         }
 
-        #endregion
+        // ─────────────────────────────────────────
+        // Pause / Resume
+        // ─────────────────────────────────────────
 
-        #region Star System
+        public void Pause() => _stateMachine.TransitionTo(GameplayState.Paused);
+        public void Resume() => _stateMachine.TransitionTo(GameplayState.Playing);
 
-        public void AddStar(int amount)
+        // ─────────────────────────────────────────
+        // Revive (từ ReviveDialog)
+        // ─────────────────────────────────────────
+
+        public void Revive()
         {
-            currentStar += amount;
-
-            float percent = (float)currentStar / totalStarInLevel;
-            OnStarChanged?.Invoke(percent);
+            _gameFlow.HandleRevive();
+            _stateMachine.TransitionTo(GameplayState.Playing);
         }
 
-        #endregion
+        public void DeclineRevive()
+            => _stateMachine.TransitionTo(GameplayState.Lose);
 
-        #region Pause
-
-        public void Pause()
-        {
-            IsPaused = true;
-            Time.timeScale = 0;
-        }
-
-        public void Resume()
-        {
-            IsPaused = false;
-            Time.timeScale = 1;
-        }
-
-        internal void Revive()
-        {
-            bool hasActiveBox = _boxQueue.ActiveBoxCount > 4;
-            if (hasActiveBox)
-            {
-                _gameFlow.HandleRevive();
-            }
-            else
-            {
-                _gameFlow.HandleGameOver();
-            }
-        }
-
+        // ─────────────────────────────────────────
+        // Return Home
+        // ─────────────────────────────────────────
 
         public void ReturnHome()
         {
-            DialogManager.ins.HideAllDialog();
-            LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
-            {
-                ViewManager.Instance.SwitchView(ViewIndex.MainScreenView);
-            });
+            _stateMachine.TransitionTo(GameplayState.Idle);
+            _gameFlow.HandleReturnToMenu();
         }
-        #endregion
 
+        // ─────────────────────────────────────────
+        // Item
+        // ─────────────────────────────────────────
 
-        #region Item Invocation
         public void InvokeItem(ItemType type, Vector3 position)
         {
-            if (itemController.IsItemExecuting) return;
+            if (!_stateMachine.IsPlaying()) return;
+            if (_itemController.IsItemExecuting) return;
+
+            _stateMachine.TransitionTo(GameplayState.ItemUsing);
 
             switch (type)
             {
                 case ItemType.Breaker:
-                    itemController.GotoState(itemController.RemovePartState);
-                    itemController.SetSelected(true);
+                    _itemController.GotoState(_itemController.RemovePartState);
+                    _itemController.SetSelected(true);
                     break;
-
                 case ItemType.AddBox:
-                    itemController.GotoState(itemController.AddBoxState);
+                    _itemController.GotoState(_itemController.AddBoxState);
                     break;
                 case ItemType.Magnet:
-                    itemController.GotoState(itemController.MagnetState);
+                    _itemController.GotoState(_itemController.MagnetState);
                     break;
                 case ItemType.Drill:
-                    itemController.GotoState(itemController.AddOneHold);
-                    break;
-                case ItemType.Gold:
-                    break;
-                case ItemType.Ticket:
+                    _itemController.GotoState(_itemController.AddOneHold);
                     break;
             }
         }
 
-        internal void Lose()
+        /// <summary>
+        /// ItemController gọi khi item thực thi xong hoặc player cancel.
+        /// </summary>
+        public void OnItemFinished()
         {
+            if (_stateMachine.IsIn(GameplayState.ItemUsing))
+                _stateMachine.TransitionTo(GameplayState.Playing);
         }
-        #endregion
 
-        #region Special Box Handlers
+        // ─────────────────────────────────────────
+        // Star
+        // ─────────────────────────────────────────
+
+        public void AddStar(int amount)
+        {
+            currentStar += amount;
+            OnStarChanged?.Invoke((float)currentStar / totalStarInLevel);
+        }
+
+        // ─────────────────────────────────────────
+        // Special Box
+        // ─────────────────────────────────────────
+
         private void HandleScrewCollected(ColorEnum color)
         {
             AddStar(1);
@@ -202,36 +274,27 @@ namespace Managers
         }
 
         private void HandleColorChanged(ColorEnum color, int count)
-        {
-            ViewManager.Instance.UpdateSpecialBoxCount(color, count);
-        }
-        #endregion
+            => ViewManager.Instance.UpdateSpecialBoxCount(color, count);
 
-        #region Box Flow
+        // ─────────────────────────────────────────
+        // Hidden screw resolve
+        // ─────────────────────────────────────────
 
         private void ResolveHiddenForBox(Box box)
         {
-            if (box == null || box.IsFull || box.IsLocked)
-                return;
+            if (box == null || box.IsFull || box.IsLocked) return;
 
-            int capacityLeft = box.RemainingCapacity;
-
-            var screws = screwManager.PopHiddenScrew(box.Color, capacityLeft);
-
-            if (screws == null || screws.Count == 0)
-                return;
+            var screws = _screwManager.PopHiddenScrew(box.Color, box.RemainingCapacity);
+            if (screws == null || screws.Count == 0) return;
 
             foreach (var screw in screws)
             {
-                bool added = box.TryAddScrew(screw);
-
-                if (!added)
+                if (!box.TryAddScrew(screw))
                 {
-                    screwManager.AddHiddenScrews(new List<ScrewController> { screw });
+                    _screwManager.AddHiddenScrews(new List<ScrewController> { screw });
                     break;
                 }
             }
         }
-        #endregion
     }
 }

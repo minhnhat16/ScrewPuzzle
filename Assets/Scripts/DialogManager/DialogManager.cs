@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DialogManager : SingletonMono<DialogManager>
+public class DialogManager : SingletonMono<DialogManager>,IDialogService
 {
     public Transform anchorDialog;
     public Dictionary<DialogIndex, BaseDialog> dicDialog = new Dictionary<DialogIndex, BaseDialog>();
@@ -108,5 +108,34 @@ public class DialogManager : SingletonMono<DialogManager>
     {
         var dialog = dicDialog[settingDialog];
         return dialogShowed.Contains(dialog);
+    }
+
+    void IDialogService.ShowWinDialog(WinParam param)
+    {
+        ShowDialog(DialogIndex.WinDialog, param);
+    }
+
+    void IDialogService.ShowLoseDialog(LoseParam param)
+    {
+        ShowDialog(DialogIndex.LoseDialog, param);
+    }
+
+    void IDialogService.ShowReviveDialog(ReviveParam param)
+    {
+        ShowDialog(DialogIndex.ReviveDialog, param);
+    }
+
+    void IDialogService.ShowItemDialog(AddItemDialogParam param)
+    {
+        ShowDialog(DialogIndex.ItemDialog, param);
+    }
+
+    void IDialogService.ReturnToMainMenu()
+    {
+        HideAllDialog();
+    }
+    void IDialogService.ShowPause()
+    {
+        ShowDialog(DialogIndex.SettingDialog);
     }
 }

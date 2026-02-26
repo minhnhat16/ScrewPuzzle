@@ -25,7 +25,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
     private readonly Dictionary<ColorEnum, List<ScrewController>> _hiddenByColor
     = new();
 
-    public bool hasMovingBox => _activeBoxes.Any(b => b.isMoving);
+    public bool hasMovingBox => _activeBoxes.Any(b => b.IsMoving);
     public event Action<Box> OnBoxFull;
     public event Action<Box> OnBoxSpawned;
     public event Action<Box> OnBoxRemoved;
@@ -79,7 +79,9 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
 
         _activeBoxes.Remove(box);
 
-        box.SetActive(false);
+
+        /// TODO : sửa lại goto state thành một animation khác, ví dụ như "BoxFullAnimation" hoặc "BoxCelebration"
+        //box.GotoState(box.);
 
         OnBoxRemoved?.Invoke(box);
 
@@ -96,11 +98,11 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
         ActivateBox(next);
     }
     public void ResetQueue()
-    { 
+    {
         foreach (var box in _activeBoxes)
         {
             box.OnBoxFull -= NotifyBoxFull;
-            box.SetActive(false);
+            //box.SetActive(false);
         }
 
         _activeBoxes.Clear();
@@ -121,9 +123,9 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
     {
         if (screw == null || box == null)
             return;
-        if (box.IsLocked || box.IsBoxFull)
+        if (box.IsLocked || box.IsFull)
             return;
-        box.AddScrew(new List<ScrewController> { screw });
+        box.TryAddScrew(screw);
     }
     private void HideScrew(ScrewController screw)
     {
@@ -139,7 +141,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
 
     private void ActivateBox(Box box)
     {
-        box.SetActive(true);
+        //box.SetActive(true);
         _activeBoxes.Add(box);
 
         OnBoxSpawned?.Invoke(box);
@@ -163,14 +165,14 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
 
         foreach (var screw in copy)
         {
-            if (box.IsBoxFull)
+            if (box.IsFull)
                 break;
 
             hiddenList.Remove(screw);
 
             screw.SetActive(true);
 
-            box.AddScrew(new List<ScrewController> { screw });
+            box.TryAddScrew(screw);
         }
 
         if (hiddenList.Count == 0)
@@ -197,7 +199,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
 
         if (targetBox == null) return;
 
-        targetBox.AddScrew(screws);
+        targetBox.TryAddScrews(screws);
     }
 
     internal Box FindSuitableBox(ColorEnum color)
@@ -205,7 +207,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
         return _activeBoxes
             .FirstOrDefault(b =>
                 !b.IsLocked &&
-                !b.IsBoxFull &&
+                !b.IsFull &&
                 (b.Color == color || b.Color == ColorEnum.Rainbow));
     }
 
@@ -237,7 +239,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
         _activeBoxes.Remove(box);
 
         box.OnBoxFull -= NotifyBoxFull;
-        box.SetActive(false);
+        //box.SetActive(false);
 
         OnBoxRemoved?.Invoke(box);
     }
@@ -278,7 +280,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
         _activeBoxes.Remove(box);
 
         box.OnBoxFull -= NotifyBoxFull;   // ⚠️ quan trọng
-        box.SetActive(false);
+        //box.SetActive(false);
 
         OnBoxRemoved?.Invoke(box);
 
@@ -291,7 +293,7 @@ public class BoxQueue : MonoBehaviour, IBoxQueue
         if (suitableBox == null || screw == null)
             return;
 
-        if (suitableBox.IsBoxFull)
+        if (suitableBox.IsFull)
             return;
 
         if (suitableBox.IsLocked)

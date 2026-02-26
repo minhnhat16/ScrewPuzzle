@@ -88,7 +88,7 @@ public class RateParam : DialogParam
 }
 
 
-public class ReviveDialogParam : DialogParam
+public class ReviveParam : DialogParam
 {
     public bool isRevive;
     public bool isHasAds;

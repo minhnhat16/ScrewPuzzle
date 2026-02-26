@@ -9,7 +9,7 @@ namespace UIScript.Dialog
     public class ReviveDialog : BaseDialog
     {
 
-        ReviveDialogParam param;
+        ReviveParam param;
         [SerializeField] Button ticketPayButton;
         [SerializeField] Button watchButton;
         [SerializeField] Button retryButton;
@@ -39,7 +39,7 @@ namespace UIScript.Dialog
         }
         public override void Setup(DialogParam param)
         {
-            ReviveDialogParam newParam = (ReviveDialogParam)param;
+            ReviveParam newParam = (ReviveParam)param;
             this.param = newParam;
             if (newParam == null) return;
             long userGold = newParam.totalGold;
@@ -82,19 +82,19 @@ namespace UIScript.Dialog
 
         private void TickeAccept()
         {
-            DialogManager.ins.HideDialog(dialogIndex);
+            //DialogManager.ins.HideDialog(dialogIndex);
 
-            bool isSpent = WalletManager.ins.TrySpend(Currency.Ticket, 1);
+            //bool isSpent = WalletManager.ins.TrySpend(Currency.Ticket, 1);
 
-            if (isSpent)
-                IngameController.ins.Revive();
-            else
-                IngameController.ins.Lose();
-            //ZenSDK.instance.ShowVideoReward(onWatch =>
-            //{
-            //    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
-            //    else IngameController.Instance.OnGameOver();
-            //});
+            //if (isSpent)
+            //    IngameController.ins.Revive();
+            //else
+            //    IngameController.ins.Lose();
+            ////ZenSDK.instance.ShowVideoReward(onWatch =>
+            ////{
+            ////    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
+            ////    else IngameController.Instance.OnGameOver();
+            ////});
         }
         private void ReplayButton()
         {
@@ -103,7 +103,7 @@ namespace UIScript.Dialog
                 //Debug.Log($"Hide this dialog {dialogIndex}");
                 if (param.isRevive)
                 {
-                    IngameController.ins.Lose();
+                    //IngameController.ins.Lose();
                 }
             });
         }

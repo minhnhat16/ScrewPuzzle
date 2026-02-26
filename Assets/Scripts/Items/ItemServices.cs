@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ingame;
+using System;
 using UnityEngine;
 
 public class ItemService : IItemService
@@ -58,7 +59,7 @@ public class ItemService : IItemService
         {
             ItemType.Magnet => _arrayScrew.HasAny(),
             ItemType.Breaker => _boxQueue.HasLockedBox(),
-            ItemType.Drill => _arrayScrew.MaxCapacityReached(),
+            ItemType.Drill => _arrayScrew.IsFull,
             _ => false
         };
     }

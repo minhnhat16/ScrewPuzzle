@@ -612,7 +612,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         SpecialBoxManager.ins.OnReset();
         screwManager.Reset();
 
-        ThreeHoldBoxPool.Instance.ReturnAll();
+        BoxPool.Instance.ReturnAll();
         currentLevelObject = null;
     }
     public bool TryHexToColor(string hex, out Color color)

@@ -53,7 +53,6 @@ public class LoseDialog : BaseDialog
 
         DialogManager.ins.HideDialog(DialogIndex.LoseDialog, () =>
         {
-            IngameController.ins.Lose();
         });
 
     }

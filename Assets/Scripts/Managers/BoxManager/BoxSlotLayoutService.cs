@@ -30,14 +30,14 @@ public class BoxSlotLayoutService : IBoxSlotLayoutService
         if (box == null || slot == null)
             return;
 
-        box.isMoving = true;
+         //box.IsMoving = true;
 
         box.transform
             .DOMove(CalculateSlotPosition(slot), _moveDuration)
             .SetEase(_ease)
             .OnComplete(() =>
             {
-                box.isMoving = false;
+                 //box.IsMoving = false;
                 onComplete?.Invoke();
             });
     }

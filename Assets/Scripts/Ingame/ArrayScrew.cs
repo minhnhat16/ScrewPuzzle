@@ -10,349 +10,184 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using SFX = SoundManager.SFX;
+
 namespace Ingame
 {
-    public class ArrayScrew : MonoBehaviour, IResetable
+    public class ArrayScrew : MonoBehaviour, IResetable, IArrayScrew
     {
         public static ArrayScrew Instance;
-        [SerializeField] private int coutHoldActive;
+
+        // ─────────────────────────────────────────
+        // Inspector
+        // ─────────────────────────────────────────
+
+        [SerializeField] private int activeHoldCount;
         [SerializeField] private float totalWidth;
-        //[SerializeField] private SpriteRenderer spriteRenderer;
-        [SerializeField] private List<HoldScrew> holdScrews; // Mảng các HoldScrew (ô chứa screw)
-        [SerializeField] private List<ScrewController> screws; // Mảng các HoldScrew (ô chứa screw)
-        private Coroutine alignmentCoroutine;
-        private Coroutine holdRoutine;
-        private bool stopCheckHold = false;
+        [SerializeField] private List<HoldScrew> holdScrews;
+        [SerializeField] private List<ScrewController> screws;
 
-        public UnityEvent onHoldScrewsFull = new(); // Sự kiện khi holdScrews đầy
-        public List<ScrewController> Screws
+        // ─────────────────────────────────────────
+        // Injected dependencies (set từ bên ngoài, không dùng singleton)
+        // ─────────────────────────────────────────
+
+        private IBoxQueue _boxQueue;
+        private ScrewManager _screwManager;
+
+        public void Inject(IBoxQueue boxQueue, ScrewManager screwManager)
         {
-            get => screws;
-            set => screws = value;
-        }
-        private void OnEnable()
-        {
-            onHoldScrewsFull.AddListener(ScrewFullEvent);
+            _boxQueue = boxQueue;
+            _screwManager = screwManager;
         }
 
-        private void OnDisable()
-        {
-            onHoldScrewsFull.RemoveListener(ScrewFullEvent);
-        }
+        // ─────────────────────────────────────────
+        // IArrayScrew — State
+        // ─────────────────────────────────────────
 
-        public void Awake()
-        {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
+        public int ActiveHoldCount => activeHoldCount;
 
-            Instance = this;
+        public bool IsFull => holdScrews
+            .Where(h => h.gameObject.activeSelf)
+            .All(h => h != null && !h.IsEmpty());
+
+        public bool HasAny() => screws != null && screws.Count > 0;
+
+        // ─────────────────────────────────────────
+        // IArrayScrew — Events
+        // ─────────────────────────────────────────
+
+        /// <summary>
+        /// Fire khi array full và box không đang di chuyển.
+        /// IngameController lắng nghe → TriggerArrayScrewFull()
+        /// </summary>
+        public event Action OnArrayFull;
+
+        // ─────────────────────────────────────────
+        // Internal coroutine state
+        // ─────────────────────────────────────────
+
+        private Coroutine _alignmentCoroutine;
+        private Coroutine _holdCheckCoroutine;
+        private bool _stopCheckHold;
+        private bool _isGameActive; // set bởi IngameController qua SetGameActive()
+
+        // ─────────────────────────────────────────
+        // Unity Lifecycle
+        // ─────────────────────────────────────────
+
+        private void Awake()
+        {
+            if (Instance == null) Instance = this;
         }
 
         private void Start()
         {
-            //spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-            coutHoldActive = 7;
+            activeHoldCount = 7;
             HoldAlignment();
         }
 
+        // ─────────────────────────────────────────
+        // IArrayScrew — Screw Operations
+        // ─────────────────────────────────────────
 
-        public void SpawnNewHold()
-        {
-            Debug.Log("Spawn new hold");
-            coutHoldActive++;
-            var hold = holdScrews.FirstOrDefault(hold => !hold.gameObject.activeSelf);
-            if (hold == null) return;
-            hold.gameObject.SetActive(true);
-            totalWidth += 0.5f;
-            HoldAlignment(() =>
-            {
-            });
-        }
-        public void ShowArrayScrew()
-        {
-            if (!gameObject.activeSelf) gameObject.SetActive(true);
-            coutHoldActive = 5;
-            //spriteRenderer.enabled = true;
-            for (int i = 0; i < coutHoldActive; i++)
-            {
-                holdScrews[i].gameObject.SetActive(true);
-            }
-
-            var pos = transform.position;
-            var y = CameraMain.instance.GetTop() - 5.5f;
-            pos.y = y;
-            transform.position = pos;
-        }
-        public void ShowArrayActive(int activeCount)
-        {
-            coutHoldActive = activeCount;
-            for (int i = 0; i < holdScrews.Count; i++)
-            {
-                holdScrews[i].gameObject.SetActive(i < activeCount);
-            }
-        }
-        public void HoldAlignment(Action callback = null)
-        {
-            if (holdScrews.Count == 0) return;
-
-            if (alignmentCoroutine != null)
-            {
-                StopCoroutine(alignmentCoroutine);
-            }
-            alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine(0, callback));
-        }
-
-        private IEnumerator HoldAlignmentCoroutine(float duration = 0.5f, Action callBack = null)
-        {
-            var activeHolds = holdScrews.Where(hold => hold.gameObject.activeSelf).ToList();
-            if (activeHolds.Count == 0) yield break;
-
-            float totalWidth = this.totalWidth;
-            float minSpacing = 0.7f;
-            float spacing = Mathf.Max(minSpacing, totalWidth / (activeHolds.Count + 1));
-
-            // ✅ Căn giữa
-            float totalOccupiedWidth = spacing * (activeHolds.Count - 1);
-            float startX = -totalOccupiedWidth / 2f;
-
-
-            List<Vector3> initialPositions = activeHolds.Select(h => h.transform.localPosition).ToList();
-            List<Vector3> targetPositions = new List<Vector3>();
-
-            for (int i = 0; i < activeHolds.Count; i++)
-            {
-                Vector3 localPos = activeHolds[i].transform.localPosition;
-                var targetPos = new Vector3(startX + spacing * i, localPos.y, localPos.z);
-                targetPositions.Add(targetPos);
-            }
-
-            float elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-
-                for (int i = 0; i < activeHolds.Count; i++)
-                {
-                    activeHolds[i].transform.localPosition = Vector3.Lerp(initialPositions[i], targetPositions[i], t);
-                }
-
-                yield return null;
-            }
-
-            for (int i = 0; i < activeHolds.Count; i++)
-                activeHolds[i].transform.localPosition = targetPositions[i];
-
-            alignmentCoroutine = null;
-            callBack?.Invoke();
-        }
-
-        // Hàm thêm Screw vào một ô trống trong holdScrew
-        private void ScrewFullEvent()
-        {
-            IngameController.ins.Revive();
-        }
-        // Hàm kiểm tra xem tất cả các ô trong holdScrews đã đầy chưa
-        private IEnumerator CheckHoldCoroutine()
-        {
-            stopCheckHold = false;
-            var boxQueue = IngameController.ins.BoxQueue;
-            while (!stopCheckHold && !IngameController.ins.IsGameOver)
-            {
-                bool allFull = holdScrews.All(h => h != null && !h.IsEmpty());
-
-                if (allFull)
-                {
-                    //Debug.Log("All holdScrews are full!");
-                    yield return new WaitForSeconds(2f);
-
-                    allFull = holdScrews.All(h => h != null && !h.IsEmpty());
-
-                    if (allFull && boxQueue.hasMovingBox == false)
-                    {
-                        stopCheckHold = true;     // <--- STOP TẠI ĐÂY
-                        onHoldScrewsFull?.Invoke();
-                        yield break;              // <--- Thoát coroutine
-                    }
-                }
-
-                yield return new WaitForSeconds(2f);
-            }
-        }
-
-
-        private void CheckIfHoldScrewsFull()
-        {
-
-            //Debug.Log("Check if holdScrews full" + holdRoutine);
-            if (holdRoutine != null)
-                StopCoroutine(holdRoutine);
-
-            holdRoutine = StartCoroutine(CheckHoldCoroutine());
-        }
-        public void RemoveScrewOutHold(ScrewController screw)
-        {
-            var hold = holdScrews.Find(h => h.Screw == screw);
-            if (hold == null) return;
-            hold.RemoveScrew();
-            screws.Remove(screw);
-        }
-
-        public void RemoveListScrewOutHold(List<ScrewController> screws)
-        {
-            foreach (var screw in screws)
-            {
-                RemoveScrewOutHold(screw);
-            }
-        }
         public void AddScrew(ScrewController screw)
         {
             if (screw == null) return;
 
-            // Reserve the screw for move. This uses a separate reservation flag so
-            // a prior OnScrewClicked() doesn't block locking for move.
             if (!screw.TryLockForMove())
             {
-                Debug.Log($"[ArrayScrew] Screw {screw.name} cannot be reserved for move (blocked or reserved).");
+                Debug.Log($"[ArrayScrew] {screw.name} không thể lock để move.");
                 return;
             }
 
-            // proceed: place into first empty hold or try boxes
-            var emptyHoldScrew = FindEmptyHoldScrew();
-            if (emptyHoldScrew != null)
+            var emptyHold = FindEmptyHold();
+            if (emptyHold != null)
             {
                 SoundHelper.PlaySFX(SFX.ScrewClicked);
-                AddScrewToHoldScrew(screw, emptyHoldScrew);
+                AddScrewToHold(screw, emptyHold);
             }
             else
             {
-                // No space — release the reservation and reset click state so user can try again
+                // Không còn chỗ — trả lại state screw
                 screw.ResetClickedFlag();
                 screw.ReleaseLockForMove();
             }
         }
 
-
-        private HoldScrew FindEmptyHoldScrew()
+        public void RemoveScrew(ScrewController screw)
         {
-            return holdScrews.FirstOrDefault(hold => hold.IsEmpty());
+            var hold = holdScrews.Find(h => h.Screw == screw);
+            if (hold == null) return;
+
+            hold.RemoveScrew();
+            screws.Remove(screw);
         }
 
-        private void AddScrewToHoldScrew(ScrewController screw, HoldScrew holdScrew)
+        public void RemoveScrews(IEnumerable<ScrewController> screwList)
         {
-            var screwMng = LevelManager.ins.ScrewManager;
-
-            if (TryAddToSuitableBox(screw))
-                return;
-
-            if (TryHandleRainbow(screw, screwMng))
-                return;
-
-            AddToHoldScrewFlow(screw, holdScrew, screwMng);
-        }
-        private bool TryAddToSuitableBox(ScrewController screw)
-        {
-            var boxQueue = IngameController.ins.BoxQueue;
-            var suitableBox = boxQueue.FindSuitableBox(screw.GetColor());
-            if (suitableBox == null)
-                return false;
-
-            HandleTutorialForBox(suitableBox);
-
-            screw.SetSortingOrderAndLayer(4, "Box");
-
-            bool canAdd;
-            boxQueue.CanAddScrew(screw, suitableBox, out canAdd);
-
-            if (canAdd)
-                ParentTo(screw, suitableBox.transform);
-
-            return true;
-        }
-        private void HandleTutorialForBox(Box suitableBox)
-        {
-            if (!DataAPIController.instance.IsNewPlayer())
-                return;
-
-            if (suitableBox.NextEmptyIndex < 1)
-            {
-                TutorialTargetRegistry.Register("box_1", suitableBox.transform);
-                TutorialEventBus.Emit("Screw.Selected", "red_1");
-            }
-            else if (suitableBox.NextEmptyIndex > 1)
-            {
-                TutorialTargetRegistry.Register("box_close", suitableBox.transform);
-                TutorialEventBus.Emit("Screw.Selected", "red_2");
-            }
+            foreach (var screw in screwList.ToList())
+                RemoveScrew(screw);
         }
 
-        private bool TryHandleRainbow(ScrewController screw, ScrewManager screwMng)
-        {
-            if (screw.GetColor() != ColorEnum.Rainbow)
-                return false;
-
-            SpecialBoxManager.ins.AddSingle(screw);
-            screwMng.RemoveScrew(screw);
-            return true;
-        }
-        private void AddToHoldScrewFlow(
-            ScrewController screw,
-            HoldScrew holdScrew,
-            ScrewManager screwMng)
-        {
-            screw.SetSortingOrderAndLayer(4, "Box");
-
-            holdScrew.AddScrew(screw, false, (onMoved) =>
-            {
-                if (onMoved)
-                    //ParentTo(screw, holdScrew.transform);
-
-                HandleTutorialForHold(holdScrew);
-                CheckIfHoldScrewsFull();
-            });
-
-            screws.Add(screw);
-            screwMng.RemoveScrew(screw);
-        }
-        private void HandleTutorialForHold(HoldScrew holdScrew)
-        {
-            if (!DataAPIController.instance.IsNewPlayer())
-                return;
-
-            TutorialTargetRegistry.Register("array_1", holdScrew.transform);
-            TutorialEventBus.Emit("Screw.Selected", "blue_1");
-        }
-        public void ClearAllScrewsOnArray()
+        public void Clear()
         {
             if (screws.Count == 0) return;
-            StartCoroutine(SetScrewInActive());
+            StartCoroutine(ClearCoroutine());
         }
-        private void ParentTo(ScrewController screw, Transform parent)
+
+        public IEnumerator ClearToHidden()
         {
-            screw.transform.SetParent(parent, false);
-            screw.transform.localPosition = Vector3.zero;
-        }
-        private IEnumerator SetScrewInActive()
-        {
-            for (int i = 0; i < screws.Count; i++)
+            if (_screwManager == null)
             {
-                var screw = screws[i];
-                ScrewPool.Instance.Pool.ReturnToPool(screw);
+                Debug.LogError("[ArrayScrew] _screwManager chưa được inject.");
+                yield break;
+            }
+
+            var copy = screws.ToList();
+
+            foreach (var screw in copy)
+            {
+                screw.SetActive(false);
                 yield return null;
             }
 
+            _screwManager.AddHiddenScrews(copy);
 
-            for (int j = 0; j < holdScrews.Count; j++)
+            foreach (var hold in holdScrews.ToList())
             {
-                holdScrews[j].RemoveScrew();
+                hold.RemoveScrew();
                 yield return null;
             }
+
             screws.Clear();
         }
 
-        public ColorEnum GetMostestColorInArray()
+        // ─────────────────────────────────────────
+        // IArrayScrew — Hold Operations
+        // ─────────────────────────────────────────
+
+        public void AddOneHold()
+        {
+            activeHoldCount++;
+            var hold = holdScrews.FirstOrDefault(h => !h.gameObject.activeSelf);
+            if (hold == null) return;
+
+            hold.gameObject.SetActive(true);
+            totalWidth += 0.5f;
+            HoldAlignment();
+        }
+
+        public void ShowArrayActive(int count)
+        {
+            activeHoldCount = count;
+            for (int i = 0; i < holdScrews.Count; i++)
+                holdScrews[i].gameObject.SetActive(i < count);
+        }
+
+        // ─────────────────────────────────────────
+        // IArrayScrew — Queries
+        // ─────────────────────────────────────────
+
+        public ColorEnum GetDominantColor()
         {
             if (screws == null || screws.Count == 0)
                 return ColorEnum.Clear;
@@ -365,37 +200,149 @@ namespace Ingame
                 .FirstOrDefault();
         }
 
-
-
-        public void OnReset()
+        public Vector3 GetLastHoldPosition()
         {
-            totalWidth = GameConstants.ArrayWidth;
-            holdRoutine = null;
-            ShowArrayActive(5);
-            ClearAllScrewsOnArray();
+            var hold = holdScrews.LastOrDefault(h => h.gameObject.activeSelf);
+            if (hold == null) return Vector3.zero;
+
+            return hold.transform.position + Vector3.up * 0.5f;
         }
 
+        // ─────────────────────────────────────────
+        // Game Active flag (thay thế IngameController.ins.IsGameOver)
+        // ─────────────────────────────────────────
 
-        public void StartClearHiding()
+        /// <summary>
+        /// IngameController gọi method này khi state thay đổi.
+        /// Thay thế việc check IngameController.ins.IsGameOver trong coroutine.
+        /// </summary>
+        public void SetGameActive(bool active)
         {
-            StartCoroutine(ClearToHidding());
+            _isGameActive = active;
+
+            if (!active)
+                _stopCheckHold = true; // dừng check loop nếu game không còn active
         }
-        // Change the signature of ClearToHidding from void to IEnumerator
-        public IEnumerator ClearToHidding()
+
+        // ─────────────────────────────────────────
+        // Internal — Hold Logic
+        // ─────────────────────────────────────────
+
+        private HoldScrew FindEmptyHold()
+            => holdScrews.FirstOrDefault(h => h.gameObject.activeSelf && h.IsEmpty());
+
+        private void AddScrewToHold(ScrewController screw, HoldScrew hold)
         {
-            var boxQueue = IngameController.ins.BoxQueue;
-
-            var copy = screws.ToList();   // clone để tránh modify trong quá trình loop
-
-            foreach (var screw in copy)
+            if (_screwManager == null)
             {
-                screw.SetActive(false);
+                Debug.LogError("[ArrayScrew] _screwManager chưa được inject.");
+                return;
+            }
+
+            // 1. Thử đưa thẳng vào box phù hợp
+            if (TryAddToSuitableBox(screw)) return;
+
+            // 2. Thử xử lý rainbow
+            if (TryHandleRainbow(screw)) return;
+
+            // 3. Thêm vào hold bình thường
+            AddToHoldFlow(screw, hold);
+        }
+
+        private bool TryAddToSuitableBox(ScrewController screw)
+        {
+            if (_boxQueue == null) return false;
+
+            var suitableBox = _boxQueue.box(screw.GetColor());
+            if (suitableBox == null) return false;
+
+            HandleTutorialForBox(suitableBox);
+
+            screw.SetSortingOrderAndLayer(4, "Box");
+
+            _boxQueue.CanAddScrew(screw, suitableBox, out bool canAdd);
+            if (canAdd)
+                ParentTo(screw, suitableBox.transform);
+
+            return true;
+        }
+
+        private bool TryHandleRainbow(ScrewController screw)
+        {
+            if (screw.GetColor() != ColorEnum.Rainbow) return false;
+
+            SpecialBoxManager.ins.AddSingle(screw);
+            _screwManager.RemoveScrew(screw);
+            return true;
+        }
+
+        private void AddToHoldFlow(ScrewController screw, HoldScrew hold)
+        {
+            screw.SetSortingOrderAndLayer(4, "Box");
+
+            hold.AddScrew(screw, false, onMoved =>
+            {
+                HandleTutorialForHold(hold);
+                TriggerFullCheck();
+            });
+
+            screws.Add(screw);
+            _screwManager.RemoveScrew(screw);
+        }
+
+        // ─────────────────────────────────────────
+        // Internal — Full Check
+        // ─────────────────────────────────────────
+
+        private void TriggerFullCheck()
+        {
+            if (_holdCheckCoroutine != null)
+                StopCoroutine(_holdCheckCoroutine);
+
+            _holdCheckCoroutine = StartCoroutine(CheckFullCoroutine());
+        }
+
+        private IEnumerator CheckFullCoroutine()
+        {
+            _stopCheckHold = false;
+
+            while (!_stopCheckHold && _isGameActive)
+            {
+                bool allFull = IsFull;
+
+                if (allFull)
+                {
+                    yield return new WaitForSeconds(2f);
+
+                    // Kiểm tra lại sau delay — box có thể đã nhận screw trong lúc chờ
+                    bool stillFull = IsFull;
+                    bool boxMoving = _boxQueue != null && _boxQueue.hasMovingBox;
+
+                    if (stillFull && !boxMoving)
+                    {
+                        _stopCheckHold = true;
+                        OnArrayFull?.Invoke(); // IngameController xử lý
+                        yield break;
+                    }
+                }
+
+                yield return new WaitForSeconds(2f);
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // Internal — Clear
+        // ─────────────────────────────────────────
+
+        private IEnumerator ClearCoroutine()
+        {
+            for (int i = 0; i < screws.Count; i++)
+            {
+                ScrewPool.Instance.Pool.ReturnToPool(screws[i]);
                 yield return null;
             }
 
-            var screwManager = IngameController.ins.ScrewManager;
-            screwManager.AddHiddenScrews(copy);
-            foreach (var hold in holdScrews.ToList())
+            foreach (var hold in holdScrews)
             {
                 hold.RemoveScrew();
                 yield return null;
@@ -403,12 +350,98 @@ namespace Ingame
 
             screws.Clear();
         }
-        internal Vector3 GetHoldPos()
+
+        // ─────────────────────────────────────────
+        // Internal — Tutorial helpers
+        // ─────────────────────────────────────────
+
+        private void HandleTutorialForBox(Box suitableBox)
         {
-            var hold = holdScrews.Last(h => h.gameObject.activeSelf);
-            Vector3 target = hold.transform.position;
-            target.y += 0.5f;
-            return target;
+            if (!DataAPIController.instance.IsNewPlayer()) return;
+
+            if (suitableBox.RemainingCapacity < 1)
+            {
+                TutorialTargetRegistry.Register("box_1", suitableBox.transform);
+                TutorialEventBus.Emit("Screw.Selected", "red_1");
+            }
+            else if (suitableBox.RemainingCapacity > 1)
+            {
+                TutorialTargetRegistry.Register("box_close", suitableBox.transform);
+                TutorialEventBus.Emit("Screw.Selected", "red_2");
+            }
+        }
+
+        private void HandleTutorialForHold(HoldScrew hold)
+        {
+            if (!DataAPIController.instance.IsNewPlayer()) return;
+
+            TutorialTargetRegistry.Register("array_1", hold.transform);
+            TutorialEventBus.Emit("Screw.Selected", "blue_1");
+        }
+
+        // ─────────────────────────────────────────
+        // Internal — Alignment
+        // ─────────────────────────────────────────
+
+        private void HoldAlignment(Action callback = null)
+        {
+            if (_alignmentCoroutine != null)
+                StopCoroutine(_alignmentCoroutine);
+
+            _alignmentCoroutine = StartCoroutine(HoldAlignmentCoroutine(0f, callback));
+        }
+
+        private IEnumerator HoldAlignmentCoroutine(float duration, Action callback)
+        {
+            var activeHolds = holdScrews.Where(h => h.gameObject.activeSelf).ToList();
+            if (activeHolds.Count == 0) yield break;
+
+            float spacing = Mathf.Max(0.7f, totalWidth / (activeHolds.Count + 1));
+            float totalOccupied = spacing * (activeHolds.Count - 1);
+            float startX = -totalOccupied / 2f;
+
+            var from = activeHolds.Select(h => h.transform.localPosition).ToList();
+            var to = activeHolds.Select((h, i) =>
+                new Vector3(startX + spacing * i, h.transform.localPosition.y, h.transform.localPosition.z)
+            ).ToList();
+
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                for (int i = 0; i < activeHolds.Count; i++)
+                    activeHolds[i].transform.localPosition = Vector3.Lerp(from[i], to[i], t);
+                yield return null;
+            }
+
+            for (int i = 0; i < activeHolds.Count; i++)
+                activeHolds[i].transform.localPosition = to[i];
+
+            _alignmentCoroutine = null;
+            callback?.Invoke();
+        }
+
+        // ─────────────────────────────────────────
+        // Internal — Utils
+        // ─────────────────────────────────────────
+
+        private void ParentTo(ScrewController screw, Transform parent)
+        {
+            screw.transform.SetParent(parent, false);
+            screw.transform.localPosition = Vector3.zero;
+        }
+
+        // ─────────────────────────────────────────
+        // IResetable
+        // ─────────────────────────────────────────
+
+        public void OnReset()
+        {
+            totalWidth = GameConstants.ArrayWidth;
+            _holdCheckCoroutine = null;
+            ShowArrayActive(5);
+            Clear();
         }
     }
 }

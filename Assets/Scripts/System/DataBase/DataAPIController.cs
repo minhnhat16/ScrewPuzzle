@@ -990,7 +990,7 @@ namespace System.DataBase
             {
                 if(special.currentSpecial >= special.targetSpecial)
                 {
-                    IngameController.ins.onSpecialDone.Invoke();
+                    //IngameController.ins.s.Invoke();
                 }
             });
            

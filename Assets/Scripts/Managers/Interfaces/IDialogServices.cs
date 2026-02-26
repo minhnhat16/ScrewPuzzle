@@ -1,8 +1,12 @@
+using UIScript.Dialog;
+
 public interface IDialogService
 {
-    void ShowWinDialog(int levelId);
-    void ShowLoseDialog();
-    void ShowReviveDialog();
-    void ShowItemDialogd(ItemType item);
+    void ShowWinDialog(WinParam param);
+    void ShowLoseDialog(LoseParam param = null);
+    void ShowReviveDialog(ReviveParam param = null );
+    void ShowItemDialog(AddItemDialogParam param = null);
     void ReturnToMainMenu();
+    void ShowPause();
+    void HideAllDialog();
 }

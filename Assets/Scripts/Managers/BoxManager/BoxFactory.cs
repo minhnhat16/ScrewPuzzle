@@ -17,7 +17,7 @@ public class BoxFactory : IBoxFactory
         foreach (var config in records)
         {
             Box box = SpawnFromPool(config);
-            box.SetActive(false);
+            //box.SetAct(false);
 
             _boxes.Add(box);
             _stack.Push(box);
@@ -47,7 +47,7 @@ public class BoxFactory : IBoxFactory
         switch (config.NumberOfScrewHoles)
         {
             case 3:
-                return ThreeHoldBoxPool.Instance.pool.SpawnNonGravity();
+                return BoxPool.Instance.pool.SpawnNonGravity();
             default:
                 throw new Exception("Unsupported box size");
         }

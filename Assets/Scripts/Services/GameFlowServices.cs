@@ -82,4 +82,21 @@ public class GameFlowService : IGameFlowService
     }
 
     #endregion
+
+    #region PAUSE
+    public void PauseGame()
+    {
+        _player.LockInput();
+        _dialogService.ShowPause();
+
+    }
+    #endregion
+
+    #region RESUME
+    public void ResumeGame()
+    {
+        _player.UnlockInput();
+        _dialogService.HideAllDialog();
+    }
+    #endregion
 }

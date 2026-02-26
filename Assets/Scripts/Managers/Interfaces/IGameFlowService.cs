@@ -6,4 +6,7 @@ public interface IGameFlowService
     void HandleRevive();
     void HandleReturnToMenu();
     void RestartLevel(int levelId);
+    void PauseGame();
+    void ResumeGame();
+
 }

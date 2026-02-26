@@ -1,11 +1,13 @@
 using Enums;
 using Ingame.Screw;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ingame
 {
-    public class Box : MonoBehaviour
+    public class Box : FSMSystem
     {
         #region Inspector
 
@@ -91,7 +93,24 @@ namespace Ingame
 
             return true;
         }
-
+        public bool TryAddScrews(List<ScrewController> screws)
+        {
+            if (IsLocked) return false;
+            if (!stateController.IsReady) return false;
+            bool allAdded = true;
+            foreach (var screw in screws)
+            {
+                bool added = storage.TryAdd(screw);
+                if (!added)
+                {
+                    allAdded = false;
+                    break;
+                }
+            }
+            if (storage.IsFull)
+                HandleFull();
+            return allAdded;
+        }
         #endregion
 
         #region Full Flow

@@ -1,12 +1,8 @@
 ﻿#if UNITY_EDITOR
-using System;
-using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
-
 public static class FindMissingScriptsPlus
 {
     [MenuItem("Tools/Missing Scripts/Find in Open Scenes")]
@@ -75,7 +71,7 @@ public static class FindMissingScriptsPlus
 
             if (removedAny)
             {
-                PrefabUtility.ApplyPrefabInstance(instance, InteractionMode.AutomatedAction);
+                PrefabUtility.ApplyPrefabInstance(instance, UnityEditor.InteractionMode.AutomatedAction);
                 Debug.Log($"✅ Removed missing scripts in prefab: {path}");
             }
         }

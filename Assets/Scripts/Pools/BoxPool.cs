@@ -2,19 +2,19 @@ using UnityEngine;
 
 namespace Ingame.Pools
 {
-    public class ThreeHoldBoxPool : MonoBehaviour
+    public class BoxPool : MonoBehaviour
     {
-        public static ThreeHoldBoxPool Instance;
-        public BY_Local_Pool<BoxThreeHold> pool;
-        public BoxThreeHold prefab;
+        public static BoxPool Instance;
+        public BY_Local_Pool<Box> pool;
+        public Box prefab;
         public int total;
         private void Awake()
         {
             Instance = this;
-            pool = new BY_Local_Pool<BoxThreeHold>(prefab, total, transform);
+            pool = new BY_Local_Pool<Box>(prefab, total, transform);
         }
 
-        public BoxThreeHold Spawn()
+        public Box Spawn()
         {
             return pool.SpawnNonGravity();
         }

@@ -26,13 +26,13 @@ public class ScrewRoutingService
         bool Match(Box box) =>
             box != null &&
             box.Color == screw.GetColor() &&
-            !box.isMoving &&
-            !box.IsBoxFull &&
+            !box.IsMoving &&
+            !box.IsFull &&
             !box.IsLocked;
 
         var active = _boxes
             .Where(b => Match(b) && b.gameObject.activeInHierarchy)
-            .OrderByDescending(b => b.NextEmptyIndex)
+            .OrderByDescending(b => 3 -  b.RemainingCapacity)
             .FirstOrDefault();
 
         if (active != null)
@@ -43,7 +43,7 @@ public class ScrewRoutingService
 
         return _boxes
             .Where(b => Match(b) && !b.gameObject.activeInHierarchy)
-            .OrderByDescending(b => b.NextEmptyIndex)
+            .OrderByDescending(b => 3 - b.RemainingCapacity)
             .FirstOrDefault();
     }
 
@@ -77,11 +77,11 @@ public class ScrewRoutingService
                 continue;
             }
 
-            var freeSlots = box.holdScrews.Count(h => h.IsEmpty());
+            var freeSlots = box.RemainingCapacity;
 
             var toMove = list.Take(freeSlots).ToList();
 
-            box.AddScrew(toMove, false);
+            box.TryAddScrews(toMove);
 
             totalMoved += toMove.Count;
 

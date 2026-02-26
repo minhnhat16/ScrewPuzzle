@@ -1,3 +1,4 @@
+using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
 
@@ -17,6 +18,6 @@ public class ScrewInteractionService : IScrewInteractionService
     public void HandleScrewSelected(ScrewController screw)
     {
         _layerManager.RemoveScrewOnDict(screw, screw.GetSortingOrder());
-        _arrayScrew.AppendScrew(screw);
+        _arrayScrew.AddScrew(screw);
     }
 }
