@@ -1,30 +1,37 @@
-﻿using Core.Match;
-using Ingame.Board;
-using LevelSystem.Core;
+﻿using LevelSystem.Core;
 using System.Collections;
 
 namespace LevelSystem.Steps
 {
     /// <summary>
     /// Step 3: Khởi tạo BoxQueue với config của level hiện tại.
-    /// Tách riêng để BoxQueue logic không lẫn vào loading logic.
+    ///
+    /// Dùng ILevelBoxQueue thay vì IContainerQueue để gọi được
+    /// LoadBoxConfigRecord() mà không cần cast hay dùng BoxQueue.ins.
     /// </summary>
     public class InitBoxQueueStep : ILevelLoadStep
     {
         public string StepName => "Init Box Queue";
 
-        // Dùng interface thay vì BoxQueue.ins trực tiếp → DIP
-        private readonly IContainerQueue _boxQueue;
+        private readonly ILevelBoxQueue _boxQueue;
 
-        public InitBoxQueueStep(IContainerQueue boxQueue)
+        public InitBoxQueueStep(ILevelBoxQueue boxQueue)
         {
             _boxQueue = boxQueue;
         }
 
         public IEnumerator Execute(LevelContext ctx)
         {
+            if (ctx.LevelData?.boxConfig == null)
+            {
+                ctx.IsSuccess = false;
+                ctx.ErrorMessage = "BoxConfig is null — cannot init BoxQueue.";
+                yield break;
+            }
+
             _boxQueue.LoadBoxConfigRecord(ctx.LevelData.boxConfig);
-            _boxQueue.Init();
+            _boxQueue.Initialize(isTutorial: false);
+
             yield return null;
         }
     }

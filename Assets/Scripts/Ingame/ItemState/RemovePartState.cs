@@ -30,7 +30,7 @@ public class RemovePartState : FSMState<ItemController>
             () =>
             {
                 MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
-                LevelManager.ins.RemovePart(part);
+                LevelManager.ins.RemovePartItem(part);
 
                 sys.SetExecuting(false);
                 sys.SetSelected(false);

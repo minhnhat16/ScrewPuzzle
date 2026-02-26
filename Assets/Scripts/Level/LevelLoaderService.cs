@@ -30,6 +30,6 @@ public class LevelLoaderService : MonoBehaviour, ILevelLoader
 
     public Level.Level GetLevelData(int levelId)
     {
-        return levelManager.GetLevelData(levelId);
+        return levelManager.levelConfig[levelId];
     }
 }

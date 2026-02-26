@@ -265,5 +265,15 @@ namespace Managers
                 }
             }
         }
+        /// <summary>
+        /// Set tổng số star cần đạt trong level.
+        /// totalStarInLevel = số box records + (1 nếu có side mission, 0 nếu không)
+        /// Gọi từ InitSpecialMissionStep trong pipeline load level.
+        /// </summary>
+        public void SetTotalStar(int total)
+        {
+            totalStarInLevel = Mathf.Max(1, total);  // tối thiểu 1 để tránh div/0 trong AddStar
+            Debug.Log($"[IngameController] totalStarInLevel = {totalStarInLevel}");
+        }
     }
 }

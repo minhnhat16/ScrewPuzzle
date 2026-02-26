@@ -22,10 +22,9 @@ public interface ILevelManager
     // ─────────────────────────────────────────
 
     /// <summary>Load level từ menu, khởi động scene transition</summary>
-    void LoadLevel(int levelId);
+    void LoadLevel(int levelId, Action callback = null);
 
     /// <summary>Reset scene về trạng thái ban đầu</summary>
-    void ResetLevel();
 
     // ─────────────────────────────────────────
     // Query

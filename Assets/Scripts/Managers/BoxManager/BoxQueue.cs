@@ -9,21 +9,23 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// BoxQueue sau khi update:
-/// - Implement IContainerQueue (Core layer)
-/// - Giữ nguyên IBoxQueue cũ để không break code hiện có
-/// - Thêm FindSuitableBox(string tag) overload
-/// - Fix AddScrewToBox trả về bool
+/// BoxQueue:
+///  - Implement IContainerQueue  (Core layer — routing, lifecycle)
+///  - Implement ILevelBoxQueue   (Game layer — level load, screw routing, reset)
+///
+/// LevelManager chỉ thấy ILevelBoxQueue.
+/// IngameController chỉ thấy IContainerQueue.
+/// Không ai cần BoxQueue.ins nữa.
 /// </summary>
-public class BoxQueue : MonoBehaviour, IContainerQueue
+public class BoxQueue : MonoBehaviour, ILevelBoxQueue
 {
+    // ─── Singleton (backward compat — chỉ dùng để Bootstrapper lấy ref) ──
+    public static BoxQueue ins { get; private set; }
+
     private SideMission _currentMission;
     public bool HasSpecialBox => _currentMission != null;
 
-    // ─────────────────────────────────────────
-    // IBoxQueue + IContainerQueue shared state
-    // ─────────────────────────────────────────
-
+    // ─── State ─────────────────────────────────────────────────────
     public int ActiveBoxCount => _activeBoxes.Count;
     public int ActiveCount => _activeBoxes.Count;
     public bool HaseMovingContainer => _activeBoxes.Any(b => b.IsMoving);
@@ -33,19 +35,17 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
     private IBoxSlotLayoutService _layout;
 
     private List<Box> _activeBoxes = new();
+    private List<BoxConfigRecord> _configRecords = new();
     [SerializeField] private List<BoxSlot> slots;
     private readonly Dictionary<ColorEnum, List<ScrewController>> _hiddenByColor = new();
 
-    // ─────────────────────────────────────────
-    // Events — IBoxQueue
-    // ─────────────────────────────────────────
-
+    // ─── Events — IBoxQueue ────────────────────────────────────────
     public event Action<Box> OnBoxFull;
     public event Action<Box> OnBoxSpawned;
     public event Action<Box> OnBoxRemoved;
     public event Action<SideMission> OnSpecialModeStarted;
 
-    // Events — IContainerQueue (relay từ Box events)
+    // ─── Events — IContainerQueue ──────────────────────────────────
     event Action<IMatchContainer> IContainerQueue.OnContainerCompleted
     {
         add => _onContainerCompleted += value;
@@ -66,10 +66,13 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
     private event Action<IMatchContainer> _onContainerSpawned;
     private event Action<IMatchContainer> _onContainerRemoved;
 
-    // ─────────────────────────────────────────
-    // Setup
-    // ─────────────────────────────────────────
+    // ─── Unity ─────────────────────────────────────────────────────
+    private void Awake()
+    {
+        ins = this;
+    }
 
+    // ─── Setup ─────────────────────────────────────────────────────
     public void Setup(IBoxFactory factory, IBoxSequenceService sequence, IBoxSlotLayoutService layout)
     {
         _factory = factory;
@@ -77,30 +80,93 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
         _layout = layout;
     }
 
-    public void LoadLevelBoxes(IEnumerable<BoxConfigRecord> records)
-    {
-        if (_factory == null) throw new Exception("BoxQueue not setup");
+    // ─── ILevelBoxQueue: Level Lifecycle ───────────────────────────
 
-        var boxes = _factory.CreateBoxes(records);
+    /// <summary>
+    /// Load BoxConfig → convert records → build sequence.
+    /// Gọi từ InitBoxQueueStep trước Initialize().
+    /// </summary>
+    public void LoadBoxConfigRecord(BoxConfig boxConfig)
+    {
+        if (boxConfig == null)
+        {
+            Debug.LogWarning("[BoxQueue] BoxConfig is null.");
+            return;
+        }
+
+        _configRecords = boxConfig.records?.ToList() ?? new List<BoxConfigRecord>();
+
+        if (_factory == null)
+        {
+            Debug.LogError("[BoxQueue] Not setup — call Setup() before LoadBoxConfigRecord().");
+            return;
+        }
+
+        var boxes = _factory.CreateBoxes(_configRecords);
         _sequence.Load(boxes);
 
         foreach (var box in boxes)
             box.OnBoxFull += NotifyBoxFull;
+
+        Debug.Log($"[BoxQueue] Loaded {_configRecords.Count} box config records.");
     }
 
-    // ─────────────────────────────────────────
-    // Lifecycle
-    // ─────────────────────────────────────────
+    public void ClearConfigRecords()
+    {
+        _configRecords.Clear();
+    }
 
-    public void Initialize(bool isTutorial) => SpawnInitial();
-    void IContainerQueue.Initialize(bool isTutorial) => Initialize(isTutorial);
-
-    public void ResetQueue()
+    public void ClearCurrentBoxes()
     {
         foreach (var box in _activeBoxes)
             box.OnBoxFull -= NotifyBoxFull;
         _activeBoxes.Clear();
     }
+
+    /// <summary>
+    /// Full reset — clear boxes, config, hidden screws.
+    /// Gọi từ LevelManager.OnReset().
+    /// </summary>
+    public void OnReset()
+    {
+        ClearCurrentBoxes();
+        ClearConfigRecords();
+        _hiddenByColor.Clear();
+        _currentMission = null;
+    }
+
+    // ─── ILevelBoxQueue: Screw Routing ─────────────────────────────
+
+    /// <summary>
+    /// Nhận screws từ board, group theo màu, route vào box phù hợp.
+    /// Nếu không có box → screw ở lại ArrayScrew (hàng chờ).
+    /// → Gọi từ LevelManager.RemovePartItem()
+    /// </summary>
+    public void TryMoveScrewsGroupedByColor(List<ScrewController> screws, bool fromBoard)
+    {
+        if (screws == null || screws.Count == 0) return;
+
+        foreach (var group in screws
+                     .Where(s => s != null)
+                     .GroupBy(s => s.GetColor()))
+        {
+            var box = FindSuitableBox(group.Key);
+            if (box != null)
+                box.TryAddScrews(group.ToList());
+            else
+            {
+                // Không có box → thông báo để LevelManager reset combo
+                LevelManager.ins?.OnScrewQueued();
+            }
+        }
+    }
+
+    // ─── IContainerQueue: Lifecycle ────────────────────────────────
+
+    public void Initialize(bool isTutorial) => SpawnInitial();
+    void IContainerQueue.Initialize(bool isTutorial) => Initialize(isTutorial);
+
+    public void ResetQueue() => ClearCurrentBoxes();
     void IContainerQueue.Reset() => ResetQueue();
 
     private void SpawnInitial()
@@ -113,42 +179,9 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
         _layout.AlignBoxes(_activeBoxes, slots);
     }
 
-    // ─────────────────────────────────────────
-    // FindSuitableBox — 2 overloads
-    // ─────────────────────────────────────────
+    // ─── IContainerQueue: Routing ──────────────────────────────────
 
-    /// <summary>IBoxQueue — dùng ColorEnum (backward compat)</summary>
-    public Box FindSuitableBox(ColorEnum color)
-    {
-        return _activeBoxes.FirstOrDefault(b =>
-            !b.IsLocked && !b.IsFull && !b.IsMoving &&
-            (b.Color == color || b.Color == ColorEnum.Rainbow));
-    }
-
-    /// <summary>IContainerQueue — dùng string tag (Core layer)</summary>
-    public Box FindSuitableBox(string tag)
-    {
-        return _activeBoxes.FirstOrDefault(b =>
-            !b.IsLocked && !b.IsFull && !b.IsMoving &&
-            (b.Color.ToString().ToLower() == tag || b.Color == ColorEnum.Rainbow));
-    }
-
-    IMatchContainer IContainerQueue.FindSuitable(string tag)
-    {
-        var box = FindSuitableBox(tag);
-        return box; // Box implement IMatchContainer trực tiếp
-    }
-
-    // ─────────────────────────────────────────
-    // AddScrewToBox — fix trả về bool
-    // ─────────────────────────────────────────
-
-    public bool AddScrewToBox(ScrewController screw, Box box)
-    {
-        if (screw == null || box == null) return false;
-        if (box.IsLocked || box.IsFull) return false;
-        return box.TryAddScrew(screw);
-    }
+    IMatchContainer IContainerQueue.FindSuitable(string tag) => FindSuitableBox(tag);
 
     bool IContainerQueue.AddItemToContainer(IMatchItem item, IMatchContainer container)
     {
@@ -157,30 +190,60 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
         return AddScrewToBox(screw, box);
     }
 
-    // ─────────────────────────────────────────
-    // Box lifecycle
-    // ─────────────────────────────────────────
-
-    public void NotifyBoxFull(Box box)
-    {
-        if (!_activeBoxes.Contains(box)) return;
-
-        _activeBoxes.Remove(box);
-        OnBoxFull?.Invoke(box);
-        _onContainerCompleted?.Invoke(box);
-
-        TrySpawnNext();
-        _layout.AlignBoxes(_activeBoxes, slots);
-    }
-
     void IContainerQueue.NotifyCompleted(IMatchContainer container)
     {
         if (container is Box box) NotifyBoxFull(box);
     }
 
+    void IContainerQueue.UnlockNext() => UnlockNext();
+    bool IContainerQueue.HasLocked() => HasLockedBox();
+
+    // ─── Find Box ──────────────────────────────────────────────────
+
+    public Box FindSuitableBox(ColorEnum color)
+    {
+        return _activeBoxes.FirstOrDefault(b =>
+            !b.IsLocked && !b.IsFull && !b.IsMoving &&
+            (b.Color == color || b.Color == ColorEnum.Rainbow));
+    }
+
+    public Box FindSuitableBox(string tag)
+    {
+        return _activeBoxes.FirstOrDefault(b =>
+            !b.IsLocked && !b.IsFull && !b.IsMoving &&
+            (b.Color.ToString().ToLower() == tag || b.Color == ColorEnum.Rainbow));
+    }
+
+    // ─── AddScrewToBox ─────────────────────────────────────────────
+
+    public bool AddScrewToBox(ScrewController screw, Box box)
+    {
+        if (screw == null || box == null) return false;
+        if (box.IsLocked || box.IsFull) return false;
+        return box.TryAddScrew(screw);
+    }
+
+    // ─── Box Lifecycle ─────────────────────────────────────────────
+
+    public void NotifyBoxFull(Box box)
+    {
+        if (!_activeBoxes.Contains(box)) return;
+        _activeBoxes.Remove(box);
+        box.OnBoxFull -= NotifyBoxFull;
+        OnBoxFull?.Invoke(box);
+        _onContainerCompleted?.Invoke(box);
+
+        // Gọi LevelManager để tính điểm / combo
+        LevelManager.ins?.OnBoxCleared();
+
+        TrySpawnNext();
+        _layout.AlignBoxes(_activeBoxes, slots);
+    }
+
     private void ActivateBox(Box box)
     {
         _activeBoxes.Add(box);
+        box.OnBoxFull += NotifyBoxFull;
         OnBoxSpawned?.Invoke(box);
         _onContainerSpawned?.Invoke(box);
         TryResolveHiddenForBox(box);
@@ -192,48 +255,43 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
         ActivateBox(_sequence.GetNext());
     }
 
-    // ─────────────────────────────────────────
-    // Các method còn lại — giữ nguyên
-    // ─────────────────────────────────────────
+    // ─── Hidden Screw ──────────────────────────────────────────────
 
-    public void UnlockNextBox() { /* TODO */ }
-    bool IContainerQueue.HasLocked() => HasLockedBox();
-    public bool HasLockedBox() => _activeBoxes.Any(b => b.IsLocked);
-
-    public void EnableSpecialMode(SideMission mission)
+    private void HideScrew(ScrewController screw)
     {
-        if (mission == null) return;
-        _currentMission = mission;
-        OnSpecialModeStarted?.Invoke(mission);
+        var color = screw.GetColor();
+        if (!_hiddenByColor.ContainsKey(color))
+            _hiddenByColor[color] = new List<ScrewController>();
+        screw.SetActive(false);
+        _hiddenByColor[color].Add(screw);
     }
+
+    private void TryResolveHiddenForBox(Box box)
+    {
+        var color = box.Color;
+        if (!_hiddenByColor.ContainsKey(color)) return;
+
+        var hiddenList = _hiddenByColor[color];
+        foreach (var screw in hiddenList.ToList())
+        {
+            if (box.IsFull) break;
+            hiddenList.Remove(screw);
+            screw.SetActive(true);
+            box.TryAddScrew(screw);
+        }
+
+        if (hiddenList.Count == 0) _hiddenByColor.Remove(color);
+    }
+
+    // ─── Misc ──────────────────────────────────────────────────────
 
     public void RemoveBoxByColor(ColorEnum targetColor, int count)
     {
         if (count <= 0) return;
-
         var toRemove = _activeBoxes.Where(b => b.Color == targetColor).Take(count).ToList();
         foreach (var box in toRemove) RemoveBoxInternal(box);
-
         FillToSlotCapacity();
         _layout.AlignBoxes(_activeBoxes, slots);
-    }
-
-    public void ProcessScrews(IEnumerable<ScrewController> screws)
-    {
-        if (screws == null) return;
-
-        foreach (var group in screws.Where(s => s != null).GroupBy(s => s.GetColor()))
-        {
-            var box = FindSuitableBox(group.Key);
-            if (box != null) box.TryAddScrews(group.ToList());
-        }
-    }
-
-    public void TryProcessItemScrew(ScrewController screw)
-    {
-        var box = FindSuitableBox(screw.GetColor());
-        if (box == null) { HideScrew(screw); return; }
-        AddScrewToBox(screw, box);
     }
 
     private void RemoveBoxInternal(Box box)
@@ -251,35 +309,30 @@ public class BoxQueue : MonoBehaviour, IContainerQueue
             ActivateBox(_sequence.GetNext());
     }
 
-    private void HideScrew(ScrewController screw)
+    public void ProcessScrews(IEnumerable<ScrewController> screws)
     {
-        var color = screw.GetColor();
-        if (!_hiddenByColor.ContainsKey(color))
-            _hiddenByColor[color] = new List<ScrewController>();
-        screw.SetActive(false);
-        _hiddenByColor[color].Add(screw);
-    }
-
-    private void TryResolveHiddenForBox(Box box)
-    {
-        var color = box.Color;
-        if (!_hiddenByColor.ContainsKey(color)) return;
-
-        var hiddenList = _hiddenByColor[color];
-        var copy = hiddenList.ToList();
-
-        foreach (var screw in copy)
+        if (screws == null) return;
+        foreach (var group in screws.Where(s => s != null).GroupBy(s => s.GetColor()))
         {
-            if (box.IsFull) break;
-            hiddenList.Remove(screw);
-            screw.SetActive(true);
-            box.TryAddScrew(screw);
+            var box = FindSuitableBox(group.Key);
+            if (box != null) box.TryAddScrews(group.ToList());
         }
-
-        if (hiddenList.Count == 0) _hiddenByColor.Remove(color);
     }
 
-    public void UnlockNext()
+    public void TryProcessItemScrew(ScrewController screw)
     {
+        var box = FindSuitableBox(screw.GetColor());
+        if (box == null) { HideScrew(screw); return; }
+        AddScrewToBox(screw, box);
+    }
+
+    public bool HasLockedBox() => _activeBoxes.Any(b => b.IsLocked);
+    public void UnlockNext() { /* TODO */ }
+
+    public void EnableSpecialMode(SideMission mission)
+    {
+        if (mission == null) return;
+        _currentMission = mission;
+        OnSpecialModeStarted?.Invoke(mission);
     }
 }
