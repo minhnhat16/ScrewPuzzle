@@ -14,6 +14,6 @@ public class ScrewSelectionHandler : MonoBehaviour
     private void HandleScrewSelected(ScrewController screw)
     {
         layerManager.RemoveScrewOnDict(screw, screw.GetSortingOrder());
-        arrayScrew.AddScrew(screw);
+        arrayScrew.Enqueue(screw);
     }
 }

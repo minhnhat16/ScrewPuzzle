@@ -28,7 +28,7 @@ namespace UIScript.Dialog
         {
             List<LevelItem>levelItemList = new();
             var waitUntil = new WaitUntil(()=> LevelManager.ins.IsInitDone);
-            var allLevelConfig = new List<Level.Level>(LevelManager.ins.Levels.Values);
+            //var allLevelConfig = new List<Level.Level>(ConfigExtensions.GetAllLevel(Co));
         }
     }
 }

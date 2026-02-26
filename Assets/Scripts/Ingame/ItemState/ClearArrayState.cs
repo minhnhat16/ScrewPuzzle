@@ -22,7 +22,7 @@ public class ClearArrayState : FSMState<ItemController>
             () =>
             {
                 MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
-                ArrayScrew.Instance.StartClearHiding();
+                ArrayScrew.ins.Clear ();
                 sys.SetExecuting(false);
                 sys.SetSelected(false);
                 callback?.Invoke();

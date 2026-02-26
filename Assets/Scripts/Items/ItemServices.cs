@@ -1,11 +1,11 @@
-﻿using Ingame;
+﻿using Core.Match;
 using System;
 using UnityEngine;
 
 public class ItemService : IItemService
 {
-    private readonly IBoxQueue _boxQueue;
-    private readonly IArrayScrew _arrayScrew;
+    private readonly IContainerQueue _containerQueue;
+    private readonly ITempQueue _tempQueue;
     private readonly IItemView _itemView;
     private readonly IInventoryService _inventory;
 
@@ -13,13 +13,13 @@ public class ItemService : IItemService
     public event Action<ItemType> OnItemUseFailed;
 
     public ItemService(
-        IBoxQueue boxQueue,
-        IArrayScrew arrayScrew,
+        IContainerQueue containerQueue,
+        ITempQueue tempQueue,
         IItemView itemView,
         IInventoryService inventory)
     {
-        _boxQueue = boxQueue;
-        _arrayScrew = arrayScrew;
+        _containerQueue = containerQueue;
+        _tempQueue = tempQueue;
         _itemView = itemView;
         _inventory = inventory;
     }
@@ -35,9 +35,7 @@ public class ItemService : IItemService
         try
         {
             ExecuteItem(type);
-
             _inventory.Consume(type);
-
             _itemView.PlayItemEffect(type, Vector3.zero, targetPos, () =>
             {
                 OnItemUsed?.Invoke(type);
@@ -45,21 +43,20 @@ public class ItemService : IItemService
         }
         catch (Exception e)
         {
-            Debug.LogError($"Item execution failed: {e}");
+            Debug.LogError($"[ItemService] Lỗi khi dùng item {type}: {e}");
             OnItemUseFailed?.Invoke(type);
         }
     }
 
     public bool CanUseItem(ItemType type)
     {
-        if (!_inventory.HasItem(type))
-            return false;
+        if (!_inventory.HasItem(type)) return false;
 
         return type switch
         {
-            ItemType.Magnet => _arrayScrew.HasAny(),
-            ItemType.Breaker => _boxQueue.HasLockedBox(),
-            ItemType.Drill => _arrayScrew.IsFull,
+            ItemType.Magnet => _tempQueue.HasAny,          // còn screw trong array
+            ItemType.Breaker => _containerQueue.HasLocked(), // có box bị lock
+            ItemType.Drill => _tempQueue.IsFull,           // array đang full
             _ => false
         };
     }
@@ -69,15 +66,15 @@ public class ItemService : IItemService
         switch (type)
         {
             case ItemType.Magnet:
-                _arrayScrew.Clear();
+                _tempQueue.Clear();
                 break;
 
             case ItemType.Breaker:
-                _boxQueue.UnlockNextBox();
+                _containerQueue.UnlockNext();
                 break;
 
             case ItemType.Drill:
-                _arrayScrew.AddOneHold();
+                _tempQueue.AddSlot();
                 break;
         }
     }

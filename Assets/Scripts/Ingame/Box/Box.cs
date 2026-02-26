@@ -1,3 +1,4 @@
+﻿using Core.Match;
 using Enums;
 using Ingame.Screw;
 using System;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Ingame
 {
-    public class Box : FSMSystem
+    public class Box : FSMSystem, IMatchContainer
     {
         #region Inspector
 
@@ -31,6 +32,9 @@ namespace Ingame
         public event Action<Box> OnBoxReady;
         public event Action<Box> OnBoxFull;
         public event Action<Box> OnBoxRemoved;
+
+
+        private event System.Action<Core.Match.IMatchContainer> _onCompleted;
 
         #endregion
 
@@ -165,6 +169,50 @@ namespace Ingame
         {
             storage.Clear();
             stateController.SetState(BoxState.Idle);
+        }
+
+        #endregion
+
+
+        #region IMatchContainer
+
+        string IMatchContainer.AcceptedTag
+            => Color.ToString().ToLower();
+
+        int IMatchContainer.Count
+            => capacity - RemainingCapacity;          // capacity là field private đã có
+
+        int IMatchContainer.Capacity
+            => capacity;
+
+        int IMatchContainer.RemainingCapacity
+            => RemainingCapacity;                     // property đã có
+
+        bool IMatchContainer.IsFull => IsFull;
+        bool IMatchContainer.IsLocked => IsLocked;
+        bool IMatchContainer.IsMoving => IsMoving;
+
+        Vector3 IMatchContainer.Position
+            => transform.position;
+
+        event System.Action<Core.Match.IMatchContainer> IMatchContainer.OnCompleted
+        {
+            add => _onCompleted += value;
+            remove => _onCompleted -= value;
+        }
+
+        bool IMatchContainer.TryAdd(IMatchItem item)
+        {
+            if (item is not Ingame.Screw.ScrewController screw) return false;
+            return TryAddScrew(screw);
+        }
+
+        int IMatchContainer.TryAddRange(IEnumerable<IMatchItem> items)
+        {
+            int count = 0;
+            foreach (var item in items)
+                if (((IMatchContainer)this).TryAdd(item)) count++;
+            return count;
         }
 
         #endregion

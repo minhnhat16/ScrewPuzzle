@@ -21,7 +21,7 @@ public class AddOneHold : FSMState<ItemController>
             () =>
             {
                 MissionManager.ins.ProcessUseItem(ItemType.Drill, 1);
-                ArrayScrew.Instance.AddOneHold();
+                ArrayScrew.ins.AddSlot ();
                 sys.SetExecuting(false);
                 sys.SetSelected(false);
                 callback?.Invoke();

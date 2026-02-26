@@ -183,7 +183,7 @@ public class GameView : BaseView
         {
             // đủ item → sử dụng item
             ShowDescription(itemType);
-            var pos = itemType == ItemType.Breaker ? Vector3.zero : ArrayScrew.Instance.GetHoldPos() + new Vector3(1, -0.5f);
+            var pos = itemType == ItemType.Breaker ? Vector3.zero : ArrayScrew.ins.GetLastHoldPosition() + new Vector3(1, -0.5f);
             IngameController.ins.OnItemInvoke?.Invoke(itemType, pos);
             button.interactable = true;
         }

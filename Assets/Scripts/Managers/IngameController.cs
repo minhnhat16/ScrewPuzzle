@@ -1,4 +1,5 @@
-﻿using Enums;
+﻿using Core.Match;
+using Enums;
 using Gameplay.StateMachine;
 using Ingame;
 using Ingame.Screw;
@@ -18,16 +19,17 @@ namespace Managers
         [SerializeField] private GameStateMachineBootstrapper stateMachineBoot;
 
         [Header("References")]
-        [SerializeField] private BoxQueue boxQueue;   // MonoBehaviour thật → serialize thẳng, không cần cast
+        [SerializeField] private BoxQueue boxQueue;
+        [SerializeField] private ArrayScrew arrayScrew;
         [SerializeField] private Player player;
 
         // ─────────────────────────────────────────
-        // Private
+        // Private — tất cả dùng interface Core layer
         // ─────────────────────────────────────────
 
         private IGameStateMachine _stateMachine;
-        private IBoxQueue _boxQueue;
-        private IArrayScrew _arrayScrew;
+        private IContainerQueue _containerQueue;   // thay IBoxQueue
+        private ITempQueue _tempQueue;         // thay IArrayScrew
         private IGameFlowService _gameFlow;
         private ItemController _itemController;
         private ScrewManager _screwManager;
@@ -50,13 +52,14 @@ namespace Managers
         public UnityEvent<bool> OnLevelCompleted = new();
 
         // ─────────────────────────────────────────
-        // Public Properties (đọc state qua machine, không dùng bool)
+        // Public Properties
         // ─────────────────────────────────────────
 
         public bool IsGameOver => _stateMachine.IsIn(GameplayState.Lose);
         public bool IsPaused => _stateMachine.IsIn(GameplayState.Paused);
         public bool IsPlaying => _stateMachine.IsPlaying();
 
+        // Giữ lại BoxQueue public property vì một số UI/system cũ vẫn cần
         public BoxQueue BoxQueue => boxQueue;
         public ScrewManager ScrewManager => _screwManager;
 
@@ -69,26 +72,24 @@ namespace Managers
             base.Awake();
 
             _stateMachine = stateMachineBoot;
-            _boxQueue = boxQueue;
+            _containerQueue = boxQueue;              // BoxQueue implement IContainerQueue
             _itemController = GetComponentInChildren<ItemController>();
             _screwManager = GetComponentInChildren<ScrewManager>();
-            _arrayScrew = ArrayScrew.Instance;
+            _tempQueue = ArrayScrew.ins;   // ArrayScrew implement ITempQueue
 
-            // Inject vào ArrayScrew — không còn tự lấy singleton trong coroutine
-            ArrayScrew.Instance.Inject(_boxQueue, _screwManager);
-
-            // GameFlowService là pure C# class, khởi tạo thẳng
             _gameFlow = new GameFlowService(
-                boxQueue: _boxQueue,
+                containerQueue: _containerQueue,
+                arrayScrew: _tempQueue,
                 levelManager: LevelManager.ins,
-                dialogService: DialogManager.ins
+                dialogService: DialogManager.ins,
+                player: player
             );
         }
 
         private void OnEnable()
         {
             _stateMachine.OnStateChanged += HandleStateChanged;
-            _arrayScrew.OnArrayFull += TriggerArrayScrewFull;   // thay ScrewFullEvent cũ
+            _tempQueue.OnQueueFull += TriggerQueueFull;
 
             OnLevelCompleted.AddListener(HandleLevelComplete);
             OnItemInvoke.AddListener(InvokeItem);
@@ -100,7 +101,7 @@ namespace Managers
         private void OnDisable()
         {
             _stateMachine.OnStateChanged -= HandleStateChanged;
-            _arrayScrew.OnArrayFull -= TriggerArrayScrewFull;
+            _tempQueue.OnQueueFull -= TriggerQueueFull;
 
             OnLevelCompleted.RemoveListener(HandleLevelComplete);
             OnItemInvoke.RemoveListener(InvokeItem);
@@ -115,33 +116,19 @@ namespace Managers
 
         private void HandleStateChanged(GameplayState prev, GameplayState next)
         {
-            // Input lock tập trung — không rải rác ở nhiều chỗ
             player.IsInputLocked = next != GameplayState.Playing
                                 && next != GameplayState.ItemUsing;
 
-            // Báo ArrayScrew game còn đang chạy không
-            // → ArrayScrew dùng để dừng CheckFullCoroutine khi cần
-            ArrayScrew.Instance.SetGameActive(
+            ArrayScrew.ins.SetGameActive(
                 next == GameplayState.Playing || next == GameplayState.ItemUsing
             );
 
             switch (next)
             {
-                case GameplayState.Paused:
-                    _gameFlow.PauseGame();
-                    break;
-
-                case GameplayState.Win:
-                    _gameFlow.CompleteLevel();
-                    break;
-
-                case GameplayState.RevivePrompt:
-                    _gameFlow.HandleRevive();
-                    break;
-
-                case GameplayState.Lose:
-                    _gameFlow.HandleGameOver();
-                    break;
+                case GameplayState.Paused: _gameFlow.PauseGame(); break;
+                case GameplayState.Win: _gameFlow.CompleteLevel(); break;
+                case GameplayState.RevivePrompt: _gameFlow.HandleRevive(); break;
+                case GameplayState.Lose: _gameFlow.HandleGameOver(); break;
             }
         }
 
@@ -152,7 +139,7 @@ namespace Managers
         public void StartLevel()
         {
             currentStar = 0;
-            _boxQueue.Initialize(false);
+            _containerQueue.Initialize(false);
             _stateMachine.TransitionTo(GameplayState.Playing);
         }
 
@@ -162,16 +149,11 @@ namespace Managers
             _stateMachine.TransitionTo(GameplayState.Win);
         }
 
-        /// <summary>
-        /// Được gọi từ ArrayScrew.OnArrayFull event.
-        /// Quyết định revive hay thua thẳng dựa vào trạng thái box queue.
-        /// </summary>
-        private void TriggerArrayScrewFull()
+        private void TriggerQueueFull()
         {
             if (!_stateMachine.IsPlaying()) return;
 
-            bool canRevive = _boxQueue.ActiveBoxCount < 4;
-
+            bool canRevive = _containerQueue.ActiveCount < 4;
             _stateMachine.TransitionTo(canRevive
                 ? GameplayState.RevivePrompt
                 : GameplayState.Lose);
@@ -185,28 +167,18 @@ namespace Managers
         }
 
         // ─────────────────────────────────────────
-        // Pause / Resume
+        // Pause / Resume / Revive / Return
         // ─────────────────────────────────────────
 
         public void Pause() => _stateMachine.TransitionTo(GameplayState.Paused);
         public void Resume() => _stateMachine.TransitionTo(GameplayState.Playing);
-
-        // ─────────────────────────────────────────
-        // Revive (từ ReviveDialog)
-        // ─────────────────────────────────────────
+        public void DeclineRevive() => _stateMachine.TransitionTo(GameplayState.Lose);
 
         public void Revive()
         {
             _gameFlow.HandleRevive();
             _stateMachine.TransitionTo(GameplayState.Playing);
         }
-
-        public void DeclineRevive()
-            => _stateMachine.TransitionTo(GameplayState.Lose);
-
-        // ─────────────────────────────────────────
-        // Return Home
-        // ─────────────────────────────────────────
 
         public void ReturnHome()
         {
@@ -243,9 +215,6 @@ namespace Managers
             }
         }
 
-        /// <summary>
-        /// ItemController gọi khi item thực thi xong hoặc player cancel.
-        /// </summary>
         public void OnItemFinished()
         {
             if (_stateMachine.IsIn(GameplayState.ItemUsing))

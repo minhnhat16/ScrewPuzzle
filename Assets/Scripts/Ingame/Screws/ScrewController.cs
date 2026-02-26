@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using Core.Match;
+using DG.Tweening;
 using Enums;
 using Level;
 using System;
@@ -9,7 +10,7 @@ using UnityEngine;
 namespace Ingame.Screw
 {
     [RequireComponent(typeof(ScrewPhysics), typeof(ScrewRender), typeof(ScrewAnimation))]
-    public class ScrewController : MonoBehaviour, IResetable, ITappable
+    public class ScrewController : MonoBehaviour, IResetable, ITappable, IMatchItem
     {
         [Header("References")]
         [SerializeField] internal ScrewPhysics screwPhysics;
@@ -275,5 +276,25 @@ namespace Ingame.Screw
                 }
             }
         }
+
+        #region IMatchItem
+
+        // Explicit implementation — không làm ô nhiễm public API của ScrewController
+        // Caller dùng IMatchItem interface để access, không gọi thẳng từ ScrewController
+
+        public string Tag
+            => GetColor().ToString().ToLower();       // "red", "blue", "rainbow"...
+
+        Vector3 IMatchItem.Position
+            => transform.position;
+
+        Transform IMatchItem.Transform
+            => transform;
+
+        bool Core.Match.IMatchItem.IsInteractable
+            => IsInteractable;                        // đã có, tái sử dụng
+
+        #endregion
     }
+
 }

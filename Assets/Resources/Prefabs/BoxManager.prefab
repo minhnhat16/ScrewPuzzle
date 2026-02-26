@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 508206350422773675}
-  - component: {fileID: 508206350422773672}
+  - component: {fileID: 5935960889666263279}
   m_Layer: 0
   m_Name: SlotBox (2)
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 508206351258826185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &508206350422773672
+--- !u!114 &5935960889666263279
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 508206350422773674}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22f86ee1410f76446b248b2025ced64e, type: 3}
+  m_Script: {fileID: 11500000, guid: 9861611ac963f4246bce44bd0d9f5297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   screwBox: {fileID: 0}
@@ -57,7 +57,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 508206351086990827}
-  - component: {fileID: 508206351086990824}
+  - component: {fileID: 4356600136485485773}
   m_Layer: 0
   m_Name: SlotBox (1)
   m_TagString: Untagged
@@ -80,7 +80,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 508206351258826185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &508206351086990824
+--- !u!114 &4356600136485485773
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -89,7 +89,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 508206351086990826}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22f86ee1410f76446b248b2025ced64e, type: 3}
+  m_Script: {fileID: 11500000, guid: 9861611ac963f4246bce44bd0d9f5297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   screwBox: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 508206351137007849}
-  - component: {fileID: 508206351137007854}
+  - component: {fileID: 4019767093794931263}
   m_Layer: 0
   m_Name: SlotBox (3)
   m_TagString: Untagged
@@ -128,7 +128,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 508206351258826185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &508206351137007854
+--- !u!114 &4019767093794931263
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -137,7 +137,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 508206351137007848}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22f86ee1410f76446b248b2025ced64e, type: 3}
+  m_Script: {fileID: 11500000, guid: 9861611ac963f4246bce44bd0d9f5297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   screwBox: {fileID: 0}
@@ -192,33 +192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 245c76fd429d4d48b68353fcf0899a93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movingBox: 0
-  xRightCam: 0
-  xLeftCam: 0
-  activeBoxCount: 2
-  spacingBox: 7
-  topAlignSpacing: 2
-  boxConfig: {fileID: 0}
-  configRecords:
-  - NumberOfScrewHoles: 0
-    BoxColor: 0
-  - NumberOfScrewHoles: 0
-    BoxColor: 0
-  - NumberOfScrewHoles: 0
-    BoxColor: 0
-  screwBoxes: []
-  hidingScrews: []
-  boxSlots:
-  - {fileID: 508206351428096640}
-  - {fileID: 508206351086990824}
-  - {fileID: 508206350422773672}
-  - {fileID: 508206351137007854}
-  onCompleteClearBoxes:
-    m_PersistentCalls:
-      m_Calls: []
-  onDeletOneScrew:
-    m_PersistentCalls:
-      m_Calls: []
+  slots: []
 --- !u!1 &508206351428096642
 GameObject:
   m_ObjectHideFlags: 0
@@ -228,7 +202,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 508206351428096643}
-  - component: {fileID: 508206351428096640}
+  - component: {fileID: 5930526976584164067}
   m_Layer: 0
   m_Name: SlotBox
   m_TagString: Untagged
@@ -251,7 +225,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 508206351258826185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &508206351428096640
+--- !u!114 &5930526976584164067
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -260,7 +234,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 508206351428096642}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22f86ee1410f76446b248b2025ced64e, type: 3}
+  m_Script: {fileID: 11500000, guid: 9861611ac963f4246bce44bd0d9f5297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   screwBox: {fileID: 0}

@@ -14,7 +14,7 @@ public class AddHoldItem : ItemButton
     public override void OnClick()
     {
         Debug.Log("on button click");
-        var pos = ArrayScrew.Instance.GetLastHoldPosition()  + new Vector3(1,7);
+        var pos = ArrayScrew.ins.GetLastHoldPosition()  + new Vector3(1,7);
         IngameController.ins.OnItemInvoke?.Invoke(Type,pos);
     }
 
