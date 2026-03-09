@@ -1,6 +1,6 @@
 ﻿using ConfigFile;
 using Ingame.Screw;
-using System;
+using System.Collections;
 using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
@@ -8,55 +8,88 @@ public class TutorialManager : MonoBehaviour
     public static TutorialManager ins;
 
     [SerializeField] private TutorialConfig config;
-    private int currentIndex;
+
+    private int _currentIndex;
+    private Coroutine _autoAdvanceCoroutine;
 
     private TutorialStep Current
     {
         get
         {
             var list = config.GetAllRecord();
-            return currentIndex >= 0 && currentIndex < list.Count
-                ? list[currentIndex]
+            return _currentIndex >= 0 && _currentIndex < list.Count
+                ? list[_currentIndex]
                 : null;
         }
     }
 
+    private void Awake() => ins = this;
 
-    private void Awake()
+    // ─────────────────────────────────────────
+    // Public API
+    // ─────────────────────────────────────────
+
+    public void StartTutorial()
     {
-        ins = this;
+        Debug.Log("[Tutorial] START");
+        _currentIndex = 0;
+        PlayStep();
     }
 
-    private void Start()
+    /// <summary>
+    /// Force start từ step cụ thể — dùng để debug trong Editor.
+    /// </summary>
+    public void StartFromStep(int index)
     {
-        currentIndex = 0;
+        _currentIndex = Mathf.Clamp(index, 0, config.GetAllRecord().Count - 1);
+        Debug.Log($"[Tutorial] Force start from step index {_currentIndex}");
+        PlayStep();
     }
 
-    void PlayStep()
+    /// <summary>
+    /// Skip step hiện tại — dùng để debug.
+    /// </summary>
+    public void SkipCurrentStep()
+    {
+        Debug.Log($"[Tutorial] Skip step '{Current?.stepId}'");
+        CompleteStep();
+    }
+
+    public void OnStepEvent(object payload)
+    {
+        if (Current == null) return;
+
+        Debug.Log($"[Tutorial] Event for step '{Current.stepId}' payload={payload}");
+
+        if (!string.IsNullOrEmpty(Current.requiredPayload))
+        {
+            if (payload == null || payload.ToString() != Current.requiredPayload)
+                return;
+        }
+
+        CompleteStep();
+    }
+
+    // ─────────────────────────────────────────
+    // Internal
+    // ─────────────────────────────────────────
+
+    private void PlayStep()
     {
         TutorialUI.ins.HideAll();
+        StopAutoAdvance();
 
         if (Current == null)
         {
-            Debug.Log("[Tutorial] DONE");
+            Debug.Log("[Tutorial] DONE — no more steps");
             return;
         }
 
-        Debug.Log($"[Tutorial] Play step {Current.stepId}");
+        Debug.Log($"[Tutorial] ▶ Step [{_currentIndex}] '{Current.stepId}' type={Current.stepType}");
 
-        // 1. MESSAGE
         if (!string.IsNullOrEmpty(Current.message))
-        {
             TutorialUI.ins.ShowMessage(Current.message);
-            //StartCoroutine(TutorialUI.ins.HideAllAfter(5f));
 
-        }
-        if(Current.completeEventKey == "Level.Completed")
-        {
-            StartCoroutine(TutorialUI.ins.HideAllAfter(5f));
-
-        }
-        // 2. UI theo StepType
         switch (Current.stepType)
         {
             case TutorialStepType.ShowMessage:
@@ -65,48 +98,60 @@ public class TutorialManager : MonoBehaviour
 
             case TutorialStepType.HighlightAndClick:
                 TutorialUI.ins.BlockInput(Current.blockInput);
-                var target = TutorialTargetRegistry.Get(Current.targetKey);
-                TutorialUI.ins.HighlightTarget(target);
-
-                target.TryGetComponent<ScrewController>(out var s);
-                if (s != null) s.IsClicked = false;
+                HighlightCurrentTarget();
                 break;
 
             case TutorialStepType.WaitForEvent:
-                TutorialUI.ins.BlockInput(true);
-                target = TutorialTargetRegistry.Get(Current.targetKey);
-                TutorialUI.ins.HighlightTarget(target);
+                TutorialUI.ins.BlockInput(Current.blockInput);
+                HighlightCurrentTarget();
+                break;
+
+            case TutorialStepType.AutoAdvance:
+                TutorialUI.ins.BlockInput(false);
                 break;
         }
 
-        // 3. SUBSCRIBE EVENT
         if (!string.IsNullOrEmpty(Current.completeEventKey))
-        {
             TutorialEventBus.Subscribe(Current.completeEventKey, OnStepEvent);
-        }
-    }
-    public void OnStepEvent(object payload)
-    {
 
-        Debug.Log($"[Tutorial] Event received for step {Current.stepId} with payload: {payload}");
-        if (!string.IsNullOrEmpty(Current.requiredPayload))
+        if (Current.autoAdvanceDelay > 0f)
+            _autoAdvanceCoroutine = StartCoroutine(AutoAdvanceCoroutine(Current.autoAdvanceDelay));
+    }
+
+    private void HighlightCurrentTarget()
+    {
+        if (string.IsNullOrEmpty(Current.targetKey)) return;
+
+        var target = TutorialTargetRegistry.Get(Current.targetKey);
+        if (target == null)
         {
-            Debug.Log($" OnStepEvent  {payload == null || payload.ToString() != Current.requiredPayload}");
-            if (payload == null || payload.ToString() != Current.requiredPayload)
-                return;
+            Debug.LogWarning($"[Tutorial] Target not found: '{Current.targetKey}' — check TutorialTargetRegistry");
+            return;
         }
 
-        CompleteStep();
+        if (target.TryGetComponent<ScrewController>(out var screw))
+            screw.IsClicked = false;
+
+        TutorialUI.ins.HighlightTarget(
+            target,
+            Current.spotlightSize,
+            Current.spotlightLayer,
+            Current.showHand,
+            Current.handDirection
+        );
     }
 
-    void CompleteStep()
+    private void CompleteStep()
     {
+        if (Current == null) return;
+
         if (!string.IsNullOrEmpty(Current.completeEventKey))
             TutorialEventBus.Unsubscribe(Current.completeEventKey, OnStepEvent);
 
-        currentIndex++;
+        StopAutoAdvance();
+        _currentIndex++;
 
-        if (currentIndex >= config.GetAllRecord().Count)
+        if (_currentIndex >= config.GetAllRecord().Count)
         {
             OnTutorialCompleted();
             return;
@@ -115,19 +160,52 @@ public class TutorialManager : MonoBehaviour
         PlayStep();
     }
 
-    public void StartTutorial()
+    private IEnumerator AutoAdvanceCoroutine(float delay)
     {
-        Debug.Log("[Tutorial] START");
-        currentIndex = 0;
-        PlayStep();
+        yield return new WaitForSeconds(delay);
+        CompleteStep();
     }
 
-    void OnTutorialCompleted()
+    private void StopAutoAdvance()
     {
-        Debug.Log("[Tutorial] COMPLETED");
+        if (_autoAdvanceCoroutine != null)
+        {
+            StopCoroutine(_autoAdvanceCoroutine);
+            _autoAdvanceCoroutine = null;
+        }
+    }
 
+    private void OnTutorialCompleted()
+    {
+        Debug.Log("[Tutorial] ✅ COMPLETED");
+        TutorialUI.ins.HideAll();
         PlayerPrefs.SetInt("FIRST_TIME", 0);
         PlayerPrefs.Save();
-
     }
+
+#if UNITY_EDITOR
+    // ─────────────────────────────────────────
+    // Editor debug — hiện trong Inspector
+    // ─────────────────────────────────────────
+
+    [Header("── Debug (Editor Only) ──")]
+    [SerializeField] private int _debugStartIndex = 0;
+
+    [ContextMenu("▶ Start Tutorial")]
+    private void Debug_StartTutorial() => StartTutorial();
+
+    [ContextMenu("▶ Start From Index")]
+    private void Debug_StartFromIndex() => StartFromStep(_debugStartIndex);
+
+    [ContextMenu("⏭ Skip Current Step")]
+    private void Debug_SkipStep() => SkipCurrentStep();
+
+    [ContextMenu("🔄 Reset FIRST_TIME")]
+    private void Debug_ResetFirstTime()
+    {
+        PlayerPrefs.SetInt("FIRST_TIME", 1);
+        PlayerPrefs.Save();
+        Debug.Log("[Tutorial] FIRST_TIME reset → 1");
+    }
+#endif
 }

@@ -1,8 +1,9 @@
-using ConfigFile;
+﻿using ConfigFile;
 using Ingame;
 using Ingame.Pools;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class BoxFactory : IBoxFactory
 {
@@ -17,8 +18,8 @@ public class BoxFactory : IBoxFactory
         foreach (var config in records)
         {
             Box box = SpawnFromPool(config);
-            //box.SetAct(false);
-
+            box.Initialize(config.BoxColor, config.NumberOfScrewHoles);
+            box.gameObject.SetActive(false); 
             _boxes.Add(box);
             _stack.Push(box);
         }
@@ -44,12 +45,11 @@ public class BoxFactory : IBoxFactory
 
     private Box SpawnFromPool(BoxConfigRecord config)
     {
-        switch (config.NumberOfScrewHoles)
+
+        return config.NumberOfScrewHoles switch
         {
-            case 3:
-                return BoxPool.Instance.pool.SpawnNonGravity();
-            default:
-                throw new Exception("Unsupported box size");
-        }
+            3 => BoxPool.Instance.pool.SpawnNonGravity(),
+            _ => throw new Exception("Unsupported box size"),
+        };
     }
 }

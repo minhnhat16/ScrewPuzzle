@@ -8,17 +8,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Spawn tất cả BaseLayer và BasePart từ LevelData vào LayerManager.
-/// Logic lấy từ GameObjectToLevelConverter.LoadGameObjectFromLevel(),
-/// refactor sang service để dùng trong pipeline.
+/// Orchestrator: coordinates LayerSpawnService + PartSetupService
+/// to spawn all layers and parts from LevelData into the scene.
+///
+/// Each sub-service has one clear responsibility:
+///   LayerSpawnService  → spawn + setup layer GameObject from pool
+///   PartSetupService   → apply data (sprite/color/collider) to a BasePart
+///   PartSpawnService   → loop, spawn parts from pool, register to LayerManager
 /// </summary>
 public class PartSpawnService : IPartSpawnService
 {
-    private readonly IPartSpriteService _spriteService;
+    private readonly LayerSpawnService _layerSpawner;
+    private readonly PartSetupService _partSetup;
 
     public PartSpawnService(IPartSpriteService spriteService)
     {
-        _spriteService = spriteService;
+        _layerSpawner = new LayerSpawnService();
+        _partSetup = new PartSetupService(spriteService);
     }
 
     public IEnumerator SpawnLayers(Level.Level levelData, LayerManager layerManager)
@@ -29,68 +35,66 @@ public class PartSpawnService : IPartSpawnService
             yield break;
         }
 
+        // Fresh start
         layerManager.screwDict = new Dictionary<int, List<ScrewController>>();
 
-        var listBaseLayer = new List<BaseLayer>();
+        var spawnedLayers = new List<BaseLayer>();
 
-        int idLayer = 0;
         foreach (var layerData in levelData.layers)
         {
-            // Init screw dict slot
-            layerManager.screwDict.Add(layerData.layerId, new List<ScrewController>());
+            // 1. Spawn layer from pool
+            var layerComponent = _layerSpawner.SpawnLayer(layerData, layerManager.transform, layerManager);
+            if (layerComponent == null) continue;
 
-            // Spawn layer từ pool
-            var layerObject = LayerPool.Instance.pool.SpawnNonGravity();
-            var layerName = $"Layer {layerData.layerId + 1}";
-            layerObject.gameObject.name = layerName;
-            layerObject.transform.SetParent(layerManager.transform);
-            layerObject.gameObject.layer = LayerMask.NameToLayer(layerName);
+            // 2. Spawn and setup parts for this layer
+            yield return SpawnPartsForLayer(layerData, layerComponent, layerManager, levelData.levelId);
 
-            var layerComponent = layerObject.GetComponent<BaseLayer>();
-
-            // Spawn parts
-            foreach (var partData in layerData.parts)
-            {
-                var partObject = PartPool.Instance.pool.SpawnNonGravity();
-                if (partObject == null) continue;
-
-                partObject.transform.SetParent(layerObject.transform);
-                partObject.transform.SetPositionAndRotation(partData.partPosition, partData.partRotation);
-                partObject.transform.localScale = partData.partLocalScale;
-
-                var partComponent = partObject.GetComponent<BasePart>();
-                partComponent.uniqueID = partData.partName;
-                partObject.gameObject.name = partData.partName;
-
-                // Sprite
-                var sprite = _spriteService.GetPartSprite(
-                    levelData.levelId,
-                    partData.spriteName,
-                    partData.layer,
-                    outline: false
-                );
-                partComponent.Renderer.sprite = sprite;
-
-                // Color
-                if (ColorUtility.TryParseHtmlString("#" + partData.colorString, out Color color))
-                    partComponent.Renderer.color = color;
-
-                // Register
-                layerManager.AddPart(partComponent);
-                partComponent.ResetAndReapplyPolygonCollider();
-
-                var layerLayerName = LayerMask.LayerToName(layerObject.gameObject.layer);
-                partComponent.SetSortingLayer(layerLayerName);
-                partComponent.gameObject.layer = layerObject.gameObject.layer;
-
-                yield return null; // Không block frame
-            }
-
-            listBaseLayer.Add(layerComponent);
-            idLayer++;
+            spawnedLayers.Add(layerComponent);
         }
 
-        layerManager.Layers = listBaseLayer;
+        // Finalize layer manager
+        layerManager.Layers = spawnedLayers;
         layerManager.CoverDictToList();
+
+        Debug.Log($"[PartSpawnService] Done — {spawnedLayers.Count} layers, " +
+                  $"{layerManager.Parts?.Count ?? 0} parts spawned.");
+    }
+
+    private IEnumerator SpawnPartsForLayer(
+        LayerData layerData,
+        BaseLayer layerComponent,
+        LayerManager layerManager,
+        int levelId)
+    {
+        var sortingLayerName = LayerMask.LayerToName(layerComponent.gameObject.layer);
+
+        foreach (BodyPartScriptable partData in layerData.parts)
+        {
+            var partObject = PartPool.Instance.pool.SpawnNonGravity();
+            if (partObject == null)
+            {
+                Debug.LogWarning($"[PartSpawnService] Pool returned null for part {partData.partName}.");
+                continue;
+            }
+
+            partObject.transform.SetParent(layerComponent.transform);
+            partObject.gameObject.layer = layerComponent.gameObject.layer;
+
+            if (!partObject.TryGetComponent<BasePart>(out var partComponent))
+            {
+                Debug.LogError($"[PartSpawnService] BasePart missing on pool object {partObject.name}.");
+                continue;
+            }
+
+            _partSetup.Setup(partComponent, partData, levelId, sortingLayerName);
+
+            // ── Đăng ký vào CẢ HAI nơi ──────────────────────────────
+            layerManager.AddPart(partComponent);   // LayerManager.parts — cho physics/query
+            layerComponent.parts.Add(partComponent); // BaseLayer.parts  — cho listener + clear check
+
+            yield return null;
+        }
+
+        Debug.Log($"[PartSpawnService] Layer '{layerComponent.name}' — spawned {layerComponent.parts.Count} parts.");
     }
 }

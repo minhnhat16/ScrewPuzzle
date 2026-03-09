@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Unity.Jobs;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -23,6 +21,8 @@ public class ResourceManager : SingletonMono<ResourceManager>
         // 1. Lặp qua từng label để lấy key
         foreach (var label in labels)
         {
+
+            Debug.Log($"[ResourceManager] Getting keys for label: '{label}'");  
             Task<List<string>> keysTask = TaskExtensions.GetKeysFromLabel(label);
             yield return new WaitUntil(() => keysTask.IsCompleted);
 
@@ -34,7 +34,7 @@ public class ResourceManager : SingletonMono<ResourceManager>
 
             foreach (var key in keysTask.Result)
             {
-               Debug.Log($"[ResourceManager] Found key '{key}' for label '{label}'");
+                Debug.Log($"[ResourceManager] Found key '{key}' for label '{label}'");
                 allKeys.Add(key); // thêm vào set để tránh trùng
             }
         }
@@ -154,7 +154,24 @@ public class ResourceManager : SingletonMono<ResourceManager>
         _handleCache.Remove(key);
         return null;
     }
+    public Sprite GetSpriteByName(string spriteName)
+    {
+        if (string.IsNullOrEmpty(spriteName)) return null;
 
+        // 1. PSB sprites (spriteDict key = sprite.name trực tiếp)
+        if (spriteDict.TryGetValue(spriteName, out var fromPsb))
+            return fromPsb;
+
+        // 2. Addressable assetCache (key = full address, phải duyệt qua value.name)
+        foreach (var pair in assetCache)
+        {
+            if (pair.Value is Sprite s &&
+                string.Equals(s.name, spriteName, StringComparison.OrdinalIgnoreCase))
+                return s;
+        }
+
+        return null;
+    }
     public Sprite GetSpriteFromResources(string path)
     {
         // The path should be relative to the Resources folder, without the .png/.jpg extension
@@ -238,39 +255,138 @@ public class ResourceManager : SingletonMono<ResourceManager>
         return assetCache;
     }
 
-    Dictionary<string, Sprite> spriteDict = new();
+    private readonly Dictionary<string, Sprite> spriteDict = new();
+
+    // Track which PSB keys have been loaded to avoid double-loading
+    private readonly HashSet<string> _loadedPsbKeys = new();
+
+    /// <summary>
+    /// Returns true if the PSB for this key has already been loaded.
+    /// </summary>
+    public bool IsPSBLoaded(string psbKey) => _loadedPsbKeys.Contains(psbKey);
+
+    /// <summary>
+    /// Load tất cả PSB GameObjects theo label/key từ Addressables,
+    /// extract sprites từ tất cả SpriteRenderer vào spriteDict.
+    /// Dùng khi có nhiều asset cùng label (e.g. "Image_Level").
+    /// </summary>
     public async Task LoadPSB(string psbKey)
     {
-        var handle = Addressables.LoadAssetAsync<GameObject>(psbKey);
-        await handle.Task;
-
-        var obj = handle.Result;
-
-        // Lấy tất cả SpriteRenderer trong prefab
-        var renderers = obj.GetComponentsInChildren<SpriteRenderer>();
-
-        foreach (var r in renderers)
+        if (string.IsNullOrEmpty(psbKey))
         {
-            string key = $"{r.sprite.name}";
-            if (r.sprite != null && !spriteDict.ContainsKey(key))
+            Debug.LogError("[ResourceManager] LoadPSB: psbKey is null or empty.");
+            return;
+        }
+
+        if (_loadedPsbKeys.Contains(psbKey))
+        {
+            Debug.Log($"[ResourceManager] PSB '{psbKey}' already loaded, skipping.");
+            return;
+        }
+
+        // LoadAssetsAsync by label → returns IList<GameObject> (tất cả asset cùng label)
+        AsyncOperationHandle<IList<GameObject>> handle =
+            Addressables.LoadAssetsAsync<GameObject>(psbKey, null);
+
+        await handle.Task;
+        if (handle.Status != AsyncOperationStatus.Succeeded || handle.Result == null)
+        {
+            Debug.LogError($"[ResourceManager] LoadPSB failed for label '{psbKey}': {handle.Status}");
+            Addressables.Release(handle);
+            return;
+        }
+
+        int added = 0;
+        foreach (var prefab in handle.Result)
+        {
+            if (prefab == null) continue;
+
+            var renderers = prefab.GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+            foreach (var r in renderers)
             {
-                spriteDict.Add(key, r.sprite);
-                Debug.Log($"Added sprite: {key} + {r.sprite.name}");
+                if (r.sprite == null) continue;
+
+                string spriteKey = r.sprite.name;
+                if (!spriteDict.ContainsKey(spriteKey))
+                {
+                    spriteDict[spriteKey] = r.sprite;
+                    added++;
+                    Debug.Log($"[ResourceManager] Added sprite: '{spriteKey}' from '{prefab.name}'");
+                }
             }
         }
 
-        Debug.Log($"[LoadPSB] Loaded {spriteDict.Count} sprites from PSB, renderer count {renderers.Count()}");
+        _loadedPsbKeys.Add(psbKey);
+        Debug.Log($"[ResourceManager] LoadPSB label='{psbKey}': {handle.Result.Count} prefabs, +{added} sprites, total={spriteDict.Count}");
     }
 
- 
+    /// <summary>
+    /// Unload PSB và xóa sprites của key đó khỏi spriteDict.
+    /// Gọi từ PsbSlidingWindowLoader khi level ra ngoài window.
+    /// </summary>
+    public void UnloadPSB(string psbKey)
+    {
+        if (string.IsNullOrEmpty(psbKey) || !_loadedPsbKeys.Contains(psbKey))
+            return;
 
+        // Release Addressable handle nếu còn giữ
+        if (_handleCache.TryGetValue(psbKey, out var handle))
+        {
+            Addressables.Release(handle);
+            _handleCache.Remove(psbKey);
+        }
+
+        _loadedPsbKeys.Remove(psbKey);
+        Debug.Log($"[ResourceManager] UnloadPSB '{psbKey}'. " +
+                  $"Note: sprites already in spriteDict remain until next re-index.");
+    }
+
+    /// <summary>
+    /// Load nhiều PSB cùng lúc (parallel).
+    /// Gọi từ BootTask hoặc trước khi load level.
+    /// </summary>
+    public async Task LoadPSBBatch(string psbKeys)
+    {
+        var tasks = new List<Task>();
+        if (!_loadedPsbKeys.Contains(psbKeys))
+            tasks.Add(LoadPSB(psbKeys));
+        if (tasks.Count > 0)
+            await Task.WhenAll(tasks);
+    }
+
+    /// <summary>
+    /// Coroutine wrapper for LoadPSBBatch — use from MonoBehaviour.
+    /// </summary>
+    public IEnumerator LoadPSBBatchCoroutine(string psbKeys, Action onComplete = null)
+    {
+        var task = LoadPSBBatch(psbKeys);
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        if (task.Exception != null)
+            Debug.LogError($"[ResourceManager] LoadPSBBatch error: {task.Exception}");
+        else
+            Debug.Log($"[ResourceManager] LoadPSBBatch complete — {psbKeys} PSBs processed.");
+
+        onComplete?.Invoke();
+    }
 
     public Sprite GetSprite(string layerName)
     {
+        if (string.IsNullOrEmpty(layerName)) return null;
+
         if (spriteDict.TryGetValue(layerName, out var s))
             return s;
 
-        //Debug.LogError($"Sprite not found: {layerName}");
+        Debug.LogWarning($"[ResourceManager] Sprite not found: '{layerName}'. Make sure LoadPSB was called before GetSprite.");
         return null;
+    }
+
+    /// <summary>
+    /// Trả về toàn bộ PSB sprites (extract từ SpriteRenderer trong prefab).
+    /// Dùng bởi SpriteLibControl.AppendPsbSprites() để index sau khi LoadPSB.
+    /// </summary>
+    public IReadOnlyDictionary<string, Sprite> GetAllPsbSprites()
+    {
+        return spriteDict;
     }
 }

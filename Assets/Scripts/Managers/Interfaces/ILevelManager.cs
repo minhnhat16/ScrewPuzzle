@@ -29,6 +29,8 @@ public interface ILevelManager
     // ─────────────────────────────────────────
     // Query
     // ─────────────────────────────────────────
-
     Level.Level GetLevelData(int levelId);
+
+
+    void Dispose();
 }

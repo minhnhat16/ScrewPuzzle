@@ -16,6 +16,9 @@ namespace LevelSystem.Steps
         private readonly GameObject _screwManagerPrefab;
         private readonly IScrewSpawnService _screwSpawnService;
 
+
+        private static Vector3 screwManagerPosition = new Vector3(0,-1,0);
+
         public LoadScrewsStep(GameObject screwManagerPrefab, IScrewSpawnService screwSpawnService)
         {
             _screwManagerPrefab = screwManagerPrefab;
@@ -36,10 +39,9 @@ namespace LevelSystem.Steps
                 _screwManagerPrefab,
                 ctx.LevelObject.transform
             );
-            screwManagerGO.transform.localPosition = Vector3.zero;
+            screwManagerGO.transform.localPosition = screwManagerPosition;
 
-            var screwManager = screwManagerGO.GetComponent<ScrewManager>();
-            if (screwManager == null)
+            if (!screwManagerGO.TryGetComponent<ScrewManager>(out var screwManager))
             {
                 ctx.IsSuccess = false;
                 ctx.ErrorMessage = "ScrewManager component not found on prefab.";
@@ -47,6 +49,19 @@ namespace LevelSystem.Steps
             }
 
             ctx.ScrewManager = screwManager;
+
+            // ── Set vào LevelManager NGAY ĐÂY ──────────────────────
+            // HingeController.Start() → InitHingeJoints() → LevelManager.ins.ScrewManager
+            // được gọi trong SpawnScrews() bên dưới — phải set trước khi spawn
+            if (LevelManager.ins != null)
+            {
+                LevelManager.ins.ScrewManager = screwManager;
+                Debug.Log("[LoadScrewsStep] ScrewManager set vào LevelManager trước khi spawn screws.");
+            }
+            else
+            {
+                Debug.LogWarning("[LoadScrewsStep] LevelManager.ins is null — HingeController sẽ không register được.");
+            }
 
             // Spawn individual screws
             yield return _screwSpawnService.SpawnScrews(

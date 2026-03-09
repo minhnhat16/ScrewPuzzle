@@ -20,8 +20,8 @@ namespace Ingame
         #region Properties
 
         public ColorEnum Color => boxColor;
-        public bool IsFull => storage.IsFull;
-        public bool IsLocked => lockController.IsLocked;
+        public bool IsFull => storage != null && storage.IsFull;
+        public bool IsLocked => lockController != null && lockController.IsLocked;
         public bool IsMoving => mover != null && mover.IsMoving;
         public int RemainingCapacity => storage.RemainingCapacity;
 
@@ -46,11 +46,15 @@ namespace Ingame
         private IBoxAnimator animator;
         private IBoxReward rewardSpawner;
         private IMovable mover;
+        private BoxRenderer boxRenderer;
 
         #endregion
 
         #region Unity
-
+        private void OnEnable()
+        {
+            Debug.Log("[BOX] OnEnable");    
+        }
         private void Awake()
         {
             stateController = GetComponent<BoxStateController>();
@@ -59,7 +63,7 @@ namespace Ingame
             animator = GetComponent<IBoxAnimator>();
             rewardSpawner = GetComponent<IBoxReward>();
             mover = GetComponent<IMovable>();
-
+            boxRenderer = GetComponent<BoxRenderer>();
             storage.Initialize(capacity, boxColor);
         }
 
@@ -75,6 +79,7 @@ namespace Ingame
                 capacity = customCapacity;
 
             storage.Initialize(capacity, boxColor);
+            boxRenderer?.SetColor(color);
             stateController.SetState(BoxState.Ready);
 
             OnBoxReady?.Invoke(this);
@@ -84,35 +89,62 @@ namespace Ingame
 
         #region Screw Handling
 
+        /// <summary>
+        /// Add screw với animation jump (flow bình thường).
+        /// </summary>
         public bool TryAddScrew(ScrewController screw)
         {
             if (IsLocked) return false;
             if (!stateController.IsReady) return false;
 
-            bool added = storage.TryAdd(screw);
-            if (!added) return false;
+            bool added = storage.TryAdd(screw, isTele: false, onComplete: () =>
+            {
+                if (storage.IsFull)
+                    HandleFull();
+            });
 
-            if (storage.IsFull)
-                HandleFull();
-
-            return true;
+            return added;
         }
+
+        /// <summary>
+        /// Add screw KHÔNG animate — set position ngay lập tức.
+        /// Dùng cho hidden screw resolve trước khi box move vào slot.
+        /// </summary>
+        public bool TryAddScrewImmediate(ScrewController screw)
+        {
+            if (IsLocked) return false;
+            if (!stateController.IsReady) return false;
+
+            bool added = storage.TryAdd(screw, isTele: true, onComplete: () =>
+            {
+                if (storage.IsFull)
+                    HandleFull();
+            });
+
+            return added;
+        }
+
         public bool TryAddScrews(List<ScrewController> screws)
         {
             if (IsLocked) return false;
             if (!stateController.IsReady) return false;
+
             bool allAdded = true;
             foreach (var screw in screws)
             {
-                bool added = storage.TryAdd(screw);
+                bool added = storage.TryAdd(screw, onComplete: () =>
+                {
+                    if (storage.IsFull)
+                        HandleFull();
+                });
+
                 if (!added)
                 {
                     allAdded = false;
                     break;
                 }
             }
-            if (storage.IsFull)
-                HandleFull();
+
             return allAdded;
         }
         #endregion
@@ -123,10 +155,17 @@ namespace Ingame
         {
             stateController.SetState(BoxState.Full);
 
-            animator?.PlayCloseAnimation();
-            rewardSpawner?.SpawnReward(transform.position);
+            animator.PlayCloseAnimation(() =>
+            {
+                // Lấy vị trí từng holdSlot đang có screw → spawn star tại đó
+                var positions = storage.GetOccupiedSlotWorldPositions();
+                rewardSpawner?.SpawnReward(positions);
 
-            OnBoxFull?.Invoke(this);
+                animator.PlayExitAnimation(() =>
+                {
+                    OnBoxFull?.Invoke(this);
+                });
+            });
         }
 
         #endregion
@@ -173,6 +212,13 @@ namespace Ingame
 
         #endregion
 
+        #region Utilities
+        private Vector3 GetExitPosition()
+        {
+            // Move box to the right and down (adjust as needed for your layout)
+            return transform.position + new Vector3(5f, -3f, 0f);
+        }
+        #endregion
 
         #region IMatchContainer
 

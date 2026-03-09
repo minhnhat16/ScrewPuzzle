@@ -259,6 +259,9 @@ namespace System.DataBase
                 callback?.Invoke();
             });
         }
+
+        #endregion
+        #region ItemData
         public ItemData GetItemData(ItemType type)
         {
             var itemData = dataModel.ReadDictionary<ItemData>(DataPath.ITEMDICT, type.ToString());
@@ -302,12 +305,39 @@ namespace System.DataBase
             });
 
         }
+        internal void UseItem(ItemType itemType, int amount)
+        {
+            if (amount <= 0) return;
 
+            var itemData = GetItemData(itemType);
+            if (itemData == null)
+            {
+                Debug.LogWarning($"[DataAPI] UseItem: không tìm thấy itemData cho {itemType}");
+                return;
+            }
+
+            int newTotal = Mathf.Max(0, itemData.total - amount);
+            if (itemData.total <= 0)
+            {
+                Debug.LogWarning($"[DataAPI] UseItem: {itemType} đã hết (total={itemData.total})");
+                return;
+            }
+
+            itemData.total = newTotal;
+
+            // Lưu xuống DataModel
+            dataModel.UpdateDataDictionary<ItemData>(DataPath.ITEMDICT, itemType.ToString(), itemData, () =>
+            {
+                // Fire trigger SAU KHI save xong → GameView.OnItemDictChanged refresh UI
+                DataTrigger.TriggerValueChange(DataPath.ITEMDICT, itemData);
+                Debug.Log($"[DataAPI] UseItem: {itemType} dùng {amount}, còn lại {newTotal}");
+            });
+        }
         private static string SubPathForItem(ItemType type)
         {
             return DataPath.ITEMDICT + $"/{char.ToLower(type.ToString()[0]) + type.ToString().Substring(1)}";
         }
-
+        #endregion
         public bool GetSpinData()
         {
             return dataModel.ReadData<bool>(DataPath.ISSPIN);
@@ -418,7 +448,6 @@ namespace System.DataBase
                 });
             }
         }
-        #endregion
         public List<LevelData> GetAllLevelData()
         {
             var listLevelData = dataModel.ReadData<List<LevelData>>(DataPath.ALLLEVEL);
@@ -1017,6 +1046,8 @@ namespace System.DataBase
             var special = GetSpecial();
             return special.claimed;
         }
+
+       
         #endregion
 
     }

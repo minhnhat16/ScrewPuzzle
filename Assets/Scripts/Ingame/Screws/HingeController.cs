@@ -48,11 +48,17 @@ namespace Ingame.Screw
                 hinge.connectedBody = body;
                 hinge.gameObject.name = body.gameObject.name + "_Hinge";
 
-                // REGISTER hinge vào ScrewManager
                 ScrewManager sm = LevelManager.ins.ScrewManager;
+                Debug.Log("[HingeController] InitHingeJoints: hinge=" + hinge.name + " connected to body=" + body.name + " ScrewManager: " +(sm == null));
                 if (sm != null)
-                    sm.AddHingeConnection(hinge, body.GetComponent<BasePart>());
-            }
+                {
+                    var part = body.GetComponent<BasePart>();
+
+
+                    sm.AddHingeConnection(hinge, part);
+
+                }
+            }   
         }
 
 
@@ -90,6 +96,7 @@ namespace Ingame.Screw
 
         internal void Reset()
         {
+            Debug.Log("HingeController Reset called");
             ClearBody();
         }
 

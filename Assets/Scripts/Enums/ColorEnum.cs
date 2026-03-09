@@ -33,7 +33,6 @@ namespace Enums
             string path = $"Screw_{colorEnum.ToColorString()}";
             var sprite = SpriteLibControl.Instance.GetSprite(0,SpriteGroup.UI,path);
 
-
             Debug.Assert(sprite != null, $"Sprite not found for color: {colorEnum.ToColorString()} at path: {path}");
             return sprite;
         }

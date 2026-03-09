@@ -3,12 +3,6 @@ using System.Collections;
 
 namespace LevelSystem.Steps
 {
-    /// <summary>
-    /// Step 3: Khởi tạo BoxQueue với config của level hiện tại.
-    ///
-    /// Dùng ILevelBoxQueue thay vì IContainerQueue để gọi được
-    /// LoadBoxConfigRecord() mà không cần cast hay dùng BoxQueue.ins.
-    /// </summary>
     public class InitBoxQueueStep : ILevelLoadStep
     {
         public string StepName => "Init Box Queue";
@@ -22,16 +16,18 @@ namespace LevelSystem.Steps
 
         public IEnumerator Execute(LevelContext ctx)
         {
-            if (ctx.LevelData?.boxConfig == null)
+            if (ctx.LevelData.boxConfig == null)
             {
                 ctx.IsSuccess = false;
                 ctx.ErrorMessage = "BoxConfig is null — cannot init BoxQueue.";
                 yield break;
             }
 
+            // Reset trước khi load level mới — tránh state cũ từ level trước
+            _boxQueue.OnReset();
+
             _boxQueue.LoadBoxConfigRecord(ctx.LevelData.boxConfig);
             _boxQueue.Initialize(isTutorial: false);
-
             yield return null;
         }
     }

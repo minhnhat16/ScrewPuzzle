@@ -12,7 +12,7 @@ public class TutorialHand : MonoBehaviour
         rect = transform as RectTransform;
     }
 
-    public void ShowAtScreenPos(Transform target)
+    public void ShowAtScreenPos(Transform target, TutorialHandDirection dir)
     {
 
         var canvas = gameObject.GetComponentInParent<Canvas>();

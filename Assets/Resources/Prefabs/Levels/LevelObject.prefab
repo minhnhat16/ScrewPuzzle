@@ -52,7 +52,7 @@ MonoBehaviour:
   moveSpeed: 10
   isDragging: 0
   isEditColor: 0
-  screwManager: {fileID: 0}
+  screwManager: {fileID: 7753765736939318378}
 --- !u!114 &3520337934081065260
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,6 +160,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+--- !u!114 &7753765736939318378 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3294476197213538573, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+  m_PrefabInstance: {fileID: 5053808982191793511}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92b25c4e743a4a0bae7be60383be6e93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &8671551728964319125 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}

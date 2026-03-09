@@ -63,6 +63,21 @@ namespace Managers
         public BoxQueue BoxQueue => boxQueue;
         public ScrewManager ScrewManager => _screwManager;
 
+        /// <summary>State hiện tại của game — dùng để ghi nhớ trước khi pause.</summary>
+        public GameplayState CurrentState => _stateMachine.Current;
+
+        /// <summary>
+        /// True khi đang ở ItemUsing state VÀ Breaker đang selected (chờ player tap part).
+        /// Dùng để BasePart.OnTap() check mà không cần inject IInteractionService.
+        /// </summary>
+        public bool IsItemExecutingBreaker =>
+            _stateMachine.IsIn(GameplayState.ItemUsing) &&
+            _itemController.IsItemSelected &&
+            _itemController.CurrentState is RemovePartState;
+
+        /// <summary>Expose ItemController để BasePart.OnTap() forward tap.</summary>
+        public ItemController ItemController => _itemController;
+
         // ─────────────────────────────────────────
         // Initialization
         // ─────────────────────────────────────────
@@ -82,7 +97,8 @@ namespace Managers
                 arrayScrew: _tempQueue,
                 levelManager: LevelManager.ins,
                 dialogService: DialogManager.ins,
-                player: player
+                player: player,
+                stateMachine:stateMachineBoot
             );
         }
 
@@ -119,6 +135,9 @@ namespace Managers
             player.IsInputLocked = next != GameplayState.Playing
                                 && next != GameplayState.ItemUsing;
 
+
+            Debug.Log($"[IngameController] State changed from {prev} to {next}. " +
+                      $"Player input locked: {player.IsInputLocked}");
             ArrayScrew.ins.SetGameActive(
                 next == GameplayState.Playing || next == GameplayState.ItemUsing
             );
@@ -139,8 +158,26 @@ namespace Managers
         public void StartLevel()
         {
             currentStar = 0;
-            _containerQueue.Initialize(false);
-            _stateMachine.TransitionTo(GameplayState.Playing);
+
+            // Debug: log current state trước khi transition
+            Debug.Log($"[IngameController] StartLevel — current state: {_stateMachine.Current}");
+
+            if (!_stateMachine.TransitionTo(GameplayState.Loading))
+            {
+                Debug.LogError($"[IngameController] Failed to transition to Loading. " +
+                               $"Current state: {_stateMachine.Current}, " +
+                               $"CanTransition: {_stateMachine.CanTransition(_stateMachine.Current, GameplayState.Loading)}");
+                return;
+            }
+
+            if (!_stateMachine.TransitionTo(GameplayState.Playing))
+            {
+                Debug.LogError($"[IngameController] Failed to transition to Playing. " +
+                               $"Current state: {_stateMachine.Current}");
+                return;
+            }
+
+            Debug.Log("[IngameController] Level started - now in Playing state");
         }
 
         private void HandleLevelComplete(bool completed)
@@ -172,11 +209,35 @@ namespace Managers
 
         public void Pause() => _stateMachine.TransitionTo(GameplayState.Paused);
         public void Resume() => _stateMachine.TransitionTo(GameplayState.Playing);
+
+        /// <summary>
+        /// Resume về state cụ thể thay vì luôn luôn về Playing.
+        /// Dùng khi dialog close cần trả về đúng state trước khi pause.
+        /// </summary>
+        public void ResumeTo(GameplayState targetState)
+        {
+            if (targetState == GameplayState.Paused) return; // guard
+            _stateMachine.TransitionTo(targetState);
+        }
+
         public void DeclineRevive() => _stateMachine.TransitionTo(GameplayState.Lose);
 
+        /// <summary>
+        /// Revive từ ReviveDialog — show dialog, player chọn trong đó.
+        /// </summary>
         public void Revive()
         {
-            _gameFlow.HandleRevive();
+            _gameFlow.HandleRevive(); // → ShowReviveDialog
+        }
+
+        /// <summary>
+        /// Revive trực tiếp không qua dialog (từ LoseDialog Watch ads).
+        /// Unlock input + unlock box + về Playing.
+        /// </summary>
+        public void ReviveDirectly()
+        {
+            player.IsInputLocked = false;
+            _containerQueue.UnlockNext();
             _stateMachine.TransitionTo(GameplayState.Playing);
         }
 
@@ -192,27 +253,31 @@ namespace Managers
 
         public void InvokeItem(ItemType type, Vector3 position)
         {
+            Debug.Log("game state on invoke item: " + _stateMachine.Current);   
             if (!_stateMachine.IsPlaying()) return;
             if (_itemController.IsItemExecuting) return;
 
             _stateMachine.TransitionTo(GameplayState.ItemUsing);
 
-            switch (type)
+            IItem item = type switch
             {
-                case ItemType.Breaker:
-                    _itemController.GotoState(_itemController.RemovePartState);
-                    _itemController.SetSelected(true);
-                    break;
-                case ItemType.AddBox:
-                    _itemController.GotoState(_itemController.AddBoxState);
-                    break;
-                case ItemType.Magnet:
-                    _itemController.GotoState(_itemController.MagnetState);
-                    break;
-                case ItemType.Drill:
-                    _itemController.GotoState(_itemController.AddOneHold);
-                    break;
+                ItemType.Breaker => _itemController.RemovePartState,
+                ItemType.AddBox => _itemController.AddBoxState,
+                ItemType.Magnet => _itemController.MagnetState,
+                ItemType.Drill => _itemController.AddOneHold,
+                _ => null
+            };
+
+            if (item == null)
+            {
+                Debug.LogWarning($"[IngameController] Không tìm thấy item state cho {type}");
+                _stateMachine.TransitionTo(GameplayState.Playing);
+                return;
             }
+
+            _itemController.GotoState((IFSMState)item);
+            _itemController.SetSelected(true);
+            item.Use(position);
         }
 
         public void OnItemFinished()
@@ -228,6 +293,8 @@ namespace Managers
         public void AddStar(int amount)
         {
             currentStar += amount;
+
+            Debug.Log($"[IngameController] AddStar: currentStar = {currentStar}, totalStarInLevel = {totalStarInLevel}");
             OnStarChanged?.Invoke((float)currentStar / totalStarInLevel);
         }
 

@@ -11,7 +11,7 @@ using UnityEditor;
 #endif
 
 public class BootLoader : MonoBehaviour
-{   
+{
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject uiRoot;
     [SerializeField] private UIRootControlScale uiRootControl;
@@ -92,10 +92,12 @@ public class BootLoader : MonoBehaviour
         LoadSceneManager.ins.LoadSceneByName(sceneName, () =>
         {
             Debug.Log("BootLoader: Load Scene Done");
+            if (isNew)
+            {
+                StartCoroutine(LoadLevelFromService(isNew));
+            }
             ViewManager.Instance.SwitchViewForNewPlayer(isNew);
 
-            // After scene is loaded, request level load from the scene's LevelLoaderService (if present)
-            StartCoroutine(LoadLevelFromService(isNew));
         });
     }
 

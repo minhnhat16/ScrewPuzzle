@@ -151,7 +151,7 @@ public class QuestItem : MonoBehaviour
 
             DialogManager.ins.HideDialog(DialogIndex.QuestDialog, () =>
             {
-                int lv = LevelManager.ins.currentLevelID;
+                int lv = DataAPIController.instance.GetPlayerLevel();
                 LevelManager.ins.LoadLevel(lv);
             });
         }

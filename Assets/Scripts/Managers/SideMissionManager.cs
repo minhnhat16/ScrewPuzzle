@@ -27,6 +27,7 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
     public void Inject(IContainerQueue containerQueue)
     {
         _containerQueue = containerQueue;
+        Debug.Log("[SideMissionManager] Injected IContainerQueue successfully.");
     }
 
     // ─────────────────────────────────────────
@@ -39,9 +40,11 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
     /// </summary>
     public SideMission GenerateColorMission(Level.Level level, int require = 3)
     {
+        // Guard: ensure injection happened
         if (_containerQueue == null)
         {
-            Debug.LogError("[SideMissionManager] _containerQueue chưa được inject.");
+            Debug.LogError("[SideMissionManager] _containerQueue not injected. " +
+                "Ensure ScrewGameBootstrapper.Inject() is called before GenerateColorMission().");
             return null;
         }
 
@@ -49,6 +52,12 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
         var colorCount = level.screws
             .GroupBy(s => s.idColor)
             .ToDictionary(g => g.Key, g => g.Count());
+
+        if (colorCount.Count == 0)
+        {
+            Debug.Log("[SideMissionManager] No screws in level.");
+            return null;
+        }
 
         // Chỉ chọn màu có đủ số screw yêu cầu
         var validColors = colorCount
@@ -58,7 +67,7 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
 
         if (validColors.Count == 0)
         {
-            Debug.Log("[SideMissionManager] Không có màu nào đủ screw cho side mission.");
+            Debug.Log("[SideMissionManager] No color has enough screws for side mission.");
             return null;
         }
 
@@ -71,12 +80,14 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
             currentCount = 0
         };
 
-        // Xoá box màu này khỏi queue — player phải gỡ vào special box thay vì box thường
-        // BoxQueue vẫn expose RemoveBoxByColor qua concrete type — gọi qua event hoặc cast
+        // Remove box of this color from queue — player must unscrew into special box instead
         if (_containerQueue is BoxQueue boxQueue)
+        {
             boxQueue.RemoveBoxByColor((ColorEnum)targetColorID, require / 3);
+            Debug.Log($"[SideMissionManager] Removed {require / 3} box(es) of color {(ColorEnum)targetColorID}");
+        }
 
-        Debug.Log($"[SideMissionManager] Mission tạo: gỡ {require} screw màu {(ColorEnum)targetColorID}");
+        Debug.Log($"[SideMissionManager] Mission created: collect {require} screws of color {(ColorEnum)targetColorID}");
         return CurrentMission;
     }
 

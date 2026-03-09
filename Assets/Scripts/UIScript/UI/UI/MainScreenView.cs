@@ -62,7 +62,6 @@ namespace UIScript.UI.UI
         public override void OnStartShowView()
         {
             int currentPlayerLevel = DataAPIController.instance.GetPlayerLevel();
-            LevelManager.ins.currentLevelID = currentPlayerLevel;
             SetUpLevel(currentPlayerLevel);
             base.OnStartShowView();
             SetLevelPanelIs(true);
@@ -78,11 +77,10 @@ namespace UIScript.UI.UI
         {
             base.Setup(viewParam);
 
-            MainScreenViewParam param = viewParam as MainScreenViewParam;
-            if (param != null)
+            if (viewParam is MainScreenViewParam param)
             {
                 long userGold = gold = param.totalGold;
-                int ticket = param.ticket;
+                long ticket = param.ticket;
                 SetUpGold(userGold);
                 goldDp.SetGoldToLable(userGold);
                 ticketDp.SetGoldToLable(ticket);
@@ -144,24 +142,34 @@ namespace UIScript.UI.UI
         {
             DialogManager.ins.ShowDialog(DialogIndex.RateDialog);
         }
+        private ILevelStartService _levelStartService;
 
+        // In Awake or OnInit, setup the service:
         public override void OnInit(Action callback = null)
         {
             levelPanel?.Init(callback);
             base.OnInit(callback);
+
+            // LevelStartService only needs LoadSceneManager (lives in DontDestroyOnLoad).
+            // LevelManager, IngameController, Bootstrapper are resolved lazily after scene loads.
+            _levelStartService = new LevelStartService(LoadSceneManager.ins);
         }
+
         public void SetLevelPanelIs(bool isOn)
         {
         }
         private void OnPlayButton()
         {
-            int currentLevel = LevelManager.ins.currentLevelID;
+            int currentLevel = DataAPIController.instance.GetPlayerLevel();
 
             SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
-            LevelManager.ins.LoadLevel(currentLevel, () =>
-            {
-                IngameController.ins.Pause();
-            });
+
+            // Delegate to service — UI doesn't know the details
+            _levelStartService?.StartLevel(
+                currentLevel,
+                onLevelStarted: () => Debug.Log($"[MainScreenView] Level {currentLevel} started."),
+                onError: (error) => Debug.LogError($"[MainScreenView] {error}")
+            );
         }
 
         public void Daily()
@@ -242,8 +250,8 @@ namespace UIScript.UI.UI
 
         private void OnGoldChanged(object arg0)
         {
-            long ticket = DataAPIController.instance.GetGold();
-            ticketDp.SetGoldToLable(ticket);
+            long gold = DataAPIController.instance.GetGold();
+            goldDp.SetGoldToLable(gold);
         }
 
     }

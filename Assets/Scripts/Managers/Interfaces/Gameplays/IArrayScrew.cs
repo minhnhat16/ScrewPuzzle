@@ -4,84 +4,46 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Ingame
+public interface IArrayScrew
 {
-    /// <summary>
-    /// Contract cho ArrayScrew — khu vực hold screw tạm thời của player.
-    ///
-    /// Nguyên tắc:
-    /// - Chỉ expose những gì system bên ngoài thực sự cần
-    /// - Không expose internal (HoldScrew, alignment...)
-    /// - Event thay cho callback trực tiếp vào IngameController
-    /// </summary>
-    public interface IArrayScrew
-    {
-        // ─────────────────────────────────────────
-        // State
-        // ─────────────────────────────────────────
+    // ─────────────────────────────────────────
+    // State
+    // ─────────────────────────────────────────
 
-        /// <summary>Số hold đang active</summary>
-        int ActiveHoldCount { get; }
+    int ActiveHoldCount { get; }
+    bool IsFull { get; }
+    bool HasAny();
 
-        /// <summary>Còn ít nhất 1 screw trong array</summary>
-        bool HasAny();
+    // ─────────────────────────────────────────
+    // Events
+    // ─────────────────────────────────────────
 
-        /// <summary>Tất cả hold đang active đều có screw</summary>
-        bool IsFull { get; }
+    event Action OnArrayFull;
 
-        // ─────────────────────────────────────────
-        // Events (thay thế callback vào IngameController)
-        // ─────────────────────────────────────────
+    // ─────────────────────────────────────────
+    // Screw operations
+    // ─────────────────────────────────────────
 
-        /// <summary>
-        /// Fire khi tất cả hold đầy và box queue không có box đang moving.
-        /// IngameController lắng nghe → TriggerArrayScrewFull()
-        /// </summary>
-        event Action OnArrayFull;
+    void AddScrew(ScrewController screw);
+    void RemoveScrew(ScrewController screw);
+    void RemoveScrews(IEnumerable<ScrewController> screws);
+    void Clear();
+    IEnumerator ClearToHidden();
 
-        // ─────────────────────────────────────────
-        // Screw operations
-        // ─────────────────────────────────────────
+    // ─────────────────────────────────────────
+    // Hold operations
+    // ─────────────────────────────────────────
 
-        /// <summary>Thêm 1 screw vào hold trống đầu tiên</summary>
-        void AddScrew(ScrewController screw);
+    void AddOneHold();
+    void ShowArrayActive(int activeCount);
 
-        /// <summary>Xoá screw khỏi hold (dùng khi screw di chuyển vào box)</summary>
-        void RemoveScrew(ScrewController screw);
+    // ─────────────────────────────────────────
+    // Queries
+    // ─────────────────────────────────────────
 
-        /// <summary>Xoá danh sách screw khỏi hold</summary>
-        void RemoveScrews(IEnumerable<ScrewController> screws);
-
-        /// <summary>Xoá tất cả screw, return về pool</summary>
-        void Clear();
-
-        /// <summary>
-        /// Ẩn screw hiện tại và chuyển về hidden queue trong ScrewManager.
-        /// Dùng khi Magnet item được activate.
-        /// </summary>
-        IEnumerator ClearToHidden();
-
-        // ─────────────────────────────────────────
-        // Hold operations
-        // ─────────────────────────────────────────
-
-        /// <summary>Thêm 1 hold mới (Drill item)</summary>
-        void AddOneHold();
-
-        /// <summary>
-        /// Khởi tạo hiển thị với số hold active cụ thể.
-        /// Dùng khi bắt đầu level.
-        /// </summary>
-        void ShowArrayActive(int activeCount);
-
-        // ─────────────────────────────────────────
-        // Queries
-        // ─────────────────────────────────────────
-
-        /// <summary>Màu xuất hiện nhiều nhất trong array hiện tại</summary>
-        ColorEnum GetDominantColor();
-
-        /// <summary>Position của hold cuối cùng (dùng cho item effect UI)</summary>
-        UnityEngine.Vector3 GetLastHoldPosition();
-    }
+    ColorEnum GetDominantColor();
+    UnityEngine.Vector3 GetLastHoldPosition();
+    List<ScrewController> TakeByColor(ColorEnum color, int maxCount);
+    HashSet<ColorEnum> GetHeldColors();
+    Dictionary<ColorEnum, int> GetHeldColorCounts();
 }

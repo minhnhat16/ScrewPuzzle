@@ -42,13 +42,15 @@ public class InitSpecialMissionStep : ILevelLoadStep
         }
 
         // Tính số box records → dùng cho totalStarInLevel
-        int boxCount = level.boxConfig?.records?.Count ?? 0;
+        int starCount = level.screws.Count != 0 ? level.screws.Count : 1;
 
+
+        Debug.Log($"[InitSpecialMissionStep] Stars count in level: {starCount}");
         // ── Skip nếu thiếu screw ───────────────────────────────────
         if (level.screws == null || level.screws.Count < 3)
         {
             Debug.Log("[InitSpecialMissionStep] Not enough screws — skip mission.");
-            SetTotalStar(boxCount, missionBonus: 0);
+            SetTotalStar(starCount, missionBonus: 0);
             yield break;
         }
 
@@ -63,7 +65,7 @@ public class InitSpecialMissionStep : ILevelLoadStep
         if (mission == null)
         {
             Debug.Log("[InitSpecialMissionStep] No valid mission generated — skip.");
-            SetTotalStar(boxCount, missionBonus: 0);
+            SetTotalStar(starCount, missionBonus: 0);
             yield break;
         }
 
@@ -74,7 +76,7 @@ public class InitSpecialMissionStep : ILevelLoadStep
 
         // ── Set totalStarInLevel ───────────────────────────────────
         // boxCount star từ box + 1 bonus star nếu có mission
-        SetTotalStar(boxCount, missionBonus: 1);
+        SetTotalStar(starCount, missionBonus: 1);
 
         Debug.Log($"[InitSpecialMissionStep] Mission ready: " +
                   $"colorId={mission.targetColorID} required={mission.requiredCount}");

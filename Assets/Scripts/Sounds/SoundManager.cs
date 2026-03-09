@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NUnit.Framework.Constraints;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -67,6 +68,8 @@ public class SoundManager : MonoBehaviour
         Shop_Purchase_Success,
         GoldCollect,
         TicketCollect,
+        BoxLand,
+        BoxExit,
     }
 
     [SerializeField] public SoundFactory soundFactory;
@@ -208,7 +211,14 @@ public class SoundManager : MonoBehaviour
             soundGameObj.sfx = sfx;
             AudioSource audioSource = soundGameObj.gameObject.GetComponent<AudioSource>();
             SettingSFXVolume(sfxSetting);
-            audioSource.PlayOneShot(GetSFXAudioClip(sfx));
+
+            var sfxObject = GetSFXAudioClip(sfx);
+            if(!sfxObject)
+            {
+                Debug.LogError("SFX " + sfx + " audio clip not found!");
+                return;
+            }
+            audioSource.PlayOneShot(sfxObject);
         }
     }
     public void PlaySFXWithVolume(SFX sfx, float value)

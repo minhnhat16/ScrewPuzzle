@@ -1,3 +1,4 @@
+﻿using Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -55,17 +56,16 @@ namespace Ingame
         public bool canBreak => true;
         public bool OnTap(Vector2 screenPosition)
         {
-            if (_interactionService == null)
-                return false;
+            // Kiểm tra mode qua IngameController thay vì inject IInteractionService
+            // IInteractionService không được inject vào BasePart → luôn null
+            if (IngameController.ins == null) return false;
+            if (!IngameController.ins.IsItemExecutingBreaker) return false;
 
-            if (_interactionService.CurrentMode != InteractionMode.BreakerSelecting)
-                return false;
+            // Đang ở BreakerSelecting → forward tới RemovePartState
+            var itemController = IngameController.ins.ItemController;
+            itemController?.RemovePartState?.Perform(this, transform.position);
 
-            Break();
-
-            _interactionService.ResetMode();
-
-            return true;
+            return true; // consumed — không forward lên Player
         }
 
         //-----------------------------
@@ -77,12 +77,36 @@ namespace Ingame
             activeSprite = GetComponentInChildren<SpriteRenderer>();
             col = GetComponent<PolygonCollider2D>();
 
-            // Unique ID
+            // Freeze ngay khi Awake — hinge chưa connect, không được apply gravity
+            FreezeBody();
+
             if (string.IsNullOrEmpty(uniqueID))
                 uniqueID = GenerateUniqueID();
-
         }
-    
+
+        /// <summary>
+        /// Freeze hoàn toàn Rigidbody2D — dùng khi part chưa có hinge.
+        /// Gọi từ Awake và Reset() để đảm bảo không bao giờ rơi trước khi sẵn sàng.
+        /// </summary>
+        public void FreezeBody()
+        {
+            if (body == null) return;
+            body.gravityScale = 0;
+            body.linearVelocity = Vector2.zero;
+            body.angularVelocity = 0;
+            body.bodyType = RigidbodyType2D.Kinematic;
+        }
+
+        /// <summary>
+        /// Unfreeze sau khi hinge đã connect — gọi từ ScrewSpawnService.
+        /// </summary>
+        public void UnfreezeBody()
+        {
+            if (body == null) return;
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.gravityScale = 0; // vẫn giữ 0 — hinge giữ part, gravity do HandleNoHingesLeft set
+        }
+
         //-----------------------------
         // FALLING LOGIC (STABLE VERSION)
         //-----------------------------
@@ -149,6 +173,10 @@ namespace Ingame
 
             int layer = gameObject.layer;
             SetIgnoreColliderLayer(false, layer, layer);
+
+            Debug.Log("State part falling: " + isFalling + " part id " + uniqueID);
+
+
             OnStateChanged.Invoke(true, this);
         }
 
@@ -176,7 +204,7 @@ namespace Ingame
             GenerateColliderFromSprite();
         }
 
-        public virtual void GenerateColliderFromSprite(float scale = 1.05f)
+        public virtual void GenerateColliderFromSprite(float scale = 1.02f)
         {
             if (activeSprite == null || col == null)
                 return;
@@ -216,11 +244,8 @@ namespace Ingame
             if (activeSprite != null)
                 activeSprite.sprite = null;
 
-            if (body != null)
-            {
-                body.linearVelocity = Vector2.zero;
-                body.gravityScale = 0;
-            }
+            // Freeze lại khi return về pool
+            FreezeBody();
         }
 
         //-----------------------------
@@ -261,7 +286,16 @@ namespace Ingame
         {
             Debug.Log("Break part: " + uniqueID);
 
-            Destroy(gameObject);
+
+            gameObject.SetActive(false);
+        }
+
+        internal void SetSpriteAlpha(float v)
+        {
+            if (activeSprite != null)
+            {
+                activeSprite.color = new Color(activeSprite.color.r, activeSprite.color.g, activeSprite.color.b, v);
+            }
         }
     }
 }

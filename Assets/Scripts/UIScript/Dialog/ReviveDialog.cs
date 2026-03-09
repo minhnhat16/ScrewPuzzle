@@ -1,111 +1,123 @@
+﻿using Managers;
 using System;
-using Managers;
 using UnityEngine;
-using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
 namespace UIScript.Dialog
 {
     public class ReviveDialog : BaseDialog
     {
+        [SerializeField] private Button ticketPayButton;
+        [SerializeField] private Button watchButton;
+        [SerializeField] private Button retryButton;
+        [SerializeField] private Button closeDialogButton;
+        [SerializeField] private GoldDisplay goldDisplay;
+        [SerializeField] private Text txt_Title;
+        [SerializeField] private Text txt_watchText;
 
-        ReviveParam param;
-        [SerializeField] Button ticketPayButton;
-        [SerializeField] Button watchButton;
-        [SerializeField] Button retryButton;
-        [SerializeField] Button closeDialogButton;
-        [SerializeField] GoldDisplay goldDisplay;
-        [SerializeField] Text txt_Title;
-        [SerializeField] Text txt_watchText;
-        private void OnEnable()
-        {
-            ticketPayButton.onClick.AddListener(TickeAccept);
-            watchButton.onClick.AddListener(WatchAccept);
-            retryButton.onClick.AddListener(ReplayButton);
-            closeDialogButton.onClick.AddListener(()=> HideDialog());
-        }
-        private void OnDisable()
-        {
-            ticketPayButton.onClick.RemoveListener(TickeAccept);
-            watchButton.onClick.RemoveListener(WatchAccept);
-            retryButton.onClick.RemoveListener(ReplayButton);
-            closeDialogButton.onClick.RemoveListener(() => HideDialog());
+        private ReviveParam _param;
 
-        }
+        // ─────────────────────────────────────────
+        // Unity lifecycle
+        // ─────────────────────────────────────────
 
         private void Awake()
         {
             txt_watchText = watchButton.GetComponentInChildren<Text>();
         }
+
+        private void OnEnable()
+        {
+            ticketPayButton.onClick.AddListener(OnTicketAccept);
+            watchButton.onClick.AddListener(OnWatchAccept);
+            retryButton.onClick.AddListener(OnRetryButton);
+            closeDialogButton.onClick.AddListener(OnCloseButton);
+        }
+
+        private void OnDisable()
+        {
+            ticketPayButton.onClick.RemoveListener(OnTicketAccept);
+            watchButton.onClick.RemoveListener(OnWatchAccept);
+            retryButton.onClick.RemoveListener(OnRetryButton);
+            closeDialogButton.onClick.RemoveListener(OnCloseButton);
+        }
+
+        // ─────────────────────────────────────────
+        // Setup
+        // ─────────────────────────────────────────
+
         public override void Setup(DialogParam param)
         {
-            ReviveParam newParam = (ReviveParam)param;
-            this.param = newParam;
-            if (newParam == null) return;
-            long userGold = newParam.totalGold;
-            ticketPayButton.interactable = newParam.currentTicket > 0;
-            SetRevive(newParam.isRevive);
-            goldDisplay.SetGoldToLable(userGold);
-            IngameController.ins.Pause();
+            _param = param as ReviveParam;
+            if (_param == null) return;
+
+            ticketPayButton.interactable = _param.currentTicket > 0;
+            goldDisplay.SetGoldToLable(_param.totalGold);
+            SetRevive(_param.isRevive);
         }
+
+        // ─────────────────────────────────────────
+        // UI helpers
+        // ─────────────────────────────────────────
+
+        private void SetRevive(bool isRevive)
+        {
+            retryButton.gameObject.SetActive(isRevive);
+            txt_Title.text = isRevive ? "So close" : "Add One Box";
+            txt_watchText.text = isRevive ? "Continue" : "Free";
+        }
+
+        // ─────────────────────────────────────────
+        // Button handlers
+        // ─────────────────────────────────────────
+
+        /// <summary>Watch ads / free → chấp nhận revive → tiếp tục Playing.</summary>
+        private void OnWatchAccept()
+        {
+            var callback = _param?.onWatchAccepted;
+            HideDialog();                  // ← BaseDialog.HideDialog() → animation → OnEndHideDialog
+            callback?.Invoke();            // GameFlowService: UnlockInput + UnlockNext + TransitionTo(Playing)
+        }
+
+        /// <summary>Dùng ticket → tương tự Watch.</summary>
+        private void OnTicketAccept()
+        {
+            if (_param == null || _param.currentTicket <= 0) return;
+            var callback = _param?.onWatchAccepted;
+            HideDialog();
+            callback?.Invoke();
+        }
+
+        /// <summary>Retry → từ chối revive → về Lose.</summary>
+        private void OnRetryButton()
+        {
+            var callback = _param?.onDeclined;
+            HideDialog();
+            callback?.Invoke();            // GameFlowService: HideAllDialog + TransitionTo(Lose)
+        }
+
+        /// <summary>Close (X) → từ chối revive → về Lose.</summary>
+        private void OnCloseButton()
+        {
+            var callback = _param?.onDeclined;
+            HideDialog();
+            callback?.Invoke();
+        }
+
+        public override void HideDialog()
+        {
+            base.HideDialog();
+            DialogManager.ins.HideDialog(dialogIndex);  
+        }
+
+        // ─────────────────────────────────────────
+        // BaseDialog overrides
+        // ─────────────────────────────────────────
 
         public override void OnEndHideDialog()
         {
-            IngameController.ins.Resume();
-
-        }
-
-
-        public void SetRevive(bool isRevive)
-        {
-            param.isRevive = isRevive;
-            retryButton.gameObject.SetActive(isRevive);
-            if (isRevive)
-            {
-                txt_Title.text = "So close";
-                txt_watchText.text = "Continue";
-            }
-            else
-            {
-                txt_Title.text = "Add One Box";
-                txt_watchText.text = "Free";
-            }
-        }
-        private void WatchAccept()
-        {
-
-            DialogManager.ins.HideDialog(dialogIndex, () =>
-            {
-                IngameController.ins.OnItemInvoke.Invoke(ItemType.AddBox, Vector3.zero);
-            });
-        }
-
-        private void TickeAccept()
-        {
-            //DialogManager.ins.HideDialog(dialogIndex);
-
-            //bool isSpent = WalletManager.ins.TrySpend(Currency.Ticket, 1);
-
-            //if (isSpent)
-            //    IngameController.ins.Revive();
-            //else
-            //    IngameController.ins.Lose();
-            ////ZenSDK.instance.ShowVideoReward(onWatch =>
-            ////{
-            ////    if (onWatch) DialogManager.Instance.HideDialog(dialogIndex, IngameController.Instance.OnRevive);
-            ////    else IngameController.Instance.OnGameOver();
-            ////});
-        }
-        private void ReplayButton()
-        {
-            DialogManager.ins.HideDialog(dialogIndex, () =>
-            {
-                //Debug.Log($"Hide this dialog {dialogIndex}");
-                if (param.isRevive)
-                {
-                    //IngameController.ins.Lose();
-                }
-            });
+            // State transition do GameFlowService callback xử lý
+            // Dialog không tự resume — tránh double transition
         }
     }
 }

@@ -62,5 +62,5 @@ public class BaseDialog : MonoBehaviour
 
     public virtual void ShowDialog() { }
 
-    public virtual void HideDialog() { }
+    public virtual void HideDialog() { DialogManager.ins.HideDialog(dialogIndex); }
 }

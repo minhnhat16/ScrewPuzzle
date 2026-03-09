@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Object = UnityEngine.Object;
 public class BY_Local_Pool<T> where T : MonoBehaviour
 {
     public T prefab;
@@ -19,7 +19,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         index = -1;
         for (int i = 0; i < total; i++)
         {
-            T trans = GameObject.Instantiate<T>(prefab);
+            T trans = Object.Instantiate(prefab);
             trans.transform.SetParent(parent);
             trans.gameObject.SetActive(false);
             list.Add(trans);
@@ -93,10 +93,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
     {
         foreach (var g in list)
         {
-            if (g != null)
-            {
-                g.gameObject.SetActive(true);
-            }
+            g?.gameObject.SetActive(true);
         }
         activeList.Clear();
         index++;
@@ -105,10 +102,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
     {
         foreach (var g in list)
         {
-            if (g != null)
-            {
-                g.gameObject.SetActive(false);
-            }
+            g?.gameObject.SetActive(false);
         }
         activeList.Clear();
         index = -1;

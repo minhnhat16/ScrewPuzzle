@@ -2,67 +2,73 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Ingame
 {
     public class Player : BaseInputHandler, IPlayer
     {
-        [SerializeField] private MonoBehaviour screwServiceBehaviour;
         private IScrewInteractionService _screwService;
 
         public UnityEvent<ScrewController> OnScrewClicked = new();
-
         public event Action<ScrewController> OnScrewSelected;
 
-        protected override void Awake()
+        // Called from ScrewGameBootstrapper.InitializeForLevel()
+        public void Inject(IScrewInteractionService screwService)
         {
-            base.Awake();
-            _screwService = (IScrewInteractionService)screwServiceBehaviour;
+            _screwService = screwService;
+            Debug.Log("[Player] IScrewInteractionService injected.");
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
-
             if (InputRouter.Instance != null)
                 InputRouter.Instance.OnTappableTapped += HandleTappableTapped;
+            else
+                Debug.LogWarning("[Player] InputRouter.Instance is null in OnEnable.");
         }
 
         protected override void OnDisable()
         {
             if (InputRouter.Instance != null)
                 InputRouter.Instance.OnTappableTapped -= HandleTappableTapped;
-
             base.OnDisable();
         }
 
         private void HandleTappableTapped(ITappable tappable, Vector2 screenPos)
         {
-            if (tappable is not ScrewController screw)
+            if (tappable == null) return;
+            if (_screwService == null)
+            {
+                Debug.LogError("[Player] _screwService is null. Call Inject() from ScrewGameBootstrapper.");
                 return;
+            }
+
+            // Resolve ScrewController from direct or adapter case
+            ScrewController screw = tappable as ScrewController;
+            if (screw == null && tappable is MonoBehaviour mb)
+                screw = mb.GetComponent<ScrewController>()
+                     ?? mb.GetComponentInParent<ScrewController>()
+                     ?? mb.GetComponentInChildren<ScrewController>();
+
+            if (screw == null)
+            {
+                Debug.LogWarning($"[Player] Could not resolve ScrewController from tappable:    {tappable}");
+                return;
+            }
 
             _screwService.HandleScrewSelected(screw);
             OnScrewClicked?.Invoke(screw);
         }
 
-        public void LockInput()
-        {
-            IsInputLocked = true;
-        }
-
-        public void UnlockInput()
-        {
-            IsInputLocked = false;
-        }
+        public void LockInput() => IsInputLocked = true;
+        public void UnlockInput() => IsInputLocked = false;
 
         protected override void HandleInput(Vector3 screenPos)
         {
             if (IsClickOverUI()) return;
-
             var screw = PickAtScreenPos<ScrewController>(screenPos, "Player");
-            if (screw != null)
-                OnScrewSelected?.Invoke(screw);
+            if (screw != null) OnScrewSelected?.Invoke(screw);
         }
     }
 }

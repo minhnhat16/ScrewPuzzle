@@ -25,7 +25,8 @@ public class ItemController : FSMSystem, IItemView
     public AddOneHold AddOneHold { get => addOneHold; }
 
     public UnityEvent<bool> itemPerformed;
-
+    /// <summary>Trả về state đang active hiện tại.</summary>
+    public IFSMState CurrentState => currentState;
     public void SetSelected(bool value)
     {
         IsItemSelected = value;

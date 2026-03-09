@@ -1,45 +1,63 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using Ingame;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BoxSlotLayoutService : IBoxSlotLayoutService
 {
-    private readonly float _moveDuration;
     private readonly Ease _ease;
 
-    public BoxSlotLayoutService(float moveDuration = 0.3f, Ease ease = Ease.OutQuad)
+    public BoxSlotLayoutService(Ease ease = Ease.OutQuad)
     {
-        _moveDuration = moveDuration;
         _ease = ease;
     }
 
-    public void AlignBoxes(IReadOnlyList<Box> boxes, IReadOnlyList<BoxSlot> slots)
+    public void AlignSlots(IReadOnlyList<BoxSlot> slots, float totalWidth, float duration = 0.3f)
     {
-        int count = Mathf.Min(boxes.Count, slots.Count);
+        var activeSlots = slots.ToList();
+        if (activeSlots.Count == 0) return;
 
-        for (int i = 0; i < count; i++)
+        float spacing = Mathf.Max(0.7f, totalWidth / (activeSlots.Count + 1));
+        float startX = -spacing * (activeSlots.Count - 1) / 2f;
+
+        for (int i = 0; i < activeSlots.Count; i++)
         {
-            MoveBoxToSlot(boxes[i], slots[i]);
+            var slot = activeSlots[i];
+            Vector3 current = slot.transform.localPosition;
+            Vector3 target = new Vector3(startX + spacing * i, current.y, current.z);
+
+            if (duration <= 0f)
+            {
+                slot.transform.localPosition = target;
+                if (slot.screwBox != null && !slot.screwBox.IsMoving)
+                    slot.screwBox.transform.position = slot.transform.position;
+            }
+            else
+            {
+                slot.transform
+                    .DOLocalMoveX(target.x, duration)
+                    .SetEase(_ease)
+                    .OnUpdate(() =>
+                    {
+                        // Chỉ kéo box theo slot nếu box đã settled (không đang spawn vào)
+                        if (slot.screwBox != null && !slot.screwBox.IsMoving)
+                            slot.screwBox.transform.position = slot.transform.position;
+                    });
+            }
         }
     }
 
     public void MoveBoxToSlot(Box box, BoxSlot slot, Action onComplete = null)
     {
-        if (box == null || slot == null)
-            return;
+        if (box == null || slot == null) return;
 
-         //box.IsMoving = true;
-
+        Debug.Log($"[BoxSlotLayoutService] Moving box '{box.name}' to slot '{slot.name}' at position {CalculateSlotPosition(slot)}");
         box.transform
-            .DOMove(CalculateSlotPosition(slot), _moveDuration)
+            .DOMove(CalculateSlotPosition(slot), 1f)
             .SetEase(_ease)
-            .OnComplete(() =>
-            {
-                 //box.IsMoving = false;
-                onComplete?.Invoke();
-            });
+            .OnComplete(() => onComplete?.Invoke());
     }
 
     public Vector3 CalculateSlotPosition(BoxSlot slot)

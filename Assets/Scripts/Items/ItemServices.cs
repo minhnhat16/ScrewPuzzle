@@ -70,7 +70,6 @@ public class ItemService : IItemService
                 break;
 
             case ItemType.Breaker:
-                _containerQueue.UnlockNext();
                 break;
 
             case ItemType.Drill:

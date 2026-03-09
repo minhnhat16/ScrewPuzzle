@@ -213,6 +213,8 @@ public class LayerVisibilityController : MonoBehaviour
 
     internal void ShowNextLayer()
     {
+
+        Debug.Log("Next Layer called. Current preViewMin: " + preViewMin);  
         var layers = (indexedLayers != null && indexedLayers.Count > 0)
             ? indexedLayers
             : layerQueue.ToList();

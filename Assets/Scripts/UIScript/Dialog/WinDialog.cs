@@ -26,7 +26,7 @@ namespace UIScript.Dialog
 
         // new: percent label showing fill percentage
         [SerializeField] private Text fillPercentText;
-        [SerializeField] WinParam param;    
+        [SerializeField] WinParam param;
         private void OnEnable()
         {
             nextLevelButton.onClick.AddListener(OnNextButtonClicked);
@@ -137,8 +137,9 @@ namespace UIScript.Dialog
             SetButtonInteractAble(false);
             nextLevelButton.interactable = false;
             var levelManager = LevelManager.ins;
-            int currentLevel = levelManager.currentLevelID + 1;
 
+            int currentLevel = DataAPIController.instance.GetPlayerLevel();
+            currentLevel++;
             LevelData data = new();
             data.levelStar = 3;
             data.levelID = currentLevel;

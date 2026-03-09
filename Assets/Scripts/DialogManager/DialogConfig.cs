@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -94,6 +94,13 @@ public class ReviveParam : DialogParam
     public bool isHasAds;
     public long totalGold;
     public long currentTicket;
+
+    /// <summary>
+    /// Override callback cho nút Watch/Free.
+    /// Nếu null → dùng hành vi mặc định (ItemType.AddBox).
+    /// </summary>
+    public Action onWatchAccepted;
+    internal Action onDeclined;
 }
 public class WinParam : DialogParam
 {

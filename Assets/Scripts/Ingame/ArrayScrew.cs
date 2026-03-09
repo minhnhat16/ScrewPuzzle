@@ -13,14 +13,8 @@ using SFX = SoundManager.SFX;
 
 namespace Ingame
 {
-    /// <summary>
-    /// TempQueue cho screw game.
-    /// Implement ITempQueue — logic routing delegate hoàn toàn cho MatchRouter.
-    /// ArrayScrew chỉ lo: visual slot, alignment, animation.
-    /// </summary>
-    public class ArrayScrew : SingletonMono<ArrayScrew>, IResetable, ITempQueue
+    public class ArrayScrew : SingletonMono<ArrayScrew>, IResetable, ITempQueue, IArrayScrew
     {
-
         // ─────────────────────────────────────────
         // Inspector
         // ─────────────────────────────────────────
@@ -63,12 +57,9 @@ namespace Ingame
         public void Enqueue(IMatchItem item)
         {
             if (item is not ScrewController screw) return;
-
             if (!screw.TryLockForMove()) return;
 
-            // Shortcut: thử route thẳng vào container
             var result = _router.TryRoute(item, out var container);
-
             if (result == MatchRouter.RouteResult.RoutedToContainer)
             {
                 SoundHelper.PlaySFX(SFX.ScrewClicked);
@@ -76,17 +67,14 @@ namespace Ingame
                 return;
             }
 
-            // Không route được → tìm slot trống để hold
             var emptyHold = FindEmptyHold();
             if (emptyHold == null)
             {
-                // Không có slot → trả lại state
                 screw.ResetClickedFlag();
                 screw.ReleaseLockForMove();
                 return;
             }
 
-            // Rainbow screw → special box, không vào hold thường
             if (screw.GetColor() == ColorEnum.Rainbow)
             {
                 SpecialBoxManager.ins.AddSingle(screw);
@@ -116,18 +104,21 @@ namespace Ingame
 
         public IEnumerator ClearToHidden()
         {
-            if (_screwManager == null) yield break;
-
             var copy = _heldScrews.ToList();
 
+            // Ẩn visual từng screw
             foreach (var screw in copy)
             {
                 screw.SetActive(false);
                 yield return null;
             }
 
-            _screwManager.AddHiddenScrews(copy);
+            // Add vào BoxQueue._hiddenByColor (nguồn 1)
+            // → ResolveAllHiddenForBox sẽ pick up khi box màu phù hợp spawn
+            foreach (var screw in copy)
+                BoxQueue.ins.TryProcessItemScrew(screw);
 
+            // Clear holds
             foreach (var hold in holdScrews.ToList())
             {
                 hold.RemoveScrew();
@@ -156,7 +147,91 @@ namespace Ingame
         }
 
         // ─────────────────────────────────────────
-        // Game Active (từ IngameController qua OnStateChanged)
+        // IArrayScrew — explicit implementation
+        // ─────────────────────────────────────────
+
+        int IArrayScrew.ActiveHoldCount => ActiveHolds().Count();
+        bool IArrayScrew.HasAny() => _heldScrews.Count > 0;
+
+        event Action IArrayScrew.OnArrayFull
+        {
+            add => OnQueueFull += value;
+            remove => OnQueueFull -= value;
+        }
+
+        void IArrayScrew.AddScrew(ScrewController screw)
+        {
+            if (screw == null) return;
+            if (!screw.TryLockForMove()) return;
+
+            var result = _router.TryRoute(screw, out _);
+            if (result == MatchRouter.RouteResult.RoutedToContainer)
+            {
+                SoundHelper.PlaySFX(SFX.ScrewClicked);
+                _screwManager.RemoveScrew(screw);
+                return;
+            }
+
+            if (screw.GetColor() == ColorEnum.Rainbow)
+            {
+                SpecialBoxManager.ins.AddSingle(screw);
+                _screwManager.RemoveScrew(screw);
+                return;
+            }
+
+            var hold = FindEmptyHold();
+            if (hold == null)
+            {
+                Debug.LogWarning("[ArrayScrew] AddScrew: không còn hold trống.");
+                screw.ResetClickedFlag();
+                screw.ReleaseLockForMove();
+                return;
+            }
+
+            SoundHelper.PlaySFX(SFX.ScrewClicked);
+            AddToHoldFlow(screw, hold);
+        }
+
+        void IArrayScrew.RemoveScrew(ScrewController screw) => Dequeue(screw);
+
+        void IArrayScrew.RemoveScrews(IEnumerable<ScrewController> screws)
+        {
+            foreach (var s in screws) Dequeue(s);
+        }
+
+        void IArrayScrew.AddOneHold() => AddSlot();
+        void IArrayScrew.ShowArrayActive(int activeCount) => SetupSlots(activeCount);
+
+        /// <summary>
+        /// Lấy tối đa <paramref name="maxCount"/> screw cùng màu <paramref name="color"/>
+        /// ra khỏi array (xóa hold, trả về list để BoxQueue add vào box).
+        /// </summary>
+        List<ScrewController> IArrayScrew.TakeByColor(ColorEnum color, int maxCount)
+        {
+            var taken = new List<ScrewController>();
+            if (maxCount <= 0) return taken;
+
+            var matching = _heldScrews
+                .Where(s => s != null && s.GetColor() == color)
+                .Take(maxCount)
+                .ToList();
+
+            foreach (var screw in matching)
+            {
+                var hold = holdScrews.FirstOrDefault(h => h.Screw == screw);
+                if (hold != null) hold.RemoveScrew();
+                _heldScrews.Remove(screw);
+                taken.Add(screw);
+            }
+
+            if (taken.Count > 0)
+                HoldAlignment();
+
+            return taken;
+        }
+
+        // ─────────────────────────────────────────
+        // Game Active
         // ─────────────────────────────────────────
 
         private bool _isGameActive;
@@ -165,6 +240,8 @@ namespace Ingame
         public void SetGameActive(bool active)
         {
             _isGameActive = active;
+
+            Debug.Log($"[ArrayScrew] SetGameActive: active={active}, _isGameActive={_isGameActive}");
             if (!active && _fullCheckCoroutine != null)
             {
                 StopCoroutine(_fullCheckCoroutine);
@@ -173,7 +250,7 @@ namespace Ingame
         }
 
         // ─────────────────────────────────────────
-        // Queries (giữ nguyên cho backward compat)
+        // Queries
         // ─────────────────────────────────────────
 
         public ColorEnum GetDominantColor()
@@ -203,22 +280,20 @@ namespace Ingame
             HoldAlignment();
         }
 
-        private HoldScrew FindEmptyHold()
-            => holdScrews.FirstOrDefault(h => h.gameObject.activeSelf && h.IsEmpty());
+        private HoldScrew FindEmptyHold() =>
+            holdScrews.FirstOrDefault(h => h.gameObject.activeSelf && h.IsEmpty());
 
-        private IEnumerable<HoldScrew> ActiveHolds()
-            => holdScrews.Where(h => h.gameObject.activeSelf);
+        private IEnumerable<HoldScrew> ActiveHolds() =>
+            holdScrews.Where(h => h.gameObject.activeSelf);
 
         private void AddToHoldFlow(ScrewController screw, HoldScrew hold)
         {
             screw.SetSortingOrderAndLayer(4, "Box");
-
             hold.AddScrew(screw, false, _ =>
             {
                 HandleTutorialForHold(hold);
                 TriggerFullCheck();
             });
-
             _heldScrews.Add(screw);
             _screwManager.RemoveScrew(screw);
         }
@@ -241,6 +316,8 @@ namespace Ingame
                     bool stillFull = IsFull;
                     bool containerMoving = _containerQueue != null && _containerQueue.HaseMovingContainer;
 
+
+                    Debug.Log($"[ArrayScrew] CheckFullCoroutine: stillFull={stillFull}, containerMoving={containerMoving}");
                     if (stillFull && !containerMoving)
                     {
                         OnQueueFull?.Invoke();
@@ -315,6 +392,31 @@ namespace Ingame
             _alignCoroutine = null;
             callback?.Invoke();
         }
+        Dictionary<ColorEnum, int> IArrayScrew.GetHeldColorCounts()
+        {
+            var result = new Dictionary<ColorEnum, int>();
+            foreach (var screw in _heldScrews)
+            {
+                if (screw == null) continue;
+                var color = screw.GetColor();
+                if (!result.ContainsKey(color))
+                    result[color] = 0;
+                result[color]++;
+            }
+            return result;
+        }
+        // Thêm vào phần IArrayScrew explicit implementation
+
+        HashSet<ColorEnum> IArrayScrew.GetHeldColors()
+        {
+            var result = new HashSet<ColorEnum>();
+            foreach (var screw in _heldScrews)
+            {
+                if (screw != null)
+                    result.Add(screw.GetColor());
+            }
+            return result;
+        }
 
         // ─────────────────────────────────────────
         // IResetable
@@ -326,5 +428,7 @@ namespace Ingame
             SetupSlots(5);
             Clear();
         }
+
+
     }
 }

@@ -73,6 +73,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fe91a2017098504b8009e1ed03410db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  layer:
+    serializedVersion: 2
+    m_Bits: 0
+  bodyConnect: {fileID: 0}
+  hingeJoint2D: {fileID: 4825029988917458358}
 --- !u!233 &4825029988917458358
 HingeJoint2D:
   m_ObjectHideFlags: 0

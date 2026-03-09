@@ -16,6 +16,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 {
     // ─── Inspector Fields ──────────────────────────────────────────
     [SerializeField] private GameObject screwManagerPrefab;
+    [SerializeField] private ScrewGameBootstrapper bootstrapper;
 
     [Header("Dependencies — inject, không dùng singleton trực tiếp")]
     [Tooltip("BoxQueue trong scene — tự động tìm nếu để trống")]
@@ -33,7 +34,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     public int CurrentLevelId { get; private set; }
     public Level.Level currentLevel { get; private set; }
     public LayerManager layerManager { get; private set; }
-    public ScrewManager ScrewManager { get; private set; }
+        public ScrewManager ScrewManager { get; set; }
     public bool IsInitDone { get; private set; }
 
     public List<Level.Level> levelConfig => _repository.LevelList;
@@ -77,11 +78,13 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         if (_boxQueue == null && boxQueueRef != null)
             _boxQueue = boxQueueRef;
 
-        if (_boxQueue == null)
-            _boxQueue = FindAnyObjectByType<BoxQueue>();
+        _boxQueue ??= FindAnyObjectByType<BoxQueue>();
 
         if (_boxQueue == null)
             Debug.LogError("[LevelManager] ILevelBoxQueue not found! Call Inject() or assign boxQueueRef.");
+
+        // REMOVED: _boxQueue.Setup() — ScrewGameBootstrapper.InitializeForLevel() đã gọi Setup() rồi.
+        // Gọi 2 lần sẽ thay thế _sequence bằng instance mới rỗng.
     }
 
     // ─── Dependency Injection ──────────────────────────────────────
@@ -106,9 +109,15 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             callback.Invoke();
         }));
     }
-
+    public void ReLoadLevel()
+    {
+        Dispose();
+        if (CurrentLevelId > 0)
+            LoadLevel(CurrentLevelId);
+    }
     public void LoadLevel(int levelID, Action callback = null)
     {
+        Debug.Log($"[LevelManager] Starting to load level {levelID}...");
         StartCoroutine(LoadLevelCoroutine(levelID, callback));
     }
 
@@ -133,7 +142,10 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         _boxQueue?.OnReset();
 
         SpecialBoxManager.ins.OnReset();
-        ScrewManager?.Reset();
+        ScrewManager.Reset();
+
+        // Reset ArrayScrew: clear held screws + restore default slots
+        ArrayScrew.ins.OnReset();
 
         layerManager = null;
         currentLevel = null;
@@ -156,6 +168,10 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
     private IEnumerator LoadLevelCoroutine(int levelID, Action callback)
     {
+        // ── REMOVED: InitializeForLevel() call — already called from LevelStartService ──
+        // ScrewGameBootstrapper.ins.InitializeForLevel() is called once from LevelStartService,
+        // not here. Calling it here causes double initialization.
+
         CurrentLevelId = levelID;
 
         CurrentScore = 0;
@@ -166,14 +182,16 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
         // Pipeline — tất cả steps nhận _boxQueue qua constructor (DIP)
         var pipeline = new LevelLoadPipeline()
+            .AddStep(new LoadPsbStep())                  // ← load PSB trước khi spawn parts
             .AddStep(new InitLevelObjectStep(transform))
             .AddStep(new ResolveLevelDataStep(_repository.Levels))
-            .AddStep(new InitBoxQueueStep(_boxQueue))            // inject ILevelBoxQueue
+            .AddStep(new InitBoxQueueStep(_boxQueue))
             .AddStep(new LoadLayersStep(_partSpawnService))
             .AddStep(new LoadScrewsStep(screwManagerPrefab, _screwSpawnService))
             .AddStep(new ActivatePartsStep())
             .AddStep(new InitSpecialMissionStep(IngameController.ins, SideMissionManager.ins, _boxQueue))
-            .AddStep(new FinalizeStep(_boxQueue));               // inject ILevelBoxQueue as IContainerQueue
+            .AddStep(new ActivatePartsStep())
+            .AddStep(new FinalizeStep(_boxQueue));
 
         yield return pipeline.Run(ctx, () =>
         {
@@ -182,6 +200,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             ScrewManager = ctx.ScrewManager;
             Difficulty = ResolveDifficulty(currentLevel);
 
+            this.layerManager = layerManager;
             Debug.Log($"[LevelManager] Level {levelID} loaded. Difficulty: {Difficulty}");
             callback?.Invoke();
         });
@@ -191,19 +210,53 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     }
 
     // ─── Game Events ───────────────────────────────────────────────
-
-    /// <summary>
-    /// Player tap screw → xóa khỏi board.
-    /// Flow: lấy screws → route vào BoxQueue → remove part → board drop check.
+    // <summary>
+    /// Breaker item: remove part + tất cả screw gắn với nó.
+    /// Screw nào có box cùng màu đang active → route vào box.
+    /// Screw nào không match → ẩn vào ScrewManager hidden (không vào ArrayScrew).
     /// </summary>
     public void RemovePartItem(BasePart bp)
     {
         if (layerManager == null || bp == null) return;
 
         var screws = layerManager.GetScrewByPart(bp);
+        if (screws == null || screws.Count == 0)
+        {
+            // Không có screw → chỉ remove part
+            layerManager.RemovePart(bp.uniqueID);
+            bp.gameObject.SetActive(false);
+            return;
+        }
 
-        // Dùng _boxQueue interface — không gọi BoxQueue.ins.TryMoveScrewsGroupedByColor
-        _boxQueue?.TryMoveScrewsGroupedByColor(screws, fromBoard: true);
+        var routed = new List<ScrewController>();
+        var hidden = new List<ScrewController>();
+
+        foreach (var screw in screws)
+        {
+            if (screw == null) continue;
+
+            // Tìm box phù hợp màu đang active
+            var box = BoxQueue.ins.FindSuitableBox(screw.GetColor());
+            if (box != null && box.TryAddScrew(screw))
+            {
+                routed.Add(screw);
+            }
+            else
+            {
+                // Không có box match → ẩn vào hidden, không vào ArrayScrew
+                screw.SetActive(false);
+                hidden.Add(screw);
+            }
+        }
+
+        if (hidden.Count > 0)
+        {
+            ScrewManager.AddHiddenScrews(hidden);
+            Debug.Log($"[LevelManager] Breaker: {hidden.Count} screw(s) hidden (no matching box).");
+        }
+
+        if (routed.Count > 0)
+            Debug.Log($"[LevelManager] Breaker: {routed.Count} screw(s) routed to box.");
 
         layerManager.RemoveScrewsOnDict(screws);
         layerManager.RemovePart(bp.uniqueID);
@@ -222,6 +275,15 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         AddScore(gained);
         OnComboChanged?.Invoke(CurrentCombo);
         Debug.Log($"[LevelManager] Box cleared | Combo:{CurrentCombo} | +{gained}pts");
+    }
+
+    /// <summary>
+    /// Win khi: sequence hết box VÀ không còn box active nào trên slot.
+    /// </summary>
+    public void CheckWinCondition()
+    {
+        Debug.Log("[LevelManager] CheckWinCondition called.");
+        IngameController.ins.OnLevelCompleted.Invoke(true);
     }
 
     /// <summary>
@@ -281,6 +343,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     public Level.Level GetLevelData(int levelId)
     {
         return levelConfig[levelId];
+    }
+
+    public void Dispose()
+    {
+        OnReset();
+        // Cleanup if needed
     }
 }
 

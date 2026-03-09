@@ -11,6 +11,7 @@ namespace Core.Match
     /// </summary>
     public interface IContainerQueue
     {
+
         // ─────────────────────────────────────────
         // State
         // ─────────────────────────────────────────
@@ -26,6 +27,10 @@ namespace Core.Match
         event Action<IMatchContainer> OnContainerSpawned;
         event Action<IMatchContainer> OnContainerRemoved;
 
+        // ─────────────────────────────────────────
+        // Setup
+        // ─────────────────────────────────────────
+        public void Setup(IBoxFactory factory, IBoxSequenceService sequence, IBoxSlotLayoutService layout);
         // ─────────────────────────────────────────
         // Lifecycle
         // ─────────────────────────────────────────

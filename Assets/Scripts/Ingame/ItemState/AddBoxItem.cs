@@ -1,36 +1,44 @@
-using Managers;
+﻿using Managers;
+using UnityEngine;
 
 public class AddBoxItem : FSMState<ItemController>, IItem
 {
-    private bool isHadling;
-
     public ItemType ItemType => ItemType.AddBox;
-
-    public bool IsHandling => isHadling;
+    public bool IsHandling => sys.IsItemExecuting;
 
     public AddBoxItem(ItemController sys)
     {
         Setup(sys);
     }
 
-    public void Discard()
+    public void Use(Vector3 targetPos = default)
     {
-    }
+        if (sys.IsItemExecuting) return;
+        sys.SetExecuting(true);
 
-    public void HandlingItem()
-    {
-    }
-
-    public void Use()
-    {
         sys.PlayItemEffect(
-            ItemType,
+            ItemType.AddBox,
             sys.transform.position,
             sys.transform.position,
             () =>
             {
                 MissionManager.ins.ProcessUseItem(ItemType, 1);
-                IngameController.ins.Revive();
+                BoxQueue.ins.UnlockNextSlot();
+                sys.SetExecuting(false);
+                sys.SetSelected(false);
+
+                // Auto item → invoke ngay sau khi effect xong
+                sys.itemPerformed.Invoke(true);
+
+                IngameController.ins.OnItemFinished();
             });
+    }
+
+    public void HandlingItem() { }
+    public void Discard()
+    {
+        sys.SetExecuting(false);
+        sys.itemPerformed.Invoke(false);
+        IngameController.ins.OnItemFinished();
     }
 }

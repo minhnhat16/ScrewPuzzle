@@ -1,9 +1,10 @@
-using Enums;
+﻿using Enums;
 using Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,7 @@ public class ViewManager : MonoBehaviour
     public Dictionary<ViewIndex, BaseView> dicView = new Dictionary<ViewIndex, BaseView>();
     public BaseView currentView = null;
     private Canvas canvas;
+
     private void Awake()
     {
         Instance = this;
@@ -30,18 +32,36 @@ public class ViewManager : MonoBehaviour
         {
             if (dicView.ContainsKey(viewIndex)) continue;
             string viewName = viewIndex.ToString();
-            GameObject view = Instantiate(Resources.Load("Prefabs/UIPrefab/Views/" + viewName, typeof(GameObject))) as GameObject;
+            GameObject view = Instantiate(Resources.Load("Prefabs/UIPrefab/Views/" + viewName,
+                typeof(GameObject))) as GameObject;
             view.transform.SetParent(anchorView, false);
             view.GetComponent<BaseView>().Init();
             dicView.Add(viewIndex, view.GetComponent<BaseView>());
             yield return new WaitForSeconds(0.5f);
-
         }
     }
+
+    /// <summary>
+    /// Tìm view theo type T trong dicView.
+    /// Trả về null nếu không tìm thấy.
+    /// </summary>
+    public T GetView<T>() where T : BaseView
+    {
+        foreach (var view in dicView.Values)
+        {
+            if (view is T typed)
+                return typed;
+        }
+
+        Debug.LogWarning($"[ViewManager] GetView<{typeof(T).Name}>: không tìm thấy view.");
+        return null;
+    }
+
     public void SwitchView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
+        Debug.Log("SwitchView to " + newView + " from " +
+                  (currentView != null ? currentView.viewIndex.ToString() : "null"));
 
-        Debug.Log("SwitchView to " + newView + " from " + (currentView != null ? currentView.viewIndex.ToString() : "null"));   
         if (currentView != null)
         {
             currentView.HideViewAnimation(() =>
@@ -58,41 +78,26 @@ public class ViewManager : MonoBehaviour
 
     private void ShowNextView(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
     {
-
         var nextView = dicView[newView];
 
-        // SAME VIEW
         if (currentView == nextView)
         {
             currentView.gameObject.SetActive(true);
-            Debug.Log("SwitchView: same view " + newView + "callback " + callback == null);
-            currentView.ShowViewAnimation(() =>
-            {
-                callback?.Invoke();
-            });
+            currentView.ShowViewAnimation(() => callback?.Invoke());
             return;
         }
 
-        // SWITCH VIEW
         currentView = nextView;
         currentView.gameObject.SetActive(true);
-
         currentView.Setup(viewParam);
-        currentView.ShowViewAnimation(() =>
-        {
-            callback?.Invoke();
-        });
+        currentView.ShowViewAnimation(() => callback?.Invoke());
     }
-
-
 
     public Vector3 UIToWorld(RectTransform uiObj, Camera worldCam)
     {
-        var uiCam = this.canvas.worldCamera;
+        var uiCam = canvas.worldCamera;
         Vector3 screenPos = RectTransformUtility.WorldToScreenPoint(uiCam, uiObj.position);
-
         screenPos.z = Mathf.Abs(worldCam.transform.position.z);
-
         return worldCam.ScreenToWorldPoint(screenPos);
     }
 
@@ -103,22 +108,20 @@ public class ViewManager : MonoBehaviour
 
     internal void UpdateSpecialBoxCount(ColorEnum color, int v)
     {
-
         if (currentView is GameView gameview)
-        {
             gameview.UpdateSpecialBoxCount(color, v);
-        }
     }
-
 
     public void SwitchViewForNewPlayer(bool isNewPlayer)
     {
         if (isNewPlayer)
         {
-            LevelManager.ins.LoadLevel(0, () =>
-            {
-                IngameController.ins.Pause();
-            });
+            var service = new LevelStartService(LoadSceneManager.ins);
+            service.StartLevel(
+                levelId: 0,
+                onLevelStarted: () => Debug.Log("[ViewManager] New player level 0 started."),
+                onError: (err) => Debug.LogError($"[ViewManager] {err}")
+            );
         }
         else
         {
@@ -135,6 +138,5 @@ public class ViewManager : MonoBehaviour
                 DayTimeController.instance.CheckNewDay();
             });
         }
-
     }
 }

@@ -1,43 +1,64 @@
 ﻿using Core.Match;
+using DG.Tweening;
 using Ingame;
 using UnityEngine;
 
 namespace Managers
 {
-    /// <summary>
-    /// Wire toàn bộ dependencies cho screw game.
-    /// Đây là nơi DUY NHẤT biết các class cụ thể.
-    /// Tất cả chỗ khác chỉ thấy interface.
-    ///
-    /// Inject order:
-    ///  1. BoxQueue → ArrayScrew  (IContainerQueue)
-    ///  2. BoxQueue → LevelManager (ILevelBoxQueue)  ← NEW
-    ///  3. BoxQueue → SideMissionManager (IContainerQueue)
-    /// </summary>
-    public class ScrewGameBootstrapper : MonoBehaviour
+    public class ScrewGameBootstrapper : SingletonMono<ScrewGameBootstrapper>
     {
+       
         [Header("References")]
         [SerializeField] private ArrayScrew arrayScrew;
         [SerializeField] private BoxQueue boxQueue;
         [SerializeField] private ScrewManager screwManager;
-
-        private void Awake()
+        [SerializeField] private Player player;
+        [SerializeField]
+        private  Ease boxMovingEse;
+        public void InitializeForLevel()
         {
+            if (arrayScrew == null || boxQueue == null || screwManager == null || player == null)
+            {
+                Debug.LogError("[ScrewGameBootstrapper] Missing references. Please assign all fields in the Inspector.");
+                return;
+            }
+
             IMatchRule rule = new TagMatchRule(requiredCount: 3);
             IPathValidator path = new NoPathValidator();
-            IContainerQueue containers = boxQueue;    // BoxQueue implement IContainerQueue
-            ILevelBoxQueue levelBox = boxQueue;    // BoxQueue implement ILevelBoxQueue
+            IContainerQueue containers = boxQueue;
+            ILevelBoxQueue levelBox = boxQueue;
 
             // ── ArrayScrew ──────────────────────────────────────
             var router = new MatchRouter(rule, path, containers);
             arrayScrew.Inject(router, screwManager, containers);
+            Debug.Log("[ScrewGameBootstrapper] Injected ArrayScrew");
 
             // ── LevelManager ────────────────────────────────────
-            // Inject trước Init() và LoadLevel() được gọi
             LevelManager.ins.Inject(levelBox);
+            Debug.Log("[ScrewGameBootstrapper] Injected LevelManager");
 
             // ── SideMissionManager ──────────────────────────────
             SideMissionManager.ins.Inject(containers);
+            Debug.Log("[ScrewGameBootstrapper] Injected SideMissionManager");
+
+            // ── BoxQueue Setup ──────────────────────────────────
+            var factory = new BoxFactory();
+            var sequence = new BoxSequenceService();
+            var layout = new BoxSlotLayoutService(boxMovingEse);
+            boxQueue.Setup(factory, sequence, layout);
+            Debug.Log("[ScrewGameBootstrapper] Setup BoxQueue services");
+
+            // ── BoxQueue ← ArrayScrew ───────────────────────────
+            boxQueue.SetArrayScrew(arrayScrew);
+            Debug.Log("[ScrewGameBootstrapper] SetArrayScrew into BoxQueue" + (arrayScrew == null));
+
+            // ── ScrewInteractionService → Player ─────────────────
+            var screwService = new ScrewInteractionService(
+                () => LevelManager.ins.layerManager as ILayerManager,
+                arrayScrew as IArrayScrew
+            );
+            player.Inject(screwService);
+            Debug.Log("[ScrewGameBootstrapper] Injected ScrewInteractionService into Player");
         }
     }
 }

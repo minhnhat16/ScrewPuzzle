@@ -23,6 +23,10 @@ public class SpriteLibControl : MonoBehaviour
 
     // ================= ENTRY =================
 
+    /// <summary>
+    /// Gọi lúc boot (remoteLoad=true) hoặc Editor test (remoteLoad=false).
+    /// Xóa toàn bộ index và build lại — CHỈ gọi 1 lần khi boot.
+    /// </summary>
     public void LoadAllPartSprites(bool remoteLoad = false)
     {
         spriteIndex.Clear();
@@ -32,7 +36,37 @@ public class SpriteLibControl : MonoBehaviour
         else
             LoadLocal();
 
-        Debug.Log($"[SpriteLibControl] Indexed sprites: {spriteIndex.Count}");
+        Debug.Log($"[SpriteLibControl] Full index built: {spriteIndex.Count} sprites.");
+    }
+
+    /// <summary>
+    /// Append sprites từ PSB mới load vào index — KHÔNG xóa sprites cũ.
+    /// Gọi từ PsbSlidingWindowLoader sau mỗi lần LoadPSB hoàn tất.
+    /// </summary>
+    public void AppendPsbSprites()
+    {
+        int before = spriteIndex.Count;
+
+        // Lấy tất cả sprites từ spriteDict của ResourceManager (PSB sprites)
+        var psbSprites = ResourceManager.ins.GetAllPsbSprites();
+        foreach (var pair in psbSprites)
+        {
+            // PSB sprites là HINH parts — group Main/Outline được xác định bởi tên
+            // Tên _a = Main, _b = Outline; mặc định là Main nếu không rõ
+            SpriteGroup group = pair.Key.EndsWith("_b") ? SpriteGroup.Outline : SpriteGroup.Main;
+
+            var key = new SpriteIndexKey
+            {
+                level = 0,       // PSB sprites không cần level context — dùng 0 (global)
+                Group = group,
+                Name = NormalizeShapeName(pair.Value.name)
+            };
+
+            spriteIndex[key] = pair.Value;
+        }
+
+        int added = spriteIndex.Count - before;
+        Debug.Log($"[SpriteLibControl] AppendPsbSprites: +{added} sprites, total={spriteIndex.Count}");
     }
 
     // ================= LOCAL =================
@@ -156,6 +190,8 @@ public class SpriteLibControl : MonoBehaviour
         if (string.IsNullOrEmpty(name)) return null;
         string partname = $"{name}";
         var sprite = ResourceManager.ins.GetSprite(partname);
+
+        Debug.Log($"[SpriteLibControl] GetSpritePSB: level={level}, group={group}, layer={layer}, name={name} → found {(sprite == null ? "YES" : "NO")}");
         return sprite;
     }
     public Sprite GetSprite(int level, SpriteGroup group, string name)
@@ -209,18 +245,6 @@ public class SpriteLibControl : MonoBehaviour
 
         Debug.LogError($"[SpriteLibControl] Sprite NOT FOUND: requested Layer={level}, Group={group}, Name={normalized}");
         return null;
-    }
-
-    /// <summary>
-    /// Helper phổ biến cho HINH
-    /// </summary>
-    public Sprite GetHinhSprite(int layer, bool outline, string shapeName)
-    {
-        return GetSprite(
-            layer,
-            outline ? SpriteGroup.Outline : SpriteGroup.Main,
-            shapeName
-        );
     }
 
     // ================= GROUP MAPPING =================

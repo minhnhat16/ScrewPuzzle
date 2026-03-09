@@ -8,8 +8,10 @@ public class SFXGameObj : MonoBehaviour
 
     public void AutoDespawnSFX(SoundManager.SFX sfx)
     {
-        float time = SoundManager.instance.sfxTimerDespawnDictionary[sfx];
-        StartCoroutine(DespawnSFX(time));
+        if (SoundManager.instance.sfxTimerDespawnDictionary.TryGetValue(sfx, out float time))
+        {
+            StartCoroutine(DespawnSFX(time));
+        }
     }
 
     IEnumerator DespawnSFX(float time)

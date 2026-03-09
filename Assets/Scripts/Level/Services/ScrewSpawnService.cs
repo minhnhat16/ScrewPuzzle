@@ -3,36 +3,32 @@ using Ingame;
 using Ingame.Board;
 using Ingame.Screw;
 using Level;
+using PoolManager;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Spawn tất cả ScrewController từ LevelData, gắn HingeJoint2D vào part,
-/// và đăng ký vào ScrewManager + LayerManager.screwDict.
-///
-/// Logic lấy từ GameObjectToLevelConverter (phần screw), refactor sang service.
+/// Spawn tất cả ScrewController từ LevelData sử dụng ScrewPool,
+/// gắn HingeJoint2D vào part, và đăng ký vào ScrewManager + LayerManager.screwDict.
 /// </summary>
 public class ScrewSpawnService : IScrewSpawnService
 {
-    private const string SCREW_PREFAB_PATH = "Prefabs/ScrewController";
-
     public IEnumerator SpawnScrews(
         Level.Level levelData,
         LayerManager layerManager,
         ScrewManager screwManager,
         Transform screwParent)
     {
-        if (levelData?.screws == null || levelData.screws.Count == 0)
+        if (levelData == null ||  levelData.screws == null || levelData.screws.Count == 0)
         {
             Debug.LogWarning("[ScrewSpawnService] No screws in level data.");
             yield break;
         }
 
-        var screwPrefab = Resources.Load<GameObject>(SCREW_PREFAB_PATH);
-        if (screwPrefab == null)
+        if (ScrewPool.Instance.Pool == null)
         {
-            Debug.LogError($"[ScrewSpawnService] Prefab not found at Resources/{SCREW_PREFAB_PATH}");
+            Debug.LogError("[ScrewSpawnService] ScrewPool.Instance or Pool is null.");
             yield break;
         }
 
@@ -40,49 +36,73 @@ public class ScrewSpawnService : IScrewSpawnService
         {
             if (screwData == null) continue;
 
-            // Spawn screw
-            var screwGO = Object.Instantiate(screwPrefab, screwParent);
-            screwGO.transform.localPosition = screwData.screwPosition;
+            var screw = SpawnScrewFromPool(screwData, screwParent);
+            if (screw == null) continue;
 
-            var screwComponent = screwGO.GetComponent<ScrewController>();
-            if (screwComponent == null)
+            var part = layerManager.GetPartByKey(screwData.hinge.bodyPartUniqueID);
+            if (!ValidateAndSetupScrew(screw, screwData, part))
             {
-                Debug.LogError("[ScrewSpawnService] ScrewController not found on prefab.");
-                Object.Destroy(screwGO);
+                ScrewPool.Instance.Pool.ReturnToPool(screw);
                 continue;
             }
 
-            // Set color
-            var color = (ColorEnum)screwData.idColor;
-            screwComponent.ChangeScrewColor(color);
+            RegisterScrewInLayer(screw, part, layerManager);
+            screwManager.AddScrew(screw);
 
-            // Create hinge
-            var hingeConnection = screwData.hinge;
-            var connectedPart = layerManager.GetPartByKey(hingeConnection.bodyPartUniqueID);
-
-            if (connectedPart == null)
-            {
-                Debug.LogWarning($"[ScrewSpawnService] Part not found: {hingeConnection.bodyPartUniqueID}");
-                continue;
-            }
-
-            screwComponent.CreateHinge(connectedPart.GetComponent<Rigidbody2D>(), hingeConnection);
-
-            // Register in screwDict
-            int partLayerID = connectedPart.PartLayer() - 10;
-            if (!layerManager.screwDict.ContainsKey(partLayerID))
-                layerManager.screwDict[partLayerID] = new List<ScrewController>();
-
-            if (!layerManager.screwDict[partLayerID].Contains(screwComponent))
-                layerManager.screwDict[partLayerID].Add(screwComponent);
-
-            // Register in ScrewManager
-            screwManager.AddScrew(screwComponent);
-
-            yield return null;
-
-            // Init physics / visuals sau khi đã được add vào scene
-            screwGO.GetComponent<MonoBehaviour>()?.StartCoroutine(screwComponent.Init());
+            //yield return null;
+            yield return screw.Init();
         }
+
+        Debug.Log($"[ScrewSpawnService] Finished spawning {levelData.screws.Count} screws.");
+    }
+
+    private ScrewController SpawnScrewFromPool(ScrewScriptable screwData, Transform parent)
+    {
+        var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
+        if (screw == null)
+        {
+            Debug.LogError("[ScrewSpawnService] Failed to spawn screw from pool.");
+            return null;
+        }
+
+        screw.gameObject.transform.SetParent(parent);
+        screw.gameObject.transform.localPosition = screwData.screwPosition;
+        screw.OnReset();
+
+        return screw;
+    }
+
+    private bool ValidateAndSetupScrew(ScrewController screw, ScrewScriptable screwData, BasePart part)
+    {
+        if (part == null)
+        {
+            Debug.LogWarning($"[ScrewSpawnService] Part not found: {screwData.hinge.bodyPartUniqueID}");
+            return false;
+        }
+
+        var color = (ColorEnum)screwData.idColor;
+        screw.ChangeScrewColor(color);
+
+        var rigidbody = part.GetComponent<Rigidbody2D>();
+
+        // Hinge connect trước
+        screw.CreateHinge(rigidbody, screwData.hinge);
+
+        // Unfreeze sau khi hinge đã connect — part giờ được giữ bởi hinge
+        //part.UnfreezeBody();
+
+        return true;
+    }
+
+    private void RegisterScrewInLayer(ScrewController screw, BasePart part, LayerManager layerManager)
+    {
+        int layerID = part.PartLayer() - 10;
+
+        if (!layerManager.screwDict.ContainsKey(layerID))
+            layerManager.screwDict[layerID] = new List<ScrewController>();
+
+        layerManager.screwDict[layerID].Add(screw);
+
+        Debug.Log($"[ScrewSpawnService] Registered screw to layer {layerID}");
     }
 }

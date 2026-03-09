@@ -19,7 +19,7 @@ public class LevelManagerEditor : Editor
             {
                 Debug.Log("Button on click");
                 // Call your load level function or any other function in Play Mode
-                levelManager.LoadLevel(levelManager.currentLevelID);
+                levelManager.LoadLevel(levelManager.CurrentLevelId);
             }
 
             if (GUILayout.Button("Reset Level in Play Mode"))
@@ -33,7 +33,7 @@ public class LevelManagerEditor : Editor
             if (GUILayout.Button("Load Level in Edit Mode"))
             {
                 // Call your load level function or any other function in Edit Mode
-                levelManager.LoadLevel(levelManager.currentLevelID);
+                levelManager.LoadLevel(levelManager.CurrentLevelId);
             }
         }
     }

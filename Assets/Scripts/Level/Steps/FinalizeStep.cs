@@ -1,4 +1,5 @@
 ﻿using Core.Match;
+using Ingame;
 using Ingame.Board;
 using LevelSystem.Core;
 using System.Collections;
@@ -40,6 +41,16 @@ namespace LevelSystem.Steps
                 yield break;
             }
 
+            // ── Inject TopLayerScrewProvider vào BoxQueue ──────────
+            // LayerManager đã sẵn sàng ở đây → safe để tạo provider
+            if (_boxQueue is BoxQueue concreteQueue)
+            {
+                var provider = new TopLayerScrewProvider(lm);
+                concreteQueue.SetTopLayerProvider(provider);
+                Debug.Log("[FinalizeStep] TopLayerScrewProvider injected into BoxQueue.");
+            }
+
+            // ── Visibility ─────────────────────────────────────────
             var visCtrl = lm.visibilityController;
             if (visCtrl == null)
             {
@@ -57,7 +68,7 @@ namespace LevelSystem.Steps
             else
             {
                 Debug.LogWarning("[FinalizeStep] LayerVisibilityController not found — layers will not have visibility applied.");
-            }
+            }   
 
             Debug.Log($"[FinalizeStep] Level {ctx.LevelId} ready. " +
                       $"Layers: {lm.Layers?.Count ?? 0} | " +

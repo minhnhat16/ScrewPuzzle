@@ -51,4 +51,12 @@ public interface ILevelBoxQueue : IContainerQueue
     /// Nếu không có box nào match → screw ở lại ArrayScrew (queue).
     /// </summary>
     void TryMoveScrewsGroupedByColor(List<ScrewController> screws, bool fromBoard);
+
+    // ─── Win condition queries ─────────────────────────────────
+
+    /// <summary>Còn box nào trong sequence chưa spawn không.</summary>
+    bool HasNext();
+
+    /// <summary>Số box đang active trên slot.</summary>
+    int ActiveBoxCount { get; }
 }
