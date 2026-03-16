@@ -114,10 +114,10 @@ namespace UIScript.Dialog
         // BaseDialog overrides
         // ─────────────────────────────────────────
 
-        public override void OnEndHideDialog()
+        public override void OnEndShowDialog()
         {
-            // State transition do GameFlowService callback xử lý
-            // Dialog không tự resume — tránh double transition
+            base.OnEndShowDialog();
+            SoundHelper.PlaySFX(SoundManager.SFX.Lose);
         }
-    }
+    }   
 }

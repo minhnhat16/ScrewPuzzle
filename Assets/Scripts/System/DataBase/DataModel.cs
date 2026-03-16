@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -62,22 +63,161 @@ public static class DataTrigger
 public class DataModel : MonoBehaviour
 {
     private UserData userData;
+
     public void InitData(Action callback)
     {
         if (LoadData())
         {
+            MigrateData();
             Debug.Log("(BOOT) // INIT DATA DONE");
             callback?.Invoke();
         }
         else
         {
-            //if (false) NewDataForTester();
-            //else
             NewDataForPlayer();
             SaveData();
             Debug.Log("(BOOT) // INIT DATA DONE");
             callback?.Invoke();
         }
+    }
+
+    // ─────────────────────────────────────────
+    // Auto Migration — patch null fields cho save cũ
+    // ─────────────────────────────────────────
+
+    /// <summary>
+    /// Tự động scan tất cả public field trong UserData.
+    /// Nếu field là reference type và đang null → tạo instance mới bằng Activator.
+    /// Nếu field là Dictionary và đang null → tạo Dictionary rỗng.
+    /// 
+    /// Khi thêm field mới vào UserData:
+    ///   1. Khai báo field trong UserData (DataSchema.cs)
+    ///   2. Init giá trị trong NewDataForPlayer() (cho new player)
+    ///   3. MigrateData() tự động handle cho existing player — KHÔNG CẦN SỬA GÌ THÊM
+    /// </summary>
+    private void MigrateData()
+    {
+        if (userData == null) return;
+
+        bool dirty = MigrateObject(userData, "UserData");
+
+        if (dirty)
+        {
+            SaveData();
+            Debug.Log("[DataModel] Migration complete — saved patched data.");
+        }
+    }
+
+    /// <summary>
+    /// Đệ quy scan tất cả public field của một object.
+    /// Tạo default instance cho bất kỳ reference field nào đang null.
+    /// Trả về true nếu có ít nhất 1 field được patch.
+    /// </summary>
+    private bool MigrateObject(object target, string parentPath)
+    {
+        if (target == null) return false;
+
+        bool dirty = false;
+        Type type = target.GetType();
+
+        FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (var field in fields)
+        {
+            Type fieldType = field.FieldType;
+            string fieldPath = $"{parentPath}.{field.Name}";
+
+            // Skip value types (int, bool, float, enum...) — chúng có default value sẵn
+            if (fieldType.IsValueType) continue;
+
+            // Skip string — null string là hợp lệ, không cần migrate
+            if (fieldType == typeof(string)) continue;
+
+            object value = field.GetValue(target);
+
+            if (value != null)
+            {
+                // Field không null — nhưng nếu là nested data class (không phải collection)
+                // thì đệ quy vào để check sub-fields
+                if (IsUserDataClass(fieldType))
+                {
+                    if (MigrateObject(value, fieldPath))
+                        dirty = true;
+                }
+                continue;
+            }
+
+            // ── Field null → cần patch ─────────────────────────────
+
+            object newInstance = CreateDefaultInstance(fieldType);
+
+            if (newInstance != null)
+            {
+                field.SetValue(target, newInstance);
+                Debug.Log($"[DataModel] Migration: created default for {fieldPath} ({fieldType.Name})");
+                dirty = true;
+            }
+            else
+            {
+                Debug.LogWarning($"[DataModel] Migration: cannot create default for {fieldPath} ({fieldType.FullName})");
+            }
+        }
+
+        return dirty;
+    }
+
+    /// <summary>
+    /// Tạo default instance cho một type.
+    /// Hỗ trợ: class có parameterless constructor, Dictionary, List.
+    /// </summary>
+    private object CreateDefaultInstance(Type type)
+    {
+        try
+        {
+            // Dictionary<K,V> → new Dictionary<K,V>()
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            // List<T> → new List<T>()
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            // Class có parameterless constructor → new T()
+            if (type.IsClass && !type.IsAbstract)
+            {
+                var ctor = type.GetConstructor(Type.EmptyTypes);
+                if (ctor != null)
+                {
+                    return Activator.CreateInstance(type);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[DataModel] CreateDefaultInstance failed for {type.FullName}: {ex.Message}");
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Kiểm tra xem type có phải là data class trong project (không phải Unity built-in, collection, string...).
+    /// Dùng để quyết định có đệ quy MigrateObject vào sub-fields không.
+    /// </summary>
+    private bool IsUserDataClass(Type type)
+    {
+        if (type == null || type.IsValueType || type == typeof(string)) return false;
+        if (type.IsArray) return false;
+        if (type.IsGenericType) return false; // Skip Dictionary, List
+        if (type.Namespace != null && type.Namespace.StartsWith("UnityEngine")) return false;
+        if (type.Namespace != null && type.Namespace.StartsWith("System")) return false;
+
+        // Chỉ đệ quy vào class có [Serializable] — đây là data class của project
+        return type.IsClass && type.IsDefined(typeof(SerializableAttribute), false);
     }
 
     #region Read Normal
@@ -339,8 +479,20 @@ public class DataModel : MonoBehaviour
     private void SaveData()
     {
         string json_string = JsonConvert.SerializeObject(userData);
-        //Debug.Log("(DATA) // SAVE  DATA: " + json_string);
         PlayerPrefs.SetString("DATA", json_string);
+        PlayerPrefs.Save(); // ← flush xuống disk ngay lập tức
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        // Khi app bị minimize / switch task → đảm bảo data đã ghi
+        if (pauseStatus)
+            PlayerPrefs.Save();
+    }
+
+    private void OnApplicationQuit()
+    {
+        PlayerPrefs.Save();
     }
 
     private bool LoadData()
@@ -547,11 +699,17 @@ public class DataModel : MonoBehaviour
         {
             lastResetUtcTicks = DateTime.MinValue.Ticks
         };
-        
+
         userData.specialData = new Special
         {
             currentSpecial = 0,
             targetSpecial = 15
+        };
+
+        userData.sideMissionDaily = new SideMissionDailyData
+        {
+            completedToday = 0,
+            lastResetDate = DateTime.UtcNow.ToString("yyyy-MM-dd")
         };
 
         Debug.Log("Time save meta " + userData.timeMeta.lastResetUtcTicks);

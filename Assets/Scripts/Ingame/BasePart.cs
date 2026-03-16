@@ -20,8 +20,36 @@ namespace Ingame
 
         [Header("State")]
         [SerializeField] private bool isFalling;
+        // Set bởi LayerVisibilityController — true = fully visible, false = prereview/hidden
+        private bool _isBreakable = true;
+
+        /// <summary>
+        /// Trạng thái visibility hiện tại của part — set bởi LayerVisibilityController.
+        /// Dùng để skip fade nếu state không đổi.
+        /// </summary>
+        public enum VisibilityState { Hidden, Prereview, FullyVisible }
+
+        private VisibilityState _visibilityState = VisibilityState.Hidden;
+
+        public VisibilityState CurrentVisibilityState
+        {
+            get => _visibilityState;
+            set => _visibilityState = value;
+        }
 
         public bool IsFalling => isFalling;
+
+        /// <summary>
+        /// Chỉ true khi layer đang ở trạng thái FullyVisible.
+        /// Set bởi LayerVisibilityController.SetLayerFullyVisible / SetLayerPrereview / SetLayerHidden.
+        /// </summary>
+        public bool IsBreakableByItem
+        {
+            get => _isBreakable && gameObject.activeInHierarchy;
+            set => _isBreakable = value;
+        }
+
+        public bool IsVisible => IsBreakableByItem; // alias cho rõ nghĩa ở OnTap/Break
 
         public UnityEvent<bool, BasePart> OnStateChanged = new();
 
@@ -54,18 +82,23 @@ namespace Ingame
         public Transform Transform => transform;
 
         public bool canBreak => true;
+
         public bool OnTap(Vector2 screenPosition)
         {
-            // Kiểm tra mode qua IngameController thay vì inject IInteractionService
-            // IInteractionService không được inject vào BasePart → luôn null
             if (IngameController.ins == null) return false;
             if (!IngameController.ins.IsItemExecutingBreaker) return false;
 
-            // Đang ở BreakerSelecting → forward tới RemovePartState
-            var itemController = IngameController.ins.ItemController;
-            itemController?.RemovePartState?.Perform(this, transform.position);
+            // Part đang hidden hoặc prereview → không thể break
+            if (!IsVisible)
+            {
+                Debug.Log($"[BasePart] OnTap blocked — part '{uniqueID}' is not visible (hidden or prereview).");
+                return false;
+            }
 
-            return true; // consumed — không forward lên Player
+            var itemController = IngameController.ins.ItemController;
+            itemController.RemovePartState.Perform(this, transform.position);
+
+            return true;
         }
 
         //-----------------------------
@@ -104,7 +137,7 @@ namespace Ingame
         {
             if (body == null) return;
             body.bodyType = RigidbodyType2D.Dynamic;
-            body.gravityScale = 0; // vẫn giữ 0 — hinge giữ part, gravity do HandleNoHingesLeft set
+            body.gravityScale = 1; // vẫn giữ 0 — hinge giữ part, gravity do HandleNoHingesLeft set
         }
 
         //-----------------------------
@@ -240,6 +273,7 @@ namespace Ingame
         public void Reset()
         {
             isFalling = false;
+            gameObject.name = "Part (Clone)";
 
             if (activeSprite != null)
                 activeSprite.sprite = null;
@@ -284,9 +318,14 @@ namespace Ingame
         }
         public void Break()
         {
+            // Guard: không break part đang hidden hoặc prereview
+            if (!IsVisible)
+            {
+                Debug.LogWarning($"[BasePart] Break blocked — part '{uniqueID}' is not visible.");
+                return;
+            }
+
             Debug.Log("Break part: " + uniqueID);
-
-
             gameObject.SetActive(false);
         }
 

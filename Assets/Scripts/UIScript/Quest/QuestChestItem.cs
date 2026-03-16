@@ -82,9 +82,8 @@ public class QuestChestItem : MonoBehaviour
         if (lockIcon != null) lockIcon.SetActive(false);
         if (doneIcon != null) doneIcon.SetActive(false);
 
-        Debug.Log(
-            $"[QuestChestItem] ApplyState → chestId: {param.chestId}, isClaimed: {param.isClaimed}, isUnlocked: {param.isUnlocked}, progress: {param.progress}, target: {param.target}"
-        );
+        //Debug.Log(
+        //    $"[QuestChestItem] ApplyState → chestId: {param.chestId}, isClaimed: {param.isClaimed}, isUnlocked: {param.isUnlocked}, progress: {param.progress}, target: {param.target}"
 
         if (param.isClaimed)
         {

@@ -32,6 +32,10 @@ public class ScrewSpawnService : IScrewSpawnService
             yield break;
         }
 
+        // Reset registry trước khi spawn level mới
+        // tránh stale key từ level trước
+        TutorialTargetRegistry.Clear();
+
         foreach (var screwData in levelData.screws)
         {
             if (screwData == null) continue;
@@ -49,7 +53,14 @@ public class ScrewSpawnService : IScrewSpawnService
             RegisterScrewInLayer(screw, part, layerManager);
             screwManager.AddScrew(screw);
 
-            //yield return null;
+            // Register vào TutorialTargetRegistry nếu có tutorialKey
+            if (!string.IsNullOrEmpty(screwData.tutorialKey))
+            {
+                TutorialTargetRegistry.Register(screwData.tutorialKey, screw.transform);
+                screw.tutorialKey = screwData.tutorialKey; // ← thêm dòng này
+                Debug.Log($"[ScrewSpawnService] Tutorial target registered: '{screwData.tutorialKey}'");
+            }
+
             yield return screw.Init();
         }
 
@@ -59,6 +70,7 @@ public class ScrewSpawnService : IScrewSpawnService
     private ScrewController SpawnScrewFromPool(ScrewScriptable screwData, Transform parent)
     {
         var screw = ScrewPool.Instance.Pool.SpawnNonGravity();
+        screw.OnReset();
         if (screw == null)
         {
             Debug.LogError("[ScrewSpawnService] Failed to spawn screw from pool.");
@@ -67,7 +79,6 @@ public class ScrewSpawnService : IScrewSpawnService
 
         screw.gameObject.transform.SetParent(parent);
         screw.gameObject.transform.localPosition = screwData.screwPosition;
-        screw.OnReset();
 
         return screw;
     }

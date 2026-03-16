@@ -81,9 +81,11 @@ namespace Level
         public Vector3 screwPosition;
 
         public HingeConnection hinge;
-
-        
         public List<HingeConnection> hingeConnections;
+
+        [Header("Tutorial")]
+        [Tooltip("Key để register vào TutorialTargetRegistry. Để trống nếu không dùng tutorial.")]
+        public string tutorialKey;
     }
 
     [System.Serializable]

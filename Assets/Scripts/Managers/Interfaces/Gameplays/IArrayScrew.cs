@@ -28,7 +28,7 @@ public interface IArrayScrew
     void RemoveScrew(ScrewController screw);
     void RemoveScrews(IEnumerable<ScrewController> screws);
     void Clear();
-    IEnumerator ClearToHidden();
+    IEnumerator ClearToHidden(Action<bool> callback);
 
     // ─────────────────────────────────────────
     // Hold operations

@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
   m_Name: Step_06_match_completed
   m_EditorClassIdentifier: 
-  stepId: match_completed
+  stepId: Step_06_match_completed
   stepType: 2
-  message: "Ba \u1ED1c c\xF9ng m\xE0u s\u1EBD \u0111\u01B0\u1EE3c gh\xE9p v\xE0 lo\u1EA1i
-    b\u1ECF!"
-  targetKey: box_close
+  message: "Perfect! The box is full \u2014 matched!"
+  targetKey: 0
+  spotlightSize: 200
+  spotlightLayer: 1
+  showHand: 1
+  handDirection: 0
   blockInput: 0
-  completeEventKey: Screw.MatchCompleted
-  requiredPayload: blue
+  completeEventKey: on_box_full
+  requiredPayload: 
+  autoAdvanceDelay: 0

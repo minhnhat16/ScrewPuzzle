@@ -1,5 +1,6 @@
 ﻿using Core.Match;
 using Enums;
+using Ingame.Pools;
 using Ingame.Screw;
 using System;
 using System.Collections;
@@ -8,7 +9,7 @@ using UnityEngine;
 
 namespace Ingame
 {
-    public class Box : FSMSystem, IMatchContainer
+    public class Box : FSMSystem, IMatchContainer, IResetable
     {
         #region Inspector
 
@@ -51,9 +52,9 @@ namespace Ingame
         #endregion
 
         #region Unity
-        private void OnEnable()
+        private void OnDisable()
         {
-            Debug.Log("[BOX] OnEnable");    
+            Debug.Log("[BOX] Box Disable");
         }
         private void Awake()
         {
@@ -69,7 +70,7 @@ namespace Ingame
 
         #endregion
 
-        #region Initialization
+       #region Initialization
 
         public void Initialize(ColorEnum color, int customCapacity = -1)
         {
@@ -78,11 +79,29 @@ namespace Ingame
             if (customCapacity > 0)
                 capacity = customCapacity;
 
+            animator?.KillAllAnimations();
+
             storage.Initialize(capacity, boxColor);
             boxRenderer?.SetColor(color);
             stateController.SetState(BoxState.Ready);
 
             OnBoxReady?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Called by BoxQueue when the box has finished moving into slot / is about to be used.
+        /// Ensure any stored screws are active and properly configured.
+        /// </summary>
+        public void OnActivated()
+        {
+            try
+            {
+                storage?.ActivateAllScrews();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[Box] OnActivated failed: {ex.Message}");
+            }
         }
 
         #endregion
@@ -259,6 +278,20 @@ namespace Ingame
             foreach (var item in items)
                 if (((IMatchContainer)this).TryAdd(item)) count++;
             return count;
+        }
+
+        internal void ClearActionBoxFull()
+        {
+            OnBoxFull = null;
+        }
+
+        public void OnReset()
+        {
+            Clear();
+            _onCompleted = null;
+            OnBoxReady = null;
+            OnBoxFull = null;
+            OnBoxRemoved = null;
         }
 
         #endregion

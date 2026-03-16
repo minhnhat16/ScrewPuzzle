@@ -123,7 +123,7 @@ public class SpriteLibControl : MonoBehaviour
     {
         var parts = address.Split('/');
 
-        Debug.Log("Address " + address);
+        //Debug.Log("Address " + address);
         if (parts.Length < 2)
             return;
 
@@ -177,7 +177,7 @@ public class SpriteLibControl : MonoBehaviour
             Group = group,
             Name = NormalizeShapeName(sprite.name)
         };
-        Debug.Log($"[SpriteLibControl] Indexed sprite: Layer={layer}, Group={group}, Name={key.Name}");
+        //Debug.Log($"[SpriteLibControl] Indexed sprite: Layer={layer}, Group={group}, Name={key.Name}");
         // Overwrite là hành vi đúng (remote override local)
         spriteIndex[key] = sprite;
 

@@ -14,4 +14,10 @@ public interface IBoxAnimator
     /// Invokes onComplete before deactivating.
     /// </summary>
     void PlayExitAnimation(Action onComplete = null);
+
+    /// <summary>
+    /// Kill tất cả tween/animation đang pending — gọi khi box được reuse từ pool.
+    /// Tránh stale callback từ level cũ fire vào box mới.
+    /// </summary>
+    void KillAllAnimations();
 }

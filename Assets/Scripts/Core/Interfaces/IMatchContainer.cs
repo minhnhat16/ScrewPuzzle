@@ -48,7 +48,7 @@ namespace Core.Match
         void Clear();
 
         /// <summary>Ẩn và chuyển về hidden storage (Magnet item)</summary>
-        IEnumerator ClearToHidden();
+        IEnumerator ClearToHidden(Action<bool> callback);
 
         // ─────────────────────────────────────────
         // Slot operations

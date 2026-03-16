@@ -87,17 +87,16 @@ public class BootLoader : MonoBehaviour
 
         yield return new WaitForEndOfFrame();
 
+        // ── New player flow hoàn toàn do SwitchViewForNewPlayer xử lý ──
+        // SwitchViewForNewPlayer(true) → LevelStartService.StartLevel(1) → load scene
+        // → bootstrapper → load level → start tutorial → gameplay
+        // KHÔNG gọi LoadLevelFromService nữa — tránh double load
         bool isNew = DataAPIController.instance.IsNewPlayer();
         string sceneName = isNew ? "InGame" : "Buffer";
         LoadSceneManager.ins.LoadSceneByName(sceneName, () =>
         {
             Debug.Log("BootLoader: Load Scene Done");
-            if (isNew)
-            {
-                StartCoroutine(LoadLevelFromService(isNew));
-            }
             ViewManager.Instance.SwitchViewForNewPlayer(isNew);
-
         });
     }
 
@@ -135,32 +134,6 @@ public class BootLoader : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Find LevelLoaderService in the loaded scene and run its load routine.
-    /// Adjust logic that chooses the target level id if you store last-played level in player data.
-    /// </summary>
-    private IEnumerator LoadLevelFromService(bool isNewPlayer)
-    {
-        // Choose level id: new players typically start at 0. Replace the fallback for returning players
-        // with your real "last played level" lookup (DataAPIController, player profile, etc.)
-        int levelId = isNewPlayer ? 0 : 1;
-
-        // Wait a frame to ensure scene objects have been initialized
-        yield return null;
-
-        var loader = FindAnyObjectByType<LevelLoaderService>();
-        if (loader == null)
-        {
-            Debug.LogWarning("[BOOT] LevelLoaderService not found in scene. Skipping level load.");
-            yield break;
-        }
-
-        Debug.Log($"[BOOT] Loading level {levelId} via LevelLoaderService");
-        // This yields until the service completes the load routine
-        yield return StartCoroutine(loader.LoadLevelRoutine(levelId, () => Debug.Log("[BOOT] LevelLoaderService finished load")));
-        Debug.Log("[BOOT] Level load from service completed");
-    }
-
     private void ScreenSetup()
     {
         Screen.orientation = ScreenOrientation.Portrait;
@@ -179,4 +152,3 @@ public class BootLoader : MonoBehaviour
         Time.timeScale = 1;
     }
 }
-

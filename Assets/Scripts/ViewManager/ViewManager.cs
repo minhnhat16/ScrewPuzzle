@@ -118,7 +118,7 @@ public class ViewManager : MonoBehaviour
         {
             var service = new LevelStartService(LoadSceneManager.ins);
             service.StartLevel(
-                levelId: 0,
+                levelId: 1,
                 onLevelStarted: () => Debug.Log("[ViewManager] New player level 0 started."),
                 onError: (err) => Debug.LogError($"[ViewManager] {err}")
             );

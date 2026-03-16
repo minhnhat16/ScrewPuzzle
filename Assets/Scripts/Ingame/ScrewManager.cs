@@ -47,7 +47,14 @@ namespace Ingame
         {
             if (screw == null) return;
 
-            var hinge = screw.hingeController?.HingeJoint2D;
+            // Remove from LayerManager's dictionary
+            var lm = LevelManager.ins.layerManager;
+            lm.RemoveScrewOnDict(screw, screw.GetSortingOrder());
+
+            var istrue = lm.screwDict.TryGetValue(screw.GetSortingOrder(), out var list) && list.Contains(screw);
+            Debug.Log($"[ScrewManager] RemoveScrew: {screw.GetColor()}, with sorting {screw.GetSortingLayerName()} from LayerManager.screwDict, screw has in dict {istrue}");
+
+            var hinge = screw.hingeController.HingeJoint2D;
             if (hinge != null)
                 RemoveHingeConnection(hinge);
 
@@ -64,11 +71,55 @@ namespace Ingame
             foreach (var s in distinct)
             {
                 if (s == null) continue;
-                var h = s.hingeController?.HingeJoint2D;
+                var h = s.hingeController.HingeJoint2D;
                 if (h != null) RemoveHingeConnection(h);
                 screws.Remove(s);
                 OnScrewRemoved?.Invoke(s);
             }
+        }
+
+        internal void AddHiddenScrews(List<ScrewController> copy)
+        {
+            if (copy == null || copy.Count == 0) return;
+
+            var hidden = copy.GroupBy(s => s.GetColor())
+                             .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var kvp in hidden)
+            {
+                if (!hiddenByColor.ContainsKey(kvp.Key))
+                    hiddenByColor[kvp.Key] = new List<ScrewController>();
+                hiddenByColor[kvp.Key].AddRange(kvp.Value);
+            }
+
+            // Remove from LayerManager.screwDict so LayerVisibilityController won't re-activate these screws later
+            try
+            {
+                var lm = LevelManager.ins.layerManager;
+                if (lm != null)
+                {
+                    lm.RemoveScrewsOnDict(copy);
+                    Debug.Log($"[ScrewManager] AddHiddenScrews: removed {copy.Count} screws from LayerManager.screwDict");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[ScrewManager] AddHiddenScrews -> RemoveScrewsOnDict failed: {ex.Message}");
+            }
+
+            // Remove khỏi active screws list — screw đang vào hidden không còn trên board
+            foreach (var s in copy)
+            {
+                if (s == null) continue;
+                var hinge = s.hingeController?.HingeJoint2D;
+                if (hinge != null)
+                    RemoveHingeConnection(hinge);
+                screws.Remove(s);
+                // Không fire OnScrewRemoved — screw chưa bị xóa hoàn toàn, chỉ tạm ẩn
+            }
+
+            Debug.Log($"[ScrewManager] Added {copy.Count} hidden screws. Total hidden by color: " +
+                      $"{string.Join(", ", hiddenByColor.Select(kvp => $"{kvp.Key}: {kvp.Value.Count}"))}");
         }
 
         //======================================================================//
@@ -81,8 +132,11 @@ namespace Ingame
         /// </summary>
         public void AddHingeConnection(HingeJoint2D hinge, BasePart part)
         {
-            if (hinge == null || part == null) return;
-
+            if (hinge == null || part == null)
+            {
+                Debug.LogWarning($"[ScrewManager] AddHingeConnection: hinge or part is null (hinge={hinge?.name}, part={part?.name}). Skipping.");
+                return;
+            }
             // hinge → part
             _hingeToPartMap[hinge] = part;
 
@@ -103,23 +157,38 @@ namespace Ingame
         {
             if (hinge == null) return;
 
+            // Defensive: ensure _hingeToPartMap is up-to-date
             if (!_hingeToPartMap.TryGetValue(hinge, out var part))
             {
-                Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge '{hinge.name}' không có trong map.");
-                return;
+                // Try to recover: check if hinge is attached to a part via connectedBody
+                var body = hinge.connectedBody;
+                if (body != null)
+                {
+                    part = body.GetComponent<BasePart>();
+                    if (part != null)
+                    {
+                        Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge '{hinge.name}' not in map, but found part via connectedBody: {part.name}. Recovering.");
+                        // Register missing mapping for cleanup
+                        _hingeToPartMap[hinge] = part;
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge '{hinge.name}' không có trong map và không tìm được part.");
+                    return;
+                }
             }
 
-            // Xóa hinge → part
+            // Remove hinge → part
             _hingeToPartMap.Remove(hinge);
 
-            // Xóa hinge khỏi set của part
+            // Remove hinge from set of part
             if (_partToHingesMap.TryGetValue(part, out var hingeSet))
             {
                 hingeSet.Remove(hinge);
 
                 int remaining = hingeSet.Count;
-                Debug.Log($"[ScrewManager] RemoveHingeConnection: hinge={hinge.name}, part={part.name}, " +
-                          $"remaining hinges={remaining}");
+                Debug.Log($"[ScrewManager] RemoveHingeConnection: hinge={hinge.name}, part={part.name}, remaining hinges={remaining}");
 
                 if (remaining == 0)
                 {
@@ -129,7 +198,6 @@ namespace Ingame
             }
             else
             {
-                // Map không đồng bộ — vẫn gọi HandleNoHingesLeft để an toàn
                 Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: part={part.name} không có trong _partToHingesMap.");
                 part.HandleNoHingesLeft();
             }
@@ -175,26 +243,56 @@ namespace Ingame
             ScrewPool.Instance.Pool.ReturnToPool(screw);
 
             screws.RemoveAt(idx);
-            return screw;
+            return screw; 
         }
-
+        
         public void ReturnAllScrewToPool()
         {
             var pool = ScrewPool.Instance;
-
             foreach (var s in screws)
             {
                 if (s == null) continue;
                 s.OnReset();
                 pool.Pool.ReturnToPool(s);
             }
-
             screws.Clear();
             _hingeToPartMap.Clear();
             _partToHingesMap.Clear();
         }
+        public void Reset()
+        {
+            // Return active screws
+            ReturnAllScrewToPool();
+            // Return any hidden screws (from Breaker) to pool as well
+            ReturnHiddenScrewsToPool();
+            // Ensure hiddenByColor cleared
+            hiddenByColor.Clear();
+        }
 
-        public void Reset() => ReturnAllScrewToPool();
+        private void ReturnHiddenScrewsToPool()
+        {
+            if (hiddenByColor == null || hiddenByColor.Count == 0) return;
+
+            var pool = ScrewPool.Instance;
+            foreach (var kvp in hiddenByColor)
+            {
+                var list = kvp.Value;
+                if (list == null) continue;
+                foreach (var s in list)
+                {
+                    if (s == null) continue;
+                    try
+                    {
+                        s.OnReset();
+                        pool.Pool.ReturnToPool(s);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"[ScrewManager] ReturnHiddenScrewsToPool failed for screw: {ex.Message}");
+                    }
+                }
+            }
+        }
 
         internal List<ScrewController> PopHiddenScrew(ColorEnum color, int max)
         {
@@ -209,22 +307,6 @@ namespace Ingame
                 hiddenByColor.Remove(color);
 
             return popped;
-        }
-
-        internal void AddHiddenScrews(List<ScrewController> copy)
-        {
-            var hidden = copy.GroupBy(s => s.GetColor())
-                             .ToDictionary(g => g.Key, g => g.ToList());
-
-            foreach (var kvp in hidden)
-            {
-                if (!hiddenByColor.ContainsKey(kvp.Key))
-                    hiddenByColor[kvp.Key] = new List<ScrewController>();
-                hiddenByColor[kvp.Key].AddRange(kvp.Value);
-
-            }
-            Debug.Log($"[ScrewManager] Added {copy.Count} hidden screws. Total hidden by color: " +
-                      $"{string.Join(", ", hiddenByColor.Select(kvp => $"{kvp.Key}: {kvp.Value.Count}"))}");
         }
 
         internal void RemoveHidden(ScrewController screw)
@@ -252,6 +334,12 @@ namespace Ingame
             if (!hiddenByColor.TryGetValue(color, out var list)) return;
             foreach (var s in screws) list.Remove(s);
             if (list.Count == 0) hiddenByColor.Remove(color);
+        }
+
+        public void OnValidate()
+        {
+            Debug.Log("[ScrewManager] OnValidate: checking for duplicate screws in inspector..." +
+                $"+{(screws == null ? 0 : screws.Count)}, hinge to part map {_hingeToPartMap.Count}");
         }
     }
 }

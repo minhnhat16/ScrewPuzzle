@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using Ingame.Pools;
 using System;
 using UnityEngine;
 
@@ -25,9 +26,9 @@ public class BoxAnimation : MonoBehaviour, IBoxAnimator
     [SerializeField] private Vector2 exitScreenOffset = new(-80f, -80f);
 
     [Header("Sound")]
-    [SerializeField] private SoundManager.SFX soundLidFall = SoundManager.SFX.BoxClose;  // nắp đang rơi
-    [SerializeField] private SoundManager.SFX soundLidLand = SoundManager.SFX.BoxLand;   // nắp chạm xuống
-    [SerializeField] private SoundManager.SFX soundBoxExit = SoundManager.SFX.BoxExit;   // box bay đi
+    [SerializeField] private SoundManager.SFX soundLidFall = SoundManager.SFX.BoxClose;
+    [SerializeField] private SoundManager.SFX soundLidLand = SoundManager.SFX.BoxLand;
+    [SerializeField] private SoundManager.SFX soundBoxExit = SoundManager.SFX.BoxExit;
 
     private Transform upperBoxTransform;
     private Sequence _currentSequence;
@@ -41,6 +42,30 @@ public class BoxAnimation : MonoBehaviour, IBoxAnimator
     private void OnDestroy()
     {
         _currentSequence?.Kill();
+    }
+
+    // ─── KillAllAnimations ─────────────────────────────────────────
+
+    /// <summary>
+    /// Kill tất cả tween pending — gọi khi box được reuse từ pool.
+    /// Tránh stale callback từ PlayExitAnimation level cũ fire vào box mới.
+    /// </summary>
+    public void KillAllAnimations()
+    {
+        _currentSequence?.Kill(complete: false); // complete=false → KHÔNG fire onComplete
+        _currentSequence = null;
+
+        // Reset visual về trạng thái ban đầu
+        transform.localScale = Vector3.one;
+        transform.localRotation = Quaternion.identity;
+
+        if (upperBoxTransform != null)
+        {
+            upperBoxTransform.localScale = Vector3.one;
+            upperBoxTransform.localRotation = Quaternion.identity;
+            upperBoxTransform.localPosition = upperStartPosition;
+            upperBoxRenderer.gameObject.SetActive(false);
+        }
     }
 
     // ─── PlayCloseAnimation ────────────────────────────────────────
@@ -61,16 +86,10 @@ public class BoxAnimation : MonoBehaviour, IBoxAnimator
 
         _currentSequence = DOTween.Sequence();
 
-        // Nắp bắt đầu rơi → play sound rơi
-        //_currentSequence.AppendCallback(() =>
-        //    SoundHelper.PlaySFX(soundLidFall));
-
-        // Nắp rơi xuống
         _currentSequence.Append(upperBoxRenderer.transform
             .DOLocalMove(Vector3.zero, fallDuration)
             .SetEase(Ease.InQuad));
 
-        // Nắp chạm → play sound đóng sầm + punch scale
         _currentSequence.AppendCallback(() =>
             SoundHelper.PlaySFX(soundLidLand));
 
@@ -91,16 +110,13 @@ public class BoxAnimation : MonoBehaviour, IBoxAnimator
 
         _currentSequence = DOTween.Sequence();
 
-        // Squeeze anticipation
         _currentSequence.Append(transform
             .DOScale(new Vector3(1f, 1f, 1f), 0.08f)
             .SetEase(Ease.OutQuad));
 
-        // Sound khi bay đi
         _currentSequence.AppendCallback(() =>
             SoundHelper.PlaySFX(soundBoxExit));
 
-        // Move + scale nhỏ đồng thời
         _currentSequence.Append(transform
             .DOMove(topRightWorld, exitDuration)
             .SetEase(Ease.InBack));
@@ -119,7 +135,7 @@ public class BoxAnimation : MonoBehaviour, IBoxAnimator
                 upperBoxTransform.localScale = Vector3.one;
                 upperBoxTransform.localRotation = Quaternion.identity;
             }
-            gameObject.SetActive(false);
+
         });
     }
 

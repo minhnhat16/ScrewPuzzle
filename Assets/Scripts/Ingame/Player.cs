@@ -12,7 +12,6 @@ namespace Ingame
         public UnityEvent<ScrewController> OnScrewClicked = new();
         public event Action<ScrewController> OnScrewSelected;
 
-        // Called from ScrewGameBootstrapper.InitializeForLevel()
         public void Inject(IScrewInteractionService screwService)
         {
             _screwService = screwService;
@@ -44,7 +43,6 @@ namespace Ingame
                 return;
             }
 
-            // Resolve ScrewController from direct or adapter case
             ScrewController screw = tappable as ScrewController;
             if (screw == null && tappable is MonoBehaviour mb)
                 screw = mb.GetComponent<ScrewController>()
@@ -53,7 +51,15 @@ namespace Ingame
 
             if (screw == null)
             {
-                Debug.LogWarning($"[Player] Could not resolve ScrewController from tappable:    {tappable}");
+                Debug.LogWarning($"[Player] Could not resolve ScrewController from tappable: {tappable}");
+                return;
+            }
+
+            // Guard: check IsInteractable trước khi forward xuống service
+            // Đây là điểm chặn chính — bao gồm cả tutorial block
+            if (!screw.IsInteractable)
+            {
+                Debug.Log($"[Player] Screw '{screw.name}' không interactable — bỏ qua.");
                 return;
             }
 

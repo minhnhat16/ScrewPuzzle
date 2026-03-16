@@ -164,9 +164,9 @@ namespace Managers
 
             if (!_stateMachine.TransitionTo(GameplayState.Loading))
             {
-                Debug.LogError($"[IngameController] Failed to transition to Loading. " +
-                               $"Current state: {_stateMachine.Current}, " +
-                               $"CanTransition: {_stateMachine.CanTransition(_stateMachine.Current, GameplayState.Loading)}");
+                //Debug.LogError($"[IngameController] Failed to transition to Loading. " +
+                //               $"Current state: {_stateMachine.Current}, " +
+                //               $"CanTransition: {_stateMachine.CanTransition(_stateMachine.Current, GameplayState.Loading)}");
                 return;
             }
 

@@ -28,7 +28,7 @@ namespace LevelSystem.Steps
         {
             var levelObject = LevelObjectPool.Instance.pool.SpawnNonGravity();
             levelObject.transform.SetParent(_parent);
-            levelObject.transform.localPosition = Vector3.zero;
+            levelObject.transform.localPosition = Vector3.up;
 
             var layerManager = levelObject.GetComponent<LayerManager>();
 

@@ -99,6 +99,7 @@ namespace UIScript
                 var item = itemConfig.FirstOrDefault();
                 PackMiniItem miniItem;
                 miniItem = Instantiate(itemPrefab, ItemContainer).GetComponent<PackMiniItem>();
+                itemContainer.sizeDelta = Vector2.one * GameConstants.MINI_SIZE * 2;
                 Sprite sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, item.Id.ToString());
                 miniItem.Init(item.Id, item.Quantity, sprite);
                 return;

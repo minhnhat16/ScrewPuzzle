@@ -1,5 +1,7 @@
 ﻿using LevelSystem.Core;
+using Managers;
 using System.Collections;
+using UnityEngine;
 
 namespace LevelSystem.Steps
 {
@@ -23,7 +25,16 @@ namespace LevelSystem.Steps
                 yield break;
             }
 
-            // Reset trước khi load level mới — tránh state cũ từ level trước
+            if (!_boxQueue.IsReady)
+            {
+                ctx.IsSuccess = false;
+                ctx.ErrorMessage = "[InitBoxQueueStep] BoxQueue chưa được Setup() " +
+                                   "— gọi ScrewGameBootstrapper.InitializeForLevel() trước LoadLevel().";
+                Debug.LogError($"[InitBoxQueueStep] {ctx.ErrorMessage}");
+                yield break;
+            }
+
+            // Reset state cũ từ level trước
             _boxQueue.OnReset();
 
             _boxQueue.LoadBoxConfigRecord(ctx.LevelData.boxConfig);

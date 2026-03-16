@@ -7,14 +7,23 @@ namespace Managers
 {
     public class ScrewGameBootstrapper : SingletonMono<ScrewGameBootstrapper>
     {
-       
         [Header("References")]
         [SerializeField] private ArrayScrew arrayScrew;
         [SerializeField] private BoxQueue boxQueue;
         [SerializeField] private ScrewManager screwManager;
         [SerializeField] private Player player;
-        [SerializeField]
-        private  Ease boxMovingEse;
+        [SerializeField] private Ease boxMovingEse;
+
+        [Header("Editor Dev Boot")]
+        [Tooltip("Level ID để auto-load khi Play trực tiếp từ InGame scene (Editor only).")]
+        [SerializeField] private int devBootLevelId = 1;
+        [Tooltip("Bật để auto-bootstrap khi Play từ InGame scene mà không qua MainScreen.")]
+        [SerializeField] private bool autoBootInEditor = true;
+
+        private void Start()
+        {
+        }
+
         public void InitializeForLevel()
         {
             if (arrayScrew == null || boxQueue == null || screwManager == null || player == null)
@@ -30,7 +39,7 @@ namespace Managers
 
             // ── ArrayScrew ──────────────────────────────────────
             var router = new MatchRouter(rule, path, containers);
-            arrayScrew.Inject(router, screwManager, containers);
+            arrayScrew.Inject(router, screwManager, containers, player);
             Debug.Log("[ScrewGameBootstrapper] Injected ArrayScrew");
 
             // ── LevelManager ────────────────────────────────────
@@ -50,7 +59,7 @@ namespace Managers
 
             // ── BoxQueue ← ArrayScrew ───────────────────────────
             boxQueue.SetArrayScrew(arrayScrew);
-            Debug.Log("[ScrewGameBootstrapper] SetArrayScrew into BoxQueue" + (arrayScrew == null));
+            Debug.Log("[ScrewGameBootstrapper] SetArrayScrew into BoxQueue " + (arrayScrew == null));
 
             // ── ScrewInteractionService → Player ─────────────────
             var screwService = new ScrewInteractionService(

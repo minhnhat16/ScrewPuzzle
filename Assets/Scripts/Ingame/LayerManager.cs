@@ -14,7 +14,7 @@ namespace Ingame.Board
         [SerializeField] List<BaseLayer> layers = new List<BaseLayer>();
         [SerializeField] private Dictionary<string, BasePart> partDict = new();
         [SerializeField] List<BasePart> parts = new List<BasePart>();
-            public Dictionary<int, List<ScrewController>> screwDict = new();
+        public Dictionary<int, List<ScrewController>> screwDict = new();
         public Dictionary<BaseLayer, List<ScrewController>> screwDictByLayer = new();
 
         public List<BasePart> Parts { get => parts; set => parts = value; }
@@ -68,11 +68,13 @@ namespace Ingame.Board
         /// </summary>
         public void RemoveScrewOnDict(ScrewController screw, int sortingOrder)
         {
+
+            Debug.Log($"Attempting to remove screw {screw.GetColor()} from layer {sortingOrder} and screw layer name {screw.GetSortingLayerName()} ");
             if (!screwDict.TryGetValue(sortingOrder, out var listScrews) || listScrews == null)
                 return;
 
             listScrews.Remove(screw);
-
+            Debug.Log($"Removed screw {screw.GetColor()} from layer {sortingOrder}");
             if (listScrews.Count == 0)
                 screwDict.Remove(sortingOrder);
         }
@@ -88,8 +90,16 @@ namespace Ingame.Board
         public IEnumerator ShowNext(BaseLayer layer)
         {
             yield return new WaitForSeconds(1.5f);
-            layer.gameObject.SetActive(false);
-            visibilityController.ShowNextLayer();
+
+            // Dùng PopLayer thay vì SetActive + ShowNextLayer riêng lẻ
+            // — PopLayer sẽ null slot trong indexedLayers, advance window, rồi ApplyVisibility
+            if (visibilityController != null)
+                visibilityController.PopLayer(layer);
+            else
+            {
+                // Fallback nếu không có visibilityController
+                layer.gameObject.SetActive(false);
+            }
         }
 
         public IEnumerator ChangePartState(float timeout = 0.5f)
@@ -194,30 +204,41 @@ namespace Ingame.Board
                 return new List<ScrewController>();
             }
 
-            int layer = part.PartLayer() - 10;
-            if (layer < 0 || !screwDict.TryGetValue(layer, out var screwsInLayer)
-                          || screwsInLayer == null || screwsInLayer.Count == 0)
-                return new List<ScrewController>();
-
             var body = part.Body;
-            return screwsInLayer
-                .Where(s => s.hingeController?.BodyConnect != null
-                         && body != null
-                         && s.hingeController.BodyConnect == body)
-                .ToList();
-        }
+            if (body == null) return new List<ScrewController>();
 
+            // screwDict key = SortingOrder (không phải physics layer)
+            // Scan tất cả bucket để tìm screw connect đúng body
+            var result = new List<ScrewController>();
+            foreach (var kvp in screwDict)
+            {
+                if (kvp.Value == null) continue;
+                foreach (var s in kvp.Value)
+                {
+                    if (s == null) continue;
+                    if (s.IsInHold) continue;
+                    if (s.hingeController.BodyConnect == body)
+                        result.Add(s);
+                }
+            }
+            return result;
+        }
         public bool PartHasNoScrewConnected(BasePart part)
         {
             if (part == null) return true;
-            int layer = part.PartLayer() - 10;
-            if (!screwDict.TryGetValue(layer, out var screws) || screws == null) return true;
 
             var body = part.Body;
-            return !screws.Any(s => s != null
-                                 && s.hingeController != null
-                                 && s.hingeController.BodyConnect != null
-                                 && s.hingeController.BodyConnect == body);
+            if (body == null) return true;
+
+            foreach (var kvp in screwDict)
+            {
+                if (kvp.Value == null) continue;
+                if (kvp.Value.Any(s => s != null
+                                    && s.hingeController != null
+                                    && s.hingeController.BodyConnect == body))
+                    return false;
+            }
+            return true;
         }
 
         public HashSet<ColorEnum> GetUniqueScrewColorsByLayer(int layer)
@@ -259,11 +280,7 @@ namespace Ingame.Board
 
         private void ResetAllParts()
         {
-            foreach (var part in parts)
-            {
-                part.Reset();
-                PartPool.Instance.pool.ReturnToPool(part);
-            }
+            PartPool.Instance.ReturnAll(Parts);
         }
 
         // ─── Queries ───────────────────────────────────────────────

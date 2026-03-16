@@ -67,11 +67,10 @@ namespace Ingame
                 if (screw == null) continue;
 
                 var hinge = screw.hingeController;
-                var body = hinge?.BodyConnect;
+                var body = hinge.BodyConnect;
 
                 if (isOn)
                 {
-                    // Nếu Connected Part đang tắt → không bật Screw
                     if (body != null && !body.gameObject.activeSelf)
                     {
                         Debug.Log($"[LayerUtils] Skip Activate Screw ({screw.name}) — connected part inactive: {body.name}");

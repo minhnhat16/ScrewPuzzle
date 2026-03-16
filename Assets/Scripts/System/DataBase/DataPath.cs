@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,8 +19,8 @@ public class DataPath
     public const string DAILYLIST = DAILYDATA + "/dailyList";
     public const string CAMERADATA = "cameraData";
     public const string SPINDATA = "spinData";
-    public const string ISSPIN =  SPINDATA +"/isSpin";
-    public const string TIMESPIN = SPINDATA+ "/timeSpin";
+    public const string ISSPIN = SPINDATA + "/isSpin";
+    public const string TIMESPIN = SPINDATA + "/timeSpin";
     public const string NEWPLAYER = "userInfo/isNewPlayer";
     public const string MISSION_PROGRESS = "missions";
     public const string CRBACKGROUND = "collectionData/currentBG";
@@ -35,8 +35,8 @@ public class DataPath
     public static string BLOCKSDATA = "puzzleBlockData";
 
     public static string TIMESAVEMETA = "timeMeta";
-    public static string LASTRESETTIME = TIMESAVEMETA+ "/lastResetUtcTicks";
-    public static string CURPUZZLEID = "currentPuzzleID";   
+    public static string LASTRESETTIME = TIMESAVEMETA + "/lastResetUtcTicks";
+    public static string CURPUZZLEID = "currentPuzzleID";
     public static string SOUNDFX = "music";
     public static string MUSICFX = "sfx";
 
@@ -44,4 +44,9 @@ public class DataPath
 
     public static string SPECIAL_CURRENT = "specialData/currentSpecial";
     public static string SPECIAL_TARGET = "specialData/targetSpecial";
+
+    // ─── Side Mission Daily ────────────────────────────────────────
+    public const string SIDE_MISSION_DAILY = "sideMissionDaily";
+    public const string SIDE_MISSION_COMPLETED_TODAY = SIDE_MISSION_DAILY + "/completedToday";
+    public const string SIDE_MISSION_LAST_RESET = SIDE_MISSION_DAILY + "/lastResetDate";
 }

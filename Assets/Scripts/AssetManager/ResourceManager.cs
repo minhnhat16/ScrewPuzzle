@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 using Object = UnityEngine.Object;
 
 public class ResourceManager : SingletonMono<ResourceManager>
@@ -22,19 +23,19 @@ public class ResourceManager : SingletonMono<ResourceManager>
         foreach (var label in labels)
         {
 
-            Debug.Log($"[ResourceManager] Getting keys for label: '{label}'");  
+            //Debug.Log($"[ResourceManager] Getting keys for label: '{label}'");  
             Task<List<string>> keysTask = TaskExtensions.GetKeysFromLabel(label);
             yield return new WaitUntil(() => keysTask.IsCompleted);
 
             if (keysTask.Exception != null)
             {
-                Debug.LogError("Failed to get keys for label: " + label + " => " + keysTask.Exception);
+                //Debug.LogError("Failed to get keys for label: " + label + " => " + keysTask.Exception);
                 yield break;
             }
 
             foreach (var key in keysTask.Result)
             {
-                Debug.Log($"[ResourceManager] Found key '{key}' for label '{label}'");
+                //Debug.Log($"[ResourceManager] Found key '{key}' for label '{label}'");
                 allKeys.Add(key); // thêm vào set để tránh trùng
             }
         }
@@ -45,10 +46,10 @@ public class ResourceManager : SingletonMono<ResourceManager>
 
         if (loadTask.Exception != null)
         {
-            Debug.LogError("Error loading addressable assets: " + loadTask.Exception);
+            //Debug.LogError("Error loading addressable assets: " + loadTask.Exception);
             yield break;
         }
-        Debug.Log($"Loaded {allKeys.Count} addressable assets from {labels.Count} labels successfully.");
+        //Debug.Log($"Loaded {allKeys.Count} addressable assets from {labels.Count} labels successfully.");
         callback?.Invoke();
     }
 
@@ -266,9 +267,11 @@ public class ResourceManager : SingletonMono<ResourceManager>
     public bool IsPSBLoaded(string psbKey) => _loadedPsbKeys.Contains(psbKey);
 
     /// <summary>
-    /// Load tất cả PSB GameObjects theo label/key từ Addressables,
-    /// extract sprites từ tất cả SpriteRenderer vào spriteDict.
-    /// Dùng khi có nhiều asset cùng label (e.g. "Image_Level").
+    /// Load tất cả PSB assets theo label từ Addressables,
+    /// extract sprites từ SpriteRenderer (nếu là GameObject/Prefab).
+    /// 
+    /// Trên Android build, Addressables có thể trả về type khác so với Editor.
+    /// Dùng LoadAssetsAsync&lt;Object&gt; thay vì &lt;GameObject&gt; để tương thích cả 2.
     /// </summary>
     public async Task LoadPSB(string psbKey)
     {
@@ -284,40 +287,96 @@ public class ResourceManager : SingletonMono<ResourceManager>
             return;
         }
 
-        // LoadAssetsAsync by label → returns IList<GameObject> (tất cả asset cùng label)
-        AsyncOperationHandle<IList<GameObject>> handle =
-            Addressables.LoadAssetsAsync<GameObject>(psbKey, null);
+        // ── Step 1: Kiểm tra label có tồn tại trong catalog không ──
+        AsyncOperationHandle<IList<IResourceLocation>> locHandle =
+            Addressables.LoadResourceLocationsAsync(psbKey, typeof(Object));
+
+        await locHandle.Task;
+
+        if (locHandle.Status != AsyncOperationStatus.Succeeded
+            || locHandle.Result == null
+            || locHandle.Result.Count == 0)
+        {
+            Debug.LogWarning($"[ResourceManager] LoadPSB: label '{psbKey}' has no locations in catalog. " +
+                             "Check Addressables labels and rebuild (Build > New Build > Default Build Script).");
+            Addressables.Release(locHandle);
+            _loadedPsbKeys.Add(psbKey); // đánh dấu để không retry mãi
+            return;
+        }
+
+        int locationCount = locHandle.Result.Count;
+        Addressables.Release(locHandle);
+
+        // ── Step 2: Load bằng Object type — tương thích cả Editor lẫn Android build ──
+        AsyncOperationHandle<IList<Object>> handle =
+            Addressables.LoadAssetsAsync<Object>(psbKey, null);
 
         await handle.Task;
+
         if (handle.Status != AsyncOperationStatus.Succeeded || handle.Result == null)
         {
-            Debug.LogError($"[ResourceManager] LoadPSB failed for label '{psbKey}': {handle.Status}");
+            Debug.LogError($"[ResourceManager] LoadPSB failed for label '{psbKey}': {handle.Status}. " +
+                           $"Catalog had {locationCount} locations but load returned nothing. " +
+                           $"Exception: {handle.OperationException?.Message}");
             Addressables.Release(handle);
             return;
         }
 
+        // ── Step 3: Extract sprites từ kết quả ──
         int added = 0;
-        foreach (var prefab in handle.Result)
+        foreach (var asset in handle.Result)
         {
-            if (prefab == null) continue;
+            if (asset == null) continue;
 
-            var renderers = prefab.GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
-            foreach (var r in renderers)
+            // Case 1: Asset là GameObject (PSB prefab) — extract từ SpriteRenderer
+            if (asset is GameObject go)
             {
-                if (r.sprite == null) continue;
-
-                string spriteKey = r.sprite.name;
+                var renderers = go.GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+                foreach (var r in renderers)
+                {
+                    if (r.sprite == null) continue;
+                    string spriteKey = r.sprite.name;
+                    if (!spriteDict.ContainsKey(spriteKey))
+                    {
+                        spriteDict[spriteKey] = r.sprite;
+                        added++;
+                    }
+                }
+            }
+            // Case 2: Asset là Sprite trực tiếp (sub-asset từ PSB SpriteAtlas)
+            else if (asset is Sprite sprite)
+            {
+                string spriteKey = sprite.name;
                 if (!spriteDict.ContainsKey(spriteKey))
                 {
-                    spriteDict[spriteKey] = r.sprite;
+                    spriteDict[spriteKey] = sprite;
                     added++;
-                    Debug.Log($"[ResourceManager] Added sprite: '{spriteKey}' from '{prefab.name}'");
+                }
+            }
+            // Case 3: Asset là Texture2D — convert sang Sprite
+            else if (asset is Texture2D tex)
+            {
+                var sp = Sprite.Create(
+                    tex,
+                    new Rect(0, 0, tex.width, tex.height),
+                    new Vector2(0.5f, 0.5f),
+                    100f
+                );
+                sp.name = tex.name;
+                if (!spriteDict.ContainsKey(sp.name))
+                {
+                    spriteDict[sp.name] = sp;
+                    added++;
                 }
             }
         }
 
+        // Cache handle để có thể release sau khi unload
+        _handleCache[psbKey] = handle;
         _loadedPsbKeys.Add(psbKey);
-        Debug.Log($"[ResourceManager] LoadPSB label='{psbKey}': {handle.Result.Count} prefabs, +{added} sprites, total={spriteDict.Count}");
+
+        Debug.Log($"[ResourceManager] LoadPSB label='{psbKey}': " +
+                  $"{handle.Result.Count} assets loaded, +{added} sprites, total={spriteDict.Count}");
     }
 
     /// <summary>

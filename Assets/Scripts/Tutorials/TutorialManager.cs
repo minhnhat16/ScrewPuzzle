@@ -1,6 +1,8 @@
 ﻿using ConfigFile;
 using Ingame.Screw;
 using System.Collections;
+using System.Data.Common;
+using System.DataBase;
 using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
@@ -23,6 +25,12 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>Tutorial đang block input (step hiện tại có blockInput = true)</summary>
+    public bool IsBlockingInput { get; private set; }
+
+    /// <summary>targetKey của step hiện tại — screw nào được phép click</summary>
+    public string CurrentTargetKey => Current?.targetKey;
+
     private void Awake() => ins = this;
 
     // ─────────────────────────────────────────
@@ -33,7 +41,33 @@ public class TutorialManager : MonoBehaviour
     {
         Debug.Log("[Tutorial] START");
         _currentIndex = 0;
+
+        TutorialUI.ins.EnableTutorialBlocker();
+        SetGameViewInteractable(false);
+
         PlayStep();
+    }
+
+   
+
+    /// <summary>
+    /// Lấy GameView từ ViewManager, toggle CanvasGroup.interactable.
+    /// CanvasGroup sẽ được tự động add nếu chưa có.
+    /// </summary>
+    private void SetGameViewInteractable(bool interactable)
+    {
+        var gameView = ViewManager.Instance?.GetView<GameView>();
+        if (gameView == null)
+        {
+            Debug.LogWarning("[TutorialManager] SetGameViewInteractable: GameView not found.");
+            return;
+        }
+
+        var cg = gameView.GetComponentInChildren<CanvasGroup>();
+
+        cg.interactable = interactable;
+        cg.blocksRaycasts = interactable;
+        Debug.Log($"[TutorialManager] GameView interactable = {interactable}");
     }
 
     /// <summary>
@@ -81,6 +115,7 @@ public class TutorialManager : MonoBehaviour
 
         if (Current == null)
         {
+            IsBlockingInput = false;
             Debug.Log("[Tutorial] DONE — no more steps");
             return;
         }
@@ -93,20 +128,24 @@ public class TutorialManager : MonoBehaviour
         switch (Current.stepType)
         {
             case TutorialStepType.ShowMessage:
+                IsBlockingInput = false;
                 TutorialUI.ins.BlockInput(false);
                 break;
 
             case TutorialStepType.HighlightAndClick:
+                IsBlockingInput = Current.blockInput;
                 TutorialUI.ins.BlockInput(Current.blockInput);
                 HighlightCurrentTarget();
                 break;
 
             case TutorialStepType.WaitForEvent:
+                IsBlockingInput = Current.blockInput;
                 TutorialUI.ins.BlockInput(Current.blockInput);
                 HighlightCurrentTarget();
                 break;
 
             case TutorialStepType.AutoAdvance:
+                IsBlockingInput = false;
                 TutorialUI.ins.BlockInput(false);
                 break;
         }
@@ -177,10 +216,13 @@ public class TutorialManager : MonoBehaviour
 
     private void OnTutorialCompleted()
     {
+        IsBlockingInput = false;
         Debug.Log("[Tutorial] ✅ COMPLETED");
+
+        SetGameViewInteractable(true);
         TutorialUI.ins.HideAll();
-        PlayerPrefs.SetInt("FIRST_TIME", 0);
-        PlayerPrefs.Save();
+        TutorialEventBus.Clear();
+        DataAPIController.instance.SetNewPlayer(false);
     }
 
 #if UNITY_EDITOR

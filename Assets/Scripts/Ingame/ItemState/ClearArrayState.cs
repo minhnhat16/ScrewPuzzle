@@ -31,10 +31,14 @@ public class ClearArrayState : FSMState<ItemController>, IItem
     /// </summary>
     private IEnumerator ClearAndResolve()
     {
+        int itemUsed = 0;
         // Chờ tất cả screw move vào hidden storage xong
-        yield return ArrayScrew.ins.ClearToHidden();
+        yield return ArrayScrew.ins.ClearToHidden((isClear) =>
+        {
+            itemUsed = isClear ? 1 : 0;
+        });
 
-        MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
+        MissionManager.ins.ProcessUseItem(ItemType.Magnet, itemUsed);
 
         sys.SetExecuting(false);
         sys.SetSelected(false);

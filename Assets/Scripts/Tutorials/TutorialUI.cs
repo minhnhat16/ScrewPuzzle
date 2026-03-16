@@ -9,7 +9,12 @@ public class TutorialUI : MonoBehaviour
     public CanvasGroup mainGroup;
 
     [Header("Refs")]
+    [Tooltip("Block input theo từng step (blockInput = true)")]
     public CanvasGroup blocker;
+
+    [Tooltip("Block toàn bộ raycast trong suốt tutorial — chừa lỗ spotlight")]
+    public CanvasGroup tutorialBlocker;   // ← assign trong Inspector, alpha=0 raycast=false mặc định
+
     public TutorialSpotlight spotlight;
     public TutorialHand hand;
     public TutorialMessage message;
@@ -31,9 +36,6 @@ public class TutorialUI : MonoBehaviour
         Debug.Log($"[TutorialUI] ShowMessage: {msg}");
     }
 
-    /// <summary>
-    /// Highlight target với config từ TutorialStep — không hardcode tên object.
-    /// </summary>
     public void HighlightTarget(
         Transform target,
         float spotlightSize = 200f,
@@ -64,6 +66,30 @@ public class TutorialUI : MonoBehaviour
         Debug.Log($"[TutorialUI] BlockInput: {block}");
     }
 
+    /// <summary>
+    /// Bật permanent blocker — chặn mọi raycast ngoài vùng spotlight
+    /// trong suốt tutorial. Gọi một lần khi tutorial bắt đầu.
+    /// </summary>
+    public void EnableTutorialBlocker()
+    {
+        if (tutorialBlocker == null) return;
+        tutorialBlocker.alpha = 1f;
+        tutorialBlocker.blocksRaycasts = true;
+        tutorialBlocker.interactable = false; // không cần tương tác, chỉ chặn
+        Debug.Log("[TutorialUI] TutorialBlocker ENABLED");
+    }
+
+    /// <summary>
+    /// Tắt permanent blocker — gọi khi tutorial kết thúc hoàn toàn.
+    /// </summary>
+    public void DisableTutorialBlocker()
+    {
+        if (tutorialBlocker == null) return;
+        tutorialBlocker.alpha = 0f;
+        tutorialBlocker.blocksRaycasts = false;
+        Debug.Log("[TutorialUI] TutorialBlocker DISABLED");
+    }
+
     public void Show()
     {
         mainGroup.alpha = 1f;
@@ -81,6 +107,7 @@ public class TutorialUI : MonoBehaviour
         hand.Hide();
         blocker.alpha = 0f;
         blocker.blocksRaycasts = false;
+        DisableTutorialBlocker();
     }
 
     public IEnumerator HideAllAfter(float sec)

@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
   m_Name: Step_07_level_completed
   m_EditorClassIdentifier: 
-  stepId: level_completed
-  stepType: 0
-  message: "Tuy\u1EC7t v\u1EDDi! B\u1EA1n \u0111\xE3 hi\u1EC3u c\xE1ch ch\u01A1i
-    r\u1ED3i \u0111\xF3!!!"
+  stepId: Step_07_level_completed
+  stepType: 3
+  message: "Amazing! You know the rule, let clear it! \U0001F389"
   targetKey: 
+  spotlightSize: 200
+  spotlightLayer: 1
+  showHand: 0
+  handDirection: 1
   blockInput: 0
-  completeEventKey: Level.Completed
+  completeEventKey: 0
   requiredPayload: 
+  autoAdvanceDelay: 2

@@ -168,6 +168,8 @@ namespace System.DataBase
 
         internal void SavePlayerLevel(int currentLevel)
         {
+
+            Debug.Log("Current player level " + currentLevel);  
             dataModel.UpdateData(DataPath.CURRENTPLAYERLEVEL, currentLevel);
         }
 
@@ -457,9 +459,11 @@ namespace System.DataBase
         {
             var levelsData = GetAllLevelData();
             levelsData.Add(data);
+            SavePlayerLevel(data.levelID);
+            AddOneCurrent();
             dataModel.UpdateData(DataPath.ALLLEVEL, levelsData, callback);
         }
-
+    
         internal void AddItemByConfig(List<ShopItemRecord> items)
         {
             ItemType type;
@@ -1047,8 +1051,19 @@ namespace System.DataBase
             return special.claimed;
         }
 
-       
+
         #endregion
 
+        #region SIDE MISSION DAILY
+        public SideMissionDailyData ReadSideMissionDaily()
+        {
+            return dataModel.ReadData<SideMissionDailyData>(DataPath.SIDE_MISSION_DAILY);
+        }
+
+        public void SaveSideMissionDaily(SideMissionDailyData data, Action callback = null)
+        {
+            dataModel.UpdateData(DataPath.SIDE_MISSION_DAILY, data, callback);
+        }
+        #endregion
     }
 }

@@ -259,7 +259,7 @@ public class QuestDialog : BaseDialog
 
         chestItems[chest.Id] = item;
 
-        Debug.Log($"[Quest] Create chest id={chest.Id} special={isMaxtier}");
+        //Debug.Log($"[Quest] Create chest id={chest.Id} special={isMaxtier}");
     }
 
     private void OnChestUnlocked(int chestId)

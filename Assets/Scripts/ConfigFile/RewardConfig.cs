@@ -38,7 +38,7 @@ public class RewardConfig : BYDataTable<RewardConfigRecord>
 {
     public override ConfigCompare<RewardConfigRecord> DefineConfigCompare()
     {
-        Debug.Log("Definde config compare reward " );
+        Debug.Log("Defind config compare reward " );
         configCompare = new ConfigCompare<RewardConfigRecord>("id");
         return configCompare;
     }

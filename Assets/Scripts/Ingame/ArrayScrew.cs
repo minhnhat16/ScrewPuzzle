@@ -36,12 +36,14 @@ namespace Ingame
         private MatchRouter _router;
         private ScrewManager _screwManager;
         private IContainerQueue _containerQueue;
+        private IPlayer _player; // ← thêm
 
-        public void Inject(MatchRouter router, ScrewManager screwManager, IContainerQueue containerQueue)
+        public void Inject(MatchRouter router, ScrewManager screwManager, IContainerQueue containerQueue, IPlayer player = null)
         {
             _router = router;
             _screwManager = screwManager;
             _containerQueue = containerQueue;
+            _player = player;
         }
 
         // ─────────────────────────────────────────
@@ -63,7 +65,12 @@ namespace Ingame
             if (result == MatchRouter.RouteResult.RoutedToContainer)
             {
                 SoundHelper.PlaySFX(SFX.ScrewClicked);
-                _screwManager.RemoveScrew(screw);
+                // Chỉ remove screw khi đã add vào box thành công
+                var box = container as Box;
+                if (box != null && box.TryAddScrew(screw))
+                {
+                    _screwManager.RemoveScrew(screw);
+                }
                 return;
             }
 
@@ -94,6 +101,9 @@ namespace Ingame
 
             hold.RemoveScrew();
             _heldScrews.Remove(screw);
+
+            // Reset state flags — screw rời array hold
+            screw.ResetHoldState();
         }
 
         public void Clear()
@@ -102,18 +112,29 @@ namespace Ingame
             StartCoroutine(ClearCoroutine());
         }
 
-        public IEnumerator ClearToHidden()
+        public IEnumerator ClearToHidden(Action<bool> isClear)
         {
             var copy = _heldScrews.ToList();
-
+            if (copy.Count == 0)
+            {
+                isClear?.Invoke(false);
+                yield break;
+            }
             // Ẩn visual từng screw
             foreach (var screw in copy)
             {
+                if (screw == null) continue;
                 screw.SetActive(false);
                 yield return null;
             }
 
-            // Add vào BoxQueue._hiddenByColor (nguồn 1)
+            var lm = LevelManager.ins.layerManager;
+            if (copy.Count > 0)
+            {
+                lm.RemoveScrewsOnDict(copy);
+            }
+
+            // Add into BoxQueue._hiddenByColor (nguồn 1)
             // → ResolveAllHiddenForBox sẽ pick up khi box màu phù hợp spawn
             foreach (var screw in copy)
                 BoxQueue.ins.TryProcessItemScrew(screw);
@@ -126,8 +147,8 @@ namespace Ingame
             }
 
             _heldScrews.Clear();
+            isClear?.Invoke(true);
         }
-
         public void AddSlot()
         {
             activeSlotCount++;
@@ -168,7 +189,6 @@ namespace Ingame
             if (result == MatchRouter.RouteResult.RoutedToContainer)
             {
                 SoundHelper.PlaySFX(SFX.ScrewClicked);
-                _screwManager.RemoveScrew(screw);
                 return;
             }
 
@@ -221,6 +241,10 @@ namespace Ingame
                 var hold = holdScrews.FirstOrDefault(h => h.Screw == screw);
                 if (hold != null) hold.RemoveScrew();
                 _heldScrews.Remove(screw);
+
+                // Reset state flags — screw rời array hold, chuẩn bị vào box hold
+                screw.ResetHoldState();
+
                 taken.Add(screw);
             }
 
@@ -229,7 +253,6 @@ namespace Ingame
 
             return taken;
         }
-
         // ─────────────────────────────────────────
         // Game Active
         // ─────────────────────────────────────────
@@ -288,14 +311,17 @@ namespace Ingame
 
         private void AddToHoldFlow(ScrewController screw, HoldScrew hold)
         {
+            // Remove from LayerManager.screwDict so visibility controller won't re-activate this screw
+            var lm = LevelManager.ins.layerManager;
+
+            _heldScrews.Add(screw);
             screw.SetSortingOrderAndLayer(4, "Box");
             hold.AddScrew(screw, false, _ =>
             {
                 HandleTutorialForHold(hold);
+                if (IsFull) _player?.LockInput();
                 TriggerFullCheck();
             });
-            _heldScrews.Add(screw);
-            _screwManager.RemoveScrew(screw);
         }
 
         private void TriggerFullCheck()
@@ -316,12 +342,19 @@ namespace Ingame
                     bool stillFull = IsFull;
                     bool containerMoving = _containerQueue != null && _containerQueue.HaseMovingContainer;
 
-
                     Debug.Log($"[ArrayScrew] CheckFullCoroutine: stillFull={stillFull}, containerMoving={containerMoving}");
+
                     if (stillFull && !containerMoving)
                     {
+                        // Vẫn full sau 2s → game over / revive flow
                         OnQueueFull?.Invoke();
                         yield break;
+                    }
+                    else if (!stillFull)
+                    {
+                        // Slot đã được giải phóng (box spawned, screw taken) → unlock input
+                        _player?.UnlockInput();
+                        Debug.Log("[ArrayScrew] Array no longer full — input unlocked.");
                     }
                 }
 
@@ -421,12 +454,20 @@ namespace Ingame
         // ─────────────────────────────────────────
         // IResetable
         // ─────────────────────────────────────────
-
+        public void ClearHeldScrewImidiate()
+        {
+            foreach (var screw in _heldScrews.ToList())
+                ScrewPool.Instance.Pool.ReturnToPool(screw);
+            foreach (var hold in holdScrews)
+                hold.RemoveScrew();
+            _heldScrews.Clear();
+        }
         public void OnReset()
         {
             totalWidth = GameConstants.ArrayWidth;
             SetupSlots(5);
-            Clear();
+            HoldAlignment();
+            ClearHeldScrewImidiate();
         }
 
 

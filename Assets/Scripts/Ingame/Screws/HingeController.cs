@@ -8,8 +8,8 @@ namespace Ingame.Screw
     public abstract class HingeController : MonoBehaviour
     {
         [SerializeField] private LayerMask layer;
-        [SerializeField] private Rigidbody2D bodyConnect = new();
-        [SerializeField] private HingeJoint2D hingeJoint2D = new();
+        [SerializeField] private Rigidbody2D bodyConnect;
+        [SerializeField] private HingeJoint2D hingeJoint2D;
 
         public LayerMask Layer
         {
@@ -18,9 +18,6 @@ namespace Ingame.Screw
         }
         public Rigidbody2D BodyConnect { get => bodyConnect; set => bodyConnect = value; }
         public HingeJoint2D HingeJoint2D { get => hingeJoint2D; set => hingeJoint2D = value; }
-
-
-
 
         //======================================================================
         // INITIALIZATION
@@ -38,10 +35,12 @@ namespace Ingame.Screw
 
         public virtual void InitHingeJoints()
         {
+            // Ensure references are assigned (fix null errors after reload)
+            if (hingeJoint2D == null)
+                hingeJoint2D = GetComponent<HingeJoint2D>();
+
             var hinge = hingeJoint2D;
             var body = bodyConnect;
-
-
 
             if (hinge && body)
             {
@@ -49,18 +48,14 @@ namespace Ingame.Screw
                 hinge.gameObject.name = body.gameObject.name + "_Hinge";
 
                 ScrewManager sm = LevelManager.ins.ScrewManager;
-                Debug.Log("[HingeController] InitHingeJoints: hinge=" + hinge.name + " connected to body=" + body.name + " ScrewManager: " +(sm == null));
+                Debug.Log("[HingeController] InitHingeJoints: hinge=" + hinge.name + " connected to body=" + body.name + " ScrewManager: " + (sm == null));
                 if (sm != null)
                 {
                     var part = body.GetComponent<BasePart>();
-
-
                     sm.AddHingeConnection(hinge, part);
-
                 }
-            }   
+            }
         }
-
 
         //======================================================================
         // FREE HINGES (DETACH + REMOVE FROM MANAGER + RETURN POOL)
@@ -73,17 +68,13 @@ namespace Ingame.Screw
             var hinge = hingeJoint2D;
             if (hinge == null) return;
             var body = hinge.connectedBody;
-            // 1) unregister khỏi ScrewManager
-            sm?.RemoveHingeConnection(hinge);
+            sm.RemoveHingeConnection(hinge);
 
-            // 2) tách hinge
             hinge.connectedBody = null;
 
-            // 4) Return hinge về pool
             if (hinge.TryGetComponent<HingeObject>(out var hingeObj))
                 HingePool.Instance.pool.ReturnToPool(hingeObj);
         }
-
 
         //======================================================================
         // CLEAR
@@ -100,20 +91,19 @@ namespace Ingame.Screw
             ClearBody();
         }
 
-
         //======================================================================
         // UTILS
         //======================================================================
 
         public virtual string GetStringBodyLayer(int index)
         {
-            if (index < 0 ) return "";
-            return LayerMask.LayerToName(bodyConnect.gameObject.layer);
+            if (index < 0) return "";
+            return LayerMask.LayerToName(bodyConnect != null ? bodyConnect.gameObject.layer : 0);
         }
 
         public virtual int GetIntBodyLayer(int index)
         {
-            if (index < 0 || bodyConnect == null ) return -1;
+            if (index < 0 || bodyConnect == null) return -1;
             return bodyConnect?.gameObject.layer ?? -1;
         }
 

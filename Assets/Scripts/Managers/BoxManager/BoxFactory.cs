@@ -18,8 +18,12 @@ public class BoxFactory : IBoxFactory
         foreach (var config in records)
         {
             Box box = SpawnFromPool(config);
+
+            // Reset trước khi Initialize — clear screws cũ từ level trước
+            box.OnReset();
+
             box.Initialize(config.BoxColor, config.NumberOfScrewHoles);
-            box.gameObject.SetActive(false); 
+            box.gameObject.SetActive(false);
             _boxes.Add(box);
             _stack.Push(box);
         }
@@ -45,7 +49,6 @@ public class BoxFactory : IBoxFactory
 
     private Box SpawnFromPool(BoxConfigRecord config)
     {
-
         return config.NumberOfScrewHoles switch
         {
             3 => BoxPool.Instance.pool.SpawnNonGravity(),

@@ -16,13 +16,19 @@ public class RemovePartState : FSMState<ItemController>, IItem
     {
         if (sys.IsItemExecuting) return;
         sys.SetSelected(true);
-        // Manual item — KHÔNG invoke itemPerformed ở đây
-        // Chờ player tap part → Perform()
     }
 
     internal void Perform(BasePart part, Vector3 startPos)
     {
         if (!sys.IsItemSelected || sys.IsItemExecuting) return;
+
+        // Part đang ở layer hidden hoặc prereview → không thể break
+        if (part == null || !part.IsBreakableByItem)
+        {
+            Debug.Log($"[RemovePartState] Perform blocked — part '{part?.uniqueID}' is not breakable.");
+            return;
+        }
+
         sys.SetExecuting(true);
 
         sys.PlayItemEffect(
@@ -36,7 +42,6 @@ public class RemovePartState : FSMState<ItemController>, IItem
                 sys.SetExecuting(false);
                 sys.SetSelected(false);
 
-                // Manual item → invoke SAU KHI player đã perform xong
                 sys.itemPerformed.Invoke(true);
 
                 IngameController.ins.OnItemFinished();
@@ -44,11 +49,11 @@ public class RemovePartState : FSMState<ItemController>, IItem
     }
 
     public void HandlingItem() { }
+
     public void Discard()
     {
         sys.SetExecuting(false);
         sys.SetSelected(false);
-        // Cancel mà không perform → cũng hide description
         sys.itemPerformed.Invoke(false);
         IngameController.ins.OnItemFinished();
     }

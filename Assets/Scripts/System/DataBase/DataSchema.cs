@@ -21,7 +21,7 @@ public class UserData
     public CollectionData collectionData;
 
     [SerializeField]
-    public Dictionary<string,MissionProgress> missions;
+    public Dictionary<string, MissionProgress> missions;
 
     [SerializeField]
     public Dictionary<int, ChestStageData> chestStates = new();
@@ -41,6 +41,9 @@ public class UserData
     public bool music;
     [SerializeField]
     public bool sfx;
+
+    [SerializeField]
+    public SideMissionDailyData sideMissionDaily;
 }
 [Serializable]
 public class UserInfo
@@ -139,7 +142,7 @@ public class CollectionData
 public class ScrewSkinData
 {
     [SerializeField]
-   public bool isUnlocked;
+    public bool isUnlocked;
     [SerializeField]
     public string name;
 
@@ -228,5 +231,16 @@ public class Special
 {
     public bool claimed;
     public int currentSpecial;
-    public int targetSpecial;   
+    public int targetSpecial;
+}
+
+// ─── Side Mission Daily Tracking ───────────────────────────────────────
+[Serializable]
+public class SideMissionDailyData
+{
+    /// <summary>Số mission đã generate hôm nay.</summary>
+    public int completedToday;
+
+    /// <summary>UTC date string (yyyy-MM-dd) của lần cuối reset.</summary>
+    public string lastResetDate;
 }

@@ -37,16 +37,8 @@ public class BoxSequenceService : IBoxSequenceService
             return null;
         }
 
-        Debug.Log($"[BoxSequenceService] TryDequeueMatching — queue có {_queue.Count} box: " +
-                  $"[{string.Join(", ", _queue.Select(b => b == null ? "null" : b.Color.ToString()))}]");
-
         var match = _queue.FirstOrDefault(predicate);
-
-        if (match == null)
-        {
-            Debug.Log("[BoxSequenceService] TryDequeueMatching — không tìm thấy box thỏa predicate.");
-            return null;
-        }
+        if (match == null) return null;
 
         _queue.Remove(match);
         Debug.Log($"[BoxSequenceService] TryDequeueMatching — matched color={match.Color}, còn lại {_queue.Count} box.");
@@ -58,17 +50,33 @@ public class BoxSequenceService : IBoxSequenceService
         var result = new Dictionary<ColorEnum, int>();
         foreach (var box in _queue)
         {
-            if (box == null)
-            {
-                Debug.LogWarning("[BoxSequenceService] GetColorCounts — box null trong queue!");
-                continue;
-            }
-            Debug.Log($"[BoxSequenceService] GetColorCounts — box '{box.name}' color={box.Color} active={box.gameObject.activeSelf}");
+            if (box == null) continue;
             if (!result.ContainsKey(box.Color))
                 result[box.Color] = 0;
             result[box.Color]++;
         }
-        Debug.Log($"[BoxSequenceService] GetColorCounts result: [{string.Join(", ", result.Select(kv => $"{kv.Key}={kv.Value}"))}]");
         return result;
+    }
+
+    /// <summary>
+    /// Xóa tối đa <paramref name="count"/> box màu <paramref name="color"/>
+    /// khỏi sequence (chưa spawn) và return về pool.
+    /// Trả về số box thực sự đã xóa.
+    /// </summary>
+    public int RemoveByColor(ColorEnum color, int count)
+    {
+        int removed = 0;
+        for (int i = _queue.Count - 1; i >= 0 && removed < count; i--)
+        {
+            if (_queue[i] != null && _queue[i].Color == color)
+            {
+                var box = _queue[i];
+                _queue.RemoveAt(i);
+                box.gameObject.SetActive(false); // return về pool state
+                removed++;
+            }
+        }
+        Debug.Log($"[BoxSequenceService] RemoveByColor: color={color} removed={removed}");
+        return removed;
     }
 }

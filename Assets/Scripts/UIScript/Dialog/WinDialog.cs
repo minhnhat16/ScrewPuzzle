@@ -1,6 +1,7 @@
-using Coffee.UIEffects;
+﻿using Coffee.UIEffects;
 using Coffee.UIExtensions;
 using DG.Tweening;
+using Ingame;
 using Managers;
 using System;
 using System.DataBase;
@@ -135,21 +136,52 @@ namespace UIScript.Dialog
         private void OnNextButtonClicked()
         {
             SetButtonInteractAble(false);
-            nextLevelButton.interactable = false;
+
             var levelManager = LevelManager.ins;
+            var ingameCtrl = IngameController.ins;
 
             int currentLevel = DataAPIController.instance.GetPlayerLevel();
-            currentLevel++;
-            LevelData data = new();
-            data.levelStar = 3;
-            data.levelID = currentLevel;
-            data.isCompleted = true;
-            levelManager.OnReset();
+            int nextLevel = currentLevel + 1;
+
+            LevelData data = new()
+            {
+                levelStar = 3,
+                levelID = currentLevel,
+                isCompleted = true
+            };
+
+            // 1. Save data trước
             DataAPIController.instance.SaveNewLevelData(data, () =>
             {
-                SetButtonInteractAble(true);
+                // 2. Reset state level cũ
+                levelManager.OnReset();
+
+                // 3. Hide win dialog + show loading screen
                 DialogManager.ins.HideDialog(dialogIndex);
-                levelManager.LoadLevel(currentLevel);
+                ShowLoadingThenLoadLevel(levelManager, ingameCtrl, nextLevel);
+            });
+        }
+
+        private void ShowLoadingThenLoadLevel(LevelManager levelManager, IngameController ingameCtrl, int nextLevel)
+        {
+            var loadingView = ViewManager.Instance.GetView<LoadingView>();
+            loadingView.ResetProgress();
+            // Hiện LoadingView ngay lập tức — reset progress về 0
+            ViewManager.Instance.SwitchView(ViewIndex.LoadingView, null, () =>
+            {
+              
+            });
+
+            // Load level — pipeline chạy, TaskManager.TotalProgress tự cập nhật LoadingView
+            levelManager.LoadLevel(nextLevel, () =>
+            {
+                // Pipeline xong → switch sang GameView rồi bắt đầu gameplay
+                ViewManager.Instance.SwitchView(ViewIndex.GameView, null, () =>
+                {
+                    ingameCtrl.StartLevel();
+                    SetButtonInteractAble(true);
+                    Debug.Log($"[WinDialog] Level {nextLevel} loaded and started ✅");
+                });
             });
         }
     }

@@ -40,7 +40,10 @@ public class ScrewInteractionService : IScrewInteractionService
             return;
         }
 
-        layerManager.RemoveScrewOnDict(screw, screw.GetSortingOrder());
         _arrayScrew.AddScrew(screw);
+
+        // Chỉ emit khi screw có tutorialKey — tránh noise ở level thường
+        if (!string.IsNullOrEmpty(screw.tutorialKey))
+            TutorialEventBus.Emit("on_screw_clicked", screw.tutorialKey);
     }
 }

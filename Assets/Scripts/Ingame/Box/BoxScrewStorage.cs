@@ -1,5 +1,7 @@
 ﻿using Enums;
+using Ingame;
 using Ingame.Screw;
+using PoolManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,6 +61,13 @@ public class BoxScrewStorage : MonoBehaviour
             return false;
         }
 
+        // Guard: prevent adding same screw twice
+        if (screws.Contains(screw))
+        {
+            Debug.LogWarning($"[BoxScrewStorage] TryAdd: screw {screw.name} is already in this storage — skipping duplicate add.");
+            return false;
+        }
+
         var emptySlot = holdSlots?.FirstOrDefault(h => h.IsEmpty());
         if (emptySlot == null)
         {
@@ -94,12 +103,105 @@ public class BoxScrewStorage : MonoBehaviour
 
         return result;
     }
+
+    /// <summary>
+    /// Activate all screws currently stored in this box (used when the box becomes active on screen).
+    /// Ensures visual/physics state is restored so screws move with the box and respond correctly.
+    /// </summary>
+    public void ActivateAllScrews()
+    {
+        // Activate screws tracked in storage list
+        for (int i = 0; i < screws.Count; i++)
+        {
+            var screw = screws[i];
+            if (screw == null) continue;
+
+            try
+            {
+                screw.SetActive(true);
+                screw.EnableColliderAndRig(true); // enable collider / rigid behavior for box-held screws
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[BoxScrewStorage] ActivateAllScrews: failed on screw {screw?.name}: {ex.Message}");
+            }
+        }
+
+        // Also ensure any screw still referenced by holdSlots are active
+        if (holdSlots != null)
+        {
+            foreach (var hold in holdSlots)
+            {
+                if (hold == null) continue;
+                var s = hold.GetScrew();
+                if (s == null) continue;
+                if (!s.gameObject.activeSelf)
+                {
+                    s.SetActive(true);
+                }
+                // Replace this line in ActivateAllScrews():
+                 s.ResetHoldState();
+                // with this line:
+                s.EnableColliderAndRig(true);
+            }
+        }
+    }
+
     public void Clear()
     {
-        screws.Clear();
-        if (holdSlots == null) return;
-        foreach (var hold in holdSlots)
-            hold.RemoveScrew();
+        // Return any stored screws and any screws referenced by holdSlots to pool / deactivate them
+        var pool = ScrewPool.Instance;
+        try
+        {
+            // Return list copy to avoid modification issues
+            var copy = screws.ToList();
+            foreach (var s in copy)
+            {
+                if (s == null) continue;
+                try
+                {
+                    s.OnReset();
+                    s.SetActive(false);
+                    pool?.Pool.ReturnToPool(s);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[BoxScrewStorage] Failed to return screw to pool: {ex.Message}");
+                }
+            }
+
+            // Also ensure holds are cleared and any screw there is returned
+            if (holdSlots != null)
+            {
+                foreach (var hold in holdSlots)
+                {
+                    if (hold == null) continue;
+                    var hScrew = hold.GetScrew();
+                    if (hScrew != null)
+                    {
+                        try
+                        {
+                            hScrew.OnReset();
+                            hScrew.SetActive(false);
+                            pool?.Pool.ReturnToPool(hScrew);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogWarning($"[BoxScrewStorage] Failed to return hold screw to pool: {ex.Message}");
+                        }
+                    }
+                    hold.RemoveScrew();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[BoxScrewStorage] Clear: unexpected error: {ex.Message}");
+        }
+        finally
+        {
+            screws.Clear();
+        }
     }
 
 #if UNITY_EDITOR

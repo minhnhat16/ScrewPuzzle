@@ -26,7 +26,6 @@ namespace Ingame.Screw
 
         // NEW: separate reservation flag for movement so clicks and move-locks don't collide
         private bool isReservedForMove;
-
         public bool IsInHold => isInHold;
         public bool IsMoving => isMoving;
         public bool IsActionComplete { get; private set; }
@@ -38,6 +37,7 @@ namespace Ingame.Screw
         public Transform Transform => transform;
 
         private Transform _transform;
+        internal string tutorialKey;
 
         internal int GetSortingOrder()
         {
@@ -51,6 +51,13 @@ namespace Ingame.Screw
         internal string GetSortingLayerName()
         {
             return screwRender != null ? screwRender.GetSortingLayer() : string.Empty;
+        }
+
+
+        public void OnDisable()
+        {
+            Debug.Log("Screw on disable: " + name);
+
         }
         private void Awake()
         {
@@ -68,6 +75,7 @@ namespace Ingame.Screw
 
         internal IEnumerator Init()
         {
+            IsActionComplete = false;   
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
             yield return new WaitUntil(() => bodyLayer != null);
             screwRender.SetSortingOrderAndLayer(0, bodyLayer);
@@ -125,7 +133,7 @@ namespace Ingame.Screw
             isReservedForMove = false;
         }
 
-        public void MoveToHold(HoldScrew holdScrew, bool isTele = false)
+        public void MoveToHold(HoldScrew holdScrew, bool isTele = false, Action callback = null)
         {
             isClicked = isMoving = true;
             isInHold = true;
@@ -136,8 +144,9 @@ namespace Ingame.Screw
                 screwPhysics.FreeHinge();
                 _transform.SetParent(holdScrew.transform);
                 _transform.localPosition = Vector3.zero;
-                // move finished, release reservation (now in hold)
+                _transform.localScale = Vector3.one; // Ensure scale is reset
                 isReservedForMove = false;
+                callback?.Invoke();
                 return;
             }
 
@@ -149,8 +158,10 @@ namespace Ingame.Screw
                 {
                     _transform.SetParent(holdScrew.transform, worldPositionStays: false);
                     _transform.localPosition = Vector3.zero;
+                    _transform.localScale = Vector3.one; // Ensure scale is reset
                     isMoving = false;
                     isReservedForMove = false;
+                    callback?.Invoke();
                     Debug.Log($"[ScrewController] MoveToHold complete for {name}");
                 });
             });
@@ -175,16 +186,19 @@ namespace Ingame.Screw
 
         internal void SetSortingOrderAndLayer(int order, string layer)
         {
+            Debug.Log("[Screw controller ] Set sorting order and layer: " + name + " order: " + order + " layer: " + layer);
             screwRender.SetSortingOrderAndLayer(order, layer);
         }
 
         public void OnReset()
         {
             isClicked = isInHold = isMoving = isShaking = false;
-            IsActionComplete = false;
+            IsActionComplete = true;
             screwRender.ResetRender();
             screwPhysics.ResetPhysics();
-            hingeController.Reset();
+           // hingeController.Reset();
+            if (_transform == null) _transform = transform;
+            _transform.localScale = Vector3.one; // Always reset scale
         }
 
         public ColorEnum GetColor()
@@ -216,7 +230,7 @@ namespace Ingame.Screw
             // Ensure the hinge has a HingeJoint2D component and use the HingeObject wrapper
             if (hinge.HingeJoint2D == null)
             {
-                hinge.HingeJoint2D = newHingeChild.GetComponent<HingeJoint2D>() ?? newHingeChild.AddComponent<HingeJoint2D>();
+                hinge.HingeJoint2D = newHingeChild.GetComponent<HingeJoint2D>();
             }
 
             // Ensure a Rigidbody2D exists on the hinge child (kinematic so it doesn't respond to physics)
@@ -224,13 +238,24 @@ namespace Ingame.Screw
             {
                 hingeBody = newHingeChild.AddComponent<Rigidbody2D>();
             }
+            else
+            {
+                Debug.Log("[Warning] Hinge child already has Rigidbody2D component. Reusing existing component.");
+            }
             hingeBody.bodyType = RigidbodyType2D.Kinematic;
 
             // Wire the hinge joint to the target part (guard targetPart == null)
             if (hinge.HingeJoint2D != null)
             {
-                hinge.HingeJoint2D.connectedBody = targetPart;
-                hinge.HingeJoint2D.autoConfigureConnectedAnchor = true;
+                if(targetPart == null)
+                {
+                    Debug.LogWarning($"[ScrewController] {name}: Attempting to create hinge with null targetPart! Hinge will not be connected.");
+                }
+                else
+                {
+                    hinge.HingeJoint2D.connectedBody = targetPart;
+                    hinge.HingeJoint2D.autoConfigureConnectedAnchor = true;
+                }
             }
 
             if (hingeController != null)
@@ -275,6 +300,15 @@ namespace Ingame.Screw
                     screwPhysics.DisableCollider();
                 }
             }
+        }
+
+        internal void ResetHoldState()
+        {
+            isInHold = false;
+            isMoving = false;
+            isClicked = false;
+            isReservedForMove = false;
+            screwPhysics.EnableCollider();
         }
 
         #region IMatchItem

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -26,5 +26,11 @@ public static class TutorialEventBus
         Debug.Log($"[TutorialEventBus] Emit event '{eventKey}' with payload: {payload}");
         if (events.ContainsKey(eventKey))
             events[eventKey]?.Invoke(payload);
+    }
+    /// <summary>Xóa toàn bộ subscriptions — gọi khi tutorial kết thúc hoặc level reset.</summary>
+    public static void Clear()
+    {
+        events.Clear();
+        Debug.Log("[TutorialEventBus] Cleared all subscriptions.");
     }
 }

@@ -20,6 +20,7 @@ namespace Ingame.Board
 
 
         public UnityEvent<bool, BasePart> onPartClear = new();
+        [SerializeField]
         private bool isLayerClear;
 
         public Transform Transform
@@ -46,6 +47,7 @@ namespace Ingame.Board
             set => dropPart = value;
         }
         public bool IsLayerClear { get => isLayerClear; set => isLayerClear = value; }
+        public bool IsHidden { get; private set; }
 
 
 
@@ -104,9 +106,9 @@ namespace Ingame.Board
                 parts.Remove(part);
 
             }
+            IsHidden = parts.Count == 0;
 
-
-            if (parts.Count == 0)
+            if (IsHidden)
             {
 
                 Debug.Log("Clear Layer " + gameObject.name);

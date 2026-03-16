@@ -22,9 +22,26 @@ public class LayerVisibilityController : MonoBehaviour
     public List<BaseLayer> indexedLayers = new List<BaseLayer>();
 
     [Header("Layer Range Settings")]
-    [SerializeField] private int previewMax = 1;   // exclusive upper bound for fully visible
-    [SerializeField] private int rePreviewMax = 7;  // exclusive upper bound for prereview (gray)
-    [SerializeField] private int preViewMin = 0;   // inclusive lower bound for fully visible
+    [Tooltip("Số layer fully visible cố định. Nếu > 0 thì dùng giá trị này, bỏ qua ratio.")]
+    [SerializeField] private int visibleWindowSize = 0;
+
+    [Tooltip("Tỷ lệ layer fully visible = ceil(totalLayers / divisor).\n" +
+             "Chỉ dùng khi visibleWindowSize = 0.\n" +
+             "VD: divisor=2 → 7 layers → 4 visible, 20 layers → 10 visible.\n" +
+             "    divisor=3 → 7 layers → 3 visible, 20 layers → 7 visible.")]
+    [SerializeField][Range(1f, 10f)] private float visibleDivisor = 2f;
+
+    [Tooltip("Số layer prereview (gray) hiển thị sau vùng visible.")]
+    [SerializeField] private int prereviewWindowSize = 6;
+
+    [Tooltip("Số layer hidden được preview (FadeToBlack) ngay sau prereview. " +
+             "Giới hạn để tránh spawn quá nhiều coroutine khi level có nhiều layer.")]
+    [SerializeField] private int hiddenPreviewCount = 2;
+
+    // Runtime — tính lại từ window sizes mỗi lần Init/ShowNext
+    private int previewMax;
+    private int rePreviewMax;
+    private int preViewMin;
 
     public float fadeDuration = 0.5f;
 
@@ -32,25 +49,26 @@ public class LayerVisibilityController : MonoBehaviour
     public int PreViewMin { get => preViewMin; set => preViewMin = value; }
 
     // ──────────────────────────────────────────────────────────────
-    // INIT
+    // HELPERS
     // ──────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// [FIX 1] Overload mới: nhận LayerManager trực tiếp.
-    /// Gọi từ FinalizeStep sau khi tất cả layers đã spawn.
+    /// Tính số layer fully visible thực tế:
+    ///   - visibleWindowSize > 0 → dùng giá trị cố định
+    ///   - visibleWindowSize = 0 → ceil(count / visibleDivisor), tối thiểu 1
     /// </summary>
-    public void Init(LayerManager lm)
+    private int CalcEffectiveVisible(int count)
     {
-        if (lm == null || lm.Layers == null || lm.Layers.Count == 0)
-        {
-            Init(incomingQueue: null);
-            return;
-        }
+        if (visibleWindowSize > 0)
+            return Mathf.Clamp(visibleWindowSize, 1, count);
 
-        var queue = new Queue<BaseLayer>(lm.Layers);
-        Init(queue);
+        int calculated = Mathf.CeilToInt(count / Mathf.Max(1f, visibleDivisor));
+        return Mathf.Clamp(calculated, 1, count);
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // INIT
+    // ──────────────────────────────────────────────────────────────
     /// <summary>
     /// Init với optional incoming queue.
     /// Priority: incomingQueue → LayerManager.Layers → scan children.
@@ -60,7 +78,11 @@ public class LayerVisibilityController : MonoBehaviour
         indexedLayers ??= new List<BaseLayer>();
 
         var lm = GetComponentInParent<LayerManager>();
-
+        if (lm == null)
+        {
+            Debug.LogWarning("[LayerVisibilityController] No LayerManager found in parent hierarchy.");
+            return;
+        }
         if (incomingQueue != null && incomingQueue.Count > 0)
         {
             indexedLayers = incomingQueue.ToList();
@@ -82,15 +104,15 @@ public class LayerVisibilityController : MonoBehaviour
         }
 
         int count = indexedLayers.Count;
+        int effectiveVisible = CalcEffectiveVisible(count);
 
-        // [FIX 2] Clamp một lần ở đây — KHÔNG cộng thêm 1
-        preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count));
-        previewMax = Mathf.Clamp(previewMax, preViewMin, count);
-        rePreviewMax = Mathf.Clamp(rePreviewMax, previewMax, count);
+        preViewMin = 0;
+        previewMax = Mathf.Clamp(preViewMin + effectiveVisible, preViewMin, count);
+        rePreviewMax = Mathf.Clamp(previewMax + prereviewWindowSize, previewMax, count);
 
         if (lm != null) lm.visibilityController = this;
 
-        Debug.Log($"[VisCtrl.Init] layers:{count} | min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
+        Debug.Log($"[VisCtrl.Init] layers:{count} | divisor:{visibleDivisor} | effectiveVisible:{effectiveVisible} | min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
 
         ApplyLayerVisibility();
     }
@@ -108,8 +130,6 @@ public class LayerVisibilityController : MonoBehaviour
         var lm = GetComponentInParent<LayerManager>();
         int count = layers.Count;
 
-        // [FIX 2] KHÔNG cộng thêm 1 vào previewMax — đây là bug gốc
-        // Bug cũ: previewMax = Mathf.Clamp(previewMax + 1, ...) → window trôi mỗi lần ApplyLayerVisibility() gọi
         preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count));
         previewMax = Mathf.Clamp(previewMax, preViewMin, count);
         rePreviewMax = Mathf.Clamp(rePreviewMax, previewMax, count);
@@ -119,146 +139,25 @@ public class LayerVisibilityController : MonoBehaviour
             var layer = layers[i];
             if (layer == null) continue; // null slot = đã popped, skip
 
-            if (IsFullyVisibleIndex(i)) SetLayerFullyVisible(layer, i, lm);
-            else if (IsPrereviewIndex(i)) SetLayerPrereview(layer, i, lm);
-            else if (IsHiddenIndex(i)) SetLayerHidden(layer, i, lm);
+            if (IsFullyVisibleIndex(i))
+            {
+                Debug.Log($"[VisCtrl] Applying FullyVisible to layer index {i}");
+                SetLayerFullyVisible(layer, i, lm);
+            }
+            else if (IsPrereviewIndex(i))
+            {
+                Debug.Log("[VisCtrl] Applying Prereview to layer index " + i);
+                SetLayerPrereview(layer, i, lm);
+            }
+            else if (IsHiddenIndex(i))
+            {
+                Debug.Log("[VisCtrl] Applying Hidden to layer index " + i);
+                SetLayerHidden(layer, i, lm);
+            }
         }
     }
-
     // ──────────────────────────────────────────────────────────────
-    // RANGE HELPERS
-    // ──────────────────────────────────────────────────────────────
-
-    private bool IsFullyVisibleIndex(int i) => i >= preViewMin && i < previewMax;
-    private bool IsPrereviewIndex(int i) => i >= previewMax && i < rePreviewMax;
-    private bool IsHiddenIndex(int i) => i >= rePreviewMax;
-
-    // ──────────────────────────────────────────────────────────────
-    // LAYER STATE HANDLERS
-    // ──────────────────────────────────────────────────────────────
-
-    private void SetLayerFullyVisible(BaseLayer layer, int index, LayerManager lm)
-    {
-        var go = layer.GameObject;
-        if (!go.activeSelf) go.SetActive(true);
-
-        var partsToFade = (layer.parts != null && layer.parts.Count > 0)
-            ? layer.parts
-            : new List<BasePart>();
-
-        if (!gameObject.activeSelf)
-        {
-            LayerUtils.ActiveObjectInLayer(true, layer, lm);
-            return;
-        }
-
-        StartCoroutine(ActivateAfterFade(partsToFade, layer, index, lm));
-    }
-
-    private IEnumerator ActivateAfterFade(List<BasePart> partsToFade, BaseLayer layer, int index, LayerManager lm)
-    {
-        if (partsToFade == null || partsToFade.Count == 0)
-        {
-            LayerUtils.ActiveObjectInLayer(true, layer, lm);
-            yield break;
-        }
-
-        int remaining = partsToFade.Count;
-        Color targetColor = Color.white;
-        targetColor.a = 1f;
-
-        foreach (var part in partsToFade)
-        {
-            if (part == null || part.Renderer == null) { remaining--; continue; }
-            StartCoroutine(FadePartAndNotify(part.Renderer, part.Outline, targetColor, fadeDuration, () => remaining--));
-        }
-
-        while (remaining > 0) yield return null;
-
-        LayerUtils.ActiveObjectInLayer(true, layer, lm);
-    }
-
-    private IEnumerator FadePartAndNotify(Renderer renderer, Renderer outline, Color originalColor, float duration, Action onDone)
-    {
-        yield return StartCoroutine(FadeToOriginalColor(renderer, outline, originalColor, duration));
-        onDone?.Invoke();
-    }
-
-    private void SetLayerPrereview(BaseLayer layer, int index, LayerManager lm)
-    {
-        var go = layer.GameObject;
-        if (!go.activeSelf) go.SetActive(true);
-
-        foreach (var part in layer.parts)
-        {
-            if (part?.Renderer == null) continue;
-            StartCoroutine(FadeToGray(part.Renderer, fadeDuration));
-        }
-
-        LayerUtils.ActiveObjectInLayer(true, layer, lm);
-    }
-
-    private void SetLayerHidden(BaseLayer layer, int index, LayerManager lm)
-    {
-        var go = layer.GameObject;
-        if (go.activeSelf) go.SetActive(false);
-
-        LayerUtils.ActiveObjectInLayer(false, layer, lm);
-        PreviewHiddenLayer(index);
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // SHOW NEXT / HIDE TOP
-    // ──────────────────────────────────────────────────────────────
-
-    internal void ShowNextLayer()
-    {
-
-        Debug.Log("Next Layer called. Current preViewMin: " + preViewMin);  
-        var layers = (indexedLayers != null && indexedLayers.Count > 0)
-            ? indexedLayers
-            : layerQueue.ToList();
-        int count = layers.Count;
-
-        if (previewMax >= count) return;
-
-        int visibleWidth = Mathf.Max(1, previewMax - preViewMin);
-        int prereviewWidth = Mathf.Max(0, rePreviewMax - previewMax);
-
-        int nextIndex = FindNextActiveIndex(layers, preViewMin + 1);
-        preViewMin = nextIndex >= 0
-            ? nextIndex
-            : Mathf.Clamp(preViewMin, 0, Math.Max(0, count - 1));
-
-        previewMax = Mathf.Clamp(preViewMin + visibleWidth, preViewMin, count);
-        rePreviewMax = Mathf.Clamp(previewMax + prereviewWidth, previewMax, count);
-
-        ApplyLayerVisibility();
-    }
-
-    /// <summary>
-    /// [FIX 3] HideTopLayer — ẩn layer đang visible nhất (preViewMin).
-    /// Dùng khi cần force-hide layer hiện tại (debug, item effect...).
-    /// </summary>
-    internal void HideTopLayer()
-    {
-        var layers = (indexedLayers != null && indexedLayers.Count > 0)
-            ? indexedLayers
-            : layerQueue.ToList();
-
-        if (preViewMin < 0 || preViewMin >= layers.Count) return;
-
-        var layer = layers[preViewMin];
-        if (layer == null) return;
-
-        var lm = GetComponentInParent<LayerManager>();
-        SetLayerHidden(layer, preViewMin, lm);
-
-        Debug.Log($"[VisCtrl] HideTopLayer → hiding layer at index {preViewMin}");
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // POP LAYER (board drop)
+    // POP LAYER (board drop / breaker clear)
     // ──────────────────────────────────────────────────────────────
 
     internal void PopLayer(BaseLayer clearedLayer)
@@ -282,24 +181,248 @@ public class LayerVisibilityController : MonoBehaviour
 
         indexedLayers[index] = null;
 
-        // Advance preViewMin nếu cần
-        if (index == preViewMin)
+        // Advance preViewMin: always find the lowest active index
+        int nextActive = FindNextActiveIndex(indexedLayers, 0);
+        preViewMin = nextActive >= 0 ? nextActive : 0;
+
+        // Mở rộng window nếu còn layer phía sau chưa visible
+        int count = indexedLayers.Count;
+        int effectiveVisible = CalcEffectiveVisible(count);
+
+        // Đếm số null slot trong range [preViewMin, previewMax) → cần bù
+        int nullInWindow = 0;
+        for (int i = preViewMin; i < Mathf.Min(previewMax, count); i++)
         {
-            int nextActive = FindNextActiveIndex(indexedLayers, index + 1);
-            if (nextActive >= 0)
-                preViewMin = nextActive;
-            else
+            if (indexedLayers[i] == null) nullInWindow++;
+        }
+
+        previewMax = Mathf.Clamp(preViewMin + effectiveVisible + nullInWindow, preViewMin, count);
+        rePreviewMax = Mathf.Clamp(previewMax + prereviewWindowSize, previewMax, count);
+
+        Debug.Log($"[VisCtrl] PopLayer index={index} → min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
+        ApplyLayerVisibility();
+    }
+    // ──────────────────────────────────────────────────────────────
+    // RANGE HELPERS
+    // ──────────────────────────────────────────────────────────────
+
+    private bool IsFullyVisibleIndex(int i) => i >= preViewMin && i < previewMax;
+    private bool IsPrereviewIndex(int i) => i >= previewMax && i < rePreviewMax;
+    private bool IsHiddenIndex(int i) => i >= rePreviewMax;
+
+    // ──────────────────────────────────────────────────────────────
+    // LAYER STATE HANDLERS
+    // ──────────────────────────────────────────────────────────────
+
+    private void SetLayerFullyVisible(BaseLayer layer, int index, LayerManager lm)
+    {
+        var go = layer.GameObject;
+        if (!go.activeSelf) go.SetActive(true);
+        Debug.Log("[VisCtrl] SetLayerFullyVisible: activating layer at index " + index);
+
+        var partsToFade = new List<BasePart>();
+
+        foreach (var part in layer.parts)
+        {
+            if (part == null) continue;
+            part.IsBreakableByItem = true;
+
+            SetScrewsInteractable(part, lm, enable: true);
+            if (part.CurrentVisibilityState != BasePart.VisibilityState.FullyVisible)
             {
-                int firstActive = FindFirstActiveIndex(indexedLayers);
-                preViewMin = firstActive >= 0 ? firstActive : Mathf.Clamp(preViewMin, 0, indexedLayers.Count);
+                part.CurrentVisibilityState = BasePart.VisibilityState.FullyVisible;
+                if (part.Renderer != null)
+                    partsToFade.Add(part);
             }
         }
 
-        int count = indexedLayers.Count;
-        preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count));
-        previewMax = Mathf.Clamp(previewMax, preViewMin, count);
-        rePreviewMax = Mathf.Clamp(rePreviewMax, previewMax, count);
+        if (!gameObject.activeSelf)
+        {
+            ActivateScrewsInLayer(layer, lm);
+            return;
+        }
 
+        if (partsToFade.Count == 0)
+        {
+            ActivateScrewsInLayer(layer, lm);
+            return;
+        }
+
+        StartCoroutine(ActivateAfterFade(partsToFade, layer, index, lm));
+    }
+
+    private IEnumerator ActivateAfterFade(List<BasePart> partsToFade, BaseLayer layer, int index, LayerManager lm)
+    {
+
+        Debug.Log($"[VisCtrl] Activating screws after fade for layer index {index}. Parts to fade: {partsToFade.Count}");
+        if (partsToFade == null || partsToFade.Count == 0)
+        {
+            ActivateScrewsInLayer(layer, lm);
+            yield break;
+        }
+
+        int remaining = partsToFade.Count;
+        Color targetColor = Color.white;
+        targetColor.a = 1f;
+
+        foreach (var part in partsToFade)
+        {
+            if (part == null || part.Renderer == null) { remaining--; continue; }
+            StartCoroutine(FadePartAndNotify(part.Renderer, part.Outline, targetColor, fadeDuration, () =>
+            {
+                part.UnfreezeBody();
+                remaining--;
+            }
+            ));
+        }
+
+        while (remaining > 0) yield return null;
+
+        ActivateScrewsInLayer(layer, lm);
+    }
+
+    /// <summary>
+    /// Activate screws theo BodyConnect của từng part trong layer —
+    /// tránh mismatch giữa Layers list index và screwDict key (sortingOrder).
+    /// </summary>
+    private void ActivateScrewsInLayer(BaseLayer layer, LayerManager lm)
+    {
+        if (layer == null || lm == null) return;
+
+        foreach (var part in layer.parts)
+        {
+            if (part == null || part.Body == null) continue;
+
+            var body = part.Body;
+            foreach (var kvp in lm.screwDict)
+            {
+                if (kvp.Value == null) continue;
+                foreach (var screw in kvp.Value)
+                {
+                    if (screw == null) continue;
+
+                    // If screw has been taken into hold/box, do not re-enable or re-parent it
+                    if (screw.IsInHold || screw.IsActionComplete) continue;
+
+                    if (screw.hingeController?.BodyConnect != body) continue;
+
+                    if (!body.gameObject.activeSelf)
+                    {
+                        screw.gameObject.SetActive(false);
+                        continue;
+                    }
+
+                    screw.gameObject.SetActive(true);
+                }
+            }
+        }
+    }
+
+    private IEnumerator FadePartAndNotify(Renderer renderer, Renderer outline, Color originalColor, float duration, Action onDone)
+    {
+        yield return StartCoroutine(FadeToOriginalColor(renderer, outline, originalColor, duration));
+        Debug.Log($"[VisCtrl] Fade to original color completed for part. Notifying completion. Renderer: {renderer}, Outline: {outline}");
+        onDone?.Invoke();
+    }
+
+    private void SetLayerPrereview(BaseLayer layer, int index, LayerManager lm)
+    {
+        var go = layer.GameObject;
+        if (!go.activeSelf) go.SetActive(true);
+
+        foreach (var part in layer.parts)
+        {
+            if (part == null) continue;
+            part.IsBreakableByItem = false;
+            SetScrewsInteractable(part, lm, enable: false);
+
+            if (part.CurrentVisibilityState != BasePart.VisibilityState.Prereview)
+            {
+                part.CurrentVisibilityState = BasePart.VisibilityState.Prereview;
+                if (part.Renderer != null)
+                    // Show prereview as brown (fade-to-black implementation uses brown)
+                    StartCoroutine(FadeToBlack(part.Renderer, part.Outline, fadeDuration));
+            }
+        }
+        // Prereview: keep screws active (visible) but non-interactable.
+        LayerUtils.ActiveObjectInLayer(false, layer, lm);
+    }
+
+    private void SetLayerHidden(BaseLayer layer, int index, LayerManager lm)
+    {
+
+        if (layer.IsLayerClear) return; // ← không hide layer đang visible
+        var go = layer.GameObject;
+        if (go.activeSelf) go.SetActive(false);
+
+        foreach (var part in layer.parts)
+        {
+            if (part == null) continue;
+            part.IsBreakableByItem = false;
+            part.CurrentVisibilityState = BasePart.VisibilityState.Hidden;
+            part.FreezeBody();
+            SetScrewsInteractable(part, lm, enable: false);
+        }
+
+        LayerUtils.ActiveObjectInLayer(false, layer, lm);
+
+        if (index < rePreviewMax + hiddenPreviewCount)
+            PreviewHiddenLayer(index);
+    }
+
+    /// <summary>
+    /// Enable/disable collider của tất cả ScrewController gắn với các part trong layer.
+    /// Ngăn player click screw từ layer chưa được reveal.
+    /// </summary>
+    private void SetScrewsInteractable(BasePart part, LayerManager lm, bool enable)
+    {
+        if (lm == null || part == null) return;
+
+        var body = part.Body;
+        if (body == null) return;
+
+        foreach (var kvp in lm.screwDict)
+        {
+            if (kvp.Value == null) continue;
+            foreach (var screw in kvp.Value)
+            {
+                if (screw == null) continue;
+
+                // Skip screws that have been taken into a hold/box
+                if (screw.IsInHold) continue;
+
+                if (screw.hingeController.BodyConnect != body) continue;
+                screw.EnableColliderAndRig(enable);
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // SHOW NEXT / HIDE TOP
+    // ──────────────────────────────────────────────────────────────
+
+    internal void ShowNextLayer()
+    {
+        Debug.Log("Next Layer called. Current preViewMin: " + preViewMin);
+        var layers = (indexedLayers != null && indexedLayers.Count > 0)
+            ? indexedLayers
+            : layerQueue.ToList();
+        int count = layers.Count;
+
+        if (previewMax >= count) return;
+
+        int visibleWidth = Mathf.Max(1, previewMax - preViewMin);
+        int prereviewWidth = Mathf.Max(0, rePreviewMax - previewMax);
+
+        int nextIndex = FindNextActiveIndex(layers, preViewMin + 1);
+        preViewMin = nextIndex >= 0
+            ? nextIndex
+            : Mathf.Clamp(preViewMin, 0, Math.Max(0, count - 1));
+
+        previewMax = Mathf.Clamp(preViewMin + visibleWidth, preViewMin, count);
+        rePreviewMax = Mathf.Clamp(previewMax + prereviewWidth, previewMax, count);
+
+        Debug.Log($"[VisCtrl] ShowNextLayer → min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
         ApplyLayerVisibility();
     }
 
@@ -323,33 +446,8 @@ public class LayerVisibilityController : MonoBehaviour
 
         foreach (var part in layer.parts)
         {
-            if (part?.Renderer != null)
+            if (part != null && part.Renderer != null)
                 StartCoroutine(FadeToBlack(part.Renderer, part.Outline, fadeDuration));
-        }
-    }
-
-    public void PreviewHiddenRange(int startIndex, int endIndex)
-    {
-        var layers = (indexedLayers != null && indexedLayers.Count > 0)
-            ? indexedLayers
-            : layerQueue.ToList();
-
-        startIndex = Mathf.Max(0, startIndex);
-        endIndex = Mathf.Min(layers.Count, endIndex);
-
-        for (int i = startIndex; i < endIndex; i++)
-        {
-            var layer = layers[i];
-            if (layer == null) continue;
-
-            var go = layer.GameObject;
-            if (!go.activeSelf) go.SetActive(true);
-
-            foreach (var part in layer.parts)
-            {
-                if (part?.Renderer != null)
-                    StartCoroutine(FadeToBlack(part.Renderer, part.Outline, fadeDuration));
-            }
         }
     }
 
@@ -369,7 +467,6 @@ public class LayerVisibilityController : MonoBehaviour
         return -1;
     }
 
-    private int FindFirstActiveIndex(List<BaseLayer> layers) => FindNextActiveIndex(layers, 0);
 
     // ──────────────────────────────────────────────────────────────
     // FADE COROUTINES

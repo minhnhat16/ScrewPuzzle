@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
   m_Name: Step_01_select_first_screw
   m_EditorClassIdentifier: 
-  stepId: select_first_screw
+  stepId: Step_01_select_first_screw
   stepType: 1
-  message: "Ch\u1ECDn m\u1ED9t con \u1ED1c \u0111\u1EC3 b\u1EAFt \u0111\u1EA7u"
-  targetKey: screw_blue_1
+  message: Tap the screw to remove it!
+  targetKey: screw_01
+  spotlightSize: 200
+  spotlightLayer: 1
+  showHand: 1
+  handDirection: 1
   blockInput: 1
-  completeEventKey: Screw.Selected
-  requiredPayload: red_1
+  completeEventKey: on_screw_clicked
+  requiredPayload: screw_01
+  autoAdvanceDelay: 0

@@ -9,8 +9,11 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
     public int total;
     [NonSerialized]
     public List<T> list = new List<T>();
-    public List<T> activeList = new List<T>();
+    private List<T> activeList = new List<T>();
     private int index = -1;
+
+    public List<T> ActiveList { get => activeList; set => activeList = value; }
+
     public BY_Local_Pool(T prefab, int total, Transform parent = null)
     {
         this.parent = parent;
@@ -32,7 +35,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         if (index >= list.Count) index = 0;
         T trans = list[index];
         trans.gameObject.SetActive(true);
-        activeList.Add(trans);
+        ActiveList.Add(trans);
         return trans;
     }
     public T SpawnNonGravityNext()
@@ -44,13 +47,13 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         {
             index++;
             trans = SpawnNonGravityNext();
-            activeList.Add(trans);
+            ActiveList.Add(trans);
             return trans;
         }
         else
         {
             trans.gameObject.SetActive(true);
-            activeList.Add(trans);
+            ActiveList.Add(trans);
             return trans;
         }
     }
@@ -61,7 +64,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         if (index >= list.Count) index = 0;
         T trans = list[index];
         trans.gameObject.SetActive(true);
-        activeList.Add(trans);
+        ActiveList.Add(trans);
         return trans;
 
     }
@@ -71,19 +74,19 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         if (index >= list.Count) index = 0;
         T trans = list[index];
         trans.gameObject.SetActive(true);
-        activeList.Add(trans);
+        ActiveList.Add(trans);
         trans.GetComponent<Rigidbody2D>().gravityScale = 1;
         return trans;
     }
     public void DeSpawnNonGravity(T trans)
     {
-        activeList.Remove(trans);
+        ActiveList.Remove(trans);
         trans.gameObject.SetActive(false);
 
     }
     public void DeSpawnGravity(T trans)
     {
-        activeList.Remove(trans);
+        ActiveList.Remove(trans);
         trans.GetComponent<Rigidbody2D>().linearVelocity = Vector3.zero;
         trans.GetComponent<Rigidbody2D>().gravityScale = 0;
         trans.gameObject.SetActive(false);
@@ -95,7 +98,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         {
             g?.gameObject.SetActive(true);
         }
-        activeList.Clear();
+        ActiveList.Clear();
         index++;
     }
     public void DeSpawnAll()
@@ -104,7 +107,7 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         {
             g?.gameObject.SetActive(false);
         }
-        activeList.Clear();
+        ActiveList.Clear();
         index = -1;
     }
 

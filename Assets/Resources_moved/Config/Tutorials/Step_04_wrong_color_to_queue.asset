@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
   m_Name: Step_04_wrong_color_to_queue
   m_EditorClassIdentifier: 
-  stepId: wrong_color_to_queue
+  stepId: Step_04_wrong_color_to_queue
   stepType: 1
-  message: "\u1ED0c kh\xE1c m\xE0u s\u1EBD \u0111\u01B0\u1EE3c \u0111\u01B0a v\xE0o
-    h\xE0ng \u0111\u1EE3i"
-  targetKey: array_1
+  message: "No matching box \u2014 it goes to the queue!"
+  targetKey: 0
+  spotlightSize: 200
+  spotlightLayer: 1
+  showHand: 0
+  handDirection: 0
   blockInput: 0
   completeEventKey: Screw.InsertedToQueue
   requiredPayload: array
+  autoAdvanceDelay: 0.1

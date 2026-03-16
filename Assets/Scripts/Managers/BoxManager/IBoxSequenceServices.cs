@@ -24,4 +24,5 @@ public interface IBoxSequenceService
     /// Dùng để quyết định spawn box màu nào trước.
     /// </summary>
     Dictionary<ColorEnum, int> GetColorCounts();
+    int RemoveByColor(ColorEnum targetColor, int count);
 }

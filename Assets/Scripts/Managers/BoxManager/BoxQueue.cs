@@ -8,9 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
+public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 {
-    public static BoxQueue ins { get; private set; }
 
     private SideMission _currentMission;
     public bool HasSpecialBox => _currentMission != null;
@@ -28,7 +27,8 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
 
     private List<Box> _activeBoxes = new();
     private List<BoxConfigRecord> _configRecords = new();
-
+    // Thêm vào BoxQueue — bên dưới phần Setup()
+    public bool IsReady => _factory != null && _sequence != null && _layout != null;
     [SerializeField] private List<BoxSlot> slots;
     [SerializeField] private float totalWidth = 6f;
 
@@ -42,6 +42,12 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
     [Tooltip("Số layer tính từ trên xuống để kiểm tra màu screw (1 = top only, 2 = top + second).")]
     [SerializeField][Range(1, 3)] private int smartSpawnLayerDepth = 2;
 
+
+    [Header("Difficulty Settings")]
+    [Tooltip("0 = dễ nhất (luôn dùng smart pick), 1 = khó nhất (luôn random).\n" +
+         "Ở mức cao, các tầng ưu tiên (Array, TopLayer, LeastScrews) bị bỏ qua\n" +
+         "theo xác suất → box spawn không match screw đang hold → game khó hơn.")]
+    [SerializeField][Range(0f, 1f)] private float difficultyBias = 0f;
     private readonly Dictionary<ColorEnum, List<ScrewController>> _hiddenByColor = new();
 
     // ─── Events — IBoxQueue ────────────────────────────────────────
@@ -74,10 +80,6 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
 
     public bool HasNext() => _sequence.HasNext();
     // ─── Unity ─────────────────────────────────────────────────────
-    private void Awake()
-    {
-        ins = this;
-    }
 
     private void OnDestroy()
     {
@@ -89,6 +91,8 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
     {
         _factory = factory;
         _sequence = sequence;
+
+        Debug.Log("Set up layout for box " + layout);
         _layout = layout;
     }
 
@@ -102,7 +106,9 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         _arrayScrew = arrayScrew;
     }
 
-    // ─── ILevelBoxQueue: Level Lifecycle ───────────────────────────
+    // Replace usages of null-coalescing operator (??) with explicit null checks for Unity objects.
+    // Example: _configRecords = boxConfig.records?.ToList() ?? new List<BoxConfigRecord>();
+    // Fix: Use explicit null check for boxConfig.records.
 
     public void LoadBoxConfigRecord(BoxConfig boxConfig)
     {
@@ -112,7 +118,12 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
             return;
         }
 
-        _configRecords = boxConfig.records?.ToList() ?? new List<BoxConfigRecord>();
+        // Fix UNT0007: Unity objects should not use null coalescing.
+        if (boxConfig.records != null)
+            _configRecords = boxConfig.records.ToList();
+        else
+            _configRecords = new List<BoxConfigRecord>();
+
         var colors = _configRecords.Select(r => r.BoxColor).ToList();
         Debug.Log($"[BoxQueue] Loaded box config with {colors.Count} records. Colors: [{string.Join(", ", colors)}]");
         if (_factory == null)
@@ -123,17 +134,13 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
 
         var boxes = _factory.CreateBoxes(_configRecords);
 
-         var colorList = boxes.Select(b => b == null ? "null" : b.Color.ToString()).ToList();
+        var colorList = boxes.Select(b => b == null ? "null" : b.Color.ToString()).ToList();
         Debug.Log("[BoxQueue] Created boxes from factory: " +
                   $"[{string.Join(", ", colorList)}]");
         _sequence.Load(boxes);
 
-        foreach (var box in boxes)
-            box.OnBoxFull += NotifyBoxFull;
-
         Debug.Log($"[BoxQueue] Loaded {boxConfig.name} {_configRecords.Count} box config records.");
     }
-
     public void ClearConfigRecords() => _configRecords.Clear();
 
     public void ClearCurrentBoxes()
@@ -141,11 +148,27 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         foreach (var box in _activeBoxes)
         {
             box.OnBoxFull -= NotifyBoxFull;
+            box.OnReset();  // ← clear storage + null events + reset FSM
             box.gameObject.SetActive(false);
         }
         foreach (var slot in slots)
             slot.RemoveBox();
         _activeBoxes.Clear();
+
+        // Clear hidden screws — tránh leak vào box mới sau reload
+        foreach (var kvp in _hiddenByColor)
+        {
+            if (kvp.Value == null) continue;
+            foreach (var screw in kvp.Value)
+            {
+                if (screw != null)
+                {
+                    screw.ResetHoldState();
+                    screw.SetActive(false);
+                }
+            }
+        }
+        _hiddenByColor.Clear();
     }
 
     public void OnReset()
@@ -175,6 +198,13 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
 
     private void HandleLockedSlotTapped(BoxSlot slot)
     {
+        // Block unlock khi tutorial đang chạy
+        if (TutorialManager.ins != null && TutorialManager.ins.IsBlockingInput)
+        {
+            Debug.Log("[BoxQueue] HandleLockedSlotTapped blocked — tutorial is active.");
+            return;
+        }
+
         if (DialogManager.ins == null) return;
 
         DialogManager.ins.ShowDialog(DialogIndex.ReviveDialog, new ReviveParam
@@ -230,7 +260,7 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         foreach (var slot in slots)
         {
             if (slot.isLocked) continue;
-            if (!_sequence.HasNext()) break;
+            if (_sequence == null || !_sequence.HasNext()) break;
             SpawnBoxIntoSlot(PickNextBox(), slot, snap: true);
         }
 
@@ -286,10 +316,67 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         var activeColors = _activeBoxes.Select(b => b.Color).ToHashSet();
         var sequenceCounts = _sequence.GetColorCounts();
 
-        return TryPickFromArray(activeColors, sequenceCounts)
-            ?? TryPickFromTopLayer(activeColors, sequenceCounts)
-            ?? TryPickNonDuplicate(activeColors)
-            ?? PickFallback();
+        // ── Difficulty bias ────────────────────────────────────────
+        // Roll một lần cho cả frame pick này.
+        // Nếu roll < bias → bỏ qua toàn bộ smart tầng → thẳng fallback.
+        // Kết quả: box spawn không match gì đang hold → player khó clear hơn.
+        bool skipSmart = UnityEngine.Random.value < difficultyBias;
+
+        if (!skipSmart)
+        {
+            var smart = TryPickFromArray(activeColors, sequenceCounts)
+                     ?? TryPickFromTopLayer(activeColors, sequenceCounts)
+                     ?? TryPickNonDuplicate(activeColors)
+                     ?? TryPickMatchingActiveBoxWithLeastScrews();
+
+            if (smart != null) return smart;
+        }
+        else
+        {
+            Debug.Log($"[BoxQueue] DifficultyBias ({difficultyBias:P0}) triggered — skipping smart pick.");
+        }
+
+        return PickFallback();
+    }
+
+    /// <summary>
+    /// Set difficulty bias từ code (ví dụ: từ LevelConfig hoặc DifficultyManager).
+    /// 0 = dễ nhất, 1 = khó nhất.
+    /// </summary>
+    public void SetDifficultyBias(float bias)
+    {
+        difficultyBias = Mathf.Clamp01(bias);
+        Debug.Log($"[BoxQueue] DifficultyBias set to {difficultyBias:P0}");
+    }
+
+    /// <summary>
+    /// Tầng 3.5: Khi tất cả màu trong sequence đều đang active,
+    /// ưu tiên spawn box cùng màu với box active có ít screw nhất (RemainingCapacity cao nhất).
+    /// Giúp player dễ complete box sắp đầy hơn.
+    /// </summary>
+    private Box TryPickMatchingActiveBoxWithLeastScrews()
+    {
+        if (_activeBoxes.Count == 0) return null;
+
+        // Sắp xếp box active theo RemainingCapacity giảm dần
+        // (RemainingCapacity cao = ít screw nhất = ưu tiên spawn thêm box cùng màu)
+        var sortedByLeastScrews = _activeBoxes
+            .Where(b => !b.IsLocked && !b.IsFull)
+            .OrderByDescending(b => b.RemainingCapacity)
+            .ToList();
+
+        foreach (var activeBox in sortedByLeastScrews)
+        {
+            var box = _sequence.TryDequeueMatching(b => b.Color == activeBox.Color);
+            if (box != null)
+            {
+                Debug.Log($"[BoxQueue] Tầng 3.5 (LeastScrews) — color={box.Color} " +
+                          $"remaining={activeBox.RemainingCapacity}.");
+                return box;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -391,7 +478,7 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
 
     // ─── Box Lifecycle ─────────────────────────────────────────────
 
-    public void NotifyBoxFull(Box box)
+    private void NotifyBoxFull(Box box)
     {
         if (!_activeBoxes.Contains(box)) return;
 
@@ -403,23 +490,76 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         OnBoxFull?.Invoke(box);
         _onContainerCompleted?.Invoke(box);
 
+        TutorialEventBus.Emit("on_box_full");
         LevelManager.ins.OnBoxCleared();
 
-        // Spawn trước — nếu còn box trong sequence thì fill vào slot trống
-        TrySpawnNext();
-
-        // Check win SAU khi spawn:
-        // - Nếu sequence hết VÀ không có box nào đang moving vào active
-        //   thì không còn gì để spawn → win
-        // - _activeBoxes.Count == 0 đảm bảo box cuối đã exit animation xong
-        //   (OnBoxFull chỉ fire sau PlayExitAnimation)
-        if (!_sequence.HasNext() && _activeBoxes.Count == 0)
+        if (_sequence.HasNext())
         {
-            Debug.Log("[BoxQueue] ✅ All boxes cleared — notifying win.");
-            LevelManager.ins.CheckWinCondition();
+            TrySpawnNextThenCheckWin();
         }
+        else
+        {
+            // Không có box mới → align lại các slot còn lại (có box hoặc locked)
+            _layout.AlignSlots(slots, totalWidth);
+
+            if (_activeBoxes.Count == 0)
+            {
+                LevelManager.ins.CheckWinCondition();
+            }
+        }
+
+        try { box.OnReset(); } catch (Exception) { }
+        box.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Spawn box mới vào slot trống, đợi animation move xong rồi mới check win.
+    /// </summary>
+    private void TrySpawnNextThenCheckWin()
+    {
+        if (!_sequence.HasNext()) return;
+
+        var freeSlot = slots.FirstOrDefault(s => !s.isLocked && !s.isContainingBox);
+        if (freeSlot == null) return;
+
+        var nextBox = PickNextBox();
+        if (nextBox == null) return;
+
+        SpawnBoxIntoSlotWithCallback(nextBox, freeSlot, () =>
+        {
+            _layout.AlignSlots(slots, totalWidth);
+
+            // Check win SAU khi box đã activate hoàn tất
+            if (!_sequence.HasNext() && _activeBoxes.Count == 0)
+            {
+                Debug.Log("[BoxQueue] ✅ All boxes cleared — notifying win.");
+                LevelManager.ins.CheckWinCondition();
+            }
+        });
+
+        _layout.AlignSlots(slots, totalWidth);
+    }
+
+    private void SpawnBoxIntoSlotWithCallback(Box box, BoxSlot slot, Action onActivated)
+    {
+        Debug.Log("[BOX QUEUE] Spawning box of color " + box.Color + " into slot. Box null? " +
+                  (box == null) + ", Slot locked? " + (slot.isLocked) + ", Total screw on box " + box.RemainingCapacity);
+        if (box == null) { onActivated?.Invoke(); return; }
+
+        slot.AddBox(box);
+        box.gameObject.SetActive(true);
+
+        ResolveAllHiddenForBox(box);
+
+        Vector3 offScreenStart = GetOffScreenLeft(slot.transform.position.y);
+        box.transform.position = offScreenStart;
+
+        box.MoveTo(slot.transform.position, 0.4f, () =>
+        {
+            ActivateBox(box);
+            onActivated?.Invoke();
+        });
+    }
     private void ActivateBox(Box box)
     {
         _activeBoxes.Add(box);
@@ -427,13 +567,23 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         OnBoxSpawned?.Invoke(box);
         _onContainerSpawned?.Invoke(box);
 
+        // Ensure screws stored in box are active when box becomes active on screen
+        try
+        {
+            box.OnActivated();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[BoxQueue] ActivateBox -> OnActivated failed: {ex.Message}");
+        }
+
         TryTakeScrewsFromArray(box);
     }
 
     private void SpawnBoxIntoSlot(Box box, BoxSlot slot, bool snap = false)
     {
         Debug.Log("[BOX QUEUE] Spawning box of color " + box?.Color + " into slot. Box null? " +
-                  (box == null) + ", Slot locked? " + slot?.isLocked);
+                  (box == null) + ", Slot locked? " + slot?.isLocked + "Total screw in " + box.RemainingCapacity);
         if (box == null) return;
 
         slot.AddBox(box);
@@ -507,9 +657,6 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
                           $"screw(s) color={color} to box.");
         }
     }
-
-
-
     /// <summary>
     /// Trả về vị trí world bên trái ngoài màn hình với y cho trước.
     /// </summary>
@@ -577,12 +724,22 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
     }
 
     // ─── Hidden Screw ──────────────────────────────────────────────
-
     private void HideScrew(ScrewController screw)
     {
         var color = screw.GetColor();
         if (!_hiddenByColor.ContainsKey(color))
             _hiddenByColor[color] = new List<ScrewController>();
+
+        // Ensure this screw is removed from LayerManager's screwDict so visibility controller won't reactivate it
+        try
+        {
+            LevelManager.ins.layerManager.RemoveScrewsOnDict(new List<ScrewController> { screw });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[BoxQueue] HideScrew -> RemoveScrewsOnDict failed: {ex.Message}");
+        }
+
         screw.SetActive(false);
         _hiddenByColor[color].Add(screw);
     }
@@ -611,7 +768,19 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
         OnBoxRemoved?.Invoke(box);
         _onContainerRemoved?.Invoke(box);
     }
+    /// <summary>
+    /// Xóa box theo màu khỏi SEQUENCE (chưa spawn) — gọi trước hoặc sau SpawnInitial().
+    /// An toàn hơn RemoveBoxByColor vì không động vào box đang active trên slot.
+    /// </summary>
+    public int RemoveFromSequenceByColor(ColorEnum targetColor, int count)
+    {
+        if (count <= 0) return 0;
+        if (_sequence is BoxSequenceService seq)
+            return seq.RemoveByColor(targetColor, count);
 
+        Debug.LogWarning("[BoxQueue] RemoveFromSequenceByColor: _sequence không phải BoxSequenceService.");
+        return 0;
+    }
     private void FillToSlotCapacity()
     {
         var freeSlots = slots.Where(s => !s.isLocked && !s.isContainingBox).ToList();
@@ -634,9 +803,14 @@ public class BoxQueue : MonoBehaviour, ILevelBoxQueue, IContainerQueue
 
     public void TryProcessItemScrew(ScrewController screw)
     {
+        var lm = LevelManager.ins?.layerManager;
+        if (lm != null)
+            lm.RemoveScrewOnDict(screw, screw.GetSortingOrder());
+
         var box = FindSuitableBox(screw.GetColor());
         if (box == null) { HideScrew(screw); return; }
-        AddScrewToBox(screw, box);
+        bool added = AddScrewToBox(screw, box);
+        if (!added) HideScrew(screw);
     }
 
     public bool HasLockedBox() => _activeBoxes.Any(b => b.IsLocked);

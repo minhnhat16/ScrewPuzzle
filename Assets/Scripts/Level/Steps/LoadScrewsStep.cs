@@ -35,13 +35,10 @@ namespace LevelSystem.Steps
             }
 
             // Spawn ScrewManager container
-            var screwManagerGO = Object.Instantiate(
-                _screwManagerPrefab,
-                ctx.LevelObject.transform
-            );
-            screwManagerGO.transform.localPosition = screwManagerPosition;
+            var screwManager = LevelManager.ins.ScrewManager;
+            screwManager.transform.localPosition = screwManagerPosition;
 
-            if (!screwManagerGO.TryGetComponent<ScrewManager>(out var screwManager))
+            if (!screwManager)
             {
                 ctx.IsSuccess = false;
                 ctx.ErrorMessage = "ScrewManager component not found on prefab.";
@@ -68,7 +65,7 @@ namespace LevelSystem.Steps
                 ctx.LevelData,
                 ctx.LayerManager,
                 screwManager,
-                screwManagerGO.transform
+                screwManager.transform
             );
         }
     }

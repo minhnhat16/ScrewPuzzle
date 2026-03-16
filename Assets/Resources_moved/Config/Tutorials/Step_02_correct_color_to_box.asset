@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 382f3f2453fa1f54aad947ff70560320, type: 3}
   m_Name: Step_02_correct_color_to_box
   m_EditorClassIdentifier: 
-  stepId: correct_color_to_box
-  stepType: 2
-  message: "\u1ED0c \u0111\xFAng m\xE0u s\u1EBD t\u1EF1 \u0111\u1ED9ng v\xE0o h\u1ED9p"
-  targetKey: box_1
+  stepId: Step_02_correct_color_to_box
+  stepType: 3
+  message: Great! Same color goes to the box!
+  targetKey: 0
+  spotlightSize: 200
+  spotlightLayer: 1
+  showHand: 0
+  handDirection: 1
   blockInput: 0
   completeEventKey: Screw.InsertedToBox
   requiredPayload: red
+  autoAdvanceDelay: 0.1

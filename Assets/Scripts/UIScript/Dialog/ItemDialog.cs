@@ -31,10 +31,10 @@ namespace UIScript.Dialog
             isAds = param.IsAdsAvailable;
             price = param.ItemPrice;
             icon.sprite = param.sprite;
-
-            tutorial_lb.text = detail.ToUpper();
+            if(detail !=null)
+                tutorial_lb.text = detail.ToUpper();
             price_lb.text = price.ToString();
-            ads.gameObject.SetActive(isAds);
+            ads.gameObject.SetActive(isAds) ;
         }
 
         private void OnEnable()

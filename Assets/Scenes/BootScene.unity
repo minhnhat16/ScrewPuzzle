@@ -4264,6 +4264,68 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d824f2e2aa734143af0696a5898f4f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &1076666984
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8153911043638879833}
+    m_Modifications:
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8666410574843277682, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+      propertyPath: m_Name
+      value: ScrewManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+--- !u!4 &1076666985 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4500562933867074290, guid: 216a3bc7215398c41bc5fab630825b22, type: 3}
+  m_PrefabInstance: {fileID: 1076666984}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1141541070 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 651755351719344218, guid: 185d2f97ef0f4014388cef016459e87a, type: 3}
@@ -4442,6 +4504,8 @@ GameObject:
   - component: {fileID: 1202565222}
   - component: {fileID: 1202565221}
   - component: {fileID: 1202565223}
+  - component: {fileID: 1202565225}
+  - component: {fileID: 1202565224}
   m_Layer: 5
   m_Name: TutoBg
   m_TagString: Untagged
@@ -4519,6 +4583,46 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 1
+--- !u!114 &1202565224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202565219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 3
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!223 &1202565225
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202565219}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1001 &1220972646
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6235,6 +6339,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainGroup: {fileID: 1547426809}
   blocker: {fileID: 307898410}
+  tutorialBlocker: {fileID: 0}
   spotlight: {fileID: 1005663077}
   hand: {fileID: 1220972649}
   message: {fileID: 1686238767}
@@ -13039,6 +13144,8 @@ MonoBehaviour:
   screwManager: {fileID: 8153911043638879835}
   player: {fileID: 940271991}
   boxMovingEse: 2
+  devBootLevelId: 1
+  autoBootInEditor: 1
 --- !u!81 &2119564437
 AudioListener:
   m_ObjectHideFlags: 0
@@ -14501,7 +14608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 8755657504042749257, guid: 26e9e422063bef24599ea81a0990ccfc, type: 3}
-  total: 5
+  total: 1
 --- !u!114 &6951725039299466058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19641,8 +19748,9 @@ MonoBehaviour:
   - {fileID: 2137083472}
   totalWidth: 12
   initialUnlockedSlots: 2
-  topLayerMatchChance: 0.7
+  topLayerMatchChance: 0.5
   smartSpawnLayerDepth: 2
+  difficultyBias: 0
 --- !u!4 &8147608019541441091
 Transform:
   m_ObjectHideFlags: 0
@@ -19674,7 +19782,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1076666985}
   m_Father: {fileID: 850606808}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8153911043638879834
@@ -19977,6 +20086,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f0977d893686447b3e917db3096a05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDailyMissions: 5
+  screwsPerMission: 3
 --- !u!114 &9085322710166322453
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20015,6 +20126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: e4c8536b071fdba4a939e0496ef40fc4, type: 2}
+  _debugStartIndex: 0
 --- !u!1 &9120798978857139502
 GameObject:
   m_ObjectHideFlags: 0

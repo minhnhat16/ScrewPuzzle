@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Ingame.Pools
@@ -20,9 +21,20 @@ namespace Ingame.Pools
         }
         public void ReturnAll()
         {
-            pool.DeSpawnAll();
+            for(int i = 0; i < pool.list.Count; i++)
+            {
+                if(pool.list[i].gameObject.activeSelf)
+                {
+                    ReturnToPool(pool.list[i]);
+                }
+            }
         }
 
+        internal void ReturnToPool(Box box)
+        {
+            box.OnReset();
+            pool.ReturnToPool(box);
+        }
     }
 }
 

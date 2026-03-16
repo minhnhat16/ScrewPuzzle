@@ -1,16 +1,9 @@
 ﻿using Managers;
 using System;
 using System.Collections;
+using System.DataBase;
 using UnityEngine;
 
-/// <summary>
-/// Encapsulates the flow: Load InGame scene → Initialize bootstrapper → Load level → Start gameplay.
-/// Decouples UI from game initialization logic (Single Responsibility).
-/// Testable and reusable across MainScreenView, LevelSelectView, etc.
-///
-/// IMPORTANT: LevelManager, IngameController, ScrewGameBootstrapper all live in InGame scene.
-/// They are resolved LAZILY inside the scene-loaded callback — NOT at construction time.
-/// </summary>
 public interface ILevelStartService
 {
     void StartLevel(int levelId, Action onLevelStarted = null, Action<string> onError = null);
@@ -31,7 +24,7 @@ public class LevelStartService : ILevelStartService
 
     public void StartLevel(int levelId, Action onLevelStarted = null, Action<string> onError = null)
     {
-        if (levelId < 0)
+        if (levelId <= 0)
         {
             onError?.Invoke($"[LevelStartService] Invalid level ID: {levelId}");
             return;
@@ -39,54 +32,44 @@ public class LevelStartService : ILevelStartService
 
         Debug.Log($"[LevelStartService] Preparing level {levelId}...");
 
-        // ── Đăng ký preload task vào TaskManager TRƯỚC KHI load scene ──
-        // TaskManager.RunTasks() chạy trong RunFullLoadProcess, trước LoadSceneProgress
-        // → level data + spawn objects hoàn thành trong loading screen
-        TaskManager.ins.AddTask(() => PreloadLevelTask(levelId, onLevelStarted, onError));
-
-        // Sau khi task xong → load scene (scene đã có data sẵn)
         _sceneManager.LoadSceneByName(_sceneName, () =>
         {
-            // Scene loaded — chỉ cần switch view và start gameplay
-            // KHÔNG load level ở đây nữa vì đã preload xong trong task
-            OnSceneLoaded(onError);
+            TaskManager.ins.AddTask(() => InitAfterSceneLoaded(levelId, onLevelStarted, onError));
+            TaskManager.ins.StartCoroutine(RunDeferredInit(onError));
         });
     }
 
-    /// <summary>
-    /// Coroutine task chạy trong TaskManager (loading screen):
-    /// 1. Chờ scene load xong (bootstrapper + manager available)
-    /// 2. Wire dependencies
-    /// 3. LoadLevel với progress update cho loading bar
-    /// </summary>
-    private IEnumerator PreloadLevelTask(int levelId, Action onLevelStarted, Action<string> onError)
+    private IEnumerator RunDeferredInit(Action<string> onError)
     {
-        // Chờ scene InGame load xong thì mới có các singleton
-        // LoadSceneProgress chạy song song — đợi cho đến khi scene active
-        yield return new WaitUntil(() =>
-            ScrewGameBootstrapper.ins != null &&
-            LevelManager.ins != null &&
-            IngameController.ins != null);
+        // Chạy tất cả task đã add (chỉ có 1 task: InitAfterSceneLoaded)
+        yield return TaskManager.ins.RunTasks();
+    }
 
-        TaskManager.ins.SetCurrentTaskProgress(0.1f);
+    private IEnumerator InitAfterSceneLoaded(int levelId, Action onLevelStarted, Action<string> onError)
+    {
+        // Đợi 1 frame để đảm bảo tất cả Awake() + Start() của scene đã chạy xong
+        yield return null;
 
         var bootstrapper = ScrewGameBootstrapper.ins;
         var levelManager = LevelManager.ins;
         var ingameCtrl = IngameController.ins;
 
-        // Wire dependencies
+        if (bootstrapper == null || levelManager == null || ingameCtrl == null)
+        {
+            onError?.Invoke("[LevelStartService] Singleton(s) null sau khi scene load — kiểm tra Awake order.");
+            yield break;
+        }
+
+        // 1. Wire dependencies trước khi LoadLevel
         bootstrapper.InitializeForLevel();
         Debug.Log("[LevelStartService] Bootstrapper initialized.");
+
         TaskManager.ins.SetCurrentTaskProgress(0.3f);
 
-        // Load level data + spawn (coroutine với progress)
+        // 2. Load level — chờ pipeline hoàn thành
         bool levelDone = false;
-        levelManager.LoadLevel(levelId, () =>
-        {
-            levelDone = true;
-        });
+        levelManager.LoadLevel(levelId, () => levelDone = true);
 
-        // Chờ level load xong, update progress
         float timeout = 30f;
         float elapsed = 0f;
         while (!levelDone)
@@ -97,40 +80,31 @@ public class LevelStartService : ILevelStartService
                 onError?.Invoke($"[LevelStartService] Timeout loading level {levelId}");
                 yield break;
             }
-
-            // Progress 0.3 → 0.9 trong lúc level load
-            float t = Mathf.Clamp01(elapsed / timeout);
-            TaskManager.ins.SetCurrentTaskProgress(0.3f + t * 0.6f);
+            TaskManager.ins.SetCurrentTaskProgress(0.3f + Mathf.Clamp01(elapsed / timeout) * 0.6f);
             yield return null;
         }
 
         TaskManager.ins.SetCurrentTaskProgress(1f);
-        Debug.Log($"[LevelStartService] Level {levelId} preloaded ✅");
+        Debug.Log($"[LevelStartService] Level {levelId} loaded ✅");
 
-        // Lưu callback để OnSceneLoaded gọi sau
-        _onLevelStarted = () =>
-        {
-            ingameCtrl.StartLevel();
-            onLevelStarted?.Invoke();
-        };
-    }
+        // 3. Check new player → activate tutorial
+        bool isNewPlayer = DataAPIController.instance.IsNewPlayer();
 
-    // Cache callback giữa PreloadLevelTask và OnSceneLoaded
-    private Action _onLevelStarted;
-
-    private void OnSceneLoaded(Action<string> onError)
-    {
-        if (_onLevelStarted == null)
-        {
-            onError?.Invoke("[LevelStartService] _onLevelStarted null — preload chưa xong?");
-            return;
-        }
-
-        // Tất cả đã preload xong → switch view và start ngay
+        // 4. Switch view rồi start gameplay
         ViewManager.Instance.SwitchView(ViewIndex.GameView, null, () =>
         {
-            _onLevelStarted?.Invoke();
-            _onLevelStarted = null;
+            ingameCtrl.StartLevel();
+
+            // ── Tutorial: chỉ activate cho new player ──
+            // StartTutorial() sau StartLevel() để game đã ở Playing state
+            // → TutorialManager highlight target, block input đúng cách
+            if (isNewPlayer && TutorialManager.ins != null)
+            {
+                TutorialManager.ins.StartTutorial();
+                Debug.Log("[LevelStartService] Tutorial started for new player.");
+            }
+
+            onLevelStarted?.Invoke();
             Debug.Log("[LevelStartService] GameView shown, gameplay started ✅");
         });
     }

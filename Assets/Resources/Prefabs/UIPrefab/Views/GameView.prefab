@@ -493,10 +493,10 @@ MonoBehaviour:
   btn_drill: {fileID: 5147631838438306443}
   btn_magnet: {fileID: 3187285783911594214}
   goldDisplay: {fileID: 0}
+  itemController: {fileID: 0}
   itemPerformed:
     m_PersistentCalls:
       m_Calls: []
-  itemController: {fileID: 0}
 --- !u!1 &2384524033119609890
 GameObject:
   m_ObjectHideFlags: 0
@@ -1933,6 +1933,10 @@ PrefabInstance:
     - target: {fileID: 6607075192636619058, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9035231782230829840, guid: e0623a7795a5d33499b63ce971cc700b, type: 3}
+      propertyPath: m_AnimationTriggers.m_PressedTrigger
+      value: Normal
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -16,44 +16,64 @@ public class BoxSlotLayoutService : IBoxSlotLayoutService
 
     public void AlignSlots(IReadOnlyList<BoxSlot> slots, float totalWidth, float duration = 0.3f)
     {
-        var activeSlots = slots.ToList();
-        if (activeSlots.Count == 0) return;
+        if (slots == null || slots.Count == 0) return;
 
-        float spacing = Mathf.Max(0.7f, totalWidth / (activeSlots.Count + 1));
-        float startX = -spacing * (activeSlots.Count - 1) / 2f;
+        // ── Lọc slot cần hiển thị: có box HOẶC đang locked ──
+        // Slot trống (unlocked, không box) → bỏ qua hoàn toàn
+        var visible = slots
+            .Where(s => s.isContainingBox || s.isLocked)
+            .ToList();
 
-        for (int i = 0; i < activeSlots.Count; i++)
+        if (visible.Count == 0) return;
+
+        // ── Sắp xếp: slot có box trước, locked slot sau ──
+        // Giữ thứ tự gốc trong từng nhóm (theo index trong danh sách slots gốc)
+        var sorted = visible
+             .OrderBy(s => s.isLocked && !s.isContainingBox ? 1 : 0)   // box slots first
+             .ThenBy(s =>
+             {
+                 for (int i = 0; i < slots.Count; i++)
+                     if (slots[i] == s) return i;
+                 return int.MaxValue;
+             })                                                          // preserve original order
+             .ToList();
+
+        int n = sorted.Count;
+        float spacing = Mathf.Max(0.7f, totalWidth / (n + 1));
+        float startX = -spacing * (n - 1) / 2f;
+
+        for (int i = 0; i < n; i++)
         {
-            var slot = activeSlots[i];
+            var slot = sorted[i];
+            float targetX = startX + spacing * i;
             Vector3 current = slot.transform.localPosition;
-            Vector3 target = new Vector3(startX + spacing * i, current.y, current.z);
 
             if (duration <= 0f)
             {
-                slot.transform.localPosition = target;
-                if (slot.screwBox != null && !slot.screwBox.IsMoving)
-                    slot.screwBox.transform.position = slot.transform.position;
+                slot.transform.localPosition = new Vector3(targetX, current.y, current.z);
+                SyncBoxToSlot(slot);
             }
             else
             {
+                slot.transform.DOKill();
                 slot.transform
-                    .DOLocalMoveX(target.x, duration)
+                    .DOLocalMoveX(targetX, duration)
                     .SetEase(_ease)
-                    .OnUpdate(() =>
-                    {
-                        // Chỉ kéo box theo slot nếu box đã settled (không đang spawn vào)
-                        if (slot.screwBox != null && !slot.screwBox.IsMoving)
-                            slot.screwBox.transform.position = slot.transform.position;
-                    });
+                    .OnUpdate(() => SyncBoxToSlot(slot));
             }
         }
+    }
+
+    private static void SyncBoxToSlot(BoxSlot slot)
+    {
+        if (slot.screwBox != null && !slot.screwBox.IsMoving)
+            slot.screwBox.transform.position = slot.transform.position;
     }
 
     public void MoveBoxToSlot(Box box, BoxSlot slot, Action onComplete = null)
     {
         if (box == null || slot == null) return;
 
-        Debug.Log($"[BoxSlotLayoutService] Moving box '{box.name}' to slot '{slot.name}' at position {CalculateSlotPosition(slot)}");
         box.transform
             .DOMove(CalculateSlotPosition(slot), 1f)
             .SetEase(_ease)

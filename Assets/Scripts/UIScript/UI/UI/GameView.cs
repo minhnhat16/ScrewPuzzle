@@ -97,6 +97,7 @@ public class GameView : BaseView
         starBottle.OnReset();
         txt_specialScrew.text = "0";
         IngameController.ins.OnStarChanged = starBottle.fillChange;
+        HideDescription();
     }
 
     public override void OnEndHideView()
