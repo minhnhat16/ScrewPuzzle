@@ -83,6 +83,12 @@ namespace Ingame
 
         public bool canBreak => true;
 
+
+        public void OnDisable()
+        {
+            Debug.Log("ONDISABLE part " + uniqueID);    
+        }
+
         public bool OnTap(Vector2 screenPosition)
         {
             if (IngameController.ins == null) return false;
@@ -280,6 +286,7 @@ namespace Ingame
 
             // Freeze lại khi return về pool
             FreezeBody();
+            OnStateChanged.RemoveAllListeners();
         }
 
         //-----------------------------

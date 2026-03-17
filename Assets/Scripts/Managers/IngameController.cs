@@ -3,6 +3,7 @@ using Enums;
 using Gameplay.StateMachine;
 using Ingame;
 using Ingame.Screw;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -98,7 +99,7 @@ namespace Managers
                 levelManager: LevelManager.ins,
                 dialogService: DialogManager.ins,
                 player: player,
-                stateMachine:stateMachineBoot
+                stateMachine: stateMachineBoot
             );
         }
 
@@ -132,12 +133,32 @@ namespace Managers
 
         private void HandleStateChanged(GameplayState prev, GameplayState next)
         {
-            player.IsInputLocked = next != GameplayState.Playing
-                                && next != GameplayState.ItemUsing;
+            // Decide locks per-state:
+            // - Playing: allow screw input, block item input
+            // - ItemUsing: allow item input, block screw input
+            // - Others: block both
+            bool lockScrew = true;
+            bool lockItem = true;
 
+            if (next == GameplayState.Playing)
+            {
+                lockScrew = false;
+                lockItem = true;
+            }
+            else if (next == GameplayState.ItemUsing)
+            {
+                lockScrew = true;
+                lockItem = false;
+            }
+
+            player.IsScrewInputLocked = lockScrew;
+            player.IsItemInputLocked = lockItem;
+
+            // Ensure physical colliders reflect input lock for screws — defensive: prevents any bypass.
+            _screwManager?.SetAllScrewsInteractable(!player.IsScrewInputLocked);
 
             Debug.Log($"[IngameController] State changed from {prev} to {next}. " +
-                      $"Player input locked: {player.IsInputLocked}");
+                      $"ScrewInputLocked: {lockScrew}, ItemInputLocked: {lockItem}");
             ArrayScrew.ins.SetGameActive(
                 next == GameplayState.Playing || next == GameplayState.ItemUsing
             );
@@ -236,7 +257,13 @@ namespace Managers
         /// </summary>
         public void ReviveDirectly()
         {
-            player.IsInputLocked = false;
+            // unlock both screw and item input when reviving directly
+            player.IsScrewInputLocked = false;
+            player.IsItemInputLocked = false;
+
+            // Make sure screw colliders are enabled when unlocking
+            _screwManager?.SetAllScrewsInteractable(true);
+
             _containerQueue.UnlockNext();
             _stateMachine.TransitionTo(GameplayState.Playing);
         }
@@ -253,7 +280,7 @@ namespace Managers
 
         public void InvokeItem(ItemType type, Vector3 position)
         {
-            Debug.Log("game state on invoke item: " + _stateMachine.Current);   
+            Debug.Log("game state on invoke item: " + _stateMachine.Current);
             if (!_stateMachine.IsPlaying()) return;
             if (_itemController.IsItemExecuting) return;
 

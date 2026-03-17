@@ -281,6 +281,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     {
         layerManager.RemoveScrewsOnDict(screws ?? new List<ScrewController>());
         layerManager.RemovePart(bp.uniqueID);
+        ScrewManager.RemoveScrew(screws);
     }
 
     private void RouteOrHideScrews(List<ScrewController> screws, List<ScrewController> routed, List<ScrewController> hidden)

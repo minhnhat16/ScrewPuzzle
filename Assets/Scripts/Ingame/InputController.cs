@@ -16,7 +16,7 @@ public class InputController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             startPos = Input.mousePosition;
-            OnTap?.Invoke(startPos);
+            OnTap?.Invoke(startPos);    
         }
 
         if (Input.GetMouseButton(0))

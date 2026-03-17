@@ -36,7 +36,6 @@ namespace LevelSystem.Steps
             ReturnChildrenToPool(levelObject.gameObject, layerManager);
 
             // Clear state của LayerManager
-            layerManager.ClearPartDict();
             layerManager.Reset();
 
             ctx.LevelObject = levelObject;

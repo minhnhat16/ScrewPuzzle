@@ -12,7 +12,7 @@ using UnityEngine;
 public class LayerSpawnService
 {
 
-    private static Vector3 position = new (0, -1, 0);
+    private static Vector3 position = new (0, -2, 0);
     /// <summary>
     /// Spawn một BaseLayer từ pool, set parent, name, Unity layer mask.
     /// Tạo slot trong screwDict cho layer này.

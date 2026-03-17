@@ -58,21 +58,15 @@ public class InputRouter : MonoBehaviour
         var tappable = PickTappableAt(screenPos);
         if (tappable != null)
         {
-            try
+            // If the tappable consumes the tap (returns true), do NOT forward to Player.
+            // If it DOES NOT consume (returns false), the router forwards to game-level listeners (Player).
+            bool consumed = tappable.OnTap(screenPos);
+            if (!consumed)
             {
-                // If the tappable consumes the tap (returns true), do NOT forward to Player.
-                // If it DOES NOT consume (returns false), the router forwards to game-level listeners (Player).
-                bool consumed = tappable.OnTap(screenPos);
-                if (!consumed)
-                {
-                    OnTappableTapped?.Invoke(tappable, screenPos);
-                }
-                return;
+                OnTappableTapped?.Invoke(tappable, screenPos);
             }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-            }
+            return;
+
         }
     }
 

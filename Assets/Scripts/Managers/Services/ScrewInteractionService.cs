@@ -36,7 +36,6 @@ public class ScrewInteractionService : IScrewInteractionService
         var layerManager = _layerManagerResolver();
         if (layerManager == null)
         {
-            Debug.LogError("[ScrewInteractionService] ILayerManager is null — pipeline chưa hoàn tất?");
             return;
         }
 

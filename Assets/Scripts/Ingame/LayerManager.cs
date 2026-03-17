@@ -84,6 +84,10 @@ namespace Ingame.Board
         public void OnLayerCleared(BaseLayer clearedLayer)
         {
             if (!gameObject.activeSelf) return;
+
+            // ✅ Guard: tránh start coroutine với layer đã invalid
+            if (clearedLayer == null || !clearedLayer.IsLayerClear) return;
+
             StartCoroutine(ShowNext(clearedLayer));
         }
 
@@ -91,15 +95,24 @@ namespace Ingame.Board
         {
             yield return new WaitForSeconds(1.5f);
 
-            // Dùng PopLayer thay vì SetActive + ShowNextLayer riêng lẻ
-            // — PopLayer sẽ null slot trong indexedLayers, advance window, rồi ApplyVisibility
-            if (visibilityController != null)
-                visibilityController.PopLayer(layer);
-            else
+            // ✅ Re-validate sau khi wait — layer có thể đã bị reset/pool trong 1.5s
+            if (layer == null || visibilityController == null) yield break;
+
+            // ✅ Check layer vẫn còn trong indexedLayers (chưa bị clear từ Reset())
+            if (!visibilityController.indexedLayers.Contains(layer))
             {
-                // Fallback nếu không có visibilityController
-                layer.gameObject.SetActive(false);
+                Debug.LogWarning($"[LayerManager] ShowNext: layer {layer.name} no longer in indexedLayers, skipping.");
+                yield break;
             }
+
+            // ✅ Check gameObject vẫn còn valid (chưa bị pool destroy)
+            if (layer.gameObject == null || !layer.IsLayerClear)
+            {
+                Debug.LogWarning($"[LayerManager] ShowNext: layer no longer valid, skipping.");
+                yield break;
+            }
+
+            visibilityController.PopLayer(layer);
         }
 
         public IEnumerator ChangePartState(float timeout = 0.5f)
@@ -124,8 +137,18 @@ namespace Ingame.Board
         public void AddPart(BasePart part)
         {
             if (part == null) return;
-            if (partDict.ContainsKey(part.uniqueID)) return;
+
+            if (partDict.ContainsKey(part.uniqueID))
+            {
+                Debug.LogWarning($"[LayerManager] AddPart: duplicate uniqueID '{part.uniqueID}' " +
+                                 $"— overriding stale entry. Old={partDict[part.uniqueID]?.name}, New={part.name}");
+                partDict[part.uniqueID] = part; // override stale ref
+                return;
+            }
+
+            // Register and log for debug when running repeated loads
             partDict.TryAdd(part.uniqueID, part);
+            Debug.Log($"[LayerManager] AddPart: registered part '{part.uniqueID}' -> {part.name}");
         }
 
         public void CoverDictToList()
@@ -135,7 +158,35 @@ namespace Ingame.Board
         }
 
         public BasePart GetPartByKey(string uniqueId)
-            => partDict.TryGetValue(uniqueId, out BasePart part) ? part : null;
+        {
+            if (string.IsNullOrEmpty(uniqueId)) return null;
+
+            // Fast path: dictionary
+            if (partDict != null && partDict.TryGetValue(uniqueId, out BasePart part) && part != null)
+                return part;
+
+            // Fallback: maybe dict wasn't populated but parts list contains the object (pool / init-order)
+            if (parts != null)
+            {
+                part = parts.FirstOrDefault(p => p != null && p.uniqueID == uniqueId);
+                if (part != null)
+                {
+                    Debug.LogWarning($"[LayerManager] GetPartByKey: recovered part '{uniqueId}' from Parts list. Re-registering into partDict.");
+                    try
+                    {
+                        AddPart(part);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"[LayerManager] GetPartByKey: re-register failed: {ex.Message}");
+                    }
+                    return part;
+                }
+            }
+
+            Debug.LogWarning($"[LayerManager] GetPartByKey: part '{uniqueId}' not found (dict and Parts list empty).");
+            return null;
+        }
 
         public void RemovePart(string uniqueId)
         {
@@ -265,8 +316,25 @@ namespace Ingame.Board
 
         public void Reset()
         {
+            // ✅ Cancel tất cả ShowNext coroutine đang chờ 1.5s
+            // Tránh PopLayer() chạy sau Reset() với stale layer reference
+            StopAllCoroutines();
+
             ResetAllParts();
             ResetAllLayer();
+            ClearPartDict();
+            partDict.Clear();
+            parts.Clear();
+            screwDict.Clear();
+            screwDictByLayer.Clear();
+            layerQueue.Clear();
+            layers.Clear(); // ✅ thêm — layers list vẫn còn ref sau ResetAllLayer
+
+            if (visibilityController != null)
+            {
+                visibilityController.indexedLayers.Clear();
+                visibilityController.layerQueue.Clear();
+            }
         }
 
         private void ResetAllLayer()

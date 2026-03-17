@@ -9,11 +9,18 @@ public abstract class BaseInputHandler : MonoBehaviour
     [SerializeField] protected Camera mainCam;
 
     [Header("Input Lock")]
-    [SerializeField] protected bool isInputLocked = false;
-    public bool IsInputLocked
+    [SerializeField] protected bool isScrewInputLocked = false;
+    [SerializeField] protected bool isItemInputLocked = false;
+
+    public bool IsScrewInputLocked
     {
-        get => isInputLocked;
-        set => isInputLocked = value;
+        get => isScrewInputLocked;
+        set => isScrewInputLocked = value;
+    }
+    public bool IsItemInputLocked
+    {
+        get => isItemInputLocked;
+        set => isItemInputLocked = value;
     }
 
     [Header("Tutorial")]
@@ -53,7 +60,7 @@ public abstract class BaseInputHandler : MonoBehaviour
     {
         while (true)
         {
-            if (!isInputLocked && !IsClickOverUI())
+            if (!isScrewInputLocked && !IsClickOverUI() && !IsItemInputLocked)
             {
 #if UNITY_EDITOR || UNITY_STANDALONE
                 if (Input.GetMouseButtonDown(0))

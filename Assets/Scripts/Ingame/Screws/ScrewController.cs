@@ -196,9 +196,11 @@ namespace Ingame.Screw
             IsActionComplete = true;
             screwRender.ResetRender();
             screwPhysics.ResetPhysics();
+            screwAnimation.OnReset();
            // hingeController.Reset();
             if (_transform == null) _transform = transform;
             _transform.localScale = Vector3.one; // Always reset scale
+
         }
 
         public ColorEnum GetColor()

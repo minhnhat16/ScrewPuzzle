@@ -10,6 +10,9 @@ namespace Ingame
         private IScrewInteractionService _screwService;
 
         public UnityEvent<ScrewController> OnScrewClicked = new();
+
+        public bool IsInputLocked => IsScrewInputLocked || IsItemInputLocked;
+
         public event Action<ScrewController> OnScrewSelected;
 
         public void Inject(IScrewInteractionService screwService)
@@ -42,8 +45,17 @@ namespace Ingame
                 Debug.LogError("[Player] _screwService is null. Call Inject() from ScrewGameBootstrapper.");
                 return;
             }
-
             ScrewController screw = tappable as ScrewController;
+
+            // Nếu đang khóa input screw thì bỏ qua
+            if (IsScrewInputLocked && screw)
+            {
+                screw.IsClicked = false;
+                Debug.Log("[Player] Screw input is locked. Ignore tap.");
+
+                return;
+            }
+
             if (screw == null && tappable is MonoBehaviour mb)
                 screw = mb.GetComponent<ScrewController>()
                      ?? mb.GetComponentInParent<ScrewController>()
@@ -53,10 +65,9 @@ namespace Ingame
             {
                 Debug.LogWarning($"[Player] Could not resolve ScrewController from tappable: {tappable}");
                 return;
-            }
+             }
 
             // Guard: check IsInteractable trước khi forward xuống service
-            // Đây là điểm chặn chính — bao gồm cả tutorial block
             if (!screw.IsInteractable)
             {
                 Debug.Log($"[Player] Screw '{screw.name}' không interactable — bỏ qua.");
@@ -67,14 +78,18 @@ namespace Ingame
             OnScrewClicked?.Invoke(screw);
         }
 
-        public void LockInput() => IsInputLocked = true;
-        public void UnlockInput() => IsInputLocked = false;
+        // Sửa lại để thao tác với IsScrewInputLocked
+        public void LockInput() => IsScrewInputLocked = true;
+        public void UnlockInput() => IsScrewInputLocked = false;
 
         protected override void HandleInput(Vector3 screenPos)
         {
             if (IsClickOverUI()) return;
+            if (IsScrewInputLocked) return;
+
             var screw = PickAtScreenPos<ScrewController>(screenPos, "Player");
-            if (screw != null) OnScrewSelected?.Invoke(screw);
+            if (screw != null)
+                OnScrewSelected?.Invoke(screw);
         }
     }
 }

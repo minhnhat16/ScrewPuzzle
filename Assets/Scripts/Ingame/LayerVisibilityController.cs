@@ -7,19 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-/// <summary>
-/// Điều khiển visibility của từng layer trên board.
-/// FIXES trong version này:
-///  [FIX 1] Init() — nhận LayerManager trực tiếp (overload mới)
-///           để FinalizeStep không cần tự build queue ngoài
-///  [FIX 2] ApplyLayerVisibility() — bỏ `previewMax + 1` bug
-///           (cộng thêm 1 mỗi lần gọi làm window trôi dần)
-///  [FIX 3] HideTopLayer() — implement thực sự
-/// </summary>
 public class LayerVisibilityController : MonoBehaviour
 {
     public Queue<BaseLayer> layerQueue = new Queue<BaseLayer>();
-    public List<BaseLayer> indexedLayers = new List<BaseLayer>();
+    public List<BaseLayer> indexedLayers = new();
 
     [Header("Layer Range Settings")]
     [Tooltip("Số layer fully visible cố định. Nếu > 0 thì dùng giá trị này, bỏ qua ratio.")]
@@ -66,9 +57,27 @@ public class LayerVisibilityController : MonoBehaviour
         return Mathf.Clamp(calculated, 1, count);
     }
 
+    /// <summary>
+    /// [FIX 2] Scan forward từ startMin, đếm đủ `needed` non-null slot.
+    /// Trả về exclusive-end index cho previewMax — chính xác bất kể có bao nhiêu null slot bên trong.
+    /// Thay thế cách đếm nullInWindow cũ (tính trên window cũ → over-expand).
+    /// </summary>
+    private int CalcPreviewMaxAfterPop(int startMin, int needed, int count)
+    {
+        int found = 0;
+        int i = startMin;
+        while (i < count && found < needed)
+        {
+            if (indexedLayers[i] != null) found++;
+            i++;
+        }
+        return i; // exclusive end, khớp với IsFullyVisibleIndex: i >= preViewMin && i < previewMax
+    }
+
     // ──────────────────────────────────────────────────────────────
     // INIT
     // ──────────────────────────────────────────────────────────────
+
     /// <summary>
     /// Init với optional incoming queue.
     /// Priority: incomingQueue → LayerManager.Layers → scan children.
@@ -83,12 +92,13 @@ public class LayerVisibilityController : MonoBehaviour
             Debug.LogWarning("[LayerVisibilityController] No LayerManager found in parent hierarchy.");
             return;
         }
+
         if (incomingQueue != null && incomingQueue.Count > 0)
         {
             indexedLayers = incomingQueue.ToList();
             layerQueue = new Queue<BaseLayer>(indexedLayers);
         }
-        else if (lm != null && lm.Layers != null && lm.Layers.Count > 0)
+        else if (lm.Layers != null && lm.Layers.Count > 0)
         {
             indexedLayers = new List<BaseLayer>(lm.Layers);
             layerQueue = new Queue<BaseLayer>(indexedLayers);
@@ -110,7 +120,7 @@ public class LayerVisibilityController : MonoBehaviour
         previewMax = Mathf.Clamp(preViewMin + effectiveVisible, preViewMin, count);
         rePreviewMax = Mathf.Clamp(previewMax + prereviewWindowSize, previewMax, count);
 
-        if (lm != null) lm.visibilityController = this;
+        lm.visibilityController = this;
 
         Debug.Log($"[VisCtrl.Init] layers:{count} | divisor:{visibleDivisor} | effectiveVisible:{effectiveVisible} | min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
 
@@ -130,7 +140,7 @@ public class LayerVisibilityController : MonoBehaviour
         var lm = GetComponentInParent<LayerManager>();
         int count = layers.Count;
 
-        preViewMin = Mathf.Clamp(preViewMin, 0, Math.Max(0, count));
+        preViewMin = Mathf.Clamp(preViewMin, 0, Mathf.Max(0, count));
         previewMax = Mathf.Clamp(previewMax, preViewMin, count);
         rePreviewMax = Mathf.Clamp(rePreviewMax, previewMax, count);
 
@@ -156,13 +166,14 @@ public class LayerVisibilityController : MonoBehaviour
             }
         }
     }
+
     // ──────────────────────────────────────────────────────────────
     // POP LAYER (board drop / breaker clear)
     // ──────────────────────────────────────────────────────────────
 
     internal void PopLayer(BaseLayer clearedLayer)
     {
-        if (clearedLayer == null || indexedLayers == null)
+        if (clearedLayer == null || indexedLayers == null || !clearedLayer.isActiveAndEnabled)
         {
             Debug.LogWarning("[PopLayer] clearedLayer or indexedLayers is null");
             return;
@@ -181,27 +192,21 @@ public class LayerVisibilityController : MonoBehaviour
 
         indexedLayers[index] = null;
 
-        // Advance preViewMin: always find the lowest active index
-        int nextActive = FindNextActiveIndex(indexedLayers, 0);
-        preViewMin = nextActive >= 0 ? nextActive : 0;
-
-        // Mở rộng window nếu còn layer phía sau chưa visible
         int count = indexedLayers.Count;
         int effectiveVisible = CalcEffectiveVisible(count);
 
-        // Đếm số null slot trong range [preViewMin, previewMax) → cần bù
-        int nullInWindow = 0;
-        for (int i = preViewMin; i < Mathf.Min(previewMax, count); i++)
-        {
-            if (indexedLayers[i] == null) nullInWindow++;
-        }
+        // [FIX 3] FindNextActiveIndex chỉ check null — không dùng activeInHierarchy
+        int nextActive = FindNextActiveIndex(indexedLayers, 0);
+        preViewMin = nextActive >= 0 ? nextActive : 0;
 
-        previewMax = Mathf.Clamp(preViewMin + effectiveVisible + nullInWindow, preViewMin, count);
+        // [FIX 2] Dùng CalcPreviewMaxAfterPop thay nullInWindow — tính đúng window sau pop
+        previewMax = CalcPreviewMaxAfterPop(preViewMin, effectiveVisible, count);
         rePreviewMax = Mathf.Clamp(previewMax + prereviewWindowSize, previewMax, count);
 
         Debug.Log($"[VisCtrl] PopLayer index={index} → min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
         ApplyLayerVisibility();
     }
+
     // ──────────────────────────────────────────────────────────────
     // RANGE HELPERS
     // ──────────────────────────────────────────────────────────────
@@ -253,7 +258,6 @@ public class LayerVisibilityController : MonoBehaviour
 
     private IEnumerator ActivateAfterFade(List<BasePart> partsToFade, BaseLayer layer, int index, LayerManager lm)
     {
-
         Debug.Log($"[VisCtrl] Activating screws after fade for layer index {index}. Parts to fade: {partsToFade.Count}");
         if (partsToFade == null || partsToFade.Count == 0)
         {
@@ -272,8 +276,7 @@ public class LayerVisibilityController : MonoBehaviour
             {
                 part.UnfreezeBody();
                 remaining--;
-            }
-            ));
+            }));
         }
 
         while (remaining > 0) yield return null;
@@ -321,7 +324,7 @@ public class LayerVisibilityController : MonoBehaviour
     private IEnumerator FadePartAndNotify(Renderer renderer, Renderer outline, Color originalColor, float duration, Action onDone)
     {
         yield return StartCoroutine(FadeToOriginalColor(renderer, outline, originalColor, duration));
-        Debug.Log($"[VisCtrl] Fade to original color completed for part. Notifying completion. Renderer: {renderer}, Outline: {outline}");
+        Debug.Log($"[VisCtrl] Fade to original color completed for part. Renderer: {renderer}, Outline: {outline}");
         onDone?.Invoke();
     }
 
@@ -340,7 +343,6 @@ public class LayerVisibilityController : MonoBehaviour
             {
                 part.CurrentVisibilityState = BasePart.VisibilityState.Prereview;
                 if (part.Renderer != null)
-                    // Show prereview as brown (fade-to-black implementation uses brown)
                     StartCoroutine(FadeToBlack(part.Renderer, part.Outline, fadeDuration));
             }
         }
@@ -350,8 +352,13 @@ public class LayerVisibilityController : MonoBehaviour
 
     private void SetLayerHidden(BaseLayer layer, int index, LayerManager lm)
     {
+        // [FIX 1] Guard đúng: bảo vệ bằng index range thay vì IsLayerClear.
+        // IsLayerClear = "đã clear xong", không phản ánh "đang trong visible window".
+        // Nếu layer đang fully visible, ApplyLayerVisibility() sẽ không gọi SetLayerHidden()
+        // vì IsFullyVisibleIndex(i) == true → nhánh này không bao giờ reach được với active layer.
+        // Guard dưới là safety net phòng trường hợp gọi trực tiếp từ bên ngoài.
+        if (IsFullyVisibleIndex(index)) return;
 
-        if (layer.IsLayerClear) return; // ← không hide layer đang visible
         var go = layer.GameObject;
         if (go.activeSelf) go.SetActive(false);
 
@@ -414,12 +421,16 @@ public class LayerVisibilityController : MonoBehaviour
         int visibleWidth = Mathf.Max(1, previewMax - preViewMin);
         int prereviewWidth = Mathf.Max(0, rePreviewMax - previewMax);
 
+        // [FIX 3] FindNextActiveIndex chỉ check null — không dùng activeInHierarchy
         int nextIndex = FindNextActiveIndex(layers, preViewMin + 1);
-        preViewMin = nextIndex >= 0
-            ? nextIndex
-            : Mathf.Clamp(preViewMin, 0, Math.Max(0, count - 1));
 
-        previewMax = Mathf.Clamp(preViewMin + visibleWidth, preViewMin, count);
+        // [FIX 4] Early-return nếu không còn layer hợp lệ phía sau
+        if (nextIndex < 0) return;
+
+        preViewMin = nextIndex;
+
+        // [FIX 4] Dùng CalcPreviewMaxAfterPop để advance đúng visibleWidth non-null slot
+        previewMax = CalcPreviewMaxAfterPop(preViewMin, visibleWidth, count);
         rePreviewMax = Mathf.Clamp(previewMax + prereviewWidth, previewMax, count);
 
         Debug.Log($"[VisCtrl] ShowNextLayer → min:{preViewMin} max:{previewMax} reMax:{rePreviewMax}");
@@ -455,18 +466,20 @@ public class LayerVisibilityController : MonoBehaviour
     // INDEX HELPERS
     // ──────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// [FIX 3] Chỉ check null slot — không dùng activeInHierarchy.
+    /// activeInHierarchy=false khi parent bị tắt, gây preViewMin nhảy sai
+    /// vào layer prereview vẫn còn hợp lệ.
+    /// </summary>
     private int FindNextActiveIndex(List<BaseLayer> layers, int startAt)
     {
         if (layers == null) return -1;
         for (int i = Mathf.Max(0, startAt); i < layers.Count; i++)
         {
-            var l = layers[i];
-            if (l != null && l.GameObject != null && l.GameObject.activeInHierarchy)
-                return i;
+            if (layers[i] != null) return i;
         }
         return -1;
     }
-
 
     // ──────────────────────────────────────────────────────────────
     // FADE COROUTINES

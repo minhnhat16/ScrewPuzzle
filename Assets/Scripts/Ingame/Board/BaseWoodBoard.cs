@@ -68,20 +68,7 @@ public class BaseWoodBoard : FSMSystem
     // Xử lý khi bảng gỗ đã được thả
     protected virtual void OnBoardDropped()
     {
-        //// Kiểm tra va chạm với các đối tượng khác
-        //Collider2D hit = Physics2D.OverlapCircle(transform.position, 0.5f, layerMask);
-
-        //if (hit != null)
-        //{
-        //    Debug.Log("Board dropped on a valid position: " + hit.name);
-        //    // Thực hiện các thao tác khi thả vào đúng vị trí, ví dụ gắn với screw
-        //    screwManager.AttachScrewsToBoard(this);
-        //}
-        //else
-        //{
-        //    Debug.Log("Board dropped in an invalid position, returning to initial position.");
-        //    ResetPosition();
-        //}
+        
     }
 
     // Hàm reset lại vị trí nếu thả sai

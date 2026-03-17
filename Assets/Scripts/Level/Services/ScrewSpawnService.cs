@@ -20,7 +20,7 @@ public class ScrewSpawnService : IScrewSpawnService
         ScrewManager screwManager,
         Transform screwParent)
     {
-        if (levelData == null ||  levelData.screws == null || levelData.screws.Count == 0)
+        if (levelData == null || levelData.screws == null || levelData.screws.Count == 0)
         {
             Debug.LogWarning("[ScrewSpawnService] No screws in level data.");
             yield break;
@@ -49,22 +49,18 @@ public class ScrewSpawnService : IScrewSpawnService
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
                 continue;
             }
-
             RegisterScrewInLayer(screw, part, layerManager);
-            screwManager.AddScrew(screw);
 
-            // Register vào TutorialTargetRegistry nếu có tutorialKey
             if (!string.IsNullOrEmpty(screwData.tutorialKey))
             {
                 TutorialTargetRegistry.Register(screwData.tutorialKey, screw.transform);
-                screw.tutorialKey = screwData.tutorialKey; // ← thêm dòng này
-                Debug.Log($"[ScrewSpawnService] Tutorial target registered: '{screwData.tutorialKey}'");
+                screw.tutorialKey = screwData.tutorialKey;
             }
 
             yield return screw.Init();
+            screwManager.AddScrew(screw);
         }
 
-        Debug.Log($"[ScrewSpawnService] Finished spawning {levelData.screws.Count} screws.");
     }
 
     private ScrewController SpawnScrewFromPool(ScrewScriptable screwData, Transform parent)
