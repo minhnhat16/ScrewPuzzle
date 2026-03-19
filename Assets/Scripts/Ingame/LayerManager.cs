@@ -85,6 +85,8 @@ namespace Ingame.Board
         {
             if (!gameObject.activeSelf) return;
 
+
+            Debug.Log($"[LayerManager] OnLayerCleared called for layer: {clearedLayer?.name ?? "null"}");
             // ✅ Guard: tránh start coroutine với layer đã invalid
             if (clearedLayer == null || !clearedLayer.IsLayerClear) return;
 
@@ -112,6 +114,8 @@ namespace Ingame.Board
                 yield break;
             }
 
+
+            if (!layer.IsLayerClear) yield break;
             visibilityController.PopLayer(layer);
         }
 
@@ -268,10 +272,17 @@ namespace Ingame.Board
                 {
                     if (s == null) continue;
                     if (s.IsInHold) continue;
+                    if (!s.isActiveAndEnabled) continue;
                     if (s.hingeController.BodyConnect == body)
                         result.Add(s);
                 }
             }
+
+            string reString = result.Count > 0
+                ? string.Join(", ", result.Select(s => s.GetColor()))
+                : "no screws";
+
+            Debug.Log($"GetScrewByPart: found {result.Count} screws connected to part '{part.name}' (body: {body.name}): {reString}");
             return result;
         }
         public bool PartHasNoScrewConnected(BasePart part)

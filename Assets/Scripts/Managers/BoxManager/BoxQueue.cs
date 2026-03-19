@@ -196,9 +196,8 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
             slot.OnLockedSlotTapped -= HandleLockedSlotTapped;
     }
 
-    private void HandleLockedSlotTapped(BoxSlot slot)
+    private void HandleLockedSlotTapped(BoxSlot tappedSlot)
     {
-        // Block unlock khi tutorial đang chạy
         if (TutorialManager.ins != null && TutorialManager.ins.IsBlockingInput)
         {
             Debug.Log("[BoxQueue] HandleLockedSlotTapped blocked — tutorial is active.");
@@ -209,16 +208,12 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
         DialogManager.ins.ShowDialog(DialogIndex.ReviveDialog, new ReviveParam
         {
-            isRevive = false,   // title = "Add One Box", watch text = "Free"
+            isRevive = false,
             totalGold = WalletManager.ins.Get(Currency.Ticket),
-            currentTicket = 0,  // ẩn nút ticket
+            currentTicket = 0,
             onWatchAccepted = () =>
             {
-                slot.UnlockSlot();
-                if (_sequence.HasNext())
-                    SpawnBoxIntoSlot(PickNextBox(), slot);
-                _layout.AlignSlots(slots, totalWidth);
-                Debug.Log($"[BoxQueue] Slot unlocked via dialog. Active boxes: {_activeBoxes.Count}");
+                UnlockNextSlot(); // luôn unlock slot locked đầu tiên
             }
         });
     }
@@ -317,17 +312,22 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
         var sequenceCounts = _sequence.GetColorCounts();
 
         // ── Difficulty bias ────────────────────────────────────────
-        // Roll một lần cho cả frame pick này.
-        // Nếu roll < bias → bỏ qua toàn bộ smart tầng → thẳng fallback.
-        // Kết quả: box spawn không match gì đang hold → player khó clear hơn.
         bool skipSmart = UnityEngine.Random.value < difficultyBias;
 
         if (!skipSmart)
         {
-            var smart = TryPickFromArray(activeColors, sequenceCounts)
-                     ?? TryPickFromTopLayer(activeColors, sequenceCounts)
-                     ?? TryPickNonDuplicate(activeColors)
-                     ?? TryPickMatchingActiveBoxWithLeastScrews();
+            Box smart = null;
+            smart = TryPickBoxWithLessThan3Screws(sequenceCounts);
+            if (smart == null) smart = TryPickFromArray(activeColors, sequenceCounts);
+            if (smart == null) smart = TryPickFromTopLayer(activeColors, sequenceCounts);
+            if (smart == null) smart = TryPickNonDuplicate(activeColors);
+            if (smart == null) smart = TryPickMatchingActiveBoxWithLeastScrews();
+
+            // Đảm bảo không trùng màu với các box đang active (trừ Rainbow)
+            if (smart != null && activeColors.Contains(smart.Color) && smart.Color != ColorEnum.Rainbow)
+            {
+                smart = null;
+            }
 
             if (smart != null) return smart;
         }
@@ -336,9 +336,45 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
             Debug.Log($"[BoxQueue] DifficultyBias ({difficultyBias:P0}) triggered — skipping smart pick.");
         }
 
-        return PickFallback();
+        // Fallback: lấy box đầu tiên trong sequence không trùng màu với active boxes (trừ Rainbow)
+        Box fallback = null;
+        do
+        {
+            fallback = PickFallback();
+            if (fallback == null) break;
+            if (!activeColors.Contains(fallback.Color) || fallback.Color == ColorEnum.Rainbow)
+                return fallback;
+
+            // Nếu trùng màu, loại bỏ box này khỏi sequence và thử tiếp
+            // (Cần đảm bảo PickFallback không trả về cùng box lặp lại)
+            // Nếu không thể loại bỏ, chỉ break để tránh vòng lặp vô hạn
+            break;
+        } while (true);
+
+        return fallback;
     }
 
+    // Add this new method:
+    private Box TryPickBoxWithLessThan3Screws(Dictionary<ColorEnum, int> sequenceCounts)
+    {
+        // Find active boxes with less than 3 screws and not full/locked
+        var candidates = _activeBoxes
+            .Where(b => !b.IsLocked && !b.IsFull && b.RemainingCapacity < 1)
+            .OrderBy(b => b.RemainingCapacity)
+            .ToList();
+
+        foreach (var box in candidates)
+        {
+            // Try to pick a box from the sequence with the same color
+            var match = _sequence.TryDequeueMatching(b => b.Color == box.Color);
+            if (match != null)
+            {
+                Debug.Log($"[BoxQueue] Priority: Pick box with <3 screws — color={box.Color}, screwCount={box.RemainingCapacity}");
+                return match;
+            }
+        }
+        return null;
+    }
     /// <summary>
     /// Set difficulty bias từ code (ví dụ: từ LevelConfig hoặc DifficultyManager).
     /// 0 = dễ nhất, 1 = khó nhất.
@@ -619,26 +655,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
         if (box == null || box.IsFull) return;
 
         var color = box.Color;
-
-        // ── Nguồn 1: BoxQueue internal hidden ─────────────────────
-        if (_hiddenByColor.TryGetValue(color, out var localList) && localList.Count > 0)
-        {
-            foreach (var screw in localList.ToList())
-            {
-                if (box.IsFull) break;
-                localList.Remove(screw);
-                screw.SetActive(true);
-                // Immediate — không animate, screw di chuyển cùng box khi box move vào slot
-                box.TryAddScrewImmediate(screw);
-            }
-            if (localList.Count == 0)
-                _hiddenByColor.Remove(color);
-
-            Debug.Log($"[BoxQueue] ResolveHidden (local): snapped screws color={color} to box.");
-        }
-
-        // ── Nguồn 2: ScrewManager hidden (từ Breaker item) ────────
-        var sm = LevelManager.ins?.ScrewManager;
+        var sm = LevelManager.ins.ScrewManager;
         if (sm != null && !box.IsFull)
         {
             int remaining = box.RemainingCapacity;
@@ -650,11 +667,9 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
                 screw.SetActive(true);
                 // Immediate — không animate
                 box.TryAddScrewImmediate(screw);
+                // Đảm bảo remove khỏi hidden (an toàn tuyệt đối)
+                sm.RemoveHidden(screw);
             }
-
-            if (fromBreaker.Count > 0)
-                Debug.Log($"[BoxQueue] ResolveHidden (breaker): snapped {fromBreaker.Count} " +
-                          $"screw(s) color={color} to box.");
         }
     }
     /// <summary>

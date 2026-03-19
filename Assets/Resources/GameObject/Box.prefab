@@ -265,15 +265,16 @@ MonoBehaviour:
   upperBoxRenderer: {fileID: 2417409247447237672}
   fallStartY: 10
   fallDuration: 0.8
-  bounceCount: 2
   bounceHeight: 0.5
   punchScale: {x: 1.3, y: 1.3}
   upperStartPosition: {x: 0, y: 10, z: 0}
   lidCloseDuration: 0.5
-  lidRotationAngle: 90
   exitDuration: 0.5
   exitScaleDown: 0.3
   exitScreenOffset: {x: -80, y: -80}
+  soundLidFall: 3
+  soundLidLand: 31
+  soundBoxExit: 32
 --- !u!114 &5606769183353309378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,6 +289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   starPrefab: {fileID: 2387994631555852560, guid: 2ee2c3de2c52b0c4691a43295ed6f9d4, type: 3}
   popDuration: 0.15
+  spawnInterval: 0.1
   waitBeforeFly: 0.2
   flyDuration: 0.6
   delayBetweenFlies: 0.08
@@ -351,8 +353,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.0065, y: 10, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 153449302129994267}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

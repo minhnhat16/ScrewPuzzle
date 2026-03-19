@@ -47,18 +47,6 @@ namespace LevelSystem.Steps
 
             ctx.ScrewManager = screwManager;
 
-            // ── Set vào LevelManager NGAY ĐÂY ──────────────────────
-            // HingeController.Start() → InitHingeJoints() → LevelManager.ins.ScrewManager
-            // được gọi trong SpawnScrews() bên dưới — phải set trước khi spawn
-            if (LevelManager.ins != null)
-            {
-                LevelManager.ins.ScrewManager = screwManager;
-                Debug.Log("[LoadScrewsStep] ScrewManager set vào LevelManager trước khi spawn screws.");
-            }
-            else
-            {
-                Debug.LogWarning("[LoadScrewsStep] LevelManager.ins is null — HingeController sẽ không register được.");
-            }
 
             // Spawn individual screws
             yield return _screwSpawnService.SpawnScrews(

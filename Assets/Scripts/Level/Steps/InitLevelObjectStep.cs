@@ -96,8 +96,10 @@ namespace LevelSystem.Steps
             foreach (var hinge in hinges)
             {
                 hinge.transform.SetParent(HingePool.Instance.pool.parent);
+                hinge.Reset();
                 HingePool.Instance.pool.ReturnToPool(hinge);
             }
+
 
             // 2. Reset body state trước khi return
             part.Reset();

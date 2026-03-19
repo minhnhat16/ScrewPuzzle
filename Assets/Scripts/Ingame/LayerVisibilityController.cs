@@ -224,7 +224,7 @@ public class LayerVisibilityController : MonoBehaviour
         var go = layer.GameObject;
         if (!go.activeSelf) go.SetActive(true);
         Debug.Log("[VisCtrl] SetLayerFullyVisible: activating layer at index " + index);
-
+        layer.IsHidden = false;
         var partsToFade = new List<BasePart>();
 
         foreach (var part in layer.parts)

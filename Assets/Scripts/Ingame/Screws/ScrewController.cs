@@ -79,6 +79,7 @@ namespace Ingame.Screw
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
             yield return new WaitUntil(() => bodyLayer != null);
             screwRender.SetSortingOrderAndLayer(0, bodyLayer);
+            hingeController.InitHingeJoints();
         }
 
         public bool OnScrewClicked()

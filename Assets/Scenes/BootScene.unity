@@ -5231,7 +5231,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8179671856068062486, guid: 536c81ab4e5c62f438ad4c2a3124d111, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -174.99994
+      value: -174.99992
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 407705852429133132, guid: 536c81ab4e5c62f438ad4c2a3124d111, type: 3}
@@ -13302,6 +13302,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1611511808369519758, guid: d96dcaa087e254946a447dfd4da86807, type: 3}
     - target: {fileID: 2236766362217086473, guid: d20dd70b2429bbd46939705590cdacf2, type: 3}
+      propertyPath: questItemPrefab
+      value: 
+      objectReference: {fileID: 1093483796753864950, guid: 4b0e97aab34f1c4409e5d15b56f6c62f, type: 3}
+    - target: {fileID: 2236766362217086473, guid: d20dd70b2429bbd46939705590cdacf2, type: 3}
       propertyPath: chestTrackParent
       value: 
       objectReference: {fileID: 905284232}
@@ -13928,7 +13932,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 3990346827129052022, guid: c315db34bafb21048b9c39764e9a1c13, type: 3}
-  total: 20
+  total: 100
 --- !u!1 &2304388804736975883
 GameObject:
   m_ObjectHideFlags: 0

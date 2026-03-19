@@ -18,8 +18,8 @@ public class QuestItem : MonoBehaviour
 
     private MissionConfigRecord missionData;
     private UnityAction cachedClick;
-
-    public int MissionID { get;set; }
+    [SerializeField] private Text totalText;
+    public int MissionID { get; set; }
 
     // =======================================================
     // LIFECYCLE
@@ -49,9 +49,7 @@ public class QuestItem : MonoBehaviour
     public void Setup(MissionConfigRecord data, int currentProgress)
     {
         missionData = data;
-        MissionID = data.Id;   // ✅ DATA ID
-        Debug.Log($"Mission data id {data.Id} and id {MissionID}");
-        titleText.text = data.Description;
+        MissionID = data.Id;
         icon.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, data.IconName);
 
         UpdateProgressUI(currentProgress, data.Target);
@@ -79,9 +77,7 @@ public class QuestItem : MonoBehaviour
         if (mission.Id != MissionID)
             return;
 
-        Debug.Log(
-            $"<color=blue>[QuestItem] Mission completed: dataId={mission.Id}</color>"
-        );
+        Debug.Log($"<color=blue>[QuestItem] Mission completed: dataId={mission.Id}</color>");
 
         UpdateProgressUI(mission.Target, mission.Target);
         RefreshState(MissionState.Completed);

@@ -38,24 +38,14 @@ namespace Gameplay.StateMachine
             // Loading: xong thì sang Playing
             { GameplayState.Loading,      new HashSet<GameplayState> { GameplayState.Playing } },
 
-            // Playing: các nhánh thoát ra
-            //   Paused       → player bấm pause
-            //   Win          → tất cả screw xong
-            //   RevivePrompt → array screw full, box queue chưa full
-            //   Lose         → array screw full VÀ box queue cũng full (không còn revive)
-            //   ItemUsing    → player chọn dùng item
             { GameplayState.Playing,      new HashSet<GameplayState> { GameplayState.Paused, GameplayState.Win, GameplayState.Lose, GameplayState.RevivePrompt, GameplayState.ItemUsing } },
 
-            // Paused: resume về Playing, hoặc thoát hẳn về Idle (Return Home)
             { GameplayState.Paused,       new HashSet<GameplayState> { GameplayState.Playing, GameplayState.Idle } },
 
-            // Win: về Idle (chuẩn bị level tiếp) hoặc Load level mới
             { GameplayState.Win,          new HashSet<GameplayState> { GameplayState.Idle, GameplayState.Loading } },
 
-            // Lose: về Idle (menu), Loading (restart), hoặc Playing (revive từ LoseDialog)
             { GameplayState.Lose,         new HashSet<GameplayState> { GameplayState.Idle, GameplayState.Loading, GameplayState.Playing } },
 
-            // RevivePrompt: player chọn Revive → Playing, không Revive → Lose
             { GameplayState.RevivePrompt, new HashSet<GameplayState> { GameplayState.Playing, GameplayState.Lose } },
 
             // ItemUsing: item xong hoặc cancel → về Playing

@@ -110,7 +110,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     public void ReLoadLevel()
     {
         Dispose();
-
+        InputRouter.Instance.IsInputLocked = true; // Lock input during reload to prevent issues
         if (CurrentLevelId <= 0) return;
 
         // InitializeForLevel() phải chạy lại để Setup() boxQueue trước LoadLevel().
@@ -184,9 +184,6 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         BoardDropCount = 0;
         CurrentCombo = 0;
 
-        // ── Safety net: nếu BoxQueue chưa Setup → tự gọi InitializeForLevel() ──
-        // Trường hợp: GameFlowService.RestartLevel() gọi LoadLevel() trực tiếp
-        // mà không qua LevelStartService → BoxQueue chưa được re-setup.
         if (_boxQueue == null || !_boxQueue.IsReady)
         {
             Debug.LogWarning("[LevelManager] BoxQueue not ready — calling InitializeForLevel() as fallback.");
@@ -215,7 +212,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             .AddStep(new ActivatePartsStep())
             .AddStep(new FinalizeStep(_boxQueue));
 
-        yield return pipeline.Run(ctx, () =>
+        yield return pipeline.Run(ctx,  () =>
         {
             currentLevel = ctx.LevelData;
             layerManager = ctx.LayerManager;
@@ -224,6 +221,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
             this.layerManager = layerManager;
             Debug.Log($"[LevelManager] Level {levelID} loaded. Difficulty: {Difficulty}");
+            InputRouter.Instance.IsInputLocked = false; // Unlock input after level is ready
             callback?.Invoke();
         });
 
@@ -292,6 +290,14 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
             ScrewManager.RemoveScrew(screw);
 
+            // Xử lý Rainbow: chuyển vào SpecialBoxManager
+            if (screw.GetColor() == ColorEnum.Rainbow)
+            {
+                SpecialBoxManager.ins.AddSingle(screw);
+                routed.Add(screw);
+                continue;
+            }
+
             var box = BoxQueue.ins.FindSuitableBox(screw.GetColor());
             if (box != null && box.TryAddScrew(screw))
             {
@@ -300,7 +306,12 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             else
             {
                 screw.SetActive(false);
-                hidden.Add(screw);
+                if (!hidden.Contains(screw))
+                {
+                    hidden.Add(screw);
+                }
+                else
+                    Debug.LogWarning($"[LevelManager] Screw '{screw.name}' already in hidden list, skipping duplicate add.");
             }
         }
     }
@@ -319,7 +330,10 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             }
 
             ScrewManager.AddHiddenScrews(hidden);
-            Debug.Log($"[LevelManager] Breaker: {hidden.Count} screw(s) hidden (no matching box).");
+
+
+            string hiddenColors = string.Join(", ", hidden.ConvertAll(s => s.GetColor().ToString()));
+            Debug.Log($"[LevelManager] Breaker: {hidden.Count} screw(s) hidden: {hiddenColors} (no matching box).");
         }
     }
 

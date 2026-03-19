@@ -63,14 +63,12 @@ namespace Ingame
 
             if (screw == null)
             {
-                Debug.LogWarning($"[Player] Could not resolve ScrewController from tappable: {tappable}");
                 return;
              }
 
             // Guard: check IsInteractable trước khi forward xuống service
             if (!screw.IsInteractable)
             {
-                Debug.Log($"[Player] Screw '{screw.name}' không interactable — bỏ qua.");
                 return;
             }
 

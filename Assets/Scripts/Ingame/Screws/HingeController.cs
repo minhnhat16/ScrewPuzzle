@@ -25,12 +25,7 @@ namespace Ingame.Screw
 
         public virtual void Start()
         {
-            var currentScene = SceneManager.GetActiveScene();
-
-            if (!currentScene.name.Equals("LevelMaker"))
-            {
-                InitHingeJoints();
-            }
+           
         }
 
         public virtual void InitHingeJoints()
@@ -67,7 +62,6 @@ namespace Ingame.Screw
 
             var hinge = hingeJoint2D;
             if (hinge == null) return;
-            var body = hinge.connectedBody;
             sm.RemoveHingeConnection(hinge);
 
             hinge.connectedBody = null;

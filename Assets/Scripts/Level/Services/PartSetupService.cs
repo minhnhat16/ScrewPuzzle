@@ -62,6 +62,7 @@ public class PartSetupService
 
         // ── Collider ─────────────────────────────────────────────
         partComponent.ResetAndReapplyPolygonCollider();
+        partComponent.FreezeBody();
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -12,7 +12,7 @@ namespace Ingame
     public class ScrewManager : MonoBehaviour
     {
         [SerializeField] private LayerMask layerMask;
-        private Dictionary<ColorEnum, List<ScrewController>> hiddenByColor = new();
+        private readonly Dictionary<ColorEnum, List<ScrewController>> hiddenByColor = new();
 
         private readonly List<ScrewController> screws = new();
 
@@ -30,6 +30,18 @@ namespace Ingame
             layerMask = LayerMask.GetMask("Screw");
         }
 
+        // [FIX A] — Clear dict ngay khi object được enable lại (pool reuse / scene reload)
+        // Đảm bảo không còn stale reference từ lần chơi trước dù Reset() chưa kịp gọi
+        private void OnEnable()
+        {
+            Clear();
+        }
+
+        public void Clear()
+        {
+            _hingeToPartMap.Clear();
+            _partToHingesMap.Clear();
+        }
         //======================================================================//
         // PUBLIC API
         //======================================================================//
@@ -37,7 +49,6 @@ namespace Ingame
         public void AddScrew(ScrewController screw)
         {
             if (screw == null) return;
-            // [FIX 4] Guard duplicate — pool reuse có thể AddScrew() lại screw đã có
             if (!screws.Contains(screw))
                 screws.Add(screw);
         }
@@ -120,42 +131,47 @@ namespace Ingame
         {
             if (hinge == null || part == null)
             {
-                Debug.LogWarning($"[ScrewManager] AddHingeConnection: hinge or part is null. Skipping.");
+                Debug.LogWarning("[ScrewManager] AddHingeConnection: hinge or part is snull. Skipping.");
                 return;
             }
 
-            if (_hingeToPartMap.TryGetValue(hinge, out var existingPart)
-                && existingPart != null
-                && existingPart != part)
+            // Nếu hinge đã map sang part khác, cleanup đúng chiều
+            if (_hingeToPartMap.TryGetValue(hinge, out var existingPart) && existingPart != part)
             {
-                Debug.LogWarning($"[ScrewManager] AddHingeConnection: hinge {hinge.name} already mapped to {existingPart.name}, remapping to {part.name}. Cleaning up stale entry.");
-                // Xóa hinge khỏi set của part cũ
                 if (_partToHingesMap.TryGetValue(existingPart, out var oldSet))
                 {
                     oldSet.Remove(hinge);
                     if (oldSet.Count == 0)
+                    {
                         _partToHingesMap.Remove(existingPart);
+                        existingPart.HandleNoHingesLeft();
+                    }
                 }
             }
 
+            // Map mới
             _hingeToPartMap[hinge] = part;
 
-            if (!_partToHingesMap.ContainsKey(part))
-                _partToHingesMap[part] = new HashSet<HingeJoint2D>();
-            _partToHingesMap[part].Add(hinge);
+            if (!_partToHingesMap.TryGetValue(part, out var hingeSet))
+            {
+                hingeSet = new HashSet<HingeJoint2D>();
+                _partToHingesMap[part] = hingeSet;
 
-            Debug.Log($"[ScrewManager] AddHingeConnection: {hinge.name} → {part.name} " +
-                      $"(hinges on part: {_partToHingesMap[part].Count})");
+
+                string set = string.Join(", ", hingeSet.Select(h => h.name));
+                Debug.Log($"[ScrewManager] AddHingeConnection: created new hinge set for part {part.name}: set {set == null}");
+            }
+            hingeSet.Add(hinge);
+
+            Debug.Log($"[ScrewManager] AddHingeConnection: {hinge.name} → {part.name} (total: {hingeSet.Count})");
         }
-
         public void RemoveHingeConnection(HingeJoint2D hinge)
         {
             if (hinge == null) return;
 
-            if (!_hingeToPartMap.TryGetValue(hinge, out var part))
+            if (!_hingeToPartMap.TryGetValue(hinge, out var part) || part == null)
             {
-                // [FIX 2] Hinge không có trong map — có thể do reload rồi pool reuse
-                // Thử recover qua connectedBody như cũ, nhưng log rõ hơn
+                // Recovery: tìm part qua connectedBody nếu có
                 var body = hinge.connectedBody;
                 if (body != null)
                 {
@@ -178,24 +194,14 @@ namespace Ingame
                 }
             }
 
-            // [FIX 2] Unity destroyed object check
-            if (part == null)
-            {
-                // Part đã bị destroy (pool/scene cleanup) — chỉ xóa hinge key, không gọi callback
-                _hingeToPartMap.Remove(hinge);
-                Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: part was destroyed, removing hinge key only.");
-                return;
-            }
-
             _hingeToPartMap.Remove(hinge);
 
             if (_partToHingesMap.TryGetValue(part, out var hingeSet))
             {
                 hingeSet.Remove(hinge);
-                int remaining = hingeSet.Count;
-                Debug.Log($"[ScrewManager] RemoveHingeConnection: remaining hinges on {part.name} = {remaining}");
+                Debug.Log($"[ScrewManager] RemoveHingeConnection: removed {hinge.name} from {part.name}, remaining: {hingeSet.Count}");
 
-                if (remaining == 0)
+                if (hingeSet.Count == 0)
                 {
                     _partToHingesMap.Remove(part);
                     part.HandleNoHingesLeft();
@@ -207,7 +213,6 @@ namespace Ingame
                 part.HandleNoHingesLeft();
             }
         }
-
         public int GetHingeCountForPart(BasePart part)
         {
             if (part == null) return 0;
@@ -248,28 +253,40 @@ namespace Ingame
         public void ReturnAllScrewToPool()
         {
             var pool = ScrewPool.Instance;
+
+            // [FIX C] — Gọi RemoveHingeConnection từng cái thay vì Clear() thô
+            // Đảm bảo HandleNoHingesLeft() được gọi đúng cho mọi BasePart còn sót
+            // Tránh BasePart giữ state sai sang lần reload tiếp theo
             foreach (var s in screws)
             {
                 if (s == null) continue;
+
+                var hinge = s.hingeController?.HingeJoint2D;
+                if (hinge != null)
+                    RemoveHingeConnection(hinge);
+
                 s.OnReset();
                 pool.Pool.ReturnToPool(s);
             }
             screws.Clear();
 
-            // [FIX 1] Clear cả 2 map sau khi return pool
-            // Không để stale HingeJoint2D/BasePart reference tồn tại sang game tiếp theo
+            // Clear phần còn sót (hinges không có screw tương ứng hoặc bị miss)
             _hingeToPartMap.Clear();
             _partToHingesMap.Clear();
         }
 
         public void Reset()
         {
-            // Return active screws + clear hinge maps (gọi ReturnAllScrewToPool đã xử lý)
+
+
+            Debug.Log("[ScrewManager] Resetting screws and hinge connections...");  
             ReturnAllScrewToPool();
 
-            // [FIX 3] ReturnHiddenScrewsToPool xong thì clear map — tránh stale color entries
             ReturnHiddenScrewsToPool();
-            hiddenByColor.Clear(); // đảm bảo clear dù ReturnHiddenScrewsToPool có exception
+            hiddenByColor.Clear();
+
+            // [FIX D] — Validate sau Reset để detect stale leak sớm, log ra console
+            ValidateMaps();
         }
 
         private void ReturnHiddenScrewsToPool()
@@ -294,9 +311,8 @@ namespace Ingame
                         Debug.LogWarning($"[ScrewManager] ReturnHiddenScrewsToPool failed: {ex.Message}");
                     }
                 }
-                list.Clear(); // [FIX 3] Clear list ngay sau khi return
+                list.Clear();
             }
-            // hiddenByColor.Clear() được gọi ở Reset() sau hàm này
         }
 
         internal List<ScrewController> PopHiddenScrew(ColorEnum color, int max)
@@ -369,7 +385,8 @@ namespace Ingame
         //======================================================================//
 
         /// <summary>
-        /// Kiểm tra stale entries trong map — gọi sau mỗi reload để detect leak sớm.
+        /// Kiểm tra stale entries trong map.
+        /// Tự động gọi sau mỗi Reset() — không cần gọi thủ công.
         /// </summary>
         public void ValidateMaps()
         {
@@ -377,7 +394,6 @@ namespace Ingame
 
             foreach (var kvp in _hingeToPartMap.ToList())
             {
-                // Unity destroyed object == null khi dùng == operator
                 if (kvp.Key == null || kvp.Value == null)
                 {
                     _hingeToPartMap.Remove(kvp.Key);

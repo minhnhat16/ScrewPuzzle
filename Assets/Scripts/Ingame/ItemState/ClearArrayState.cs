@@ -1,6 +1,10 @@
-﻿using Ingame;
+﻿// Assets\Scripts\Ingame\ItemState\ClearArrayState.cs
+using Enums;
+using Ingame;
+using Ingame.Screw;
 using Managers;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ClearArrayState : FSMState<ItemController>, IItem
@@ -32,20 +36,66 @@ public class ClearArrayState : FSMState<ItemController>, IItem
     private IEnumerator ClearAndResolve()
     {
         int itemUsed = 0;
-        // Chờ tất cả screw move vào hidden storage xong
-        yield return ArrayScrew.ins.ClearToHidden((isClear) =>
-        {
-            itemUsed = isClear ? 1 : 0;
-        });
 
-        MissionManager.ins.ProcessUseItem(ItemType.Magnet, itemUsed);
+        // Lấy toàn bộ screw trong array
+        var arrayScrews = new List<ScrewController>(ArrayScrew.ins.HeldScrews);
+        if (arrayScrews.Count == 0)
+        {
+            MissionManager.ins.ProcessUseItem(ItemType.Magnet, 0);
+            sys.SetExecuting(false);
+            sys.SetSelected(false);
+            sys.itemPerformed.Invoke(true);
+            IngameController.ins.OnItemFinished();
+            yield break;
+        }
+
+        // Ẩn visual từng screw
+        foreach (var screw in arrayScrews)
+        {
+            if (screw == null) continue;
+            screw.SetActive(false);
+            yield return null;
+        }
+
+        // Xử lý từng screw như RemovePart: Rainbow → SpecialBox, match box → add, else → hidden
+        var hidden = new List<ScrewController>();
+        foreach (var screw in arrayScrews)
+        {
+            if (screw == null) continue;
+
+            // Remove from ArrayScrew
+            ArrayScrew.ins.Dequeue(screw);
+
+            // Rainbow: chuyển vào SpecialBoxManager
+            if (screw.GetColor() == ColorEnum.Rainbow)
+            {
+                SpecialBoxManager.ins.AddSingle(screw);
+                continue;
+            }
+
+            // Route vào box nếu có
+            var box = BoxQueue.ins.FindSuitableBox(screw.GetColor());
+            if (box != null && box.TryAddScrew(screw))
+            {
+                continue;
+            }
+
+            // Không match box → add vào hidden
+            hidden.Add(screw);
+        }
+
+        // Add hidden screws vào ScrewManager
+        if (hidden.Count > 0)
+        {
+            LevelManager.ins.layerManager.RemoveScrewsOnDict(hidden);
+            LevelManager.ins.ScrewManager.AddHiddenScrews(hidden);
+        }
+
+        MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
 
         sys.SetExecuting(false);
         sys.SetSelected(false);
         sys.itemPerformed.Invoke(true);
-
-        // OnItemFinished → TransitionTo(Playing) → event chain
-        // Lúc này ScrewManager đã có hidden screws → ResolveAllHiddenForBox sẽ hit ✅
         IngameController.ins.OnItemFinished();
     }
 

@@ -11,14 +11,13 @@ public class BoxAnimation : MonoBehaviour, IBoxAnimator
     [Header("Close Animation Settings")]
     [SerializeField] private float fallStartY = 10f;
     [SerializeField] private float fallDuration = 0.8f;
-    [SerializeField] private int bounceCount = 2;
     [SerializeField] private float bounceHeight = 0.5f;
     [SerializeField] private Vector2 punchScale = new(1.2f, 1.2f);
     [SerializeField] private Vector3 upperStartPosition = new(0, 10, 0);
 
     [Header("Lid Close Animation Settings")]
     [SerializeField] private float lidCloseDuration = 0.5f;
-    [SerializeField] private float lidRotationAngle = 90f;
+    //[SerializeField] private float lidRotationAngle = 90f;
 
     [Header("Exit Animation Settings")]
     [SerializeField] private float exitDuration = 0.5f;

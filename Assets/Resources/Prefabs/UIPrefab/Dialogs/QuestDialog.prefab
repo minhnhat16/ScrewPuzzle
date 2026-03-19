@@ -121,6 +121,7 @@ MonoBehaviour:
   chestItemPrefab: {fileID: 1611511808369519758, guid: d96dcaa087e254946a447dfd4da86807, type: 3}
   stageTabPrefab: {fileID: 8215500041284694169, guid: c1cbe4b00e966c345bb31d34f68b19f2, type: 3}
   specialChestPrefab: {fileID: 8295471487078215671, guid: 6fa3d3f4d9d948e4ca43ab94eae9172a, type: 3}
+  questItemPrefab: {fileID: 0}
   outsideClickCatcher: {fileID: 2245663007478906527}
   topChestParent: {fileID: 3516621523009155320}
   normalChestParent: {fileID: 316173612365283236}
@@ -163,6 +164,7 @@ RectTransform:
   - {fileID: 1451053612085933078}
   - {fileID: 316173612365283236}
   - {fileID: 3516621523009155320}
+  - {fileID: 9030310764970632242}
   m_Father: {fileID: 5296379523554637645}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -366,6 +368,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AllowSwitchOff: 1
+--- !u!1 &4353928184380314933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9030310764970632242}
+  m_Layer: 5
+  m_Name: QuestItemFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &9030310764970632242
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4353928184380314933}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6158858099249355231}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4368614455932867343
 GameObject:
   m_ObjectHideFlags: 0

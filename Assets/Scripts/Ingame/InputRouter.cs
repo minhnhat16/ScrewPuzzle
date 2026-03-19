@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.EventSystems;
 /// <summary>
@@ -13,6 +14,7 @@ public class InputRouter : MonoBehaviour
 
     [SerializeField] private InputController inputController;
 
+    public bool IsInputLocked { get; set; } = false;
     // High level events
     public event Action<ITappable, Vector2> OnTappableTapped;
     public event Action<Vector2> OnTapGlobal; // fallback for non-tappable systems
@@ -48,6 +50,7 @@ public class InputRouter : MonoBehaviour
 
     private void HandleTap(Vector2 screenPos)
     {
+        if (IsInputLocked) return ;
         // Global hook
         OnTapGlobal?.Invoke(screenPos);
 

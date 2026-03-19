@@ -47,7 +47,7 @@ namespace Ingame.Board
             set => dropPart = value;
         }
         public bool IsLayerClear { get => isLayerClear; set => isLayerClear = value; }
-        public bool IsHidden { get; private set; }
+        public bool IsHidden { get;  set; }
 
         // ──────────────────────────────────────────────────────────────────
         // UNITY LIFECYCLE
@@ -145,11 +145,10 @@ namespace Ingame.Board
                 _registeredParts.Remove(part);
             }
 
-            IsHidden = parts.Count == 0;
+            IsHidden = parts.Count() == 0;
 
             if (IsHidden)
             {
-                Debug.Log($"[BaseLayer] Clear Layer: {gameObject.name}");
                 ClearLayer();
             }
         }
@@ -183,6 +182,11 @@ namespace Ingame.Board
             IsLayerClear = false;
             IsHidden = false;
             dropPart = 0;
+        }
+
+        public void OnValidate()
+        {
+            Debug.Log($"[BaseLayer] OnValidate called for {gameObject.name} — refreshing parts list. {isLayerClear}");
         }
     }
 }

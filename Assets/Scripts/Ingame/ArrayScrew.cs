@@ -52,7 +52,7 @@ namespace Ingame
 
         public int ActiveSlotCount => activeSlotCount;
         public bool IsFull => ActiveHolds().All(h => !h.IsEmpty());
-        public bool HasAny => _heldScrews.Count > 0;
+        public bool HasAny => HeldScrews.Count > 0;
 
         public event Action OnQueueFull;
 
@@ -100,7 +100,7 @@ namespace Ingame
             if (hold == null) return;
 
             hold.RemoveScrew();
-            _heldScrews.Remove(screw);
+            HeldScrews.Remove(screw);
 
             // Reset state flags — screw rời array hold
             screw.ResetHoldState();
@@ -108,13 +108,13 @@ namespace Ingame
 
         public void Clear()
         {
-            if (_heldScrews.Count == 0) return;
+            if (HeldScrews.Count == 0) return;
             StartCoroutine(ClearCoroutine());
         }
 
         public IEnumerator ClearToHidden(Action<bool> isClear)
         {
-            var copy = _heldScrews.ToList();
+            var copy = HeldScrews.ToList();
             if (copy.Count == 0)
             {
                 isClear?.Invoke(false);
@@ -146,7 +146,7 @@ namespace Ingame
                 yield return null;
             }
 
-            _heldScrews.Clear();
+            HeldScrews.Clear();
             isClear?.Invoke(true);
         }
         public void AddSlot()
@@ -172,7 +172,10 @@ namespace Ingame
         // ─────────────────────────────────────────
 
         int IArrayScrew.ActiveHoldCount => ActiveHolds().Count();
-        bool IArrayScrew.HasAny() => _heldScrews.Count > 0;
+
+        public List<ScrewController> HeldScrews => _heldScrews;
+
+        bool IArrayScrew.HasAny() => HeldScrews.Count > 0;
 
         event Action IArrayScrew.OnArrayFull
         {
@@ -231,7 +234,7 @@ namespace Ingame
             var taken = new List<ScrewController>();
             if (maxCount <= 0) return taken;
 
-            var matching = _heldScrews
+            var matching = HeldScrews
                 .Where(s => s != null && s.GetColor() == color)
                 .Take(maxCount)
                 .ToList();
@@ -240,7 +243,7 @@ namespace Ingame
             {
                 var hold = holdScrews.FirstOrDefault(h => h.Screw == screw);
                 if (hold != null) hold.RemoveScrew();
-                _heldScrews.Remove(screw);
+                HeldScrews.Remove(screw);
 
                 // Reset state flags — screw rời array hold, chuẩn bị vào box hold
                 screw.ResetHoldState();
@@ -278,8 +281,8 @@ namespace Ingame
 
         public ColorEnum GetDominantColor()
         {
-            if (_heldScrews.Count == 0) return ColorEnum.Clear;
-            return _heldScrews
+            if (HeldScrews.Count == 0) return ColorEnum.Clear;
+            return HeldScrews
                 .Where(s => s != null)
                 .GroupBy(s => s.GetColor())
                 .OrderByDescending(g => g.Count())
@@ -314,7 +317,7 @@ namespace Ingame
             // Remove from LayerManager.screwDict so visibility controller won't re-activate this screw
             var lm = LevelManager.ins.layerManager;
 
-            _heldScrews.Add(screw);
+            HeldScrews.Add(screw);
             screw.SetSortingOrderAndLayer(4, "Box");
             hold.AddScrew(screw, false, _ =>
             {
@@ -337,6 +340,12 @@ namespace Ingame
             {
                 if (IsFull)
                 {
+                    // Đợi cho đến khi không còn box nào đang move
+                    while (_containerQueue != null && _containerQueue.HaseMovingContainer)
+                    {
+                        yield return null; // chờ 1 frame, hoặc có thể yield return new WaitForSeconds(0.1f);
+                    }
+
                     yield return new WaitForSeconds(2f);
 
                     bool stillFull = IsFull;
@@ -364,7 +373,7 @@ namespace Ingame
 
         private IEnumerator ClearCoroutine()
         {
-            foreach (var screw in _heldScrews.ToList())
+            foreach (var screw in HeldScrews.ToList())
             {
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
                 yield return null;
@@ -374,7 +383,7 @@ namespace Ingame
                 hold.RemoveScrew();
                 yield return null;
             }
-            _heldScrews.Clear();
+            HeldScrews.Clear();
         }
 
         private void HandleTutorialForHold(HoldScrew hold)
@@ -428,7 +437,7 @@ namespace Ingame
         Dictionary<ColorEnum, int> IArrayScrew.GetHeldColorCounts()
         {
             var result = new Dictionary<ColorEnum, int>();
-            foreach (var screw in _heldScrews)
+            foreach (var screw in HeldScrews)
             {
                 if (screw == null) continue;
                 var color = screw.GetColor();
@@ -443,7 +452,7 @@ namespace Ingame
         HashSet<ColorEnum> IArrayScrew.GetHeldColors()
         {
             var result = new HashSet<ColorEnum>();
-            foreach (var screw in _heldScrews)
+            foreach (var screw in HeldScrews)
             {
                 if (screw != null)
                     result.Add(screw.GetColor());
@@ -456,11 +465,11 @@ namespace Ingame
         // ─────────────────────────────────────────
         public void ClearHeldScrewImidiate()
         {
-            foreach (var screw in _heldScrews.ToList())
+            foreach (var screw in HeldScrews.ToList())
                 ScrewPool.Instance.Pool.ReturnToPool(screw);
             foreach (var hold in holdScrews)
                 hold.RemoveScrew();
-            _heldScrews.Clear();
+            HeldScrews.Clear();
         }
         public void OnReset()
         {

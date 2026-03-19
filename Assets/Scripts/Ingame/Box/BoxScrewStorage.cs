@@ -44,43 +44,32 @@ public class BoxScrewStorage : MonoBehaviour
     public bool TryAdd(ScrewController screw, bool isTele = false, Action onComplete = null)
     {
         if (capacity <= 0)
-        {
-            Debug.LogError($"[BoxScrewStorage] capacity={capacity} — Initialize chưa được gọi?");
             return false;
-        }
 
         if (IsFull)
-        {
-            Debug.LogWarning($"[BoxScrewStorage] IsFull: screws={screws.Count}, capacity={capacity}");
             return false;
-        }
+
+        if (screw == null)
+            return false;
 
         if (screw.GetColor() != boxColor)
-        {
-            Debug.LogWarning($"[BoxScrewStorage] Color mismatch: screw={screw.GetColor()}, box={boxColor}");
             return false;
-        }
 
-        // Guard: prevent adding same screw twice
         if (screws.Contains(screw))
-        {
-            Debug.LogWarning($"[BoxScrewStorage] TryAdd: screw {screw.name} is already in this storage — skipping duplicate add.");
             return false;
-        }
+
+        // Prevent duplicate: check if any hold slot already contains this screw
+        if (holdSlots != null && holdSlots.Any(h => h.GetScrew() == screw))
+            return false;
 
         var emptySlot = holdSlots?.FirstOrDefault(h => h.IsEmpty());
         if (emptySlot == null)
-        {
-            Debug.LogWarning($"[BoxScrewStorage] Không còn slot trống — screws={screws.Count}, slots={holdSlots?.Count}");
             return false;
-        }
 
         screws.Add(screw);
 
-        // isTele = true → teleport ngay, không animate
         emptySlot.AddScrew(screw, isTele: isTele, callback: _ =>
         {
-            Debug.Log($"[BoxScrewStorage] Screw added (isTele={isTele}) — {screws.Count}/{capacity}");
             onComplete?.Invoke();
         });
 
