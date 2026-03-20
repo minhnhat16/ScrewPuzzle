@@ -17,7 +17,6 @@ namespace Core.Match
         // ─────────────────────────────────────────
 
         int ActiveCount { get; }
-        bool HaseMovingContainer { get; }
 
         // ─────────────────────────────────────────
         // Events
@@ -61,5 +60,6 @@ namespace Core.Match
         void NotifyCompleted(IMatchContainer container);
         void UnlockNext();
         bool HasLocked();
+        bool HasMovingBox();
     }
 }

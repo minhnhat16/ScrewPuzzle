@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using SFX = SoundManager.SFX;
 
@@ -341,15 +342,16 @@ namespace Ingame
                 if (IsFull)
                 {
                     // Đợi cho đến khi không còn box nào đang move
-                    while (_containerQueue != null && _containerQueue.HaseMovingContainer)
+                    while (_containerQueue.HasMovingBox())
                     {
-                        yield return null; // chờ 1 frame, hoặc có thể yield return new WaitForSeconds(0.1f);
+                        Debug.Log("[ArrayScrew] CheckFullCoroutine: waiting for moving containers to stop...");
+                        yield return new WaitForSeconds(2f);
                     }
 
-                    yield return new WaitForSeconds(2f);
+                    yield return new WaitForSeconds(3f);
 
                     bool stillFull = IsFull;
-                    bool containerMoving = _containerQueue != null && _containerQueue.HaseMovingContainer;
+                    bool containerMoving = _containerQueue != null && _containerQueue.HasMovingBox();
 
                     Debug.Log($"[ArrayScrew] CheckFullCoroutine: stillFull={stillFull}, containerMoving={containerMoving}");
 

@@ -25,4 +25,7 @@ public interface IBoxSequenceService
     /// </summary>
     Dictionary<ColorEnum, int> GetColorCounts();
     int RemoveByColor(ColorEnum targetColor, int count);
+
+    List<Box> GetAllBox();
+    void ReturnToFront(Box smart);
 }

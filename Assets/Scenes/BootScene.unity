@@ -5231,7 +5231,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8179671856068062486, guid: 536c81ab4e5c62f438ad4c2a3124d111, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -174.99992
+      value: -174.99994
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 407705852429133132, guid: 536c81ab4e5c62f438ad4c2a3124d111, type: 3}
@@ -19755,6 +19755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 245c76fd429d4d48b68353fcf0899a93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _activeBoxes: []
   slots:
   - {fileID: 532539011}
   - {fileID: 2137616234}
@@ -19762,9 +19763,10 @@ MonoBehaviour:
   - {fileID: 2137083472}
   totalWidth: 12
   initialUnlockedSlots: 2
-  topLayerMatchChance: 0.5
+  topLayerMatchChance: 0.8
   smartSpawnLayerDepth: 2
   difficultyBias: 0
+  currentLevelBox: []
 --- !u!4 &8147608019541441091
 Transform:
   m_ObjectHideFlags: 0

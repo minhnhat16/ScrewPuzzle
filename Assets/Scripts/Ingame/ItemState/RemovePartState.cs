@@ -39,11 +39,21 @@ public class RemovePartState : FSMState<ItemController>, IItem
             {
                 MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
                 LevelManager.ins.RemovePartItem(part);
+
+                // Gọi resolve hidden cho các box active sau khi part đã bị remove
+                var boxQueue = BoxQueue.ins;
+                if (boxQueue != null)
+                {
+                    foreach (var box in boxQueue.GetActiveBoxes())
+                    {
+                        if (!box.IsFull && !box.IsLocked && box.RemainingCapacity >0)
+                            boxQueue.ResolveAllHiddenForBox(box);
+                    }
+                }
+
                 sys.SetExecuting(false);
                 sys.SetSelected(false);
-
                 sys.itemPerformed.Invoke(true);
-
                 IngameController.ins.OnItemFinished();
             });
     }

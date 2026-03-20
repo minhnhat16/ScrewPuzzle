@@ -154,7 +154,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
 
         SpecialBoxManager.ins.OnReset();
         ScrewManager.Reset();
-
+        SpecialBoxManager.ins.OnReset();
         // Reset ArrayScrew: clear held screws + restore default slots
         ArrayScrew.ins.OnReset();
 
@@ -256,7 +256,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         RouteOrHideScrews(screws, routed, hidden);
 
         HandleHiddenScrews(hidden);
-
+        TryResolveAllPendingScrews();
         if (routed.Count > 0)
             Debug.Log($"[LevelManager] Breaker: {routed.Count} screw(s) routed to box.");
 
@@ -336,7 +336,37 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             Debug.Log($"[LevelManager] Breaker: {hidden.Count} screw(s) hidden: {hiddenColors} (no matching box).");
         }
     }
+    private void TryResolveHiddenToActiveBoxes()
+    {
+        var sm = ScrewManager;
+        if (sm == null) return;
 
+        foreach (var box in BoxQueue.ins.GetActiveBoxes())
+        {
+            if (box.IsFull || box.IsLocked || box.IsMoving) continue;
+
+            int space = box.RemainingCapacity;
+            var screws = sm.PopHiddenScrew(box.Color, space);
+
+            foreach (var screw in screws)
+            {
+                if (box.IsFull) break;
+                screw.SetActive(true);
+                box.TryAddScrewImmediate(screw);
+                sm.RemoveHidden(screw);
+            }
+        }
+    }
+    private void TryResolveAllPendingScrews()
+    {
+        TryResolveHiddenToActiveBoxes();   // hidden → active box
+        // ArrayScrew → active box (nếu box vừa có chỗ trống)
+        foreach (var box in BoxQueue.ins.GetActiveBoxes())
+        {
+            if (!box.IsFull)
+                BoxQueue.ins.TryTakeScrewsFromArray(box);
+        }
+    }
     /// <summary>
     /// Kiểm tra layer chứa part vừa bị remove — nếu layer hết part thì clear.
     /// Gọi SAU KHI part đã SetActive(false) và screws đã xử lý xong.

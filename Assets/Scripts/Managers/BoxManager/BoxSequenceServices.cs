@@ -9,52 +9,59 @@ public class BoxSequenceService : IBoxSequenceService
 {
     private List<Box> _queue = new();
 
+    public List<Box> Queue { get => _queue; set => _queue = value; }
+
     public void Load(IEnumerable<Box> boxes)
     {
-        _queue = boxes?.ToList() ?? new List<Box>();
+        Queue = boxes?.ToList() ?? new List<Box>();
 
         Debug.Log("[BoxSequenceService] Loaded boxes: " +
-                  $"[{string.Join(", ", _queue.Select(b => b == null ? "null" : b.Color.ToString()))}]");
+                  $"[{string.Join(", ", Queue.Select(b => b == null ? "null" : b.Color.ToString()))}]");
     }
 
     public Box GetNext()
     {
-        if (_queue.Count == 0) return null;
-        var box = _queue[0];
-        _queue.RemoveAt(0);
+        if (Queue.Count == 0) return null;
+        var box = Queue[0];
+        Queue.RemoveAt(0);
+
+        string colorRemains = string.Join(", ", Queue.Select(b => b == null ? "null" : b.Color.ToString()));
+        Debug.Log($"[BoxSequenceService] GetNext — dequeued color={box.Color}, còn lại {Queue.Count} box: [{colorRemains}]");
         return box;
     }
 
-    public bool HasNext() => _queue.Count > 0;
+    public bool HasNext() => Queue.Count > 0;
 
     public Box TryDequeueMatching(Func<Box, bool> predicate)
     {
         if (predicate == null) return null;
 
-        if (_queue.Count == 0)
+        if (Queue.Count == 0)
         {
             Debug.Log("[BoxSequenceService] TryDequeueMatching — queue rỗng.");
             return null;
         }
 
-        var match = _queue.FirstOrDefault(predicate);
+        var match = Queue.FirstOrDefault(predicate);
         if (match == null) return null;
 
-        _queue.Remove(match);
-        Debug.Log($"[BoxSequenceService] TryDequeueMatching — matched color={match.Color}, còn lại {_queue.Count} box.");
+        Queue.Remove(match);
+        Debug.Log($"[BoxSequenceService] TryDequeueMatching — matched color={match.Color}, còn lại {Queue.Count} box.");
         return match;
     }
 
     public Dictionary<ColorEnum, int> GetColorCounts()
     {
         var result = new Dictionary<ColorEnum, int>();
-        foreach (var box in _queue)
+        foreach (var box in Queue)
         {
             if (box == null) continue;
             if (!result.ContainsKey(box.Color))
                 result[box.Color] = 0;
             result[box.Color]++;
         }
+        string colorCountsStr = string.Join(", ", result.Select(kv => $"{kv.Key}: {kv.Value}"));
+        Debug.Log($"[BoxSequenceService] GetColorCounts: {colorCountsStr}");
         return result;
     }
 
@@ -66,17 +73,28 @@ public class BoxSequenceService : IBoxSequenceService
     public int RemoveByColor(ColorEnum color, int count)
     {
         int removed = 0;
-        for (int i = _queue.Count - 1; i >= 0 && removed < count; i--)
+        for (int i = Queue.Count - 1; i >= 0 && removed < count; i--)
         {
-            if (_queue[i] != null && _queue[i].Color == color)
+            if (Queue[i] != null && Queue[i].Color == color)
             {
-                var box = _queue[i];
-                _queue.RemoveAt(i);
+                var box = Queue[i];
+                Queue.RemoveAt(i);
                 box.gameObject.SetActive(false); // return về pool state
                 removed++;
             }
         }
         Debug.Log($"[BoxSequenceService] RemoveByColor: color={color} removed={removed}");
         return removed;
+    }
+
+    public List<Box> GetAllBox()
+    {
+        return Queue;
+    }   
+
+    public void ReturnToFront(Box smart)
+    {
+        if (smart == null) return;
+        Queue.Insert(0, smart);
     }
 }

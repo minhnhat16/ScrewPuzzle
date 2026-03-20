@@ -5,7 +5,10 @@ using System;
 public class TweenMover : MonoBehaviour, IMovable
 {
     private Tween moveTween;
-    public bool IsMoving { get; private set; }
+
+    [SerializeField] private bool isMoving;
+
+    public bool IsMoving { get => isMoving; set => isMoving = value; }
 
     public void MoveTo(Vector3 target, float duration, Ease ease = Ease.OutCubic, Action onComplete = null)
     {
@@ -22,7 +25,10 @@ public class TweenMover : MonoBehaviour, IMovable
                 onComplete?.Invoke();
             });
     }
-
+    public void OnMoving(Action action)
+    {
+        moveTween.onUpdate += () => action?.Invoke();
+    }
     public void KillMove()
     {
         moveTween?.Kill();

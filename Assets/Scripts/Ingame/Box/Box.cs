@@ -52,6 +52,11 @@ namespace Ingame
         #endregion
 
         #region Unity
+
+        public void OnEnable()
+        {
+            Debug.Log ("[BOX] Box Enable"); 
+        }
         private void OnDisable()
         {
             Debug.Log("[BOX] Box Disable");
@@ -143,7 +148,7 @@ namespace Ingame
             return added;
         }
 
-        public bool TryAddScrews(List<ScrewController> screws)
+        public bool TryAddScrews(List<ScrewController> screws, bool isTele = false)
         {
             if (IsLocked) return false;
             if (!stateController.IsReady) return false;
@@ -151,7 +156,7 @@ namespace Ingame
             bool allAdded = true;
             foreach (var screw in screws)
             {
-                bool added = storage.TryAdd(screw, onComplete: () =>
+                bool added = storage.TryAdd(screw, isTele,onComplete: () =>
                 {
                     if (storage.IsFull)
                         HandleFull();
@@ -166,6 +171,8 @@ namespace Ingame
 
             return allAdded;
         }
+
+     
         #endregion
 
         #region Full Flow

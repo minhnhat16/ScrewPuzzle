@@ -419,5 +419,12 @@ namespace Ingame
             else
                 Debug.Log("[ScrewManager] ValidateMaps: maps are clean.");
         }
+
+        internal int GetHiddenScrew(ColorEnum color)
+        {
+            if (!hiddenByColor.TryGetValue(color, out var list) || list.Count == 0)
+                return 0;
+            return list.Count;
+        }
     }
 }

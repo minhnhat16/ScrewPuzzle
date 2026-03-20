@@ -1,15 +1,18 @@
 ﻿using ConfigFile;
 using Ingame;
 using Ingame.Pools;
+using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 public class BoxFactory : IBoxFactory
 {
     private Stack<Box> _stack = new();
     private List<Box> _boxes = new();
 
+    public List<Box> Boxes => _stack.ToList();
     public List<Box> CreateBoxes(IEnumerable<BoxConfigRecord> records)
     {
         _boxes.Clear();
@@ -33,7 +36,9 @@ public class BoxFactory : IBoxFactory
 
     public Box SpawnNext()
     {
-        return _stack.Count > 0 ? _stack.Pop() : null;
+        var box = _stack.Count > 0 ? _stack.Pop() : null;
+        Boxes.Remove(box);
+        return box;
     }
 
     public Box SpawnByPredicate(Func<Box, bool> predicate)

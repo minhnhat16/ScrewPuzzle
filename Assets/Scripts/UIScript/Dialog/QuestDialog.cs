@@ -35,21 +35,11 @@ public class QuestDialog : BaseDialog
     [SerializeField]
     private Transform normalChestParent;
 
-    private QuestItemFactory questItemFactory; // Add factory field
 
     public override void OnInit(Action callback = null)
     {
         base.OnInit(callback);
         SetupChestTrack();
-
-        // Initialize the factory with the prefab and a parent (missionPanelCurrent by default)
-        if (questItemFactory == null)
-        {
-            questItemFactory = new QuestItemFactory(
-                questItemPrefab.GetComponent<QuestItem>(),
-                missionPanelCurrent // Default parent, can be changed per use
-            );
-        }
     }
 
     // =====================================================
@@ -323,12 +313,11 @@ public class QuestDialog : BaseDialog
         ClearPanel(panel);
         activeMissionItems.Clear();
 
-        // Set factory parent to current panel for correct hierarchy
-        questItemFactory.SetParent(panel);
 
+        Debug.Log($"[Mission] Filling mission panel with {missions.Count} missions for stage {currentStage}");
         foreach (var mission in missions)
         {
-            QuestItem item = questItemFactory.Get();
+            QuestItem item = QuestItemPool.ins.Spawn();
             item.transform.SetParent(panel, false);
 
             int progress = MissionManager.ins.GetProgress(mission.Id);
@@ -353,7 +342,9 @@ public class QuestDialog : BaseDialog
         {
             var item = panel.GetChild(i).GetComponent<QuestItem>();
             if (item != null)
-                questItemFactory.Release(item);
+            {
+                QuestItemPool.ins.Return(item);
+            }
         }
     }
 

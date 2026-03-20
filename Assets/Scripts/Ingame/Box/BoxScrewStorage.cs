@@ -66,6 +66,8 @@ public class BoxScrewStorage : MonoBehaviour
         if (emptySlot == null)
             return false;
 
+
+        Debug.Log("[BoxScrewStorage] Adding screw to box: " + screw.hingeController.BodyConnect.name);
         screws.Add(screw);
 
         emptySlot.AddScrew(screw, isTele: isTele, callback: _ =>

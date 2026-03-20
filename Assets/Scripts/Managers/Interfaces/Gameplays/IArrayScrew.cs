@@ -45,5 +45,5 @@ public interface IArrayScrew
     UnityEngine.Vector3 GetLastHoldPosition();
     List<ScrewController> TakeByColor(ColorEnum color, int maxCount);
     HashSet<ColorEnum> GetHeldColors();
-    Dictionary<ColorEnum, int> GetHeldColorCounts();
+    Dictionary<ColorEnum, int>  GetHeldColorCounts();
 }
