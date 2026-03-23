@@ -56,7 +56,9 @@ public class QuestItem : MonoBehaviour
 
         var state = DataAPIController.instance
             .GetMissionProgress(data.Id).state;
-
+        
+        if(data.Description != null)
+            titleText.text = data.Description;
         RefreshState(state);
     }
 
