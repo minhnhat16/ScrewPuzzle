@@ -29,6 +29,16 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
     private readonly Queue<BoxSlot> _pendingSpawnSlots = new Queue<BoxSlot>();
     private bool _isSpawning = false;
 
+    /// <summary>
+    /// Chỉ align khi không có box nào đang trong animation spawn.
+    /// Tránh layout giật cục khi box đang bay vào từ ngoài màn hình.
+    /// </summary>
+    private void AlignIfNotSpawning()
+    {
+        if (_isSpawning || _pendingSpawnSlots.Count > 0) return;
+        _layout.AlignSlots(slots, totalWidth);
+    }
+
     [SerializeField] private List<Box> _activeBoxes = new();
     private List<BoxConfigRecord> _configRecords = new();
 
@@ -243,12 +253,14 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
         SubscribeSlotEvents();
 
-        // SpawnInitial dùng snap = true, không cần spawn queue
+        // SpawnInitial dùng snap = true, không cần spawn queue.
+        // Dùng GetNext() thay vì PickNextBox() — tránh smart pick filter
+        // block slot khi tất cả màu còn lại đã trùng với active boxes.
         foreach (var slot in slots)
         {
             if (slot.isLocked) continue;
             if (_sequence == null || !_sequence.HasNext()) break;
-            var box = PickNextBox();
+            var box = _sequence.GetNext();
             if (box != null)
                 SpawnBoxIntoSlotInternal(box, slot, null, snap: true);
         }
@@ -307,6 +319,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
         {
             Box smart = null;
 
+            // Mỗi tầng gọi GetColorCounts() fresh để tránh stale snapshot
             smart = TryPickFromArray(activeColors, _sequence.GetColorCounts());
             if (smart == null) smart = TryPickFromTopLayer(activeColors, _sequence.GetColorCounts());
             if (smart == null) smart = TryPickNonDuplicate(activeColors);
@@ -328,6 +341,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
             Debug.Log($"[BoxQueue] DifficultyBias ({difficultyBias:P0}) triggered.");
         }
 
+        // FIX: Fallback chỉ dequeue 1 lần duy nhất, chấp nhận kể cả trùng màu
         var fallback = PickFallback();
         currentLevelBox = _sequence.GetAllBox();
 
@@ -374,6 +388,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
                   $"[{string.Join(", ", candidates)}], Count: {candidates.Count}, ArrayCounts: " +
                   $"[{string.Join(", ", arrayCounts.Select(kv => $"{kv.Key}={kv.Value}"))}]");
 
+        // Fallback: tất cả màu đang active → bỏ filter
         if (candidates.Count == 0)
             candidates = sequenceCounts.Keys
                 .Where(c => arrayCounts.ContainsKey(c))
@@ -428,6 +443,8 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
     private Box PickFallback()
     {
+        // FIX: điều kiện cũ "b.RemainingCapacity == b.RemainingCapacity" luôn true
+        // → dùng GetNext() trực tiếp
         return _sequence.GetNext();
     }
 
@@ -463,29 +480,18 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
         if (_sequence.HasNext())
         {
+            // Dùng spawn queue thay vì spawn trực tiếp
+            // AlignSlots sẽ gọi trong TryProcessSpawnQueue onDone sau khi animate xong
             var freeSlot = slots.FirstOrDefault(s => !s.isLocked && !s.isContainingBox);
             if (freeSlot != null)
-            {
                 RequestSpawn(freeSlot);
-            }
             else
-            {
-                // ─── FIX BUG 1: Chỉ check win nếu không còn box nào đang di chuyển vào slot ───
-                // Nếu có box đang move, slot chưa thực sự trống — chờ animation xong sẽ trigger lại
-                if (!HasMovingBox())
-                {
-                    Debug.Log("[BoxQueue] NotifyBoxFull — no free slot and no moving box, check win.");
-                    CheckWinIfNeeded();
-                }
-                else
-                {
-                    Debug.Log("[BoxQueue] NotifyBoxFull — no free slot but box is moving, skip win check.");
-                }
-            }
+                CheckWinIfNeeded();
         }
         else
         {
-            _layout.AlignSlots(slots, totalWidth);
+            // Không spawn box mới → align ngay
+            AlignIfNotSpawning();
             if (_activeBoxes.Count == 0)
                 LevelManager.ins.CheckWinCondition();
         }
@@ -496,6 +502,10 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
     // ─── Spawn Queue System ────────────────────────────────────────
 
+    /// <summary>
+    /// Enqueue một slot cần spawn box. Serialize tất cả yêu cầu spawn,
+    /// tránh 2 box bị dequeue cùng lúc khi NotifyBoxFull và UnlockNextSlot chạy đồng thời.
+    /// </summary>
     private void RequestSpawn(BoxSlot slot)
     {
         _pendingSpawnSlots.Enqueue(slot);
@@ -514,45 +524,66 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
             return;
         }
 
-        var slot = _pendingSpawnSlots.Dequeue();
+        // ── Batch: dequeue TẤT CẢ pending slots cùng lúc, spawn parallel ──
+        // Gom hết slot hợp lệ + pick box cho từng slot trước khi animate bất kỳ cái nào
+        var batch = new List<(Box box, BoxSlot slot)>();
 
-        // ─── FIX BUG 2: Slot bị occupied trong lúc chờ → tìm slot thay thế thay vì bỏ qua hoàn toàn ───
-        if (slot.isContainingBox)
+        while (_pendingSpawnSlots.Count > 0 && _sequence.HasNext())
         {
-            Debug.Log("[BoxQueue] TryProcessSpawnQueue — slot already occupied, looking for alternative.");
-            var alternativeSlot = slots.FirstOrDefault(s => !s.isLocked && !s.isContainingBox);
-            if (alternativeSlot != null)
+            var slot = _pendingSpawnSlots.Dequeue();
+
+            if (slot.isContainingBox)
             {
-                Debug.Log("[BoxQueue] TryProcessSpawnQueue — found alternative slot, re-enqueue.");
-                _pendingSpawnSlots.Enqueue(alternativeSlot);
+                Debug.Log("[BoxQueue] TryProcessSpawnQueue — slot already occupied, skip.");
+                continue;
             }
-            else
+
+            var box = PickNextBox();
+            if (box == null)
             {
-                Debug.Log("[BoxQueue] TryProcessSpawnQueue — no alternative slot available, will retry later.");
+                box = _sequence.GetNext();
+                if (box == null)
+                {
+                    Debug.LogWarning("[BoxQueue] TryProcessSpawnQueue — GetNext() null, skip slot.");
+                    continue;
+                }
+                Debug.LogWarning($"[BoxQueue] TryProcessSpawnQueue — fallback GetNext color={box.Color}.");
             }
-            TryProcessSpawnQueue();
-            return;
+
+            batch.Add((box, slot));
         }
 
-        var box = PickNextBox();
-
-        // ─── FIX BUG 3: Reset _isSpawning khi PickNextBox trả null để tránh kẹt flag ───
-        if (box == null)
+        if (batch.Count == 0)
         {
-            Debug.LogWarning("[BoxQueue] TryProcessSpawnQueue — PickNextBox() returned null! Releasing isSpawning flag.");
-            _isSpawning = false; // CRITICAL: phải reset flag, không được để kẹt
             CheckWinIfNeeded();
             return;
         }
 
+        // Align TRƯỚC khi spawn để slot đã ở đúng vị trí cuối,
+        // box fly-in sẽ animate đến đúng chỗ đó — tránh bay đến vị trí cũ rồi nhảy.
+        // Chỉ align nếu layout thực sự thay đổi (có slot trống không được fill).
+        int totalEmpty = slots.Count(s => !s.isLocked && !s.isContainingBox);
+        int willFill = batch.Count;
+        bool layoutChanged = totalEmpty > willFill; // còn slot trống sau batch → số box thay đổi
+        if (layoutChanged)
+            _layout.AlignSlots(slots, totalWidth, duration: 0f);
+
+        // Spawn tất cả box trong batch cùng lúc (parallel animation)
         _isSpawning = true;
-        SpawnBoxIntoSlotInternal(box, slot, () =>
+        int remaining = batch.Count;
+
+        foreach (var (box, slot) in batch)
         {
-            _isSpawning = false;
-            _layout.AlignSlots(slots, totalWidth);
-            CheckWinIfNeeded();
-            TryProcessSpawnQueue();
-        });
+            SpawnBoxIntoSlotInternal(box, slot, () =>
+            {
+                remaining--;
+                if (remaining > 0) return; // chờ các box khác
+
+                _isSpawning = false;
+                CheckWinIfNeeded();
+                TryProcessSpawnQueue();
+            });
+        }
     }
 
     private void CheckWinIfNeeded()
@@ -594,6 +625,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
         });
     }
 
+    // Giữ lại SpawnBoxIntoSlot cho SpawnInitial (snap) và UnlockNextSlot nếu cần gọi trực tiếp
     private void SpawnBoxIntoSlot(Box box, BoxSlot slot, bool snap = false)
     {
         SpawnBoxIntoSlotInternal(box, slot, null, snap);
@@ -630,10 +662,15 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
         if (_sequence.HasNext())
         {
+            // Dùng spawn queue → tự động serialize với NotifyBoxFull
+            // AlignSlots sẽ được gọi trong TryProcessSpawnQueue onDone sau khi box animate xong
             RequestSpawn(lockedSlot);
         }
-
-        _layout.AlignSlots(slots, totalWidth);
+        else
+        {
+            // Không có box spawn → align ngay
+            AlignIfNotSpawning();
+        }
     }
 
     // ─── Hidden / Resolve ──────────────────────────────────────────
@@ -756,7 +793,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
         if (count <= 0) return;
         var toRemove = _activeBoxes.Where(b => b.Color == targetColor).Take(count).ToList();
         foreach (var box in toRemove) RemoveBoxInternal(box);
-        _layout.AlignSlots(slots, totalWidth);
+        AlignIfNotSpawning();
     }
 
     private void RemoveBoxInternal(Box box)

@@ -18,7 +18,7 @@ public class QuestChestItem : MonoBehaviour
     [Header("Detail Preview")]
     [SerializeField] private GameObject detailRoot;
     [SerializeField] private CanvasGroup detailCanvasGroup;
-
+    [SerializeField] private RectTransform fillImage;
     [Header("Button")]
     [SerializeField] private Toggle tgle;
 
@@ -81,9 +81,6 @@ public class QuestChestItem : MonoBehaviour
         if (progressFill != null) progressFill.gameObject.SetActive(false);
         if (lockIcon != null) lockIcon.SetActive(false);
         if (doneIcon != null) doneIcon.SetActive(false);
-
-        //Debug.Log(
-        //    $"[QuestChestItem] ApplyState → chestId: {param.chestId}, isClaimed: {param.isClaimed}, isUnlocked: {param.isUnlocked}, progress: {param.progress}, target: {param.target}"
 
         if (param.isClaimed)
         {
@@ -174,6 +171,41 @@ public class QuestChestItem : MonoBehaviour
             item.Init(reward.itemType, reward.amount, sprite, false);
             item.gameObject.SetActive(true);
         }
+
+        // Auto scale fillImage theo số lượng item active
+        if (fillImage != null)
+        {
+            int activeCount = Mathf.Min(rewards.Count, items.Count);
+            ResizeFillImageByItemCount(activeCount);
+        }
+    }
+
+    private void ResizeFillImageByItemCount(int count)
+    {
+        if (fillImage == null || items == null || items.Count == 0) return;
+
+        // Lấy size + spacing từ item đầu tiên đang active
+        var firstItem = items.FirstOrDefault(i => i.gameObject.activeSelf);
+        if (firstItem == null) return;
+
+        var itemRect = firstItem.GetComponent<RectTransform>();
+        if (itemRect == null) return;
+
+        float itemWidth = itemRect.rect.width;
+
+        // Lấy spacing từ HorizontalLayoutGroup nếu có
+        float spacing = 0f;
+        float padding = 0f;
+        var layout = fillImage.GetComponent<HorizontalLayoutGroup>();
+        if (layout != null)
+        {
+            spacing = layout.spacing;
+            padding = layout.padding.left + layout.padding.right;
+        }
+
+        float totalWidth = padding + (itemWidth * count) + (spacing * Mathf.Max(0, count - 1));
+
+        fillImage.sizeDelta = new Vector2(totalWidth, fillImage.sizeDelta.y);
     }
 
     // =====================================================

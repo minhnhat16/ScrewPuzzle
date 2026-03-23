@@ -86,7 +86,7 @@ namespace Ingame
 
         public void OnDisable()
         {
-            Debug.Log("ONDISABLE part " + uniqueID);    
+            //Debug.Log("ONDISABLE part " + uniqueID);    
         }
 
         public bool OnTap(Vector2 screenPosition)

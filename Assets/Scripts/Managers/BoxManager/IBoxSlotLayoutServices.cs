@@ -17,4 +17,5 @@ public interface IBoxSlotLayoutService
     void MoveBoxToSlot(Box box, BoxSlot slot, Action onComplete = null);
 
     Vector3 CalculateSlotPosition(BoxSlot slot);
+
 }
