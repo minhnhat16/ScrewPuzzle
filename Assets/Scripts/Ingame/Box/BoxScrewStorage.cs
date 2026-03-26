@@ -140,28 +140,11 @@ public class BoxScrewStorage : MonoBehaviour
 
     public void Clear()
     {
-        // Return any stored screws and any screws referenced by holdSlots to pool / deactivate them
         var pool = ScrewPool.Instance;
         try
         {
-            // Return list copy to avoid modification issues
-            var copy = screws.ToList();
-            foreach (var s in copy)
-            {
-                if (s == null) continue;
-                try
-                {
-                    s.OnReset();
-                    s.SetActive(false);
-                    pool?.Pool.ReturnToPool(s);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"[BoxScrewStorage] Failed to return screw to pool: {ex.Message}");
-                }
-            }
+            var uniqueScrews = new HashSet<ScrewController>(screws.Where(s => s != null));
 
-            // Also ensure holds are cleared and any screw there is returned
             if (holdSlots != null)
             {
                 foreach (var hold in holdSlots)
@@ -169,18 +152,29 @@ public class BoxScrewStorage : MonoBehaviour
                     if (hold == null) continue;
                     var hScrew = hold.GetScrew();
                     if (hScrew != null)
-                    {
-                        try
-                        {
-                            hScrew.OnReset();
-                            hScrew.SetActive(false);
-                            pool?.Pool.ReturnToPool(hScrew);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.LogWarning($"[BoxScrewStorage] Failed to return hold screw to pool: {ex.Message}");
-                        }
-                    }
+                        uniqueScrews.Add(hScrew);
+                }
+            }
+
+            foreach (var screw in uniqueScrews)
+            {
+                try
+                {
+                    screw.OnReset();
+                    screw.SetActive(false);
+                    pool?.Pool.ReturnToPool(screw);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[BoxScrewStorage] Failed to return screw to pool: {ex.Message}");
+                }
+            }
+
+            if (holdSlots != null)
+            {
+                foreach (var hold in holdSlots)
+                {
+                    if (hold == null) continue;
                     hold.RemoveScrew();
                 }
             }

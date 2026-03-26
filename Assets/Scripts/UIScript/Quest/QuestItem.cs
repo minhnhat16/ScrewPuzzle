@@ -1,7 +1,4 @@
-﻿using Managers;
-using System;
 using System.DataBase;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -15,10 +12,10 @@ public class QuestItem : MonoBehaviour
     [SerializeField] private ProgressBar fill;
     [SerializeField] private Button actionButton;
     [SerializeField] private GameObject doneIcon;
+    [SerializeField] private Text totalText;
 
     private MissionConfigRecord missionData;
     private UnityAction cachedClick;
-    [SerializeField] private Text totalText;
     public int MissionID { get; set; }
 
     // =======================================================
@@ -56,15 +53,14 @@ public class QuestItem : MonoBehaviour
 
         var state = DataAPIController.instance
             .GetMissionProgress(data.Id).state;
-        
-        if(data.Description != null)
+
+        if (data.Description != null)
             titleText.text = data.Description;
         RefreshState(state);
     }
 
     private void OnMissionProgressChanged(MissionConfigRecord mission, MissionProgress progress)
     {
-
         Debug.Log($"<color=blue>[DEBUG] Completete mission  {MissionID} and data id {mission.Id}</color>");
 
         if (mission.Id != MissionID)
@@ -75,7 +71,6 @@ public class QuestItem : MonoBehaviour
 
     private void OnMissionCompleted(MissionConfigRecord mission)
     {
-        // so sánh DATA ID với DATA ID
         if (mission.Id != MissionID)
             return;
 
@@ -84,7 +79,6 @@ public class QuestItem : MonoBehaviour
         UpdateProgressUI(mission.Target, mission.Target);
         RefreshState(MissionState.Completed);
     }
-
 
     private void OnMissionClaimed(MissionConfigRecord mission)
     {
@@ -121,7 +115,6 @@ public class QuestItem : MonoBehaviour
                 break;
 
             case MissionState.Claimed:
-                // UI panel sẽ refresh list nên item này có thể disable
                 actionButton.interactable = false;
                 actionButton.gameObject.SetActive(false);
                 doneIcon.SetActive(true);
@@ -139,7 +132,27 @@ public class QuestItem : MonoBehaviour
         if (progress.state == MissionState.Completed)
         {
             Debug.Log("[QuestItem] Claim mission: " + MissionID);
+
+            // Disable button ngay để tránh double-click
+            actionButton.interactable = false;
+
+            // Claim data + cộng reward first
             MissionManager.ins.ClaimMission(missionData);
+
+            // Delegate animation to central RewardAnimationService if present.
+            // RewardAnimationService listens to RewardEvents.OnRewardGranted and will play animation.
+            var rewardAnim = FindAnyObjectByType<RewardAnimationService>();
+            // Set origin so service can spawn fly icons from this button (best-effort)
+            if (rewardAnim != null)
+            {
+                var originRt = actionButton.GetComponent<RectTransform>() ?? GetComponentInParent<RectTransform>();
+                rewardAnim.SetFlyOrigin(originRt);
+            }
+
+            // Play SFX and fire the reward event (service will react)
+            SoundHelper.PlaySFX(SoundManager.SFX.MissionComplete);
+            RewardEvents.Fire(missionData.RewardItemType, missionData.RewardAmount, missionData.IconName);
+
             return;
         }
 

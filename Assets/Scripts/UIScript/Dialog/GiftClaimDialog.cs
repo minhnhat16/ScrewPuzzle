@@ -1,235 +1,309 @@
-﻿using DG.Tweening;
-using Spine.Unity;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Spine.Unity;
 
 public class GiftClaimDialog : BaseDialog
 {
-    private bool isClaimed;
     [Header("UI")]
     public Button openButton;
     public Button claimButton;
-    [SerializeField]
-    private Text helperTxt;
+    [SerializeField] private Text helperTxt;
+    [SerializeField] private RectTransform arrow;
 
-    public Transform itemContainer;      // chứa các item spawn ra
-    public GameObject itemPrefab;        // prefab icon + text
+    [Header("Grid")]
+    [Tooltip("GameObject có CenteredGridLayout component — item spawn vào đây")]
+    public CenteredGridLayout gridLayout;
+    public GameObject itemPrefab;
 
-    [SerializeField]    
-    private RectTransform arrow;
-
-    [Header("Animation")]
+    [Header("Spine")]
     public SkeletonGraphic spineBox;
     public string animOpen = "open";
     public string animIdle = "idle";
     public string animOpenIdle = "open_idle";
 
-    private UnityAction onClaim;
+    [Header("Fly Settings")]
+    [Tooltip("Điểm xuất phát icon bay ra — thường là tâm hộp quà")]
+    [SerializeField] private RectTransform boxCenter;
+    [SerializeField] private float flyToGridDuration = 0.45f;
+    [SerializeField] private float flyToHUDDelay = 0.08f;
 
-    // MULTI-STAGE ITEM QUEUE
+    // ─── Runtime state ─────────────────────────────────────────────
     private readonly Queue<RewardItem> lootQueue = new();
+    private readonly List<GridSlot> spawnedSlots = new(); // track để fly về HUD sau
 
+    private UnityAction onClaim;
     private bool boxOpened = false;
+    private bool isClaimed = false;
     private bool revealing = false;
 
+    // Mỗi slot trong grid giữ reference tới item và reward tương ứng
+    private struct GridSlot
+    {
+        public GameObject go;
+        public RectTransform rt;
+        public RewardItem reward;
+    }
 
-    private UnityEvent<bool> onRewardNotClaim = new();
+    // ─── Lifecycle ─────────────────────────────────────────────────
 
     private void OnEnable()
     {
         openButton.onClick.AddListener(OnClickOpen);
         claimButton.onClick.AddListener(OnClickClaim);
         claimButton.gameObject.SetActive(false);
-        onRewardNotClaim.AddListener(ShowHelper);
     }
 
     private void OnDisable()
     {
         openButton.onClick.RemoveListener(OnClickOpen);
         claimButton.onClick.RemoveListener(OnClickClaim);
+        StopAllCoroutines();
     }
 
-    //============================================================
-    //  INIT
-    //============================================================
+    // ─── Setup ─────────────────────────────────────────────────────
 
     public override void Setup(DialogParam dialogParam)
     {
         base.Setup(dialogParam);
-        GiftParam param = dialogParam as GiftParam;
-        var rewards = param.rewards;
-
-
-        lootQueue.Clear();
-        foreach (var r in rewards)
-            lootQueue.Enqueue(r);
-        boxOpened = false;
-        claimButton.gameObject.SetActive(false);
-        isClaimed = false;
-        ShowHelper(false);
-
+        var param = dialogParam as GiftParam;
+        InitRewards(param.rewards, param.onClaim != null ? new UnityAction(param.onClaim) : null);
     }
+
     public void Setup(List<RewardItem> rewards, UnityAction onClaimCallback)
     {
+        InitRewards(rewards, onClaimCallback);
+    }
+
+    private void InitRewards(List<RewardItem> rewards, UnityAction onClaimCallback)
+    {
         lootQueue.Clear();
+        spawnedSlots.Clear();
+
+        // Xóa item cũ trong grid
+        gridLayout.Clear();
+
         foreach (var r in rewards)
             lootQueue.Enqueue(r);
 
         onClaim = onClaimCallback;
+        boxOpened = false;
+        isClaimed = false;
+        revealing = false;
+
         claimButton.gameObject.SetActive(false);
+        ShowHelper(false);
     }
 
-    //============================================================
-    //  SHOW
-    //============================================================
+    // ─── Show ──────────────────────────────────────────────────────
+
     public override void OnStartShowDialog()
     {
-        // vào dialog là idle trước khi open
+        claimButton.interactable = true;
         AnimationHelper.PlaySpineAnimation(spineBox, animIdle, true);
         SoundHelper.PlaySFX(SoundManager.SFX.GiftBoxOpen);
-        StartCoroutine(PlayerClaimCouroutine());
+        StartCoroutine(HelperHintCoroutine());
     }
 
-    private IEnumerator PlayerClaimCouroutine()
+    private IEnumerator HelperHintCoroutine()
     {
-        if(boxOpened || isClaimed) yield break;
         yield return new WaitForSeconds(5f);
-        ShowHelper(true);
+        if (!boxOpened) ShowHelper(true);
     }
 
-    //============================================================
-    //  OPEN BOX
-    //============================================================
+    // ─── Open box ──────────────────────────────────────────────────
+
     private void OnClickOpen()
     {
         if (boxOpened) return;
         boxOpened = true;
-        isClaimed = true;
-        StopCoroutine(PlayerClaimCouroutine());
-        // Play OPEN → OPEN_IDLE
+        ShowHelper(false);
+
         AnimationHelper.PlaySpineAnimation(spineBox, animOpen, false, () =>
         {
             AnimationHelper.PlaySpineAnimation(spineBox, animOpenIdle, true);
-            StartCoroutine(RevealNextItem());
+            StartCoroutine(RevealAllItems());
         });
-
     }
 
-    //============================================================
-    //  MULTI-STAGE ITEM REVEAL
-    //============================================================
-    private IEnumerator RevealNextItem()
+    // ─── Reveal: item bay từ hộp vào grid ──────────────────────────
+
+    /// <summary>
+    /// Spawn tất cả item prefab vào grid (alpha=0, scale=0),
+    /// sau đó lần lượt bay từ boxCenter vào đúng slot của mình.
+    /// </summary>
+    private IEnumerator RevealAllItems()
     {
         if (revealing) yield break;
-
         revealing = true;
-        Debug.Log("Loot queue" + lootQueue.Count);
 
-        while (lootQueue.Count > 0)
+        // 1. Spawn toàn bộ vào grid trước để layout tính toán vị trí
+        var allRewards = new List<RewardItem>(lootQueue);
+        lootQueue.Clear();
+
+        foreach (var reward in allRewards)
         {
-            yield return new WaitForSeconds(1f);
-
-            var reward = lootQueue.Dequeue();
-            var rewardItem = SpawnRewardItem(reward);
-
-            SoundHelper.PlaySFX(SoundManager.SFX.GiftItemAppear);
-            yield return PlayPopAnimation(itemContainer.GetChild(itemContainer.childCount - 1));
-
-            yield return new WaitForSeconds(1f);
-            rewardItem.gameObject.SetActive(false);
+            var go = SpawnGridItem(reward, hidden: true);
+            spawnedSlots.Add(new GridSlot
+            {
+                go = go,
+                rt = go.GetComponent<RectTransform>(),
+                reward = reward
+            });
         }
 
-        revealing = false;
+        // 2. Tính layout — hàng cuối tự căn giữa
+        gridLayout.Apply();
 
-        // hiển thị nút claim cuối cùng
+        // 3. Force rebuild để RectTransform cập nhật world position
+        Canvas.ForceUpdateCanvases();
+        yield return null; // chờ 1 frame
+
+        // 3. Lần lượt fly từ boxCenter vào từng slot
+        foreach (var slot in spawnedSlots)
+        {
+            StartCoroutine(FlyIntoSlot(slot));
+            yield return new WaitForSeconds(0.15f); // stagger nhẹ
+        }
+
+        // 4. Chờ animation cuối cùng xong
+        float waitTime = flyToGridDuration + 0.15f * spawnedSlots.Count + 0.3f;
+        yield return new WaitForSeconds(waitTime);
+
+        revealing = false;
         claimButton.gameObject.SetActive(true);
     }
 
-    private GameObject SpawnRewardItem(RewardItem reward)
+    private GameObject SpawnGridItem(RewardItem reward, bool hidden)
     {
-        var go = Instantiate(itemPrefab, itemContainer);
-
+        var go = Instantiate(itemPrefab, gridLayout.transform); // ← spawn vào CenteredGridLayout
         var icon = go.transform.Find("Icon").GetComponent<Image>();
         var txt = go.transform.Find("Txt").GetComponent<Text>();
 
         icon.sprite = SpriteLibControl.Instance.GetSprite(0, SpriteGroup.UI, reward.icon_name);
+        icon.preserveAspect = true; // giữ tỉ lệ, không méo, anchor giữ nguyên full stretch
 
-        // 1) Set kích thước tự nhiên của sprite
-        icon.SetNativeSize();
-
-        // 2) Scale icon để vừa khung 100x100
-        RectTransform rt = icon.rectTransform;
-        float maxSize = 300f;
-
-        float scale = Mathf.Min(
-            maxSize / rt.sizeDelta.x,
-            maxSize / rt.sizeDelta.y
-        );
-
-        rt.localScale = Vector3.one * scale;
-
-        // 3) Set text
         txt.text = "x" + reward.amount;
 
-        go.transform.localScale = Vector3.one;
+        if (hidden)
+        {
+            go.transform.localScale = Vector3.zero;
+            var cg = go.GetComponent<CanvasGroup>() ?? go.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+        }
 
         return go;
     }
 
-
-    private IEnumerator PlayPopAnimation(Transform t)
+    /// <summary>
+    /// Item bắt đầu ở vị trí boxCenter (world), bay về đúng slot trong grid,
+    /// đồng thời scale + fade in.
+    /// </summary>
+    private IEnumerator FlyIntoSlot(GridSlot slot)
     {
-        float tVal = 0;
-        float dur = 0.1f;
+        var rt = slot.rt;
+        var cg = slot.go.GetComponent<CanvasGroup>();
 
-        Vector3 big = Vector3.one * 1.2f;
-        Vector3 small = Vector3.one;
+        Vector3 targetPos = rt.position;          // vị trí thực trong grid
+        Vector3 startPos = boxCenter != null
+            ? boxCenter.position
+            : targetPos + Vector3.up * 200f;
 
-        // scale up
-        while (tVal < dur)
+        float elapsed = 0f;
+        SoundHelper.PlaySFX(SoundManager.SFX.GiftItemAppear);
+
+        while (elapsed < flyToGridDuration)
         {
-            tVal += Time.deltaTime;
-            t.localScale = Vector3.Lerp(Vector3.zero, big, tVal / dur);
+            if (rt == null) yield break;
+            elapsed += Time.deltaTime;
+            float t = elapsed / flyToGridDuration;
+            float smooth = t * t * (3f - 2f * t); // ease in-out
+
+            rt.position = Vector3.Lerp(startPos, targetPos, smooth);
+            rt.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, smooth);
+            if (cg != null) cg.alpha = smooth;
+
             yield return null;
         }
 
-        // settle down
-        tVal = 0;
-        while (tVal < 0.1f)
-        {
-            tVal += Time.deltaTime;
-            t.localScale = Vector3.Lerp(big, small, tVal / 0.1f);
-            yield return null;
-        }
+        rt.position = targetPos;
+        rt.localScale = Vector3.one;
+        if (cg != null) cg.alpha = 1f;
+
+        // Pop nhỏ khi đáp xuống
+        yield return PopBounce(rt);
     }
 
-    //============================================================
-    //  CLAIM
-    //============================================================
+    private IEnumerator PopBounce(RectTransform rt)
+    {
+        float t = 0f;
+        while (t < 0.1f)
+        {
+            t += Time.deltaTime;
+            rt.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 1.15f, t / 0.1f);
+            yield return null;
+        }
+        t = 0f;
+        while (t < 0.1f)
+        {
+            t += Time.deltaTime;
+            rt.localScale = Vector3.Lerp(Vector3.one * 1.15f, Vector3.one, t / 0.1f);
+            yield return null;
+        }
+        rt.localScale = Vector3.one;
+    }
+
+    // ─── Claim: item bay về HUD ────────────────────────────────────
+
     private void OnClickClaim()
     {
+        if (isClaimed) return;
+        isClaimed = true;
+
+        claimButton.interactable = false;
+        StartCoroutine(ClaimWithRewardService());
+    }
+
+    /// <summary>
+    /// Dùng cùng flow với QuestItem:
+    /// fire RewardEvents ngay khi bấm Take, dialog vẫn đang mở,
+    /// RewardAnimationService sẽ tự play animation từ slot hiện tại.
+    /// </summary>
+    private IEnumerator ClaimWithRewardService()
+    {
+        var rewardAnim = FindAnyObjectByType<RewardAnimationService>();
+
+        foreach (var slot in spawnedSlots)
+        {
+            if (rewardAnim != null && slot.rt != null)
+                rewardAnim.SetFlyOrigin(slot.rt);
+
+            RewardEvents.Fire(
+                slot.reward.itemType,
+                slot.reward.amount,
+                slot.reward.icon_name
+            );
+
+            if (slot.go != null)
+                slot.go.SetActive(false);
+
+            yield return new WaitForSeconds(flyToHUDDelay);
+        }
+
+        yield return new WaitForSeconds(0.15f);
+
         onClaim?.Invoke();
         DialogManager.ins.HideDialog(DialogIndex.GiftClaimDialog);
     }
 
+    // ─── Helper hint ───────────────────────────────────────────────
 
-    private void ShowHelper(bool arg0)
+    private void ShowHelper(bool active)
     {
-        if(!arg0) return;
-        Debug.Log("Show helper");
-        helperTxt.gameObject.SetActive(arg0);
-        ArrowHelper(arg0);
+        if (helperTxt != null) helperTxt.gameObject.SetActive(active);
+        if (arrow != null) arrow.gameObject.SetActive(active);
     }
-
-    private void ArrowHelper(bool active)
-    {
-        arrow.gameObject.SetActive(active);
-    }
-
 }
-
-

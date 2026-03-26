@@ -237,11 +237,8 @@ namespace System.DataBase
             dataModel.UpdateData(DataPath.TICKET, ticketWallet, () =>
             {
                 callback?.Invoke(true);
-                DataTrigger.TriggerValueChange(DataPath.TICKET, ticketWallet);
                 return;
             });
-            callback?.Invoke(false);
-
         }
         #endregion
 

@@ -24,6 +24,7 @@ namespace Ingame
         public bool IsFull => storage != null && storage.IsFull;
         public bool IsLocked => lockController != null && lockController.IsLocked;
         public bool IsMoving => mover != null && mover.IsMoving;
+        public bool IsBusy => IsMoving || (stateController != null && stateController.CurrentState == BoxState.Full);
         public int RemainingCapacity => storage.RemainingCapacity;
 
         #endregion

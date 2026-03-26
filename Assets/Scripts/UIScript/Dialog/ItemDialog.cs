@@ -41,9 +41,12 @@ namespace UIScript.Dialog
         {
             ads.onClick.AddListener(PlayAds);
             buy.onClick.AddListener(PurchaseItem);
-
-
             WalletManager.ins.OnCurrencyUpdated += OnCurrencyUpdated;
+            if (PaymentManager.ins != null)
+                PaymentManager.ins.OnPaymentCompleted += OnPaymentCompleted;
+
+            RefreshCurrencyLabels();
+            RefreshButtonState();
         }
 
         private void OnDisable()
@@ -52,6 +55,8 @@ namespace UIScript.Dialog
             buy.onClick.RemoveListener(PurchaseItem);
 
             WalletManager.ins.OnCurrencyUpdated -= OnCurrencyUpdated;
+            if (PaymentManager.ins != null)
+                PaymentManager.ins.OnPaymentCompleted -= OnPaymentCompleted;
 
         }
 
@@ -59,28 +64,30 @@ namespace UIScript.Dialog
 
         private void PlayAds()
         {
+            if (!ZenSDK.instance.IsVideoRewardReady())
+            {
+                PaymentManager.ins.TriggerGameplayItemResult(false, "Ads not available", type);
+                return;
+            }
+
             ZenSDK.instance.ShowVideoReward((isWatched) =>
             {
                 if (!isWatched)
                 {
-                    DialogManager.ins.HideDialog(dialogIndex);
+                    PaymentManager.ins.TriggerGameplayItemResult(false, "Ads not completed", type);
                     return;
                 }
 
                 DataAPIController.instance.AddItemTotal(type, 1);
-                PaymentManager.ins.TriggerResult(true, "Reward received!");
+                PaymentManager.ins.TriggerGameplayItemResult(true, "Reward received!", type);
                 DialogManager.ins.HideDialog(dialogIndex);
             });
         }
 
         private void PurchaseItem()
         {
-            // ❗ CHUYỂN QUA PAYMENT MANAGER
             PaymentManager.ins.PurchaseGameplayItem(type, price);
-            DialogManager.ins.HideDialog(dialogIndex);
         }
-
-
 
         private void OnCurrencyUpdated(Currency currency, long value)
         {
@@ -89,6 +96,33 @@ namespace UIScript.Dialog
             else if(currency == Currency.Ticket)
                 txt_ticket.text = value.ToString();
 
+            RefreshButtonState();
+        }
+
+        private void OnPaymentCompleted(PaymentResult result)
+        {
+            if (!result.isGameplayItemPurchase || result.gameplayItemType != type)
+                return;
+
+            RefreshButtonState();
+
+            if (result.success)
+                DialogManager.ins.HideDialog(dialogIndex);
+        }
+
+        private void RefreshCurrencyLabels()
+        {
+            txt_gold.text = WalletManager.ins.Get(Currency.Gold).ToString();
+            txt_ticket.text = WalletManager.ins.Get(Currency.Ticket).ToString();
+        }
+
+        private void RefreshButtonState()
+        {
+            if (buy != null)
+                buy.interactable = !PaymentManager.ins.IsPurchasing && WalletManager.ins.HasEnough(Currency.Gold, price);
+
+            if (ads != null)
+                ads.interactable = !PaymentManager.ins.IsPurchasing && isAds && ZenSDK.instance.IsVideoRewardReady();
         }
     }
 }

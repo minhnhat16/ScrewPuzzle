@@ -21,6 +21,11 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
     [Tooltip("Số screw cần collect cho mỗi mission.")]
     [SerializeField][Min(1)] private int screwsPerMission = 3;
 
+    [Header("Completion Reward")]
+    [SerializeField] private ItemType completionRewardType = ItemType.Ticket;
+    [SerializeField][Min(1)] private int completionRewardAmount = 1;
+    [SerializeField] private string completionRewardIconName;
+
     // ─────────────────────────────────────────
     // State
     // ─────────────────────────────────────────
@@ -260,6 +265,56 @@ public class SideMissionManager : SingletonMono<SideMissionManager>, IResetable
                   $"remaining today={RemainingToday()}");
     }
 
+    public bool TryShowCompletedMissionRewardDialog()
+    {
+        if (!HasActiveMission || !CurrentMission.IsCompleted)
+            return false;
+
+        if (CurrentMission.rewardClaimed || CurrentMission.rewardDialogShown)
+            return false;
+
+        CurrentMission.rewardDialogShown = true;
+
+        var reward = new RewardItem(ResolveCompletionRewardIconName(), completionRewardAmount)
+        {
+            itemType = completionRewardType
+        };
+
+        var param = new GiftParam
+        {
+            rewards = new List<RewardItem> { reward },
+            onClaim = ClaimCompletedMissionReward
+        };
+
+        DialogManager.ins.ShowDialog(DialogIndex.GiftClaimDialog, param);
+        Debug.Log($"[SideMissionManager] Showing completed mission reward dialog: {completionRewardType} x{completionRewardAmount}");
+        return true;
+    }
+
+    private void ClaimCompletedMissionReward()
+    {
+        if (!HasActiveMission || !CurrentMission.IsCompleted || CurrentMission.rewardClaimed)
+            return;
+
+        CurrentMission.rewardClaimed = true;
+
+        if (completionRewardType == ItemType.Gold)
+            WalletManager.ins.Add(Currency.Gold, completionRewardAmount);
+        else if (completionRewardType == ItemType.Ticket)
+            WalletManager.ins.Add(Currency.Ticket, completionRewardAmount);
+        else
+            DataAPIController.instance.AddItemTotal(completionRewardType, completionRewardAmount);
+
+        Debug.Log($"[SideMissionManager] Claimed completed mission reward: {completionRewardType} x{completionRewardAmount}");
+    }
+
+    private string ResolveCompletionRewardIconName()
+    {
+        return string.IsNullOrEmpty(completionRewardIconName)
+            ? completionRewardType.ToString()
+            : completionRewardIconName;
+    }
+
     // ─────────────────────────────────────────
     // Data Persistence Helpers
     // ─────────────────────────────────────────
@@ -304,6 +359,8 @@ public class SideMission
     public int targetColorID;
     public int requiredCount;
     public int currentCount;
+    public bool rewardClaimed;
+    public bool rewardDialogShown;
     public bool IsCompleted => currentCount >= requiredCount;
     public float Progress => requiredCount > 0 ? (float)currentCount / requiredCount : 0f;
 }

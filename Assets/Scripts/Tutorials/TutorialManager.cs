@@ -48,6 +48,17 @@ public class TutorialManager : MonoBehaviour
         PlayStep();
     }
 
+    public void ResetTutorialState()
+    {
+        StopAutoAdvance();
+        IsBlockingInput = false;
+        ApplyScrewInputGate(null, false);
+        SetGameViewInteractable(true);
+        TutorialUI.ins.HideAll();
+        TutorialEventBus.Clear();
+        _currentIndex = 0;
+    }
+
    
 
     /// <summary>
@@ -116,6 +127,7 @@ public class TutorialManager : MonoBehaviour
         if (Current == null)
         {
             IsBlockingInput = false;
+            ApplyScrewInputGate(null, false);
             Debug.Log("[Tutorial] DONE — no more steps");
             return;
         }
@@ -130,23 +142,27 @@ public class TutorialManager : MonoBehaviour
             case TutorialStepType.ShowMessage:
                 IsBlockingInput = false;
                 TutorialUI.ins.BlockInput(false);
+                ApplyScrewInputGate(null, false);
                 break;
 
             case TutorialStepType.HighlightAndClick:
                 IsBlockingInput = Current.blockInput;
                 TutorialUI.ins.BlockInput(Current.blockInput);
+                ApplyScrewInputGate(Current.targetKey, Current.blockInput);
                 HighlightCurrentTarget();
                 break;
 
             case TutorialStepType.WaitForEvent:
                 IsBlockingInput = Current.blockInput;
                 TutorialUI.ins.BlockInput(Current.blockInput);
+                ApplyScrewInputGate(Current.targetKey, Current.blockInput);
                 HighlightCurrentTarget();
                 break;
 
             case TutorialStepType.AutoAdvance:
                 IsBlockingInput = false;
                 TutorialUI.ins.BlockInput(false);
+                ApplyScrewInputGate(null, false);
                 break;
         }
 
@@ -216,13 +232,20 @@ public class TutorialManager : MonoBehaviour
 
     private void OnTutorialCompleted()
     {
-        IsBlockingInput = false;
         Debug.Log("[Tutorial] ✅ COMPLETED");
-
-        SetGameViewInteractable(true);
-        TutorialUI.ins.HideAll();
-        TutorialEventBus.Clear();
+        ResetTutorialState();
         DataAPIController.instance.SetNewPlayer(false);
+    }
+
+    private void ApplyScrewInputGate(string targetKey, bool restrictToTarget)
+    {
+        var screwManager = LevelManager.ins?.ScrewManager;
+        if (screwManager == null) return;
+
+        if (restrictToTarget && !string.IsNullOrEmpty(targetKey))
+            screwManager.ApplyTutorialTargetInput(targetKey);
+        else
+            screwManager.ClearTutorialInputFilter();
     }
 
 #if UNITY_EDITOR

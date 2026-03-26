@@ -86,9 +86,24 @@ public class GameFlowService : IGameFlowService
 
     public void RestartLevel(int levelId)
     {
+        _dialogService.HideAllDialog();
+
+        if (_levelManager is LevelManager concreteLevelManager)
+        {
+            concreteLevelManager.ReLoadLevel(() =>
+            {
+                _stateMachine.TransitionTo(GameplayState.Playing);
+            });
+            return;
+        }
+
         _arrayScrew.Clear();
         _boxQueue.Reset();
-        _levelManager.LoadLevel(levelId);
+        _levelManager.Dispose();
+        _levelManager.LoadLevel(levelId, () =>
+        {
+            _stateMachine.TransitionTo(GameplayState.Playing);
+        });
     }
 
     #endregion

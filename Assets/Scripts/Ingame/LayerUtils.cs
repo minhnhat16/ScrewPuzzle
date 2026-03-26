@@ -65,6 +65,7 @@ namespace Ingame
             foreach (var screw in screws)
             {
                 if (screw == null) continue;
+                if (screw.IsDetachedFromBoard) continue;
 
                 var hinge = screw.hingeController;
                 var body = hinge.BodyConnect;
@@ -74,11 +75,11 @@ namespace Ingame
                     if (body != null && !body.gameObject.activeSelf)
                     {
                         Debug.Log($"[LayerUtils] Skip Activate Screw ({screw.name}) — connected part inactive: {body.name}");
-                        screw.gameObject.SetActive(false);
+                        screw.SetActive(false);
                         continue;
                     }
 
-                    screw.gameObject.SetActive(true);
+                    screw.SetActive(true);
 
                     // Set sorting layer cho part sau khi activate
                     if (body != null && body.TryGetComponent<BasePart>(out var part))
@@ -91,7 +92,7 @@ namespace Ingame
                 {
                     string bodyName = body != null ? body.name : "NULL";
                     Debug.Log($"[LayerUtils] Deactivate Screw ({screw.name}) — connected body: {bodyName}");
-                    screw.gameObject.SetActive(false);
+                    screw.SetActive(false);
                 }
             }
         }

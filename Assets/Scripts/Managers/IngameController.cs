@@ -205,6 +205,7 @@ namespace Managers
         {
             if (!completed) return;
             _stateMachine.TransitionTo(GameplayState.Win);
+            MissionManager.ins.ProcessLevelComplete();
         }
 
         private void TriggerQueueFull()
@@ -221,6 +222,7 @@ namespace Managers
         {
             currentStar = 0;
             _stateMachine.TransitionTo(GameplayState.Loading);
+            _itemController?.ResetRuntimeState();
             _gameFlow.RestartLevel(levelId);
         }
 

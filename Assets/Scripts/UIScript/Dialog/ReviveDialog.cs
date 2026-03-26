@@ -1,5 +1,6 @@
 ﻿using Managers;
 using System;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,6 +33,9 @@ namespace UIScript.Dialog
             watchButton.onClick.AddListener(OnWatchAccept);
             retryButton.onClick.AddListener(OnRetryButton);
             closeDialogButton.onClick.AddListener(OnCloseButton);
+            DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+            DataTrigger.RegisterValueChange(DataPath.TICKET, OnTicketChanged);
+            RefreshCurrencyUI();
         }
 
         private void OnDisable()
@@ -40,6 +44,8 @@ namespace UIScript.Dialog
             watchButton.onClick.RemoveListener(OnWatchAccept);
             retryButton.onClick.RemoveListener(OnRetryButton);
             closeDialogButton.onClick.RemoveListener(OnCloseButton);
+            DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+            DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
         }
 
         // ─────────────────────────────────────────
@@ -86,6 +92,7 @@ namespace UIScript.Dialog
             var callback = _param?.onWatchAccepted;
             HideDialog();
             callback?.Invoke();
+            WalletManager.ins.Spend(Currency.Ticket, 1);
         }
 
         /// <summary>Retry → từ chối revive → về Lose.</summary>
@@ -118,6 +125,22 @@ namespace UIScript.Dialog
         {
             base.OnEndShowDialog();
             SoundHelper.PlaySFX(SoundManager.SFX.Lose);
+        }
+
+        private void RefreshCurrencyUI()
+        {
+            goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+            ticketPayButton.interactable = DataAPIController.instance.GetTicket() > 0;
+        }
+
+        private void OnGoldChanged(object _)
+        {
+            goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+        }
+
+        private void OnTicketChanged(object _)
+        {
+            ticketPayButton.interactable = DataAPIController.instance.GetTicket() > 0;
         }
     }   
 }

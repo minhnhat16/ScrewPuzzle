@@ -75,7 +75,7 @@ public class GameView : BaseView
     }
 
     // ── Tách lambda thành method để có thể RemoveListener đúng ──
-    private void ReloadClicked() => LevelManager.ins.ReLoadLevel();
+    private void ReloadClicked() => IngameController.ins.RestartLevel(LevelManager.ins.CurrentLevelId);
 
     public override void OnInit(Action callback = null)
     {

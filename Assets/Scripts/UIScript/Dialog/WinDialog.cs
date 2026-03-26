@@ -4,17 +4,23 @@ using DG.Tweening;
 using Ingame;
 using Managers;
 using System;
+using System.Collections;
 using System.DataBase;
 using System.Net.Sockets;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace UIScript.Dialog
 {
     public class WinDialog : BaseDialog
     {
+        [Header("Reward")]
+        [SerializeField] private int baseGoldReward = 50;
+        [SerializeField] private int goldRewardStepPerLevel = 10;
+        [SerializeField][Min(1)] private int levelsPerGrandReward = 5;
+        [SerializeField][Min(0)] private int grandRewardGoldAmount = 500;
+
         [SerializeField] private Button nextLevelButton;
         [SerializeField] private Text score;
         [SerializeField] private Image rewardImg;
@@ -28,18 +34,35 @@ namespace UIScript.Dialog
         // new: percent label showing fill percentage
         [SerializeField] private Text fillPercentText;
         [SerializeField] WinParam param;
+        private bool rewardGrantedThisShow;
+        private bool grandRewardHitThisShow;
+
         private void OnEnable()
         {
             nextLevelButton.onClick.AddListener(OnNextButtonClicked);
+            DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+            DataTrigger.RegisterValueChange(DataPath.TICKET, OnTicketChanged);
+            RefreshCurrencyUI();
         }
         private void OnDisable()
         {
             nextLevelButton.onClick.RemoveListener(OnNextButtonClicked);
+            DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+            DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
         }
         public override void Setup(DialogParam dialogParam)
         {
             base.Setup(dialogParam);
             this.param = (WinParam)dialogParam;
+            rewardGrantedThisShow = false;
+            grandRewardHitThisShow = false;
+
+            if (param.typeReward == 0)
+                param.typeReward = ItemType.Gold;
+
+            if (param.reward <= 0 && param.typeReward == ItemType.Gold)
+                param.reward = CalculateGoldReward(param.level, out grandRewardHitThisShow);
+
             string levelStr = param.level.ToString();
             //string scoreStr = param.score.ToString();
             long userGold = param.totalGold;
@@ -59,16 +82,72 @@ namespace UIScript.Dialog
             Debug.Log("On start show dialog Win dialog");
             base.OnStartShowDialog();
             SoundHelper.PlaySFX(SoundManager.SFX.Win);
-            SetRewardProgressCount(Random.Range(0f, 1f), () =>
+            GrantWinReward();
+            SetRewardProgressCount(CalculateGrandRewardProgress(param.level), () =>
             {
                 PoppIcon();
             });
+            StartCoroutine(ShowCompletedSideMissionReward());
+        }
+
+        private IEnumerator ShowCompletedSideMissionReward()
+        {
+            yield return null;
+            SideMissionManager.ins?.TryShowCompletedMissionRewardDialog();
         }
 
         private void PoppIcon()
         {
             piggy.DOPunchScale(new Vector3(1.2f, 1.2f), 0.1f);
             effect?.Play();
+        }
+
+        private int CalculateGoldReward(int completedLevelCount, out bool hitGrandReward)
+        {
+            completedLevelCount = Mathf.Max(1, completedLevelCount);
+            int normalReward = baseGoldReward + Mathf.Max(0, completedLevelCount - 1) * goldRewardStepPerLevel;
+
+            hitGrandReward = levelsPerGrandReward > 0 && completedLevelCount % levelsPerGrandReward == 0;
+            if (hitGrandReward)
+                normalReward += grandRewardGoldAmount;
+
+            return normalReward;
+        }
+
+        private float CalculateGrandRewardProgress(int completedLevelCount)
+        {
+            if (levelsPerGrandReward <= 0)
+                return 0f;
+
+            completedLevelCount = Mathf.Max(1, completedLevelCount);
+            int progressInCycle = completedLevelCount % levelsPerGrandReward;
+
+            if (progressInCycle == 0)
+                return 1f;
+
+            return (float)progressInCycle / levelsPerGrandReward;
+        }
+
+        private void GrantWinReward()
+        {
+            if (rewardGrantedThisShow || param == null || param.reward <= 0)
+                return;
+
+            rewardGrantedThisShow = true;
+
+            if (param.typeReward == ItemType.Gold)
+            {
+                var rewardAnim = FindAnyObjectByType<RewardAnimationService>();
+                if (rewardAnim != null && rewardImg != null)
+                    rewardAnim.SetFlyOrigin(rewardImg.rectTransform);
+
+                WalletManager.ins.Add(Currency.Gold, param.reward);
+                RewardEvents.Fire(ItemType.Gold, param.reward);
+                return;
+            }
+
+            DataAPIController.instance.AddItemTotal(param.typeReward, param.reward);
+            RewardEvents.Fire(param.typeReward, param.reward);
         }
 
         private void SetButtonInteractAble(bool isInteractable)
@@ -91,7 +170,9 @@ namespace UIScript.Dialog
         private void SetReward(string rewardString)
         {
             if (rewardLB == null) return;
-            rewardLB.text = $"x{rewardString}";
+            rewardLB.text = grandRewardHitThisShow
+                ? $"x{rewardString} BONUS"
+                : $"x{rewardString}";
         }
         public override void OnEndHideDialog()
         {
@@ -183,6 +264,22 @@ namespace UIScript.Dialog
                     Debug.Log($"[WinDialog] Level {nextLevel} loaded and started ✅");
                 });
             });
+        }
+
+        private void RefreshCurrencyUI()
+        {
+            goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+            ticket.SetGoldToLable(DataAPIController.instance.GetTicket());
+        }
+
+        private void OnGoldChanged(object _)
+        {
+            goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+        }
+
+        private void OnTicketChanged(object _)
+        {
+            ticket.SetGoldToLable(DataAPIController.instance.GetTicket());
         }
     }
 }

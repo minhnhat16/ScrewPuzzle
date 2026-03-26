@@ -272,6 +272,7 @@ namespace Ingame.Board
                 {
                     if (s == null) continue;
                     if (s.IsInHold) continue;
+                    if (s.IsDetachedFromBoard) continue;
                     if (!s.isActiveAndEnabled) continue;
                     if (s.hingeController.BodyConnect == body)
                         result.Add(s);
@@ -296,6 +297,7 @@ namespace Ingame.Board
             {
                 if (kvp.Value == null) continue;
                 if (kvp.Value.Any(s => s != null
+                                    && !s.IsDetachedFromBoard
                                     && s.hingeController != null
                                     && s.hingeController.BodyConnect == body))
                     return false;

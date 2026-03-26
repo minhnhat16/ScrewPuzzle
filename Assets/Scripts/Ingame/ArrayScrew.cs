@@ -71,7 +71,13 @@ namespace Ingame
                 if (box != null && box.TryAddScrew(screw))
                 {
                     _screwManager.RemoveScrew(screw);
+                    return;
                 }
+
+                // Route result có box nhưng add fail tại frame hiện tại
+                // → phải release lock để screw không bị kẹt không click được.
+                screw.ResetClickedFlag();
+                screw.ReleaseLockForMove();
                 return;
             }
 
@@ -193,6 +199,8 @@ namespace Ingame
             if (result == MatchRouter.RouteResult.RoutedToContainer)
             {
                 SoundHelper.PlaySFX(SFX.ScrewClicked);
+                screw.ResetClickedFlag();
+                screw.ReleaseLockForMove();
                 return;
             }
 

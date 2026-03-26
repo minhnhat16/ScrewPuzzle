@@ -126,13 +126,11 @@ public class ShopController
             return; // tránh spam / double buy
 
         isProcessing = true;
-
+        PaymentManager.ins.OnPaymentCompleted -= OnPaymentDone;
+        PaymentManager.ins.OnPaymentCompleted += OnPaymentDone;
 
         Debug.Log("Starting purchase for pack: " + config.Pack);    
         PaymentManager.ins.PurchasePack(config);
-
-        // Khi payment done → unlock
-        PaymentManager.ins.OnPaymentCompleted += OnPaymentDone;
     }
 
     private void OnPaymentDone(PaymentResult result)

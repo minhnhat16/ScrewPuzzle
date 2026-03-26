@@ -114,6 +114,7 @@ namespace Ingame
             foreach (var s in copy)
             {
                 if (s == null) continue;
+                s.MarkDetachedFromBoard();
                 var hinge = s.hingeController.HingeJoint2D;
                 if (hinge != null)
                     RemoveHingeConnection(hinge);
@@ -372,6 +373,28 @@ namespace Ingame
                 {
                     Debug.LogWarning($"[ScrewManager] SetAllScrewsInteractable failed for {s?.name}: {ex.Message}");
                 }
+            }
+        }
+
+        public void ApplyTutorialTargetInput(string targetKey)
+        {
+            if (screws == null) return;
+
+            foreach (var screw in screws)
+            {
+                if (screw == null) continue;
+                screw.SetTutorialInputEnabled(!string.IsNullOrEmpty(targetKey) && screw.tutorialKey == targetKey);
+            }
+        }
+
+        public void ClearTutorialInputFilter()
+        {
+            if (screws == null) return;
+
+            foreach (var screw in screws)
+            {
+                if (screw == null) continue;
+                screw.SetTutorialInputEnabled(true);
             }
         }
 

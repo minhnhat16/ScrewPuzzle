@@ -88,7 +88,7 @@ public class LevelStartService : ILevelStartService
         Debug.Log($"[LevelStartService] Level {levelId} loaded ✅");
 
         // 3. Check new player → activate tutorial
-        bool isNewPlayer = DataAPIController.instance.IsNewPlayer();
+        bool shouldStartTutorial = DataAPIController.instance.IsNewPlayer() && levelId == 1;
 
         // 4. Switch view rồi start gameplay
         ViewManager.Instance.SwitchView(ViewIndex.GameView, null, () =>
@@ -98,10 +98,17 @@ public class LevelStartService : ILevelStartService
             // ── Tutorial: chỉ activate cho new player ──
             // StartTutorial() sau StartLevel() để game đã ở Playing state
             // → TutorialManager highlight target, block input đúng cách
-            if (isNewPlayer && TutorialManager.ins != null)
+            if (TutorialManager.ins != null)
             {
-                TutorialManager.ins.StartTutorial();
-                Debug.Log("[LevelStartService] Tutorial started for new player.");
+                if (shouldStartTutorial)
+                {
+                    TutorialManager.ins.StartTutorial();
+                    Debug.Log("[LevelStartService] Tutorial started for level 1.");
+                }
+                else
+                {
+                    TutorialManager.ins.ResetTutorialState();
+                }
             }
 
             onLevelStarted?.Invoke();

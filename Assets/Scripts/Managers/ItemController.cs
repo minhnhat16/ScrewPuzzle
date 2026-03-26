@@ -36,6 +36,21 @@ public class ItemController : FSMSystem, IItemView
     {
         IsItemExecuting = value;
     }
+
+    public void ResetRuntimeState()
+    {
+        KillTweens();
+        IsItemExecuting = false;
+        IsItemSelected = false;
+
+        if (skeleton != null)
+            skeleton.gameObject.SetActive(false);
+
+        if (idleState != null)
+            GotoState(idleState);
+        else
+            currentState = null;
+    }
     private void Awake()
     {
         this.removePartState = new RemovePartState(this);

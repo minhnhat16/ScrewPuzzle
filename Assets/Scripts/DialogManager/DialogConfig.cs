@@ -178,6 +178,7 @@ public class MissionParam : DialogParam
 public class GiftParam : DialogParam
 {
     public List<RewardItem> rewards;
+    public Action onClaim;
 
     public GiftParam() { }  
     public GiftParam(QuestChestParam chestParam)

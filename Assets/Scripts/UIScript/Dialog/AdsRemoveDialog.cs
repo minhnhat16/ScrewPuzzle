@@ -21,6 +21,14 @@ public class AdsRemoveDialog : BaseDialog
     public void OnEnable()
     {
         closeBtn.onClick.AddListener(CloseDialog);
+        DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        RefreshCurrencyUI();
+    }
+
+    private void OnDisable()
+    {
+        closeBtn.onClick.RemoveListener(CloseDialog);
+        DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
     }
     public override void Setup(DialogParam dialogParam)
     {
@@ -58,6 +66,16 @@ public class AdsRemoveDialog : BaseDialog
     public void CloseDialog()
     {
         DialogManager.ins.HideDialog(dialogIndex);
+    }
+
+    private void RefreshCurrencyUI()
+    {
+        goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+    }
+
+    private void OnGoldChanged(object _)
+    {
+        goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
     }
 
 }

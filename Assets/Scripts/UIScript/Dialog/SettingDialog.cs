@@ -33,12 +33,17 @@ public class SettingDialog : BaseDialog
 
         tg_music.m_Toggle.onValueChanged.AddListener(SettingMusic);
         tg_soundSfx.m_Toggle.onValueChanged.AddListener(SettingSFX);
+        DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        DataTrigger.RegisterValueChange(DataPath.TICKET, OnTicketChanged);
+        RefreshCurrencyUI();
     }
     private void OnDisable()
     {
         homeButton.onClick.RemoveAllListeners();
         tg_music.m_Toggle.onValueChanged.RemoveListener(SettingMusic);
         tg_soundSfx.m_Toggle.onValueChanged.RemoveListener(SettingSFX);
+        DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
     }
     private void SettingSFX(bool value)
     {
@@ -139,6 +144,22 @@ public class SettingDialog : BaseDialog
     {
         if (isMainScreen) return;
         IngameController.ins.Pause();
+    }
+
+    private void RefreshCurrencyUI()
+    {
+        goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+        ticketDisplay.SetGoldToLable(DataAPIController.instance.GetTicket());
+    }
+
+    private void OnGoldChanged(object _)
+    {
+        goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+    }
+
+    private void OnTicketChanged(object _)
+    {
+        ticketDisplay.SetGoldToLable(DataAPIController.instance.GetTicket());
     }
 
 }

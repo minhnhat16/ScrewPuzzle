@@ -217,8 +217,8 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
         DialogManager.ins.ShowDialog(DialogIndex.ReviveDialog, new ReviveParam
         {
             isRevive = false,
-            totalGold = WalletManager.ins.Get(Currency.Ticket),
-            currentTicket = 0,
+            totalGold = WalletManager.ins.Get(Currency.Gold),
+            currentTicket = WalletManager.ins.Get(Currency.Ticket),
             onWatchAccepted = () => UnlockNextSlot()
         });
     }
@@ -482,7 +482,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
         TutorialEventBus.Emit("on_box_full");
         LevelManager.ins.OnBoxCleared();
-
+        MissionManager.ins.ProcessBoxClosed(box.Color, 1);
         if (_sequence.HasNext())
         {
             // Enqueue đúng slot vừa bị clear — không tìm freeSlot mới
@@ -791,6 +791,7 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
             Debug.LogWarning($"[BoxQueue] HideScrew -> RemoveScrewsOnDict failed: {ex.Message}");
         }
 
+        screw.MarkDetachedFromBoard();
         screw.SetActive(false);
         _hiddenByColor[color].Add(screw);
     }
@@ -865,8 +866,12 @@ public class BoxQueue : SingletonMono<BoxQueue>, ILevelBoxQueue, IContainerQueue
 
     public bool HasMovingBox()
     {
+        if (_isSpawning || _pendingSpawnSlots.Count > 0)
+            return true;
+
         var boxes = _sequence.GetAllBox();
-        return _activeBoxes.Any(b => b.IsMoving) || boxes.Any(b => b != null && b.IsMoving);
+        return _activeBoxes.Any(b => b != null && b.IsBusy)
+            || boxes.Any(b => b != null && b.gameObject.activeInHierarchy && b.IsBusy);
     }
 
     public void SetDifficultyBias(float bias)

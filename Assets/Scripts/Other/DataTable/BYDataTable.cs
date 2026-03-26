@@ -1,9 +1,9 @@
-
-using System.Collections.Generic;
-using UnityEngine;
-using System.Text.RegularExpressions;
-using System.Reflection;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using UnityEngine;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,7 +15,7 @@ public class BYDataBase : ScriptableObject
 
     }
 }
-public  class ConfigCompare<T> : IComparer<T> where T : class, new()
+public class ConfigCompare<T> : IComparer<T> where T : class, new()
 {
     private List<FieldInfo> keyInfos = new List<FieldInfo>();
     public ConfigCompare(params string[] keyInfoNames)// ConfigCompareKey("a","b","c")
@@ -34,7 +34,27 @@ public  class ConfigCompare<T> : IComparer<T> where T : class, new()
         {
             object val_x = keyInfos[i].GetValue(x);
             object val_y = keyInfos[i].GetValue(y);
-            result = ((IComparable)val_x).CompareTo(val_y);
+
+            // Defensive: handle nulls explicitly to avoid cast exceptions
+            if (val_x == null && val_y == null)
+            {
+                result = 0;
+            }
+            else if (val_x == null)
+            {
+                result = -1;
+            }
+            else if (val_y == null)
+            {
+                result = 1;
+            }
+            else
+            {
+                if (val_x is IComparable cmpX)
+                    result = cmpX.CompareTo(val_y);
+                else
+                    throw new ArgumentException($"Field '{keyInfos[i].Name}' of type '{val_x.GetType()}' does not implement IComparable.");
+            }
 
             if (result != 0)
             {
@@ -45,8 +65,8 @@ public  class ConfigCompare<T> : IComparer<T> where T : class, new()
 
         return result;
     }
-    
-    public  T SetValueSearch(params object[] value)
+
+    public T SetValueSearch(params object[] value)
     {
         T key = new T();
         //Debug.Log("SetValueSearch" + value);
@@ -66,12 +86,15 @@ public abstract class BYDataTable<T> : BYDataBase where T : class, new()
 
     private void OnEnable()
     {
-        DefineConfigCompare();
+        // Ensure configCompare is assigned when the ScriptableObject is enabled
+        configCompare = DefineConfigCompare();
     }
 
     public override void CreateBinaryFile(TextAsset csvText)
     {
-        DefineConfigCompare();
+        // Ensure configCompare is assigned before using it
+        configCompare = DefineConfigCompare();
+
         records.Clear();
         List<List<string>> grids = SplitCSVFile(csvText);
         Type recordType = typeof(T);
@@ -114,7 +137,24 @@ public abstract class BYDataTable<T> : BYDataBase where T : class, new()
             T r = JsonUtility.FromJson<T>(jsonText);
             records.Add(r);
         }
-        records.Sort(configCompare);
+
+        // Sort only if a comparer is available. Provide a clear warning otherwise.
+        if (configCompare != null)
+        {
+            try
+            {
+                records.Sort(configCompare);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[BYDataTable] Sorting failed: {ex.Message}");
+                // leave unsorted but continue
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[BYDataTable] DefineConfigCompare() returned null — skipping sort.");
+        }
     }
     private List<List<string>> SplitCSVFile(TextAsset csvTest)
     {

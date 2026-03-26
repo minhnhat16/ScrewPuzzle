@@ -55,9 +55,9 @@ public class MissionManager : SingletonMono<MissionManager>
     // ============================================================
     // ACTIVE MISSIONS
     // ============================================================
-    public void FillActiveMission (List<MissionConfigRecord> missions)
+    public void FillActiveMission(List<MissionConfigRecord> missions)
     {
-        activeMissions = missions; 
+        activeMissions = missions;
     }
 
     private MissionConfigRecord GetRandomMission()
@@ -151,7 +151,7 @@ public class MissionManager : SingletonMono<MissionManager>
 
     internal void ProcessCollectScrew(ColorEnum color, int amount)
     {
-        if(color == ColorEnum.Rainbow)
+        if (color == ColorEnum.Rainbow)
         {
             DataAPIController.instance.AddSpecial(amount);
         }
@@ -228,7 +228,7 @@ public class MissionManager : SingletonMono<MissionManager>
     private void HandleMissionCompleted(MissionConfigRecord mission)
     {
         DataAPIController.instance.UpdateMissionProgress(runtimeProgress[mission.Id]);
-        
+
         MissionEvents.OnMissionCompleted?.Invoke(mission);
         UpdateChestProgressForCurrentStage();
         ReplaceCompletedMission(mission);
@@ -343,7 +343,7 @@ public class MissionManager : SingletonMono<MissionManager>
             return;
 
         chestState.isUnlocked = true;
-        DataAPIController.instance.UnlockChest(stageId );
+        DataAPIController.instance.UnlockChest(stageId);
 
         Debug.Log(
             $"<color=gold>[Chest]</color> Unlocked chest {chest.Id} for stage {stageId}"
@@ -355,7 +355,7 @@ public class MissionManager : SingletonMono<MissionManager>
              chest.RequiredProgress,
             chest.RequiredProgress
         );
-        
+
     }
     private void ReplaceCompletedMission(MissionConfigRecord completed)
     {
@@ -370,10 +370,18 @@ public class MissionManager : SingletonMono<MissionManager>
 
     private void GrantMissionReward(MissionConfigRecord mission)
     {
+        // ── Cộng currency vào ví ────────────────────────────────────
         if (mission.RewardItemType == ItemType.Gold)
             WalletManager.ins.Add(Currency.Gold, mission.RewardAmount);
+        else if (mission.RewardItemType == ItemType.Ticket)
+            WalletManager.ins.Add(Currency.Ticket, mission.RewardAmount);
 
-        DataAPIController.instance.AddItemTotal(mission.RewardItemType, 1);
+        // ── Lưu vào data (áp dụng cho mọi loại) ────────────────────
+        DataAPIController.instance.AddItemTotal(mission.RewardItemType, mission.RewardAmount);
+
+        // ── Fire animation event dùng chung ─────────────────────────
+        RewardEvents.Fire(mission.RewardItemType, mission.RewardAmount, mission.IconName);
+        Debug.Log($"[Mission] Reward granted: {mission.RewardItemType} x{mission.RewardAmount}");
     }
 
     // ============================================================

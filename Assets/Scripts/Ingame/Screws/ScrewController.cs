@@ -23,15 +23,24 @@ namespace Ingame.Screw
         [SerializeField] private bool isInHold;
         [SerializeField] private bool isMoving;
         [SerializeField] private bool isShaking;
+        [SerializeField] private bool isDetachedFromBoard;
+        [SerializeField] private bool isTutorialInputEnabled = true;
 
         // NEW: separate reservation flag for movement so clicks and move-locks don't collide
         private bool isReservedForMove;
+        private bool runtimeColliderEnabled = true;
         public bool IsInHold => isInHold;
         public bool IsMoving => isMoving;
+        public bool IsDetachedFromBoard => isDetachedFromBoard;
         public bool IsActionComplete { get; private set; }
         public bool IsClicked { get => isClicked; set => isClicked = value; }
 
-        public bool IsInteractable => enabled && gameObject.activeInHierarchy && !isInHold && !isMoving;
+        public bool IsInteractable =>
+            enabled &&
+            gameObject.activeInHierarchy &&
+            !isInHold &&
+            !isMoving &&
+            IsTutorialInputAllowed();
 
         // Expose transform for targeting / UI anchoring
         public Transform Transform => transform;
@@ -75,11 +84,15 @@ namespace Ingame.Screw
 
         internal IEnumerator Init()
         {
-            IsActionComplete = false;   
+            IsActionComplete = false;
+            isDetachedFromBoard = false;
+            isTutorialInputEnabled = true;
+            runtimeColliderEnabled = true;
             string bodyLayer = hingeController.GetConnectedBodyRenderLayer(0);
             yield return new WaitUntil(() => bodyLayer != null);
             screwRender.SetSortingOrderAndLayer(0, bodyLayer);
             hingeController.InitHingeJoints();
+            RefreshColliderState();
         }
 
         public bool OnScrewClicked()
@@ -138,10 +151,12 @@ namespace Ingame.Screw
         {
             isClicked = isMoving = true;
             isInHold = true;
+            isDetachedFromBoard = true;
 
             if (isTele)
             {
                 screwPhysics.DisableCollider();
+                runtimeColliderEnabled = false;
                 screwPhysics.FreeHinge();
                 _transform.SetParent(holdScrew.transform);
                 _transform.localPosition = Vector3.zero;
@@ -154,6 +169,7 @@ namespace Ingame.Screw
             screwAnimation.MoveScrewUp(() =>
             {
                 screwPhysics.DisableCollider();
+                runtimeColliderEnabled = false;
                 screwPhysics.FreeHinge();
                 screwAnimation.JumpScrewToHold(holdScrew, () =>
                 {
@@ -194,6 +210,9 @@ namespace Ingame.Screw
         public void OnReset()
         {
             isClicked = isInHold = isMoving = isShaking = false;
+            isDetachedFromBoard = false;
+            isTutorialInputEnabled = true;
+            runtimeColliderEnabled = true;
             IsActionComplete = true;
             screwRender.ResetRender();
             screwPhysics.ResetPhysics();
@@ -288,21 +307,14 @@ namespace Ingame.Screw
         {
             gameObject.SetActive(isActive);
             screwRender.SetActive(isActive);
+            if (isActive)
+                RefreshColliderState();
         }
 
         public void EnableColliderAndRig(bool isEnabled)
         {
-            if (screwPhysics != null)
-            {
-                if (isEnabled)
-                {
-                    screwPhysics.EnableCollider();
-                }
-                else
-                {
-                    screwPhysics.DisableCollider();
-                }
-            }
+            runtimeColliderEnabled = isEnabled;
+            RefreshColliderState();
         }
 
         internal void ResetHoldState()
@@ -311,7 +323,49 @@ namespace Ingame.Screw
             isMoving = false;
             isClicked = false;
             isReservedForMove = false;
-            screwPhysics.EnableCollider();
+            runtimeColliderEnabled = true;
+            RefreshColliderState();
+        }
+
+        internal void MarkDetachedFromBoard()
+        {
+            isDetachedFromBoard = true;
+        }
+
+        internal void RestoreBoardTracking()
+        {
+            isDetachedFromBoard = false;
+            RefreshColliderState();
+        }
+
+        internal void SetTutorialInputEnabled(bool isEnabled)
+        {
+            isTutorialInputEnabled = isEnabled;
+            RefreshColliderState();
+        }
+
+        private void RefreshColliderState()
+        {
+            if (screwPhysics == null) return;
+
+            bool shouldEnable =
+                runtimeColliderEnabled &&
+                IsTutorialInputAllowed() &&
+                !isDetachedFromBoard &&
+                !isInHold &&
+                gameObject.activeInHierarchy;
+
+            if (shouldEnable)
+                screwPhysics.EnableCollider();
+            else
+                screwPhysics.DisableCollider();
+        }
+
+        private bool IsTutorialInputAllowed()
+        {
+            return TutorialManager.ins == null
+                || !TutorialManager.ins.IsBlockingInput
+                || isTutorialInputEnabled;
         }
 
         #region IMatchItem

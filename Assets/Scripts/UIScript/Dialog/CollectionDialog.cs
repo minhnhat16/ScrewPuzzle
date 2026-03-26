@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -46,6 +47,8 @@ public class CollectionDialog : BaseDialog
         screwToggle.onValueChanged.AddListener(ScrewColorClicked);
         boardToggle.onValueChanged.AddListener(BoardColorClicked);
         closeBtn.onClick.AddListener(OnCloseButton);
+        DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        RefreshCurrencyUI();
     }
     private void OnDisable()
     {
@@ -53,6 +56,7 @@ public class CollectionDialog : BaseDialog
         screwToggle.onValueChanged.RemoveListener(ScrewColorClicked);
         boardToggle.onValueChanged.RemoveListener(BoardColorClicked);
         closeBtn.onClick.RemoveListener(OnCloseButton);
+        DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
         //onGoldChanged.RemoveListener(GoldChange);
         /*   onClickBg.RemoveListener(BackGroundClicked);
            onClickBoardColor.RemoveListener(BoardColorClicked);
@@ -174,6 +178,16 @@ public class CollectionDialog : BaseDialog
     {
         
         DialogManager.ins.HideDialog(dialogIndex);
+    }
+
+    private void RefreshCurrencyUI()
+    {
+        goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+    }
+
+    private void OnGoldChanged(object _)
+    {
+        goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
     }
 
 }

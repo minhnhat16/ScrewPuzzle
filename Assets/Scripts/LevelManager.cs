@@ -107,7 +107,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             callback.Invoke();
         }));
     }
-    public void ReLoadLevel()
+    public void ReLoadLevel(Action callback = null)
     {
         Dispose();
         InputRouter.Instance.IsInputLocked = true; // Lock input during reload to prevent issues
@@ -121,7 +121,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         else
             Debug.LogError("[LevelManager] ReLoadLevel: ScrewGameBootstrapper.ins null!");
 
-        LoadLevel(CurrentLevelId);
+        LoadLevel(CurrentLevelId, callback);
     }
     public void LoadLevel(int levelID, Action callback = null)
     {
@@ -305,6 +305,7 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
             }
             else
             {
+                screw.MarkDetachedFromBoard();
                 screw.SetActive(false);
                 if (!hidden.Contains(screw))
                 {
@@ -401,6 +402,8 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
         float mult = CurrentCombo >= 2 ? comboMultiplier : 1f;
         int gained = Mathf.RoundToInt(scorePerBoxClear * mult);
         AddScore(gained);
+
+
         OnComboChanged?.Invoke(CurrentCombo);
         Debug.Log($"[LevelManager] Box cleared | Combo:{CurrentCombo} | +{gained}pts");
     }

@@ -237,12 +237,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d3a7ac7819a91974ebe4e90d1904b28d
-    m_Address: Assets/Resources_moved/Config/MissionConfig.asset
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Config
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d96c8269b79644941877137988d9dad5
     m_Address: Assets/Resources_moved/Sprites/UI/item/Screw_Purple.png
     m_ReadOnly: 0
@@ -296,6 +290,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - UI
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9febf0e6ffe49141b3e4760c3744ef5
+    m_Address: Config/MissionConfig
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Config
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: a91ec6d147716da4abc380b8b110cf0d, type: 2}
