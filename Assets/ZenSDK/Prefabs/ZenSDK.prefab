@@ -1,22 +1,12 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1877762603038906}
-  m_IsPrefabParent: 1
 --- !u!1 &1877762603038906
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
   m_Component:
   - component: {fileID: 4679525435551948}
   - component: {fileID: 114082613275074398}
@@ -29,26 +19,32 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &4679525435551948
 Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1877762603038906}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114082613275074398
 MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1877762603038906}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8819076471a84ecb9b08b0bc2ac5219, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zenPrefab: {fileID: 1247756067523118, guid: 871bdff1e7cb24b239481aa6f6d1f57d, type: 2}
+  zenPrefab: {fileID: 1247756067523118, guid: 871bdff1e7cb24b239481aa6f6d1f57d, type: 3}
+  inAppReviewManager: {fileID: -4194198551388564262, guid: 59eb96aee851f40de808540c74c69135, type: 3}
+  inAppUpdateManager: {fileID: -1432285351144880028, guid: 140bbd0c0aebb4559bd88785c3b73f48, type: 3}
+  isResumeFromAds: 0

@@ -1,13 +1,9 @@
 ﻿using Enums;
-using Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.DataBase;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
-
 public class ViewManager : MonoBehaviour
 {
     public static ViewManager Instance;
@@ -125,6 +121,7 @@ public class ViewManager : MonoBehaviour
         }
         else
         {
+
             MainScreenViewParam param = new()
             {
                 totalGold = DataAPIController.instance.GetGold(),
@@ -136,6 +133,13 @@ public class ViewManager : MonoBehaviour
             {
                 Debug.Log("task run done switch view");
                 DayTimeController.instance.CheckNewDay();
+
+                var isAppOpenEnabled = ZenSDK.instance.IsAppOpenReady();
+                Debug.Log("IsAppOpenReady: " + isAppOpenEnabled);
+                ZenSDK.instance.ShowAppOpen((success) =>
+                {
+                    Debug.Log("ShowAppOpen callback: " + success);
+                });
             });
         }
     }

@@ -93,15 +93,9 @@ namespace Ingame.Screw
                 activeTween = renderTransform.DOScale(1f, 0.1f);
                 activeTween.OnComplete(() => { activeTween = null; });
 
-                try
-                {
-                    if (callback != null && this != null && gameObject != null && isActiveAndEnabled)
-                        callback.Invoke();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"[ScrewAnimation] MoveScrewUp callback threw: {ex.Message}");
-                }
+                if (callback != null && this != null && gameObject != null && isActiveAndEnabled)
+                    callback.Invoke();
+
             });
         }
 

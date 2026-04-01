@@ -10,12 +10,11 @@ using UnityEngine;
 public class PartLevelMaker : BasePart
 {
     
-    public override void Awake()
+    public  void Awake()
     {
-        base.Awake();
         Body.bodyType = RigidbodyType2D.Kinematic;
     }
-    public PartLevelMaker(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider) : base(body, renderer, collider)
-    {
-    }
+    //public PartLevelMaker(Rigidbody2D body, SpriteRenderer renderer, PolygonCollider2D collider) : base(body, renderer, collider)
+    //{
+    //}
 }

@@ -1,4 +1,4 @@
-﻿using ConfigFile;
+using ConfigFile;
 using Enums;
 using Ingame;
 using Ingame.Board;
@@ -279,6 +279,18 @@ public class LevelManager : SingletonMono<LevelManager>, IResetable, ILevelManag
     {
         layerManager.RemoveScrewsOnDict(screws ?? new List<ScrewController>());
         layerManager.RemovePart(bp.uniqueID);
+
+        // CLEAR BodyConnect to avoid zombie references!
+        if (screws != null)
+        {
+            foreach (var s in screws)
+            {
+                if (s != null && s.hingeController != null)
+                {
+                    s.hingeController.BodyConnect = null;
+                }
+            }
+        }
         ScrewManager.RemoveScrew(screws);
     }
 

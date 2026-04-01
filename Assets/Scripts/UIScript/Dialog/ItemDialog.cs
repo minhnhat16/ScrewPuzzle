@@ -17,8 +17,8 @@ namespace UIScript.Dialog
         [SerializeField] private Button ads;
         [SerializeField] private Button buy;
         [SerializeField] private int price;
-        [SerializeField] private Text txt_gold;
-        [SerializeField] private Text txt_ticket;
+        [SerializeField] private GoldDisplay goldDisplay;
+        [SerializeField] private GoldDisplay ticketDisplay;
 
         public override void Setup(DialogParam dialogParam)
         {
@@ -31,10 +31,10 @@ namespace UIScript.Dialog
             isAds = param.IsAdsAvailable;
             price = param.ItemPrice;
             icon.sprite = param.sprite;
-            if(detail !=null)
+            if (detail != null)
                 tutorial_lb.text = detail.ToUpper();
             price_lb.text = price.ToString();
-            ads.gameObject.SetActive(isAds) ;
+            ads.gameObject.SetActive(isAds);
         }
 
         private void OnEnable()
@@ -60,7 +60,7 @@ namespace UIScript.Dialog
 
         }
 
-    
+
 
         private void PlayAds()
         {
@@ -70,6 +70,7 @@ namespace UIScript.Dialog
                 return;
             }
 
+            ZenSDK.instance.TrackRewardOfferAccept(GameConstants.FREE_ITEM_KEY, DataAPIController.instance.GetPlayerLevel().ToString(), ZenSDK.instance.IsNetworkConnected().ToString());
             ZenSDK.instance.ShowVideoReward((isWatched) =>
             {
                 if (!isWatched)
@@ -81,7 +82,7 @@ namespace UIScript.Dialog
                 DataAPIController.instance.AddItemTotal(type, 1);
                 PaymentManager.ins.TriggerGameplayItemResult(true, "Reward received!", type);
                 DialogManager.ins.HideDialog(dialogIndex);
-            });
+            }, GameConstants.FREE_ITEM_KEY, DataAPIController.instance.GetPlayerLevel().ToString());
         }
 
         private void PurchaseItem()
@@ -91,10 +92,10 @@ namespace UIScript.Dialog
 
         private void OnCurrencyUpdated(Currency currency, long value)
         {
-            if(currency == Currency.Gold)
-                txt_gold.text = value.ToString();
-            else if(currency == Currency.Ticket)
-                txt_ticket.text = value.ToString();
+            if (currency == Currency.Gold)
+                goldDisplay.SetGoldToLable(value);
+            else if (currency == Currency.Ticket)
+                ticketDisplay.SetGoldToLable(value);
 
             RefreshButtonState();
         }
@@ -112,8 +113,8 @@ namespace UIScript.Dialog
 
         private void RefreshCurrencyLabels()
         {
-            txt_gold.text = WalletManager.ins.Get(Currency.Gold).ToString();
-            txt_ticket.text = WalletManager.ins.Get(Currency.Ticket).ToString();
+            goldDisplay.SetGoldToLable(WalletManager.ins.Get(Currency.Gold));
+            ticketDisplay.SetGoldToLable(WalletManager.ins.Get(Currency.Ticket));
         }
 
         private void RefreshButtonState()

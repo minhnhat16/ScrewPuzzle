@@ -18,10 +18,7 @@ public class BreakDialog : BaseDialog
         reward = ZenSDK.instance.GetConfigInt("coffeeReward", 1500);
         //reward *= IngameController.instance.GetPlayerLevel();
         lb_reward.text = reward.ToString();
-        ZenSDK.instance.ShowVideoReward((isWatch) =>
-        {
-            if (isWatch) timeRemaining -= 10;
-        });
+       
     }
     public override void OnEndShowDialog()
     {

@@ -21,6 +21,7 @@ namespace Core.Match
         // ─────────────────────────────────────────
         // Events
         // ─────────────────────────────────────────
+        event Action OnAllBoxesStopped;
 
         event Action<IMatchContainer> OnContainerCompleted;
         event Action<IMatchContainer> OnContainerSpawned;

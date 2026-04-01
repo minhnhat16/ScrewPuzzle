@@ -12,10 +12,7 @@ public class LoadSceneManager : MonoBehaviour
     public float progress;
 
     private Action callback;
-
     private string sceneName;
-
-    //List<Func<IEnumerator>> preTask =null;
 
     public float TimeWait { get => timeWait; set => timeWait = value; }
 
@@ -24,26 +21,71 @@ public class LoadSceneManager : MonoBehaviour
         ins = this;
     }
 
-    // Hàm chính gọi load
+    /// <summary>
+    /// Load scene với animation loading.
+    /// Nếu sceneName == sceneName hiện tại, sẽ skip scene load và chỉ chạy animation + callback.
+    /// </summary>
     public void LoadSceneByName(string sceneName, Action callback)
     {
-
         Debug.Log("Start Load Scene: " + sceneName + " current view " + ViewManager.Instance.currentView);
         StopAllCoroutines();
         this.callback = callback;
         this.sceneName = sceneName;
+        
         ViewManager.Instance.SwitchView(ViewIndex.LoadingView, null, () =>
         {
-            Debug.Log("Loading View shown, start load process");
             StartCoroutine(RunFullLoadProcess());
         });
     }
+
     IEnumerator RunFullLoadProcess()
     {
         Debug.Log("Run task start");
         yield return StartCoroutine(TaskManager.ins.RunTasks());
         Debug.Log("Run task done");
-        yield return StartCoroutine(LoadSceneProgress(sceneName, callback));
+        
+        // Check xem có cần load scene hay không
+        if (IsSceneLoaded(sceneName))
+        {
+            Debug.Log($"[LoadSceneManager] Scene '{sceneName}' đã loaded rồi, skip scene load");
+            yield return StartCoroutine(SimulateLoadingProgress());
+        }
+        else
+        {
+            Debug.Log($"[LoadSceneManager] Loading scene '{sceneName}'");
+            yield return StartCoroutine(LoadSceneProgress(sceneName, callback));
+            yield break;
+        }
+        
+        // Invoke callback sau khi loading animation xong
+        callback?.Invoke();
+    }
+
+    /// <summary>
+    /// Simulate loading progress khi scene đã loaded rồi.
+    /// Tạo ra animation loading mượt mà mà không cần load scene.
+    /// </summary>
+    private IEnumerator SimulateLoadingProgress()
+    {
+        float progress = 0f;
+        float duration = 1.5f; // Loading animation kéo dài 1.5 giây
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            progress = Mathf.Clamp01(elapsed / duration);
+            
+            // Publish progress so LoadingView can read it
+            TaskManager.ins.SetCurrentTaskProgress(progress);
+            this.progress = progress;
+
+            yield return null;
+        }
+
+        // Ensure full progress
+        TaskManager.ins.SetCurrentTaskProgress(1f);
+        this.progress = 1f;
     }
 
     private IEnumerator LoadSceneProgress(string sceneName, Action onComplete = null)
@@ -60,8 +102,6 @@ public class LoadSceneManager : MonoBehaviour
 
             // Publish progress so LoadingView can read it from TaskManager (or update LoadingView directly)
             TaskManager.ins.SetCurrentTaskProgress(smooth);
-
-            // also keep a local copy if needed
             progress = smooth;
 
             if (smooth >= 0.99f)
@@ -77,4 +117,12 @@ public class LoadSceneManager : MonoBehaviour
         onComplete?.Invoke();
     }
 
+    /// <summary>
+    /// Check xem scene có loaded rồi không.
+    /// </summary>
+    private bool IsSceneLoaded(string sceneName)
+    {
+        Scene scene = SceneManager.GetSceneByName(sceneName);
+        return scene.isLoaded;
+    }
 }

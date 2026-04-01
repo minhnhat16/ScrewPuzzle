@@ -87,7 +87,7 @@ public class SettingDialog : BaseDialog
     public override void OnStartShowDialog()
     {
         base.OnStartShowDialog();
-        ZenSDK.instance.ShowFullScreen();
+        ZenSDK.instance.ShowFullScreen(GameConstants.SETTING_KEY,DataAPIController.instance.GetPlayerLevel().ToString());
 
         Debug.Log($"SFX: {param.sfx_enable}, Music: {param.music_enable}");
 

@@ -186,7 +186,7 @@ namespace Ingame.Board
 
         public void OnValidate()
         {
-            Debug.Log($"[BaseLayer] OnValidate called for {gameObject.name} — refreshing parts list. {isLayerClear}");
+          //  Debug.Log($"[BaseLayer] OnValidate called for {gameObject.name} — refreshing parts list. {isLayerClear}");
         }
     }
 }

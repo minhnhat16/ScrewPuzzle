@@ -1,124 +1,210 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SocialPlatforms;
+﻿using UnityEngine;
 using System;
 
-
-public class ZenSDKV1 : MonoBehaviour, ZenSDK.IZenSDK
-{
+public class ZenSDKV1 :MonoBehaviour, ZenSDK.IZenSDK {
 
 	public void Init()
 	{
-		//Application.targetFrameRate = 60;
+		Application.targetFrameRate = 60;
 
 		//init leaderboard;
-#if UNITY_ANDROID
+		#if UNITY_ANDROID
 
-#elif UNITY_IOS
+        #elif UNITY_IOS
 
-#else
+		#else
 
-#endif
+		#endif
 
 		Debug.Log("ZenSDKV1:Init");
 
 	}
 
 	//tracking
-	public void OnGameStart()
-	{
+	public void OnGameStart(){
 	}
-	public void OnGameOver(string overValue)
-	{
+	public void OnGameOver(string overValue){
 	}
-	public void OnGameResume()
-	{
+	public void OnGameResume(){
 	}
-	public void OnGamePause()
-	{
+	public void OnGamePause(){		
 
 	}
-	public void TrackLevelStart(int level)
+
+    public void TrackLevelStart(string level, string mode)
+    {
+        FirebaseAnalysticManager.instance.sendLevelStart(level, mode);
+    }
+
+    public void TrackLevelFailed(string level, string mode, string failedReason, float duration)
+    {
+        FirebaseAnalysticManager.instance.sendLevelFail(level, mode, failedReason, duration);
+    }
+
+    public void TrackLevelCompleted(string level, string mode, float duration)
+    {
+        FirebaseAnalysticManager.instance.sendLevelComplete(level, mode, duration);
+    }
+
+    public void TrackRewardOffer(string placement, string level, string is_online)
 	{
-		//Debug.Log($"ZenSDK1:TRACKLEVELSTART{level}");
+        FirebaseAnalysticManager.instance.sendRewardOffer(placement,level,is_online);
 	}
-	public void TrackLevelFailed(int level)
+	
+	public void TrackRewardOfferAccept(string placement, string level, string is_online){
+        FirebaseAnalysticManager.instance.sendRewardOfferAccept(placement,level,is_online);
+    }
+	public void TrackPurchaseOffer(string sku, string placement, string level)
+    {
+        FirebaseAnalysticManager.instance.sendPurchaseOffer(sku, placement, level);
+    }
+
+	public void TrackPurchaseAccept(string sku, string placement, string level)
+    {
+    	 FirebaseAnalysticManager.instance.sendPurchaseAccept(sku, placement, level);
+    }
+	public void TrackPurchaseSuccess(string sku, string placement, string level)
+    {
+        FirebaseAnalysticManager.instance.sendPurchaseSuccess(sku, placement, level);
+    }
+
+	public void TrackPurchaseFail(string sku, string placement, string level, string failed_reason)
+    {
+         FirebaseAnalysticManager.instance.sendPurchaseFail(sku, placement, level,failed_reason);
+    }
+	public void TrackSpendCurrency(string virtual_currency_name, int value, string item_name, string level)
+    {
+        FirebaseAnalysticManager.instance.sendSpendCurrency(virtual_currency_name,value,item_name,level);
+    }
+	public void TrackEarnCurrency(string virtual_currency_name, int value, string item_name, string level)
+    {
+         FirebaseAnalysticManager.instance.sendEarnCurrency(virtual_currency_name,value,item_name,level);
+    }
+	public void TrackPromoOffer(string name)
+    {
+        FirebaseAnalysticManager.instance.sendPromoOffer(name);
+    }
+	public void TrackPromoClick(string name, string promo)
+    {
+        FirebaseAnalysticManager.instance.sendPromoClick(name,promo);
+    }
+
+	public void TrackRateSelect(string placement, string rateValue)
 	{
-	}
-    public void TrackLevelCompleted(int level,int scores)
+        FirebaseAnalysticManager.instance.sendRateSelect(placement,rateValue);
+    }
+
+    public void TrackCustomEvent(string eventName)
+    {
+        FirebaseAnalysticManager.instance.sendTrackEvent(eventName);
+    }
+
+    public void TrackRewardNotReady(string placement, string level, string failed_reason){
+        FirebaseAnalysticManager.instance.sendRewardNotReady(placement,level,failed_reason);
+    }
+
+    public void TrackRewardStartShow(string placement, string level){
+        FirebaseAnalysticManager.instance.sendRewardStartShow(placement,level);
+    }
+
+    public void TrackRewardEndShow(string placement, string level){
+        FirebaseAnalysticManager.instance.sendRewardEndShow(placement,level);
+    }
+    public void TrackFullscreenStartShow(string placement, string level){
+       	FirebaseAnalysticManager.instance.sendFullscreenStartShow(placement,level);
+    }
+
+    public void TrackFullscreenEndShow(string placement, string level){
+        FirebaseAnalysticManager.instance.sendFullscreenEndShow(placement,level);
+    }
+
+    public void TrackFullscreenNotReady(string placement, string failed_reason){
+       FirebaseAnalysticManager.instance.sendFullscreenNotReady(placement,failed_reason);
+    }
+
+
+    public int GetConfigInt(string name, int defaultValue)
+    {
+        return FirebaseAnalysticManager.instance.GetConfigInt(name,defaultValue);
+    }
+
+    public string GetConfigString(string name, string defaultValue)
+    {
+        return FirebaseAnalysticManager.instance.GetConfigString(name,defaultValue);
+    }
+
+    //leaderboard
+    public void ReportScore(string leaderboardID, long score)
     {
 
     }
-    public int GetConfigInt(String name,int defaultValue)
-	{
-		return defaultValue;
-	}
-	public string GetConfigString(String name, string defaultValue)
-    {
-		return defaultValue;
-    }
-	public string SpecialTileTutorial(String name)
-	{
-		return "";
-	}
-
-	//leaderboard
-	public void ReportScore(string leaderboardID, long score)
-	{
-
-	}
 
 	public void ShowLeaderboard()
 	{
-
+		
 	}
+
+
 
 	//ads
-	public void ShowFullScreen()
-	{
-		Debug.Log("ShowFullScreen");
+	public void ShowFullScreen (string placement, string level){
+		AdsManager.instance.showInterstitial (placement,level);
 	}
-	public void ShowBanner(bool visible)
-	{
+	public void ShowBanner (bool visible){
+		AdsManager.instance.showBanner (visible);
+	}
+	public void ShowVideoReward (Action<bool> callback,string placement, string level){
+		AdsManager.instance.showVideoReward (callback,placement,level);
 
 	}
-	public void ShowVideoReward(Action<bool> callback)
-	{
-
-
-	}
-	public bool IsVideoRewardReady()
-	{
-		return false;
+	public bool IsVideoRewardReady(){
+        return AdsManager.instance.isVideoRewardReady();
 	}
 
-	public void ShowAppOpen(Action<bool> callback)
-	{
-		//Debug.Log($"SHOW APP OPEN {callback}");
-		callback?.Invoke(true);
+    public bool IsFullScreenReady()
+    {
+        return AdsManager.instance.isFullScreenReady();
+    }
+    public void ShowAppOpen(Action<bool> callback)
+    {
+        int appOpenCount = PlayerPrefs.GetInt("appOpenCount", 0);
+        if (appOpenCount > GetConfigInt("appOpenCount", 0) && GetConfigInt("isShowAppOpen", 1) == 1)
+        {
+            Debug.Log("show app open");
+            AdsManager.instance.showAppOpen(callback);
+    }
+        else
+        {
+            callback(true);
+            appOpenCount++;
+            PlayerPrefs.SetInt("appOpenCount", appOpenCount);
+            Debug.Log("appOpenCount "+ appOpenCount);
+        }
+    }
+    
+    public bool IsAppOpenReady(){
+        return AdsManager.instance.isAppOpenReady();
 	}
 
-	//rate
-	public void Rate()
-	{
+    //rate
+    public void Rate()
+    {
 #if UNITY_ANDROID
-				Application.OpenURL("market://details?id=com.geda.candymatch3mania");
-#elif UNITY_IPHONE
-				Application.OpenURL("itms-apps://itunes.apple.com/app/id1438933213");
+        Application.OpenURL("market://details?id=com.geda.jigsolitaire");
+#elif UNITY_IOS
+        Application.OpenURL("itms-apps://itunes.apple.com/app/id6499258826");
 #endif
 
-	}
+    }
 
 	//share
-	public void Share()
-	{
+	public void Share(){
 
 	}
 
-	public void Like()
-	{
+	public void Like(){
 
 
 	}
+
 }

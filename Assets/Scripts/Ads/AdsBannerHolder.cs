@@ -15,7 +15,11 @@ public class AdsBannerHolder : MonoBehaviour
     }
     private void Start()
     {
-        bool isEnableBanner = true;
-        ZenSDK.instance.ShowBanner(isEnableBanner);
+    }
+
+    public void ShowBanner(bool isShow)
+    {
+        ZenSDK.instance.ShowBanner(isShow);
+        canvas.enabled = isShow;
     }
 }

@@ -16,7 +16,7 @@ public class LevelStartService : ILevelStartService
 
     public LevelStartService(
         LoadSceneManager sceneManager,
-        string sceneName = "InGame")
+        string sceneName = "BootScene")
     {
         _sceneManager = sceneManager ?? throw new ArgumentNullException(nameof(sceneManager));
         _sceneName = sceneName;
@@ -37,6 +37,7 @@ public class LevelStartService : ILevelStartService
             TaskManager.ins.AddTask(() => InitAfterSceneLoaded(levelId, onLevelStarted, onError));
             TaskManager.ins.StartCoroutine(RunDeferredInit(onError));
         });
+        ZenSDK.instance.ShowAppOpen(success => { Debug.Log("ShowAppOpen success: " + success); });
     }
 
     private IEnumerator RunDeferredInit(Action<string> onError)
@@ -89,7 +90,6 @@ public class LevelStartService : ILevelStartService
 
         // 3. Check new player → activate tutorial
         bool shouldStartTutorial = DataAPIController.instance.IsNewPlayer() && levelId == 1;
-
         // 4. Switch view rồi start gameplay
         ViewManager.Instance.SwitchView(ViewIndex.GameView, null, () =>
         {

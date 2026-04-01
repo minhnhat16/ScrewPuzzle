@@ -118,6 +118,8 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
         {
             trans.transform.SetParent(parent);
         }
+        //if (trans is IResetable resetable)
+        //    resetable.OnReset();
         DeSpawnNonGravity(trans);
     }
 }

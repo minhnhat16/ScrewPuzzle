@@ -1,5 +1,6 @@
 ﻿using Ingame;
 using Managers;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,22 +53,31 @@ public class LoseDialog : BaseDialog
     /// </summary>
     private void OnWatchClicked()
     {
-        DialogManager.ins.HideDialog(dialogIndex, () =>
-        {
-            // Callback chạy sau khi animation hide xong
-            // 1. Về Playing
-            IngameController.ins.ReviveDirectly();
+        string playerLevel = DataAPIController.instance.GetPlayerLevel().ToString();
+        ZenSDK.instance.TrackRewardOfferAccept(GameConstants.REVIVE_VIDEO_KEY, playerLevel, ZenSDK.instance.IsNetworkConnected().ToString());
 
-            // 2. Invoke Magnet — state đã là Playing ✅
-            Vector3 magnetPos = ArrayScrew.ins.GetLastHoldPosition();
-            IngameController.ins.OnItemInvoke.Invoke(ItemType.Magnet, magnetPos);
-        });
+        ZenSDK.instance.ShowVideoReward((success) =>
+        {
+            DialogManager.ins.HideDialog(dialogIndex, () =>
+            {
+                // Callback chạy sau khi animation hide xong
+                // 1. Về Playing
+                IngameController.ins.ReviveDirectly();
+
+                // 2. Invoke Magnet — state đã là Playing ✅
+                Vector3 magnetPos = ArrayScrew.ins.GetLastHoldPosition();
+                IngameController.ins.OnItemInvoke.Invoke(ItemType.Magnet, magnetPos);
+            });
+        }, GameConstants.REVIVE_VIDEO_KEY, playerLevel);
+
     }
 
     /// <summary>Retry → restart level hiện tại.</summary>
     private void OnRetryClicked()
     {
-        ZenSDK.instance.ShowFullScreen();
+
+        ZenSDK.instance.ShowFullScreen(GameConstants.QUIT_STRING_KEY, DataAPIController.instance.GetPlayerLevel().ToString());
+
         HideDialog();
 
         int currentLevel = LevelManager.ins.CurrentLevelId;

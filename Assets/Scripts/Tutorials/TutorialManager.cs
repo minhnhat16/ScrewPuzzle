@@ -87,7 +87,7 @@ public class TutorialManager : MonoBehaviour
     public void StartFromStep(int index)
     {
         _currentIndex = Mathf.Clamp(index, 0, config.GetAllRecord().Count - 1);
-        Debug.Log($"[Tutorial] Force start from step index {_currentIndex}");
+        //Debug.Log($"[Tutorial] Force start from step index {_currentIndex}");
         PlayStep();
     }
 
@@ -96,7 +96,7 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     public void SkipCurrentStep()
     {
-        Debug.Log($"[Tutorial] Skip step '{Current?.stepId}'");
+        //Debug.Log($"[Tutorial] Skip step '{Current?.stepId}'");
         CompleteStep();
     }
 
@@ -104,7 +104,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (Current == null) return;
 
-        Debug.Log($"[Tutorial] Event for step '{Current.stepId}' payload={payload}");
+        //Debug.Log($"[Tutorial] Event for step '{Current.stepId}' payload={payload}");
 
         if (!string.IsNullOrEmpty(Current.requiredPayload))
         {

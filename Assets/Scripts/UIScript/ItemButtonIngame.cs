@@ -14,7 +14,7 @@ namespace UIScript
             //Button = GetComponent<Button>();
             DataTrigger.RegisterValueChange(DataPath.ITEMDICT, OnItemQuantityChanged);
             Button.onClick.AddListener(OnClick);
-            AddQuantityBtn.onClick.AddListener(OnAddQuantity);
+            AddQuantityBtn.onClick.AddListener(OnClick);
         }
 
         private void OnItemQuantityChanged(object arg0)
@@ -25,7 +25,7 @@ namespace UIScript
         public override void OnDisable()
         {
             Button.onClick.RemoveListener(OnClick);
-            AddQuantityBtn.onClick.RemoveListener(OnAddQuantity);
+            //AddQuantityBtn.onClick.RemoveListener(OnAddQuantity);
         }
 
         private void Start()
@@ -55,10 +55,12 @@ namespace UIScript
             bool isAdsAvailable = ZenSDK.instance.IsVideoRewardReady();
             var itemConfig = PriceConfig(Type);
 
-            AddItemDialogParam param = new AddItemDialogParam();
-            param.ItemType = Type;
-            param.ItemPrice = ZenSDK.instance.GetConfigInt($"price{Type}", itemConfig.Price);
-            param.IsAdsAvailable = isAdsAvailable;
+            AddItemDialogParam param = new()
+            {
+                ItemType = Type,
+                ItemPrice = ZenSDK.instance.GetConfigInt($"price{Type}", itemConfig.Price),
+                IsAdsAvailable = isAdsAvailable
+            };
             Quantity += itemConfig.Quantity;
             DataAPIController.instance.AddItemTotal(Type, itemConfig.Quantity);
             DialogManager.ins.ShowDialog(DialogIndex.ItemDialog, param, () =>

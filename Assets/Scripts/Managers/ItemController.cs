@@ -18,6 +18,7 @@ public class ItemController : FSMSystem, IItemView
     private AddOneHold addOneHold;
     public bool IsItemExecuting { get; private set; }
     public bool IsItemSelected { get; private set; }
+    public bool IsItemBusy => IsItemExecuting || IsItemSelected;
     public RemovePartState RemovePartState { get => removePartState;  }
     public AddBoxItem AddBoxState { get => addBoxState; }
     public ClearArrayState MagnetState { get => magnetState;  }
@@ -25,16 +26,21 @@ public class ItemController : FSMSystem, IItemView
     public AddOneHold AddOneHold { get => addOneHold; }
 
     public UnityEvent<bool> itemPerformed;
+    public UnityEvent<bool> itemBusyChanged = new();
     /// <summary>Trả về state đang active hiện tại.</summary>
     public IFSMState CurrentState => currentState;
     public void SetSelected(bool value)
     {
+        if (IsItemSelected == value) return;
         IsItemSelected = value;
+        itemBusyChanged?.Invoke(IsItemBusy);
     }
 
     public void SetExecuting(bool value)
     {
+        if (IsItemExecuting == value) return;
         IsItemExecuting = value;
+        itemBusyChanged?.Invoke(IsItemBusy);
     }
 
     public void ResetRuntimeState()
@@ -42,6 +48,7 @@ public class ItemController : FSMSystem, IItemView
         KillTweens();
         IsItemExecuting = false;
         IsItemSelected = false;
+        itemBusyChanged?.Invoke(false);
 
         if (skeleton != null)
             skeleton.gameObject.SetActive(false);

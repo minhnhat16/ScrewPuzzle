@@ -58,7 +58,7 @@ namespace Ingame
             if (screw == null) return;
 
             var lm = LevelManager.ins.layerManager;
-            lm.RemoveScrewOnDict(screw, screw.GetSortingOrder());
+            lm.RemoveScrew(screw);
 
             var hinge = screw.hingeController.HingeJoint2D;
             if (hinge != null)
@@ -103,12 +103,12 @@ namespace Ingame
                 if (lm != null)
                 {
                     lm.RemoveScrewsOnDict(copy);
-                    Debug.Log($"[ScrewManager] AddHiddenScrews: removed {copy.Count} screws from LayerManager.screwDict");
+                    //Debug.Log($"[ScrewManager] AddHiddenScrews: removed {copy.Count} screws from LayerManager.screwDict");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[ScrewManager] AddHiddenScrews -> RemoveScrewsOnDict failed: {ex.Message}");
+                //Debug.LogWarning($"[ScrewManager] AddHiddenScrews -> RemoveScrewsOnDict failed: {ex.Message}");
             }
 
             foreach (var s in copy)
@@ -121,7 +121,7 @@ namespace Ingame
                 screws.Remove(s);
             }
 
-            Debug.Log($"[ScrewManager] Added {copy.Count} hidden screws.");
+            //Debug.Log($"[ScrewManager] Added {copy.Count} hidden screws.");
         }
 
         //======================================================================//
@@ -132,7 +132,7 @@ namespace Ingame
         {
             if (hinge == null || part == null)
             {
-                Debug.LogWarning("[ScrewManager] AddHingeConnection: hinge or part is snull. Skipping.");
+                //Debug.LogWarning("[ScrewManager] AddHingeConnection: hinge or part is snull. Skipping.");
                 return;
             }
 
@@ -160,11 +160,11 @@ namespace Ingame
 
 
                 string set = string.Join(", ", hingeSet.Select(h => h.name));
-                Debug.Log($"[ScrewManager] AddHingeConnection: created new hinge set for part {part.name}: set {set == null}");
+                //Debug.Log($"[ScrewManager] AddHingeConnection: created new hinge set for part {part.name}: set {set == null}");
             }
             hingeSet.Add(hinge);
 
-            Debug.Log($"[ScrewManager] AddHingeConnection: {hinge.name} → {part.name} (total: {hingeSet.Count})");
+            //Debug.Log($"[ScrewManager] AddHingeConnection: {hinge.name} → {part.name} (total: {hingeSet.Count})");
         }
         public void RemoveHingeConnection(HingeJoint2D hinge)
         {
@@ -179,18 +179,18 @@ namespace Ingame
                     part = body.GetComponent<BasePart>();
                     if (part != null)
                     {
-                        Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge {hinge.name} not in map, recovered via connectedBody ({part.name}).");
+                        //Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge {hinge.name} not in map, recovered via connectedBody ({part.name}).");
                         _hingeToPartMap[hinge] = part;
                     }
                     else
                     {
-                        Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge {hinge.name} — connectedBody has no BasePart. Skipping.");
+                        //Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge {hinge.name} — connectedBody has no BasePart. Skipping.");
                         return;
                     }
                 }
                 else
                 {
-                    Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge {hinge.name} not in map and no connectedBody. Skipping.");
+                    //Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: hinge {hinge.name} not in map and no connectedBody. Skipping.");
                     return;
                 }
             }
@@ -200,7 +200,7 @@ namespace Ingame
             if (_partToHingesMap.TryGetValue(part, out var hingeSet))
             {
                 hingeSet.Remove(hinge);
-                Debug.Log($"[ScrewManager] RemoveHingeConnection: removed {hinge.name} from {part.name}, remaining: {hingeSet.Count}");
+                //Debug.Log($"[ScrewManager] RemoveHingeConnection: removed {hinge.name} from {part.name}, remaining: {hingeSet.Count}");
 
                 if (hingeSet.Count == 0)
                 {
@@ -210,7 +210,7 @@ namespace Ingame
             }
             else
             {
-                Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: part {part.name} not in _partToHingesMap. Calling HandleNoHingesLeft.");
+                //Debug.LogWarning($"[ScrewManager] RemoveHingeConnection: part {part.name} not in _partToHingesMap. Calling HandleNoHingesLeft.");
                 part.HandleNoHingesLeft();
             }
         }
@@ -245,7 +245,7 @@ namespace Ingame
             var screw = screws[idx];
 
             screw.screwPhysics.FreeHinge();
-            ScrewPool.Instance.Pool.ReturnToPool(screw);
+            ScrewPool.Instance.ReturnScrewToPool(screw);
 
             screws.RemoveAt(idx);
             return screw;
@@ -280,7 +280,7 @@ namespace Ingame
         {
 
 
-            Debug.Log("[ScrewManager] Resetting screws and hinge connections...");  
+            //Debug.Log("[ScrewManager] Resetting screws and hinge connections...");  
             ReturnAllScrewToPool();
 
             ReturnHiddenScrewsToPool();
@@ -309,7 +309,7 @@ namespace Ingame
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogWarning($"[ScrewManager] ReturnHiddenScrewsToPool failed: {ex.Message}");
+                        //Debug.LogWarning($"[ScrewManager] ReturnHiddenScrewsToPool failed: {ex.Message}");
                     }
                 }
                 list.Clear();
@@ -365,14 +365,8 @@ namespace Ingame
             foreach (var s in Screws)
             {
                 if (s == null || !s.isActiveAndEnabled) continue;
-                try
-                {
-                    s.EnableColliderAndRig(enable);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"[ScrewManager] SetAllScrewsInteractable failed for {s?.name}: {ex.Message}");
-                }
+                s.EnableColliderAndRig(enable);
+
             }
         }
 
@@ -400,11 +394,11 @@ namespace Ingame
 
         public void OnValidate()
         {
-            Debug.Log($"[ScrewManager] OnValidate: screws={screws?.Count ?? 0}, hingeMap={_hingeToPartMap.Count}, partMap={_partToHingesMap.Count}");
+            ////Debug.Log($"[ScrewManager] OnValidate: screws={screws?.Count ?? 0}, hingeMap={_hingeToPartMap.Count}, partMap={_partToHingesMap.Count}");
         }
 
         //======================================================================//
-        // DEBUG HELPERS
+        // //Debug HELPERS
         //======================================================================//
 
         /// <summary>
@@ -437,13 +431,20 @@ namespace Ingame
                     _partToHingesMap.Remove(kvp.Key);
             }
 
-            if (staleHinge > 0 || stalePart > 0)
-                Debug.LogWarning($"[ScrewManager] ValidateMaps: removed {staleHinge} stale hinge entries, {stalePart} stale part entries.");
-            else
-                Debug.Log("[ScrewManager] ValidateMaps: maps are clean.");
+            //if (staleHinge > 0 || stalePart > 0)
+            //    //Debug.LogWarning($"[ScrewManager] ValidateMaps: removed {staleHinge} stale hinge entries, {stalePart} stale part entries.");
+            //else
+            //    //Debug.Log("[ScrewManager] ValidateMaps: maps are clean.");
         }
 
         internal int GetHiddenScrew(ColorEnum color)
+        {
+            if (!hiddenByColor.TryGetValue(color, out var list) || list.Count == 0)
+                return 0;
+            return list.Count;
+        }
+
+        internal int GetHiddenCountByColor(ColorEnum color)
         {
             if (!hiddenByColor.TryGetValue(color, out var list) || list.Count == 0)
                 return 0;

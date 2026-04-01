@@ -27,7 +27,7 @@ public class HoldScrew : MonoBehaviour
             // Remove screw from LayerManager dict using its current sortingOrder
             var lm = LevelManager.ins?.layerManager;
             if (lm != null)
-                lm.RemoveScrewOnDict(newScrew, newScrew.GetSortingOrder());
+                lm.RemoveScrew(newScrew);
 
             screw = newScrew;
             screw.SetSortingOrderAndLayer(sortingOrder, sortingLayerName);

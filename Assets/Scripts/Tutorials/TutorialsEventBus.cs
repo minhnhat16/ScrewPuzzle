@@ -23,7 +23,7 @@ public static class TutorialEventBus
 
     public static void Emit(string eventKey, object payload = null)
     {
-        Debug.Log($"[TutorialEventBus] Emit event '{eventKey}' with payload: {payload}");
+        //Debug.Log($"[TutorialEventBus] Emit event '{eventKey}' with payload: {payload}");
         if (events.ContainsKey(eventKey))
             events[eventKey]?.Invoke(payload);
     }
@@ -31,6 +31,6 @@ public static class TutorialEventBus
     public static void Clear()
     {
         events.Clear();
-        Debug.Log("[TutorialEventBus] Cleared all subscriptions.");
+        //Debug.Log("[TutorialEventBus] Cleared all subscriptions.");
     }
 }

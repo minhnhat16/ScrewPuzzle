@@ -53,10 +53,16 @@ public class GameView : BaseView
 
         // ── FIX 1: Subscribe vào event của itemController, không gán đè reference ──
         if (itemController != null)
+        {
             itemController.itemPerformed.AddListener(ItemPerformededHandler);
+            itemController.itemBusyChanged.AddListener(OnItemBusyChanged);
+        }
+        if (IngameController.ins != null)
+            IngameController.ins.OnGameplayStateChanged += HandleGameplayStateChanged;
 
         DataTrigger.RegisterValueChange(DataPath.ITEMDICT, OnItemDictChanged);
         RefreshAllItemDisplays();
+        RefreshGameplayItemButtonsState();
     }
 
     private void OnDisable()
@@ -69,7 +75,12 @@ public class GameView : BaseView
 
         // ── FIX 2: Unsubscribe đúng cách ────────────────────────
         if (itemController != null)
+        {
             itemController.itemPerformed.RemoveListener(ItemPerformededHandler);
+            itemController.itemBusyChanged.RemoveListener(OnItemBusyChanged);
+        }
+        if (IngameController.ins != null)
+            IngameController.ins.OnGameplayStateChanged -= HandleGameplayStateChanged;
 
         DataTrigger.UnRegisterValueChange(DataPath.ITEMDICT, OnItemDictChanged);
     }
@@ -98,6 +109,8 @@ public class GameView : BaseView
         txt_specialScrew.text = "0";
         IngameController.ins.OnStarChanged = starBottle.fillChange;
         HideDescription();
+        ZenSDK.instance.ShowBanner(true);
+
     }
 
     public override void OnEndHideView()
@@ -116,6 +129,12 @@ public class GameView : BaseView
 
     private void HandleGameplayItemClick(ItemType itemType, Button button)
     {
+        if (itemController != null && itemController.IsItemBusy)
+            return;
+
+        if (IngameController.ins == null || !IngameController.ins.IsPlaying)
+            return;
+
         button.interactable = false;
 
         var itemData = DataAPIController.instance.GetItemData(itemType);
@@ -140,16 +159,19 @@ public class GameView : BaseView
         }
         else
         {
-            DataAPIController.instance.UseItem(itemType, 1);
-
-            ShowDescription(itemType);
-
             var pos = itemType == ItemType.Breaker
                 ? Vector3.zero
                 : ArrayScrew.ins.GetLastHoldPosition() + new Vector3(1f, -0.5f, 0f);
 
-            IngameController.ins.OnItemInvoke?.Invoke(itemType, pos);
-            button.interactable = true;
+            if (IngameController.ins.TryInvokeItem(itemType, pos))
+            {
+                DataAPIController.instance.UseItem(itemType, 1);
+                ShowDescription(itemType);
+            }
+            else
+            {
+                button.interactable = true;
+            }
         }
     }
 
@@ -181,6 +203,34 @@ public class GameView : BaseView
     private void ItemPerformededHandler(bool isPerformed)
     {
         HideDescription();
+        RefreshGameplayItemButtonsState();
+    }
+
+    private void OnItemBusyChanged(bool _)
+    {
+        RefreshGameplayItemButtonsState();
+    }
+
+    private void HandleGameplayStateChanged(Gameplay.StateMachine.GameplayState prev, Gameplay.StateMachine.GameplayState next)
+    {
+        RefreshGameplayItemButtonsState();
+    }
+
+    private void SetGameplayItemButtonsInteractable(bool interactable)
+    {
+        if (btn_hammer?.Button != null)
+            btn_hammer.Button.interactable = interactable;
+        if (btn_drill?.Button != null)
+            btn_drill.Button.interactable = interactable;
+        if (btn_magnet?.Button != null)
+            btn_magnet.Button.interactable = interactable;
+    }
+
+    private void RefreshGameplayItemButtonsState()
+    {
+        bool isPlaying = IngameController.ins != null && IngameController.ins.IsPlaying;
+        bool isBusy = itemController != null && itemController.IsItemBusy;
+        SetGameplayItemButtonsInteractable(isPlaying && !isBusy);
     }
 
     public void SettingButton()

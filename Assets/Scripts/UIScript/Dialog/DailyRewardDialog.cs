@@ -1,5 +1,6 @@
 using Managers;
 using System;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Profiling;
@@ -110,7 +111,7 @@ namespace UIScript.Dialog
                 {
                     if (isWatched) dailyGrid.currentDaily.ItemClaim(isWatched);
                 
-                });
+                },GameConstants.FREE_COIN_DAILY_KEY,DataAPIController.instance.GetPlayerLevel().ToString());
             }
         }
         public void QuitButton()

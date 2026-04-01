@@ -70,4 +70,6 @@ public class CameraMain : MonoBehaviour
     {
         return new Vector3(GetRight(), GetTop());
     }
+
+
 }

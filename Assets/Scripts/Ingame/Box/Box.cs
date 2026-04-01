@@ -54,14 +54,6 @@ namespace Ingame
 
         #region Unity
 
-        public void OnEnable()
-        {
-            Debug.Log ("[BOX] Box Enable"); 
-        }
-        private void OnDisable()
-        {
-            Debug.Log("[BOX] Box Disable");
-        }
         private void Awake()
         {
             stateController = GetComponent<BoxStateController>();

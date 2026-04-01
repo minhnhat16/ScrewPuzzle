@@ -108,7 +108,7 @@ public class PaymentManager : SingletonMono<PaymentManager>
 
             // FIX: reset sau khi ads callback xong (async)
             _isPurchasing = false;
-        });
+        }, GameConstants.FREE_COIN_DAILY_KEY, DataAPIController.instance.GetPlayerLevel().ToString());
     }
 
     // ────────────────────────────────────────────────────────────────

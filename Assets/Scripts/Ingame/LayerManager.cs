@@ -66,7 +66,7 @@ namespace Ingame.Board
         /// Xóa screw khỏi screwDict theo sortingOrder (layer index).
         /// Gọi từ ScrewInteractionService khi player tap screw.
         /// </summary>
-        public void RemoveScrewOnDict(ScrewController screw, int sortingOrder)
+        public void RemoveScrew1(ScrewController screw, int sortingOrder)
         {
 
             Debug.Log($"Attempting to remove screw {screw.GetColor()} from layer {sortingOrder} and screw layer name {screw.GetSortingLayerName()} ");
@@ -79,6 +79,29 @@ namespace Ingame.Board
                 screwDict.Remove(sortingOrder);
         }
 
+        public void RemoveScrew(ScrewController screw)
+        {
+            int? keyToRemove = null;
+
+            foreach (var kvp in screwDict)
+            {
+                var list = kvp.Value;
+                if (list == null) continue;
+
+                if (list.Remove(screw))
+                {
+                    Debug.Log($"Removed screw {screw.GetColor()} from layer {kvp.Key}");
+
+                    if (list.Count == 0)
+                        keyToRemove = kvp.Key;
+
+                    break;
+                }
+            }
+
+            if (keyToRemove.HasValue)
+                screwDict.Remove(keyToRemove.Value);
+        }
         // ─── Layer Control ──────────────────────────────────────────
 
         public void OnLayerCleared(BaseLayer clearedLayer)

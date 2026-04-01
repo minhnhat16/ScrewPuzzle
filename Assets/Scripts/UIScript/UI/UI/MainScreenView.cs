@@ -65,6 +65,19 @@ namespace UIScript.UI.UI
             SetUpLevel(currentPlayerLevel);
             base.OnStartShowView();
             SetLevelPanelIs(true);
+
+            ZenSDK.instance.ShowBanner(true);
+
+            ZenSDK.instance.ShowAppOpen((success) =>
+            {
+                Debug.Log("ShowAppOpen callback: " + success);
+            });
+        }
+
+        public override void OnEndShowView()
+        {
+            base.OnEndShowView();
+            AdsBannerHolder.Instance.ShowBanner(true);
         }
         public override void OnStartHideView()
         {

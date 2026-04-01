@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Spine.Unity;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Spine.Unity;
-
 public class GiftClaimDialog : BaseDialog
 {
     [Header("UI")]
@@ -13,7 +12,8 @@ public class GiftClaimDialog : BaseDialog
     public Button claimButton;
     [SerializeField] private Text helperTxt;
     [SerializeField] private RectTransform arrow;
-
+    [SerializeField] GoldDisplay goldDisplay;
+    [SerializeField] GoldDisplay ticketDisplay;
     [Header("Grid")]
     [Tooltip("GameObject có CenteredGridLayout component — item spawn vào đây")]
     public CenteredGridLayout gridLayout;
@@ -55,6 +55,10 @@ public class GiftClaimDialog : BaseDialog
         openButton.onClick.AddListener(OnClickOpen);
         claimButton.onClick.AddListener(OnClickClaim);
         claimButton.gameObject.SetActive(false);
+
+        // Register data triggers so gold/ticket displays update automatically
+        DataTrigger.RegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        DataTrigger.RegisterValueChange(DataPath.TICKET, OnTicketChanged);
     }
 
     private void OnDisable()
@@ -62,6 +66,10 @@ public class GiftClaimDialog : BaseDialog
         openButton.onClick.RemoveListener(OnClickOpen);
         claimButton.onClick.RemoveListener(OnClickClaim);
         StopAllCoroutines();
+
+        // Unregister data triggers
+        DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+        DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
     }
 
     // ─── Setup ─────────────────────────────────────────────────────
@@ -106,6 +114,9 @@ public class GiftClaimDialog : BaseDialog
         AnimationHelper.PlaySpineAnimation(spineBox, animIdle, true);
         SoundHelper.PlaySFX(SoundManager.SFX.GiftBoxOpen);
         StartCoroutine(HelperHintCoroutine());
+
+        // Ensure displays reflect latest wallet values when dialog opens
+        RefreshCurrencyDisplays();
     }
 
     private IEnumerator HelperHintCoroutine()
@@ -305,5 +316,29 @@ public class GiftClaimDialog : BaseDialog
     {
         if (helperTxt != null) helperTxt.gameObject.SetActive(active);
         if (arrow != null) arrow.gameObject.SetActive(active);
+    }
+
+    // ─── DataTrigger handlers for currency updates ────────────────
+
+    private void OnGoldChanged(object _)
+    {
+        if (goldDisplay == null) return;
+        long gold = DataAPIController.instance.GetGold();
+        goldDisplay.SetGoldToLable(gold);
+    }
+
+    private void OnTicketChanged(object _)
+    {
+        if (ticketDisplay == null) return;
+        long ticket = DataAPIController.instance.GetTicket();
+        ticketDisplay.SetGoldToLable(ticket);
+    }
+
+    private void RefreshCurrencyDisplays()
+    {
+        if (goldDisplay != null)
+            goldDisplay.SetGoldToLable(DataAPIController.instance.GetGold());
+        if (ticketDisplay != null)
+            ticketDisplay.SetGoldToLable(DataAPIController.instance.GetTicket());
     }
 }

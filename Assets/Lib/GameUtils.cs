@@ -35,7 +35,15 @@ public static class GameConstants
 
     public static string SPRITE_PART_PATH = "HINH/";
 
-    public static Color FadeColor { get => new Color(0.5f, 0.5f, 0.5f); }
+
+    //Key for video reward
+    public static string QUIT_STRING_KEY = "quit";
+
+    public static string REVIVE_VIDEO_KEY = "revive_pack";
+    public static string FREE_COIN_DAILY_KEY = "free_coin_daily";
+    internal static string SETTING_KEY = "setting_key";
+    public static string FREE_ITEM_KEY = "free_item";
+    public static Color FadeColor => new Color(0.5f, 0.5f, 0.5f);
     public static float ArrayWidth { get => 7.5f; }
 }
 

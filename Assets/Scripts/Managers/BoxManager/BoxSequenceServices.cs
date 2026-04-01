@@ -15,8 +15,8 @@ public class BoxSequenceService : IBoxSequenceService
     {
         Queue = boxes?.ToList() ?? new List<Box>();
 
-        Debug.Log("[BoxSequenceService] Loaded boxes: " +
-                  $"[{string.Join(", ", Queue.Select(b => b == null ? "null" : b.Color.ToString()))}]");
+        //Debug.Log("[BoxSequenceService] Loaded boxes: " +
+                 // $"[{string.Join(", ", Queue.Select(b => b == null ? "null" : b.Color.ToString()))}]");
     }
 
     public Box GetNext()
@@ -26,7 +26,7 @@ public class BoxSequenceService : IBoxSequenceService
         Queue.RemoveAt(0);
 
         string colorRemains = string.Join(", ", Queue.Select(b => b == null ? "null" : b.Color.ToString()));
-        Debug.Log($"[BoxSequenceService] GetNext — dequeued color={box.Color}, còn lại {Queue.Count} box: [{colorRemains}]");
+        //Debug.Log($"[BoxSequenceService] GetNext — dequeued color={box.Color}, còn lại {Queue.Count} box: [{colorRemains}]");
         return box;
     }
 
@@ -38,7 +38,7 @@ public class BoxSequenceService : IBoxSequenceService
 
         if (Queue.Count == 0)
         {
-            Debug.Log("[BoxSequenceService] TryDequeueMatching — queue rỗng.");
+            //Debug.Log("[BoxSequenceService] TryDequeueMatching — queue rỗng.");
             return null;
         }
 
@@ -46,7 +46,7 @@ public class BoxSequenceService : IBoxSequenceService
         if (match == null) return null;
 
         Queue.Remove(match);
-        Debug.Log($"[BoxSequenceService] TryDequeueMatching — matched color={match.Color}, còn lại {Queue.Count} box.");
+        //Debug.Log($"[BoxSequenceService] TryDequeueMatching — matched color={match.Color}, còn lại {Queue.Count} box.");
         return match;
     }
 
@@ -61,7 +61,7 @@ public class BoxSequenceService : IBoxSequenceService
             result[box.Color]++;
         }
         string colorCountsStr = string.Join(", ", result.Select(kv => $"{kv.Key}: {kv.Value}"));
-        Debug.Log($"[BoxSequenceService] GetColorCounts: {colorCountsStr}");
+        //Debug.Log($"[BoxSequenceService] GetColorCounts: {colorCountsStr}");
         return result;
     }
 
@@ -83,7 +83,7 @@ public class BoxSequenceService : IBoxSequenceService
                 removed++;
             }
         }
-        Debug.Log($"[BoxSequenceService] RemoveByColor: color={color} removed={removed}");
+        //Debug.Log($"[BoxSequenceService] RemoveByColor: color={color} removed={removed}");
         return removed;
     }
 

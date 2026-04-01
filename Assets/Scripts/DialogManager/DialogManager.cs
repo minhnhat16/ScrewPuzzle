@@ -129,7 +129,7 @@ public class DialogManager : SingletonMono<DialogManager>, IDialogService
     void IDialogService.ReturnToMainMenu()
     {
         HideAllDialog();
-        LoadSceneManager.ins.LoadSceneByName("Buffer", () =>
+        LoadSceneManager.ins.LoadSceneByName("BootScene", () =>
         {
             MainScreenViewParam param = new()
             {

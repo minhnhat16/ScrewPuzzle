@@ -20,7 +20,7 @@ MonoBehaviour:
   - idScrew: 0
     idColor: 3
     screwPosition: {x: -0.5654044, y: 1.3903368, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.055614054, y: 0.037075877, z: 0.2}
       bodyPartUniqueID: 1300
       bodyPartHingePosition: {x: -0.32000017, y: 1.4000001, z: 0}
@@ -28,10 +28,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.055614054, y: 0.037075877, z: 0.2}
       bodyPartUniqueID: 1300
       bodyPartHingePosition: {x: -0.32000017, y: 1.4000001, z: 0}
+    tutorialKey: 
   - idScrew: 1
     idColor: 12
     screwPosition: {x: -0.045, y: 1.387, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1300
       bodyPartHingePosition: {x: -0.32000017, y: 1.4000001, z: 0}
@@ -39,10 +40,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1300
       bodyPartHingePosition: {x: -0.32000017, y: 1.4000001, z: 0}
+    tutorialKey: 
   - idScrew: 2
     idColor: 11
     screwPosition: {x: -2.6231031, y: -3.003128, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7256
       bodyPartHingePosition: {x: -2.3999999, y: -3.28, z: 0}
@@ -50,10 +52,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7256
       bodyPartHingePosition: {x: -2.3999999, y: -3.28, z: 0}
+    tutorialKey: 
   - idScrew: 3
     idColor: 4
     screwPosition: {x: -2.1967328, y: -3.466574, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.01853776, y: 0, z: 0.2}
       bodyPartUniqueID: 7256
       bodyPartHingePosition: {x: -2.3999999, y: -3.28, z: 0}
@@ -61,10 +64,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.01853776, y: 0, z: 0.2}
       bodyPartUniqueID: 7256
       bodyPartHingePosition: {x: -2.3999999, y: -3.28, z: 0}
+    tutorialKey: 
   - idScrew: 4
     idColor: 3
     screwPosition: {x: -0.32441193, y: -3.9856334, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0.018537998, z: 0.2}
       bodyPartUniqueID: 6429
       bodyPartHingePosition: {x: 0, y: -4, z: 0}
@@ -72,10 +76,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0.018537998, z: 0.2}
       bodyPartUniqueID: 6429
       bodyPartHingePosition: {x: 0, y: -4, z: 0}
+    tutorialKey: 
   - idScrew: 5
     idColor: 12
     screwPosition: {x: 3.2163134, y: -2.88, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6023
       bodyPartHingePosition: {x: 2.88, y: -2.8799999, z: 0}
@@ -83,10 +88,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6023
       bodyPartHingePosition: {x: 2.88, y: -2.8799999, z: 0}
+    tutorialKey: 
   - idScrew: 6
     idColor: 11
     screwPosition: {x: 0.3058741, y: -3.9670954, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6429
       bodyPartHingePosition: {x: 0, y: -4, z: 0}
@@ -94,10 +100,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6429
       bodyPartHingePosition: {x: 0, y: -4, z: 0}
+    tutorialKey: 
   - idScrew: 7
     idColor: 3
     screwPosition: {x: -1.418144, y: -1.5942532, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4717
       bodyPartHingePosition: {x: -1.3999999, y: -1.5999999, z: 0}
@@ -105,10 +112,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4717
       bodyPartHingePosition: {x: -1.3999999, y: -1.5999999, z: 0}
+    tutorialKey: 
   - idScrew: 8
     idColor: 11
     screwPosition: {x: 2.5489511, y: -2.88, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6023
       bodyPartHingePosition: {x: 2.88, y: -2.8799999, z: 0}
@@ -116,10 +124,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6023
       bodyPartHingePosition: {x: 2.88, y: -2.8799999, z: 0}
+    tutorialKey: 
   - idScrew: 9
     idColor: 12
     screwPosition: {x: -0.73224443, y: 2.3543043, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
@@ -127,10 +136,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
+    tutorialKey: 
   - idScrew: 10
     idColor: 4
     screwPosition: {x: 0.6951682, y: 2.3913794, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
@@ -138,10 +148,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
+    tutorialKey: 
   - idScrew: 11
     idColor: 7
     screwPosition: {x: -1.0288498, y: 0.87127805, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
@@ -149,10 +160,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
+    tutorialKey: 
   - idScrew: 12
     idColor: 8
     screwPosition: {x: 0.98, y: 0.884, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.018537283, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
@@ -160,10 +172,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.018537283, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
+    tutorialKey: 
   - idScrew: 13
     idColor: 7
     screwPosition: {x: -2.1596575, y: -1.35, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
@@ -171,10 +184,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
+    tutorialKey: 
   - idScrew: 14
     idColor: 8
     screwPosition: {x: 2.173, y: -1.35, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.018537283, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
@@ -182,10 +196,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.018537283, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
+    tutorialKey: 
   - idScrew: 15
     idColor: 2
     screwPosition: {x: 0, y: 1.7610937, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
@@ -193,10 +208,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
+    tutorialKey: 
   - idScrew: 16
     idColor: 3
     screwPosition: {x: 0, y: 0.35221875, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
@@ -204,10 +220,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 3991
       bodyPartHingePosition: {x: 0, y: 1.3849998, z: 0}
+    tutorialKey: 
   - idScrew: 17
     idColor: 9
     screwPosition: {x: -1.2698418, y: -3.151431, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
@@ -215,10 +232,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
+    tutorialKey: 
   - idScrew: 18
     idColor: 10
     screwPosition: {x: 1.238, y: -3.151431, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
@@ -226,10 +244,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
+    tutorialKey: 
   - idScrew: 19
     idColor: 4
     screwPosition: {x: 0, y: -1.316186, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
@@ -237,10 +256,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
+    tutorialKey: 
   - idScrew: 20
     idColor: 8
     screwPosition: {x: 0, y: -3.151431, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.07415137, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
@@ -248,10 +268,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.07415137, y: 0, z: 0.2}
       bodyPartUniqueID: 6422
       bodyPartHingePosition: {x: 0, y: -2.3, z: 0}
+    tutorialKey: 
   - idScrew: 21
     idColor: 7
     screwPosition: {x: -1.851, y: 0.262, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
@@ -259,10 +280,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
+    tutorialKey: 
   - idScrew: 22
     idColor: 9
     screwPosition: {x: 1.8630517, y: 0.29660463, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
@@ -270,10 +292,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
+    tutorialKey: 
   - idScrew: 23
     idColor: 10
     screwPosition: {x: -2.215271, y: -0.648824, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: -0.037075758, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
@@ -281,10 +304,11 @@ MonoBehaviour:
     - hingePosition: {x: -0.037075758, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
+    tutorialKey: 
   - idScrew: 24
     idColor: 2
     screwPosition: {x: 2.222, y: -0.632, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
@@ -292,10 +316,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 4526
       bodyPartHingePosition: {x: 0, y: -0.19999981, z: 0}
+    tutorialKey: 
   - idScrew: 25
     idColor: 10
     screwPosition: {x: -2.4191868, y: -3.4480362, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
@@ -303,10 +328,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
+    tutorialKey: 
   - idScrew: 26
     idColor: 2
     screwPosition: {x: 2.437724, y: -3.4294984, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
@@ -314,10 +340,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
+    tutorialKey: 
   - idScrew: 27
     idColor: 9
     screwPosition: {x: 0, y: -3.114355, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
@@ -325,10 +352,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
+    tutorialKey: 
   - idScrew: 28
     idColor: 11
     screwPosition: {x: 0, y: -3.7631793, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0.01853776, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
@@ -336,10 +364,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0.01853776, z: 0.2}
       bodyPartUniqueID: 7585
       bodyPartHingePosition: {x: 0, y: -3.44, z: 0}
+    tutorialKey: 
   - idScrew: 29
     idColor: 12
     screwPosition: {x: -2.88, y: -3.06, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: -0.01853776, y: 0, z: 0.2}
       bodyPartUniqueID: 6568
       bodyPartHingePosition: {x: 0, y: -3.04, z: 0}
@@ -347,10 +376,11 @@ MonoBehaviour:
     - hingePosition: {x: -0.01853776, y: 0, z: 0.2}
       bodyPartUniqueID: 6568
       bodyPartHingePosition: {x: 0, y: -3.04, z: 0}
+    tutorialKey: 
   - idScrew: 30
     idColor: 12
     screwPosition: {x: 1.2883791, y: -0.6500001, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1316
       bodyPartHingePosition: {x: 0, y: -0.6500001, z: 0}
@@ -358,10 +388,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1316
       bodyPartHingePosition: {x: 0, y: -0.6500001, z: 0}
+    tutorialKey: 
   - idScrew: 31
     idColor: 3
     screwPosition: {x: -1.418144, y: -0.6500001, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1316
       bodyPartHingePosition: {x: 0, y: -0.6500001, z: 0}
@@ -369,10 +400,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1316
       bodyPartHingePosition: {x: 0, y: -0.6500001, z: 0}
+    tutorialKey: 
   - idScrew: 32
     idColor: 11
     screwPosition: {x: 2.7714052, y: -3.003128, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6568
       bodyPartHingePosition: {x: 0, y: -3.04, z: 0}
@@ -380,10 +412,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6568
       bodyPartHingePosition: {x: 0, y: -3.04, z: 0}
+    tutorialKey: 
   - idScrew: 33
     idColor: 12
     screwPosition: {x: 0.009268655, y: -3.0216665, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6568
       bodyPartHingePosition: {x: 0, y: -3.04, z: 0}
@@ -391,10 +424,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6568
       bodyPartHingePosition: {x: 0, y: -3.04, z: 0}
+    tutorialKey: 
   - idScrew: 34
     idColor: 2
     screwPosition: {x: -0.027807025, y: -0.6500001, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1316
       bodyPartHingePosition: {x: 0, y: -0.6500001, z: 0}
@@ -402,10 +436,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1316
       bodyPartHingePosition: {x: 0, y: -0.6500001, z: 0}
+    tutorialKey: 
   - idScrew: 35
     idColor: 3
     screwPosition: {x: -1.555, y: -0.7415134, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
@@ -413,10 +448,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
+    tutorialKey: 
   - idScrew: 36
     idColor: 11
     screwPosition: {x: 1.555, y: -0.7415134, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
@@ -424,10 +460,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
+    tutorialKey: 
   - idScrew: 37
     idColor: 2
     screwPosition: {x: -1.555, y: -2.836288, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
@@ -435,10 +472,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
+    tutorialKey: 
   - idScrew: 38
     idColor: 8
     screwPosition: {x: 1.555, y: -2.836288, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
@@ -446,10 +484,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
+    tutorialKey: 
   - idScrew: 39
     idColor: 9
     screwPosition: {x: 0, y: -0.7415134, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
@@ -457,10 +496,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
+    tutorialKey: 
   - idScrew: 40
     idColor: 10
     screwPosition: {x: 0, y: -2.836288, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
@@ -468,10 +508,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2328
       bodyPartHingePosition: {x: 0, y: -1.8399999, z: 0}
+    tutorialKey: 
   - idScrew: 41
     idColor: 4
     screwPosition: {x: -4.3656588, y: -1, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -479,10 +520,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 42
     idColor: 2
     screwPosition: {x: 4.4027343, y: -1, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: -0.12976456, y: -0.03707528, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -490,10 +532,11 @@ MonoBehaviour:
     - hingePosition: {x: -0.12976456, y: -0.03707528, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 43
     idColor: 4
     screwPosition: {x: 0, y: 1.5942532, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -501,10 +544,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 44
     idColor: 7
     screwPosition: {x: 0, y: -3.577801, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -512,10 +556,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 45
     idColor: 4
     screwPosition: {x: 2.73, y: -3, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -523,10 +568,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 46
     idColor: 7
     screwPosition: {x: -2.8640945, y: 0.9825051, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -534,10 +580,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 47
     idColor: 8
     screwPosition: {x: -2.8270192, y: -2.9845905, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: -0.018537998, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -545,10 +592,11 @@ MonoBehaviour:
     - hingePosition: {x: -0.018537998, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 48
     idColor: 10
     screwPosition: {x: 2.74, y: 1.01, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.018538475, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
@@ -556,10 +604,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.018538475, y: 0, z: 0.2}
       bodyPartUniqueID: 1415
       bodyPartHingePosition: {x: 0, y: -1, z: 0}
+    tutorialKey: 
   - idScrew: 49
     idColor: 7
     screwPosition: {x: -3.4202297, y: 2.16, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
@@ -567,10 +616,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
+    tutorialKey: 
   - idScrew: 50
     idColor: 8
     screwPosition: {x: -0.88, y: -0.0926891, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -578,10 +628,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 51
     idColor: 9
     screwPosition: {x: 0.88, y: -0.0926891, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -589,10 +640,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 52
     idColor: 10
     screwPosition: {x: 3.4202292, y: 2.16, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
@@ -600,10 +652,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
+    tutorialKey: 
   - idScrew: 53
     idColor: 9
     screwPosition: {x: -0.88, y: -3.48, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -611,10 +664,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 54
     idColor: 2
     screwPosition: {x: 0.88, y: -3.48, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: -0.09268868, y: -0.055613518, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -622,10 +676,11 @@ MonoBehaviour:
     - hingePosition: {x: -0.09268868, y: -0.055613518, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 55
     idColor: 3
     screwPosition: {x: 0, y: 2.16, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
@@ -633,10 +688,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
+    tutorialKey: 
   - idScrew: 56
     idColor: 12
     screwPosition: {x: -1.6591359, y: 2.16, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
@@ -644,10 +700,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
+    tutorialKey: 
   - idScrew: 57
     idColor: 11
     screwPosition: {x: 1.6776732, y: 2.16, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
@@ -655,10 +712,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7467
       bodyPartHingePosition: {x: 0, y: 2.1599998, z: 0}
+    tutorialKey: 
   - idScrew: 58
     idColor: 11
     screwPosition: {x: -0.88, y: -1.8, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -666,10 +724,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 59
     idColor: 3
     screwPosition: {x: 0.88, y: -1.8, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -677,10 +736,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 60
     idColor: 3
     screwPosition: {x: 0, y: -0.8156645, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -688,10 +748,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 61
     idColor: 11
     screwPosition: {x: 0, y: -2.5396826, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.01853784, y: 0.03707552, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
@@ -699,10 +760,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.01853784, y: 0.03707552, z: 0.2}
       bodyPartUniqueID: 8823
       bodyPartHingePosition: {x: 0, y: -1.8, z: 0}
+    tutorialKey: 
   - idScrew: 62
     idColor: 12
     screwPosition: {x: -4.4, y: 3.67049, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -710,10 +772,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 63
     idColor: 12
     screwPosition: {x: 3.2348506, y: -2.5582206, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: -0.09268856, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -721,10 +784,11 @@ MonoBehaviour:
     - hingePosition: {x: -0.09268856, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 64
     idColor: 2
     screwPosition: {x: -3.2719269, y: -2.5582206, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -732,10 +796,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 65
     idColor: 2
     screwPosition: {x: 4.4, y: 1.01958, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -743,10 +808,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 66
     idColor: 4
     screwPosition: {x: 4.4, y: 3.67049, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -754,10 +820,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 67
     idColor: 7
     screwPosition: {x: -4.4, y: 1.01958, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -765,10 +832,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 68
     idColor: 4
     screwPosition: {x: -3.2348518, y: -0.35221905, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -776,10 +844,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 69
     idColor: 7
     screwPosition: {x: 3.2533891, y: -0.35221905, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -787,10 +856,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 70
     idColor: 4
     screwPosition: {x: 0, y: 3.67049, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -798,10 +868,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 71
     idColor: 7
     screwPosition: {x: 0, y: 1.01958, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -809,10 +880,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 72
     idColor: 8
     screwPosition: {x: -0.13903406, y: -0.24099171, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -820,10 +892,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 73
     idColor: 10
     screwPosition: {x: -0.083420545, y: -2.5211449, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -831,10 +904,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 74
     idColor: 8
     screwPosition: {x: -2.2, y: 3.67049, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -842,10 +916,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 75
     idColor: 8
     screwPosition: {x: 2.2, y: 1.01958, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0.01853764, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -853,10 +928,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0.01853764, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 76
     idColor: 10
     screwPosition: {x: -2.2, y: 1.01958, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -864,10 +940,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 77
     idColor: 2
     screwPosition: {x: 2.2, y: 3.67049, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
@@ -875,10 +952,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 7829
       bodyPartHingePosition: {x: 0, y: 2.3600001, z: 0}
+    tutorialKey: 
   - idScrew: 78
     idColor: 10
     screwPosition: {x: -4, y: -2.14, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
@@ -886,10 +964,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
+    tutorialKey: 
   - idScrew: 79
     idColor: 2
     screwPosition: {x: 4, y: -2.14, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
@@ -897,10 +976,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
+    tutorialKey: 
   - idScrew: 80
     idColor: 9
     screwPosition: {x: 0, y: -2.14, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
@@ -908,10 +988,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
+    tutorialKey: 
   - idScrew: 81
     idColor: 3
     screwPosition: {x: -2, y: -2.14, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
@@ -919,10 +1000,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
+    tutorialKey: 
   - idScrew: 82
     idColor: 12
     screwPosition: {x: 2, y: -2.14, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0.018537998, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
@@ -930,10 +1012,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0.018537998, z: 0.2}
       bodyPartUniqueID: 2993
       bodyPartHingePosition: {x: 0, y: -2.1399999, z: 0}
+    tutorialKey: 
   - idScrew: 83
     idColor: 2
     screwPosition: {x: -3.9578264, y: -1.62, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
@@ -941,10 +1024,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
+    tutorialKey: 
   - idScrew: 84
     idColor: 9
     screwPosition: {x: 3.957826, y: -1.62, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
@@ -952,10 +1036,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
+    tutorialKey: 
   - idScrew: 85
     idColor: 3
     screwPosition: {x: -2.0855057, y: -1.62, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
@@ -963,10 +1048,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
+    tutorialKey: 
   - idScrew: 86
     idColor: 12
     screwPosition: {x: 2.0113533, y: -1.62, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
@@ -974,10 +1060,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
+    tutorialKey: 
   - idScrew: 87
     idColor: 9
     screwPosition: {x: 0, y: -1.62, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0.07415136, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
@@ -985,10 +1072,11 @@ MonoBehaviour:
     - hingePosition: {x: 0.07415136, y: 0, z: 0.2}
       bodyPartUniqueID: 2215
       bodyPartHingePosition: {x: 0, y: -1.6199999, z: 0}
+    tutorialKey: 
   - idScrew: 88
     idColor: 3
     screwPosition: {x: -1.7703635, y: -1.4459509, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -996,10 +1084,11 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   - idScrew: 89
     idColor: 12
     screwPosition: {x: 1.6962116, y: -1.3717995, z: -0.2}
-    hingeConnection:
+    hinge:
       hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
@@ -1007,6 +1096,7 @@ MonoBehaviour:
     - hingePosition: {x: 0, y: 0, z: 0.2}
       bodyPartUniqueID: 6708
       bodyPartHingePosition: {x: 0, y: -1.48, z: 0}
+    tutorialKey: 
   layers:
   - layerId: 0
     parts:

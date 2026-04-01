@@ -33,7 +33,7 @@ public class TutorialUI : MonoBehaviour
     {
         Show();
         message.Show(msg);
-        Debug.Log($"[TutorialUI] ShowMessage: {msg}");
+        //Debug.Log($"[TutorialUI] ShowMessage: {msg}");
     }
 
     public void HighlightTarget(

@@ -661,7 +661,7 @@ public class GameObjectToLevelConverter : SingletonMono<GameObjectToLevelConvert
     internal void RemoveScrew(ScrewLevelMaker screwLevelMaker)
     {
         screwLevelMaker.ResetHinge();
-        lmanager.RemoveScrewOnDict(screwLevelMaker, screwLevelMaker.ScrewLayerMask);
+        lmanager.RemoveScrew(screwLevelMaker);
         var screwManager = levelObject.GetComponentInChildren<ScrewManager>();
         screwManager.RemoveScrew(screwLevelMaker);
         Destroy(screwLevelMaker.gameObject);

@@ -33,7 +33,8 @@ public class BootLoader : MonoBehaviour
             new InitDataTask(),
             new InitMissionTask(),
             new SetupUITask(),
-            new InitSoundTask()
+            new InitSoundTask(),
+            //new InitAdsBanner()
         };
 
         // Run tasks sequentially
@@ -87,17 +88,47 @@ public class BootLoader : MonoBehaviour
 
         yield return new WaitForEndOfFrame();
 
-        // ── New player flow hoàn toàn do SwitchViewForNewPlayer xử lý ──
-        // SwitchViewForNewPlayer(true) → LevelStartService.StartLevel(1) → load scene
-        // → bootstrapper → load level → start tutorial → gameplay
-        // KHÔNG gọi LoadLevelFromService nữa — tránh double load
-        bool isNew = DataAPIController.instance.IsNewPlayer();
-        string sceneName = isNew ? "InGame" : "Buffer";
-        LoadSceneManager.ins.LoadSceneByName(sceneName, () =>
+        // ── New player vs Returning player flow ──
+        bool isNewPlayer = DataAPIController.instance.IsNewPlayer();
+
+        if (isNewPlayer)
         {
-            Debug.Log("BootLoader: Load Scene Done");
-            ViewManager.Instance.SwitchViewForNewPlayer(isNew);
-        });
+            // New player: Load game scene → start tutorial → gameplay
+            Debug.Log("[BOOT] New player detected → Loading InGame scene with tutorial");
+            LoadSceneManager.ins.LoadSceneByName("BootScene", () =>
+            {
+                Debug.Log("[BOOT] InGame scene loaded → Starting tutorial");
+                // SwitchViewForNewPlayer sẽ trigger LevelStartService.StartLevel(1)
+                // → load level → start tutorial → gameplay
+                ViewManager.Instance.SwitchViewForNewPlayer(isNewPlayer: true);
+            });
+        }
+        else
+        {
+            // Returning player: Load game scene → show MainScreenView
+            Debug.Log("[BOOT] Returning player detected → Loading game scene with MainScreenView");
+            LoadSceneManager.ins.LoadSceneByName("BootScene", () =>
+            {
+                Debug.Log("[BOOT] Game scene loaded → Switching to MainScreenView");
+
+                MainScreenViewParam param = new()
+                {
+                    level = DataAPIController.instance.GetPlayerLevel(),
+                    totalGold = WalletManager.ins.Get(Currency.Gold),
+                    ticket = WalletManager.ins.Get(Currency.Ticket),
+                };
+
+                ViewManager.Instance.SwitchView(ViewIndex.MainScreenView, param, () =>
+                {
+                    Debug.Log("[BOOT] MainScreenView shown");
+                    DayTimeController.instance.CheckNewDay();
+
+                    var isAppOpenEnabled = ZenSDK.instance.IsAppOpenReady();
+                    Debug.Log("IsAppOpenReady: " + isAppOpenEnabled);
+                  
+                });
+            });
+        }
     }
 
     /// <summary>

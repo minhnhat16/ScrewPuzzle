@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.DataBase;
 using System.Diagnostics.Tracing;
 using System.Security;
 using System.Xml.Schema;
@@ -65,7 +66,7 @@ public class BuyDialog : BaseDialog
                 //Debug.Log("NO ADS TO WATCH");
                 HideConfirmDialog();
             }
-        });
+        }, GameConstants.FREE_COIN_DAILY_KEY,DataAPIController.instance.GetPlayerLevel().ToString());
     }
     public void ConfirmBuy()
     {

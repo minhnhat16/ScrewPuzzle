@@ -1,16 +1,10 @@
-﻿using Ingame;
+﻿#if UNITY_EDITOR
+
+using Ingame;
 using Ingame.Board;
-using Level;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.Animations;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace PSB
 {
@@ -60,7 +54,7 @@ namespace PSB
 
                     if (layer == null) continue;
 
-                    layer.SetLayer(name);
+                    //layer.layer(name);
                     layer.name = name;
                     layerManager.Layers.Add(layer);
                 }
@@ -112,7 +106,6 @@ namespace PSB
         {
         }
     }
-#if UNITY_EDITOR
 
     [CustomEditor(typeof(PSBBuilder))]
     public class PSBEditorInspector : Editor
@@ -144,6 +137,6 @@ namespace PSB
             }
         }
     }
-#endif
 
 }
+#endif

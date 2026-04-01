@@ -1,4 +1,5 @@
 ﻿using Managers;
+using Spine;
 using System;
 using System.DataBase;
 using UnityEngine;
@@ -60,6 +61,17 @@ namespace UIScript.Dialog
             ticketPayButton.interactable = _param.currentTicket > 0;
             goldDisplay.SetGoldToLable(_param.totalGold);
             SetRevive(_param.isRevive);
+
+            bool canWatchAd = ZenSDK.instance.IsVideoRewardReady();
+
+            watchButton.gameObject.SetActive(canWatchAd);
+            if (!canWatchAd)
+            {
+                // Nếu không thể xem quảng cáo, tự động hide nút watch và show nút ticket nếu có
+                watchButton.gameObject.SetActive(false);
+                ticketPayButton.gameObject.SetActive(_param.currentTicket > 0);
+            }
+
         }
 
         // ─────────────────────────────────────────
@@ -80,9 +92,15 @@ namespace UIScript.Dialog
         /// <summary>Watch ads / free → chấp nhận revive → tiếp tục Playing.</summary>
         private void OnWatchAccept()
         {
-            var callback = _param?.onWatchAccepted;
-            HideDialog();                  // ← BaseDialog.HideDialog() → animation → OnEndHideDialog
-            callback?.Invoke();            // GameFlowService: UnlockInput + UnlockNext + TransitionTo(Playing)
+            string playerLevel = DataAPIController.instance.GetPlayerLevel().ToString();
+            ZenSDK.instance.TrackRewardOfferAccept(GameConstants.REVIVE_VIDEO_KEY, playerLevel,ZenSDK.instance.IsNetworkConnected().ToString());
+
+            ZenSDK.instance.ShowVideoReward((success) =>
+            {
+                var callback = _param?.onWatchAccepted;
+                HideDialog();                  // ← BaseDialog.HideDialog() → animation → OnEndHideDialog
+                callback?.Invoke();            // GameFlowService: UnlockInput + UnlockNext + TransitionTo(Playing)
+            }, GameConstants.REVIVE_VIDEO_KEY, playerLevel);
         }
 
         /// <summary>Dùng ticket → tương tự Watch.</summary>
@@ -114,7 +132,7 @@ namespace UIScript.Dialog
         public override void HideDialog()
         {
             base.HideDialog();
-            DialogManager.ins.HideDialog(dialogIndex);  
+            DialogManager.ins.HideDialog(dialogIndex);
         }
 
         // ─────────────────────────────────────────
@@ -142,5 +160,5 @@ namespace UIScript.Dialog
         {
             ticketPayButton.interactable = DataAPIController.instance.GetTicket() > 0;
         }
-    }   
+    }
 }

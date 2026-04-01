@@ -1,4 +1,4 @@
-﻿using Core.Match;
+using Core.Match;
 using DG.Tweening;
 using Enums;
 using Level;
@@ -149,6 +149,16 @@ namespace Ingame.Screw
 
         public void MoveToHold(HoldScrew holdScrew, bool isTele = false, Action callback = null)
         {
+            // NEW: Safety check - if this screw was already in another hold, clear it first.
+            if (_transform == null) _transform = transform;
+            if (_transform.parent != null && _transform.parent.TryGetComponent<HoldScrew>(out var oldHold))
+            {
+                if (oldHold != holdScrew)
+                {
+                    oldHold.RemoveScrew();
+                }
+            }
+
             isClicked = isMoving = true;
             isInHold = true;
             isDetachedFromBoard = true;
@@ -190,7 +200,7 @@ namespace Ingame.Screw
                 screwPhysics.FreeHinge();
         }
 
-        public void ResetClickedFlag() => StartCoroutine(ResetClickFlagAfterDelay(0.5f));
+        public void ResetClickedFlag() => StartCoroutine(ResetClickFlagAfterDelay(0.15f));
 
         private IEnumerator ResetClickFlagAfterDelay(float delay)
         {
@@ -209,18 +219,28 @@ namespace Ingame.Screw
 
         public void OnReset()
         {
-            isClicked = isInHold = isMoving = isShaking = false;
+            // Reset all state flags and runtime variables
+            isClicked = false;
+            isInHold = false;
+            isMoving = false;
+            isShaking = false;
             isDetachedFromBoard = false;
             isTutorialInputEnabled = true;
+            isReservedForMove = false;
             runtimeColliderEnabled = true;
             IsActionComplete = true;
-            screwRender.ResetRender();
-            screwPhysics.ResetPhysics();
-            screwAnimation.OnReset();
-           // hingeController.Reset();
+
+            // Reset all components
+            screwRender?.ResetRender();
+            screwPhysics?.ResetPhysics();
+            screwAnimation?.OnReset();
+            // hingeController?.Reset(); // Uncomment if you want to reset hinge state as well
+
             if (_transform == null) _transform = transform;
             _transform.localScale = Vector3.one; // Always reset scale
 
+            // Optionally, reset tutorialKey and any other runtime fields if needed
+            // tutorialKey = null;
         }
 
         public ColorEnum GetColor()

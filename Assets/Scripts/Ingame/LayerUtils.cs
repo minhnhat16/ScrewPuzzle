@@ -197,7 +197,7 @@ namespace Ingame
         {
             if (screw == null || lm == null) return;
             screw.FreeHinge();
-            lm.RemoveScrewOnDict(screw, screw.GetSortingOrder());
+            lm.RemoveScrew(screw);
         }
 
         public static void RemoveScrews(List<ScrewController> screws, LayerManager lm)

@@ -18,24 +18,20 @@ public class BoxSlotLayoutService : IBoxSlotLayoutService
     {
         if (slots == null || slots.Count == 0) return;
 
-        // ── Lọc slot cần hiển thị: có box HOẶC đang locked ──
-        // Slot trống (unlocked, không box) → bỏ qua hoàn toàn
         var visible = slots
             .Where(s => s.isContainingBox || s.isLocked)
             .ToList();
 
         if (visible.Count == 0) return;
 
-        // ── Sắp xếp: slot có box trước, locked slot sau ──
-        // Giữ thứ tự gốc trong từng nhóm (theo index trong danh sách slots gốc)
         var sorted = visible
-             .OrderBy(s => s.isLocked && !s.isContainingBox ? 1 : 0)   // box slots first
+             .OrderBy(s => s.isLocked && !s.isContainingBox ? 1 : 0)
              .ThenBy(s =>
              {
                  for (int i = 0; i < slots.Count; i++)
                      if (slots[i] == s) return i;
                  return int.MaxValue;
-             })                                                          // preserve original order
+             })
              .ToList();
 
         int n = sorted.Count;
@@ -47,21 +43,38 @@ public class BoxSlotLayoutService : IBoxSlotLayoutService
             var slot = sorted[i];
             float targetX = startX + spacing * i;
             Vector3 current = slot.transform.localPosition;
+            float targetY = GetTopAnchoredLocalY(slot.transform, 3.5f);
 
             if (duration <= 0f)
             {
-                slot.transform.localPosition = new Vector3(targetX, current.y, current.z);
+                slot.transform.localPosition = new Vector3(targetX, targetY, current.z);
                 SyncBoxToSlot(slot);
             }
             else
             {
                 slot.transform.DOKill();
                 slot.transform
-                    .DOLocalMoveX(targetX, duration)
+                    .DOLocalMove(new Vector3(targetX, targetY, current.z), duration)
                     .SetEase(_ease)
                     .OnUpdate(() => SyncBoxToSlot(slot));
             }
         }
+    }
+
+    private static float GetTopAnchoredLocalY(Transform slotTransform, float topOffset)
+    {
+        if (CameraMain.instance == null || CameraMain.instance.main == null)
+            return slotTransform.localPosition.y;
+
+        float targetWorldY = CameraMain.instance.GetTop() - topOffset;
+
+        Transform parent = slotTransform.parent;
+        if (parent == null) return targetWorldY;
+
+        Vector3 worldPos = slotTransform.position;
+        worldPos.y = targetWorldY;
+
+        return parent.InverseTransformPoint(worldPos).y;
     }
 
     private static void SyncBoxToSlot(BoxSlot slot)

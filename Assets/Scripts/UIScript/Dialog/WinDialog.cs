@@ -234,6 +234,8 @@ namespace UIScript.Dialog
             // 1. Save data trước
             DataAPIController.instance.SaveNewLevelData(data, () =>
             {
+                TutorialManager.ins?.ResetTutorialState();
+
                 // 2. Reset state level cũ
                 levelManager.OnReset();
 

@@ -305,7 +305,7 @@ public class LayerVisibilityController : MonoBehaviour
                     if (screw == null) continue;
 
                     // If screw has been taken into hold/box, do not re-enable or re-parent it
-                    if (screw.IsInHold || screw.IsDetachedFromBoard || screw.IsActionComplete) continue;
+                    if (screw.IsInHold || screw.IsDetachedFromBoard) continue;
 
                     if (screw.hingeController?.BodyConnect != body) continue;
 
@@ -316,6 +316,7 @@ public class LayerVisibilityController : MonoBehaviour
                     }
 
                     screw.SetActive(true);
+                    screw.EnableColliderAndRig(true);
                 }
             }
         }

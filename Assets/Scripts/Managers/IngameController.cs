@@ -51,6 +51,7 @@ namespace Managers
         public UnityEvent<ItemType, Vector3> OnItemInvoke = new();
         public UnityEvent<float> OnStarChanged = new();
         public UnityEvent<bool> OnLevelCompleted = new();
+        public event Action<GameplayState, GameplayState> OnGameplayStateChanged;
 
         // ─────────────────────────────────────────
         // Public Properties
@@ -162,6 +163,7 @@ namespace Managers
             ArrayScrew.ins.SetGameActive(
                 next == GameplayState.Playing || next == GameplayState.ItemUsing
             );
+            OnGameplayStateChanged?.Invoke(prev, next);
 
             switch (next)
             {
@@ -280,11 +282,11 @@ namespace Managers
         // Item
         // ─────────────────────────────────────────
 
-        public void InvokeItem(ItemType type, Vector3 position)
+        public bool TryInvokeItem(ItemType type, Vector3 position)
         {
             Debug.Log("game state on invoke item: " + _stateMachine.Current);
-            if (!_stateMachine.IsPlaying()) return;
-            if (_itemController.IsItemExecuting) return;
+            if (!_stateMachine.IsPlaying()) return false;
+            if (_itemController == null || _itemController.IsItemBusy) return false;
 
             _stateMachine.TransitionTo(GameplayState.ItemUsing);
 
@@ -301,12 +303,18 @@ namespace Managers
             {
                 Debug.LogWarning($"[IngameController] Không tìm thấy item state cho {type}");
                 _stateMachine.TransitionTo(GameplayState.Playing);
-                return;
+                return false;
             }
 
             _itemController.GotoState((IFSMState)item);
             _itemController.SetSelected(true);
             item.Use(position);
+            return true;
+        }
+
+        public void InvokeItem(ItemType type, Vector3 position)
+        {
+            TryInvokeItem(type, position);
         }
 
         public void OnItemFinished()
