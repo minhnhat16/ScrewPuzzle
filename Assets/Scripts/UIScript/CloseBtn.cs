@@ -37,7 +37,7 @@ public class CloseBtn : MonoBehaviour
         {
 
             string currentScence = SceneManager.GetActiveScene().name;
-            if (string.Compare("Buffer", currentScence) == 0){
+            if (string.Compare("BootScene", currentScence) == 0){
                 ViewManager.Instance.SwitchView(ViewIndex.MainScreenView,null);
             }
             return;

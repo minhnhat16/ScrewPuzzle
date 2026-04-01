@@ -24,7 +24,6 @@ public class BootLoader : MonoBehaviour
     void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-
         // Prepare ordered boot tasks
         var bootTasks = new List<IBootTask>
         {

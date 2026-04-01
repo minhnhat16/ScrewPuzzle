@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using GoogleMobileAds.Api;
-using UnityEngine.SceneManagement;
 
 public class AdmobMediation : MonoBehaviour, AdsManager.AdsMediation
 {
@@ -63,28 +62,21 @@ public class AdmobMediation : MonoBehaviour, AdsManager.AdsMediation
         // requestConfiguration.TestDeviceIds.Add("5F95AD9EF1C219AF48B2B748C752054D");
         // MobileAds.SetRequestConfiguration(requestConfiguration);
 
-        try
+        MobileAds.Initialize(initStatus =>
         {
-            MobileAds.Initialize(initStatus =>
+            if (initStatus == null)
             {
-                if (initStatus == null)
-                {
-                    Debug.LogError("Google Mobile Ads initialization failed.");
-                    return;
-                }
-                initBanner();
-                initInterstitial();
-                initVideoReward();
-                appopenManager = admobOpenAdsManager;
-                appopenManager.initAppOpen();
-                Debug.Log("Admob Inited");
-            });
+                Debug.LogError("Google Mobile Ads initialization failed.");
+                return;
+            }
+            initBanner();
+            initInterstitial();
+            initVideoReward();
+            appopenManager = admobOpenAdsManager;
+            appopenManager.initAppOpen();
+            Debug.Log("Admob Inited");
+        });
 
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Google Mobile Ads initialization exception: " + e);
-        }
     }
 
     void initBanner()
@@ -94,6 +86,7 @@ public class AdmobMediation : MonoBehaviour, AdsManager.AdsMediation
         if (this.bannerAds != null)
         {
             this.bannerAds.Destroy();
+            this.bannerAds = null;
         }
         //Get AdBanner Size
         if (Screen.orientation == ScreenOrientation.Portrait)
@@ -122,6 +115,8 @@ public class AdmobMediation : MonoBehaviour, AdsManager.AdsMediation
         if (this.interstitial != null)
         {
             this.interstitial.Destroy();
+            this.interstitial = null;
+
         }
         var adRequest = new AdRequest();
         // send the request to load the ad.
@@ -160,7 +155,8 @@ public class AdmobMediation : MonoBehaviour, AdsManager.AdsMediation
                     videoRewardReady = false;
                     if (lastVideoRewardCallback != null)
                         lastVideoRewardCallback(false);
-                    initVideoReward();
+
+                    Invoke("initVideoReward", 5f);
                     return;
                 }
 

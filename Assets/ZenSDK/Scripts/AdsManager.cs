@@ -1,19 +1,23 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
 using GoogleMobileAds.Ump.Api;
 using GoogleMobileAds.Api;
 
 public class AdsManager : MonoBehaviour
 {
+
     static public AdsManager instance;
+
     public GameObject mediationPrefab;
     AdsMediation mediationObj = null;
+
     public AdmobOpenAdsManager admobOpenAdsManager;
 
-    // Fix: flag để dispatch initMediation về main thread
-    private volatile bool _pendingInitMediation = false;
+    private SynchronizationContext mainThreadContext;
 
+    // Use this for initialization
     private void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
@@ -23,9 +27,10 @@ public class AdsManager : MonoBehaviour
             return;
         }
         instance = this;
+
         if (mediationPrefab != null)
         {
-            GameObject mediationGO = GameObject.Instantiate(mediationPrefab, this.transform.parent);
+            GameObject mediationGO = GameObject.Instantiate(mediationPrefab);
             mediationObj = mediationGO.GetComponent<AdsMediation>();
             DontDestroyOnLoad(mediationGO);
         }
@@ -33,38 +38,34 @@ public class AdsManager : MonoBehaviour
 
     void Start()
     {
+        // Capture the main thread context so we can safely return to it later
+        mainThreadContext = SynchronizationContext.Current;
         initGDPR();
     }
 
-    void Update()
+    void initGDPR()
     {
-        // Update() luôn chạy trên Unity main thread
-        // Kiểm tra flag và gọi initMediation an toàn tại đây
-        if (_pendingInitMediation)
-        {
-            _pendingInitMediation = false;
-            mediationObj.initMediation(admobOpenAdsManager);
-        }
-    }
 
-    internal void initGDPR()
-    {
-        // Uncomment để test GDPR trên thiết bị thật:
         // var debugSettings = new ConsentDebugSettings
-        // {
-        //     DebugGeography = DebugGeography.EEA,
-        //     TestDeviceHashedIds = new List<string>
-        //     {
-        //         "5F95AD9EF1C219AF48B2B748C752054D"
-        //     }
-        // };
-        // ConsentRequestParameters request = new ConsentRequestParameters
-        // {
-        //     ConsentDebugSettings = debugSettings,
-        // };
+        //  {
+        //      DebugGeography = DebugGeography.EEA,
+        //      TestDeviceHashedIds = new List<string>
+        //  {
+        //      "5F95AD9EF1C219AF48B2B748C752054D"
+        //  }
+        //  };
+
+
+
+        //  ConsentRequestParameters request = new ConsentRequestParameters
+        //  {
+        //      ConsentDebugSettings = debugSettings,
+        //  };
 
         ConsentRequestParameters request = new ConsentRequestParameters();
+
         ConsentInformation.Update(request, OnConsentInfoUpdated);
+
         Debug.Log("AdsManager init");
     }
 
@@ -80,20 +81,22 @@ public class AdsManager : MonoBehaviour
         {
             if (formError != null)
             {
-                // Fix: dùng formError thay vì consentError (bug nhỏ trong code gốc)
-                Debug.Log("consentError: " + formError);
+
+                Debug.Log("consentError: " + consentError);
                 return;
             }
-
             if (ConsentInformation.CanRequestAds())
             {
-                // Fix: không gọi thẳng initMediation ở đây vì callback này
-                // chạy trên JNI/background thread, sẽ crash MobileAds.Initialize
-                // Thay vào đó set flag, Update() sẽ gọi trên main thread
-                _pendingInitMediation = true;
+                // Send the initialization call back to the main thread securely 
+                // without using the Update loop.
+                mainThreadContext.Post(_ =>
+                {
+                    mediationObj.initMediation(admobOpenAdsManager);
+                }, null);
             }
         });
     }
+
 
     public void showInterstitial(string placement, string level)
     {
@@ -138,6 +141,7 @@ public class AdsManager : MonoBehaviour
         bool isVideoRewardReady();
         bool isAppOpenReady();
         bool isFullScreenReady();
+
         void showVideoReward(Action<bool> callback, string placement, string level);
         void showAppOpen(Action<bool> callback);
     }

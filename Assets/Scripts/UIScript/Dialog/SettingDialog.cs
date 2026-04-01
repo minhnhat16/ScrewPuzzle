@@ -61,7 +61,7 @@ public class SettingDialog : BaseDialog
 
     public override void Setup(DialogParam dialogParam)
     {
-         param = (SettingParam)dialogParam;
+        param = (SettingParam)dialogParam;
         long userGold = param.totalGold;
         long userTicket = param.totalTicket;
         bool isMainScreen = param.isMainScreen;
@@ -87,7 +87,7 @@ public class SettingDialog : BaseDialog
     public override void OnStartShowDialog()
     {
         base.OnStartShowDialog();
-        ZenSDK.instance.ShowFullScreen(GameConstants.SETTING_KEY,DataAPIController.instance.GetPlayerLevel().ToString());
+
 
         Debug.Log($"SFX: {param.sfx_enable}, Music: {param.music_enable}");
 
@@ -95,7 +95,7 @@ public class SettingDialog : BaseDialog
     public override void OnEndShowDialog()
     {
         base.OnEndShowDialog();
-
+        ZenSDK.instance.ShowFullScreen(GameConstants.SETTING_KEY, DataAPIController.instance.GetPlayerLevel().ToString());
 
     }
     public override void OnEndHideDialog()

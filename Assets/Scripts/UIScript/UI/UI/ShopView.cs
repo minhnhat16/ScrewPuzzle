@@ -22,7 +22,6 @@ namespace UIScript.UI.UI
 
         [SerializeField] private ShopPrefabDatabase prefabDB;
 
-
         public ShopController shopController;
         private void OnEnable()
         {
