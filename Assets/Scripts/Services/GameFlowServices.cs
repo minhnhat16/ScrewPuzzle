@@ -44,6 +44,7 @@ public class GameFlowService : IGameFlowService
 
     #endregion
 
+
     #region GAME OVER
 
     public void HandleGameOver()
@@ -54,16 +55,8 @@ public class GameFlowService : IGameFlowService
         long currentTicket = WalletManager.ins.Get(Currency.Ticket);
         bool isVideoRewardReady = AdsManager.instance.isVideoRewardReady();
 
-        // If no tickets AND no ads available → return to main menu directly (lose immediately)
-        if (currentTicket <= 0 && !isVideoRewardReady)
-        {
-            Debug.Log("[GameFlow] No tickets and no ads available - returning to main menu immediately");
-            _dialogService.HideAllDialog();
-            HandleReturnToMenu();
-            return;
-        }
 
-        // Otherwise, show lose dialog normally with revive options
+        // Show lose dialog normally with revive options
         var loseParam = new LoseParam
         {
             isAdAvailable = isVideoRewardReady

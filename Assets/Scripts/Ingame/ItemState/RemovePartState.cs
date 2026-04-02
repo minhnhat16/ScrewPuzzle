@@ -40,15 +40,26 @@ public class RemovePartState : FSMState<ItemController>, IItem
                 MissionManager.ins.ProcessUseItem(ItemType.Breaker, 1);
                 LevelManager.ins.RemovePartItem(part);
 
-                // Gọi resolve hidden cho các box active sau khi part đã bị remove
                 var boxQueue = BoxQueue.ins;
                 if (boxQueue != null)
                 {
                     foreach (var box in boxQueue.GetActiveBoxes())
                     {
-                        if (!box.IsFull && !box.IsLocked && box.RemainingCapacity >0)
+                        if (!box.IsFull && !box.IsLocked && box.RemainingCapacity > 0)
                             boxQueue.ResolveAllHiddenForBox(box);
                     }
+                }
+                
+                // MỞ KHOÁ SÂN CHƠI: Nếu ArrayScrew đang cấm người chơi bấm vì lý do gì, ta báo nó nhận định lại
+                if (ArrayScrew.ins != null)
+                {
+                    // Lợi dụng việc SetGameActive(true) hoặc gọi Evaluate ngay lập tức
+                    // Đơn giản nhất là mở khoá input trước, rồi Request Evaluator.
+                    var p = Object.FindAnyObjectByType<Ingame.Player>();
+                    p?.UnlockInput();
+
+                    // Force lại evaluator nếu như lượng khay được giải phóng
+                    ArrayScrew.ins.SetGameActive(true); 
                 }
 
                 sys.SetExecuting(false);
