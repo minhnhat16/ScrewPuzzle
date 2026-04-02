@@ -44,7 +44,18 @@ public class HoldScrew : MonoBehaviour
     /// <summary>
     /// Kiểm tra slot có đang rỗng không
     /// </summary>
-    public bool IsEmpty() => screw == null;
+    /// <summary>
+    /// Kiểm tra slot có đang rỗng không
+    /// </summary>
+    public bool IsEmpty()
+    {
+        if (screw != null) return false;
+
+        var child = GetComponentInChildren<ScrewController>();
+        if (child != null) return false;
+
+        return true;
+    }
 
     /// <summary>
     /// Lấy Screw hiện tại (nếu có)

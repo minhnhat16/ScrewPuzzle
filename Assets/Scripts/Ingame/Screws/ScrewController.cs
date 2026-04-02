@@ -147,10 +147,17 @@ namespace Ingame.Screw
             isReservedForMove = false;
         }
 
+        // Thêm biến theo dõi target để an toàn cho tween callback
+        private HoldScrew _currentHoldTarget;
+
         public void MoveToHold(HoldScrew holdScrew, bool isTele = false, Action callback = null)
         {
-            // NEW: Safety check - if this screw was already in another hold, clear it first.
+            // NGẮT TOÀN BỘ animation di chuyển cũ tránh lỗi bay ngược về chỗ cũ
             if (_transform == null) _transform = transform;
+            _transform.DOKill();
+            _currentHoldTarget = holdScrew;
+
+            // NEW: Safety check - if this screw was already in another hold, clear it first.
             if (_transform.parent != null && _transform.parent.TryGetComponent<HoldScrew>(out var oldHold))
             {
                 if (oldHold != holdScrew)
@@ -178,18 +185,22 @@ namespace Ingame.Screw
 
             screwAnimation.MoveScrewUp(() =>
             {
+                if (_currentHoldTarget != holdScrew) return; // Nếu target đổi trong lúc bay, huỷ callback
+
                 screwPhysics.DisableCollider();
                 runtimeColliderEnabled = false;
                 screwPhysics.FreeHinge();
                 screwAnimation.JumpScrewToHold(holdScrew, () =>
                 {
+                    if (_currentHoldTarget != holdScrew) return; // Bảo vệ callback cấp 2
+
                     _transform.SetParent(holdScrew.transform, worldPositionStays: false);
                     _transform.localPosition = Vector3.zero;
                     _transform.localScale = Vector3.one; // Ensure scale is reset
                     isMoving = false;
                     isReservedForMove = false;
                     callback?.Invoke();
-                    Debug.Log($"[ScrewController] MoveToHold complete for {name}");
+                    //Debug.Log($"[ScrewController] MoveToHold complete for {name}");
                 });
             });
         }

@@ -35,9 +35,6 @@ public class ClearArrayState : FSMState<ItemController>, IItem
     /// </summary>
     private IEnumerator ClearAndResolve()
     {
-        int itemUsed = 0;
-
-        // Lấy toàn bộ screw trong array
         var arrayScrews = new List<ScrewController>(ArrayScrew.ins.HeldScrews);
         if (arrayScrews.Count == 0)
         {
@@ -49,47 +46,14 @@ public class ClearArrayState : FSMState<ItemController>, IItem
             yield break;
         }
 
-        // Ẩn visual từng screw
-        foreach (var screw in arrayScrews)
+        // Tạo cờ để đợi ClearToHidden
+        bool isCleared = false;
+        
+        // Gọi thẳng ClearToHidden để tái sử dụng luồng an toàn quản lý xoá array
+        yield return ArrayScrew.ins.StartCoroutine(ArrayScrew.ins.ClearToHidden((success) => 
         {
-            if (screw == null) continue;
-            screw.SetActive(false);
-            yield return null;
-        }
-
-        // Xử lý từng screw như RemovePart: Rainbow → SpecialBox, match box → add, else → hidden
-        var hidden = new List<ScrewController>();
-        foreach (var screw in arrayScrews)
-        {
-            if (screw == null) continue;
-
-            // Remove from ArrayScrew
-            ArrayScrew.ins.Dequeue(screw);
-
-            // Rainbow: chuyển vào SpecialBoxManager
-            if (screw.GetColor() == ColorEnum.Rainbow)
-            {
-                SpecialBoxManager.ins.AddSingle(screw);
-                continue;
-            }
-
-            // Route vào box nếu có
-            var box = BoxQueue.ins.FindSuitableBox(screw.GetColor());
-            if (box != null && box.TryAddScrew(screw))
-            {
-                continue;
-            }
-
-            // Không match box → add vào hidden
-            hidden.Add(screw);
-        }
-
-        // Add hidden screws vào ScrewManager
-        if (hidden.Count > 0)
-        {
-            LevelManager.ins.layerManager.RemoveScrewsOnDict(hidden);
-            LevelManager.ins.ScrewManager.AddHiddenScrews(hidden);
-        }
+            isCleared = success;
+        }));
 
         MissionManager.ins.ProcessUseItem(ItemType.Magnet, 1);
 

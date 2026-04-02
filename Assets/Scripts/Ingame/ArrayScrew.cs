@@ -147,15 +147,48 @@ namespace Ingame
             {
                 if (screw == null) continue;
                 screw.SetActive(false);
-                yield return null;
+                screw.ResetHoldState();     // Tránh lỗi đè khay khi reload level
+                screw.ReleaseLockForMove(); // Mở khoá trạng thái bắt đinh
+                yield return null; // tạo độ trễ nhẹ cho cảm giác UI clear
             }
 
             var lm = LevelManager.ins.layerManager;
             if (copy.Count > 0)
                 lm.RemoveScrewsOnDict(copy);
 
+            var sm = LevelManager.ins.ScrewManager;
+            var hiddenScrewsToSM = new List<ScrewController>();
+
             foreach (var screw in copy)
-                BoxQueue.ins.TryProcessItemScrew(screw);
+            {
+                if (screw.GetColor() == ColorEnum.Rainbow)
+                {
+                    SpecialBoxManager.ins.AddSingle(screw);
+                }
+                else
+                {
+                    // Thử tìm Box phù hợp đang trống
+                    var box = BoxQueue.ins.FindSuitableBox(screw.GetColor());
+                    
+                    // BoxQueue sau này lấy hidden screw từ `ScrewManager.PopHiddenScrew`
+                    // Do đó, nếu không có hộp, ta ADD HẲN VÀO ScrewManager:
+                    if (box != null && box.TryAddScrew(screw))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        screw.MarkDetachedFromBoard();
+                        hiddenScrewsToSM.Add(screw); // Lưu lại để đẩy vào bộ nhớ Hidden
+                    }
+                }
+            }
+
+            // Đồng bộ hoá giấu vít vào chung khu vực mà Game đang quản lý Hidden Screw lấy ra
+            if (hiddenScrewsToSM.Count > 0)
+            {
+                sm.AddHiddenScrews(hiddenScrewsToSM);
+            }
 
             foreach (var hold in holdScrews.ToList())
             {

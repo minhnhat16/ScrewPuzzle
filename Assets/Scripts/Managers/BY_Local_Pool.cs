@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -30,25 +30,31 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
     }
     public T SpawnNonGravity()
     {
-        //Debug.Log("SPAWN");
         index++;
         if (index >= list.Count) index = 0;
+        
         T trans = list[index];
+        // Nếu object đang được sử dụng, tiến hành mở rộng (Expand) pool thay vì cướp object
+        if (trans.gameObject.activeSelf)
+        {
+            return ExpandPool();
+        }
+
         trans.gameObject.SetActive(true);
         ActiveList.Add(trans);
         return trans;
     }
+    
     public T SpawnNonGravityNext()
     {
         index++;
         if (index >= list.Count) index = 0;
         T trans = list[index];
+        
         if (trans.gameObject.activeSelf == true)
         {
-            index++;
-            trans = SpawnNonGravityNext();
-            ActiveList.Add(trans);
-            return trans;
+            // Tránh đệ quy vô hạn: thay vì gọi lại SpawnNonGravityNext(), sinh mới luôn.
+            return ExpandPool();
         }
         else
         {
@@ -57,27 +63,57 @@ public class BY_Local_Pool<T> where T : MonoBehaviour
             return trans;
         }
     }
+    
     public T SpawnNonGravityWithIndex(int index)
     {
-        // Debug.Log("spawn brick");
         this.index++;
-        if (index >= list.Count) index = 0;
-        T trans = list[index];
+        if (this.index >= list.Count) this.index = 0;
+        T trans = list[this.index];
+        
+        if (trans.gameObject.activeSelf)
+        {
+            return ExpandPool();
+        }
+
         trans.gameObject.SetActive(true);
         ActiveList.Add(trans);
         return trans;
-
     }
+    
     public T SpawnGravity()
     {
         index++;
         if (index >= list.Count) index = 0;
         T trans = list[index];
-        trans.gameObject.SetActive(true);
-        ActiveList.Add(trans);
+        
+        if (trans.gameObject.activeSelf)
+        {
+            trans = ExpandPool();
+        }
+        else 
+        {
+            trans.gameObject.SetActive(true);
+            ActiveList.Add(trans);
+        }
+        
         trans.GetComponent<Rigidbody2D>().gravityScale = 1;
         return trans;
     }
+
+    /// <summary>
+    /// Hàm sinh bổ sung thêm clone nếu số lượng trong pool không đủ đáp ứng.
+    /// </summary>
+    private T ExpandPool()
+    {
+        T newTrans = Object.Instantiate(prefab, parent);
+        newTrans.gameObject.SetActive(true);
+        list.Add(newTrans);
+        ActiveList.Add(newTrans);
+        total++;
+        index = list.Count - 1; // Cập nhật vị trí index mới nhất
+        return newTrans;
+    }
+    
     public void DeSpawnNonGravity(T trans)
     {
         ActiveList.Remove(trans);
