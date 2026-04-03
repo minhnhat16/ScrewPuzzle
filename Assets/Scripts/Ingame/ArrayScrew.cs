@@ -32,9 +32,12 @@ namespace Ingame
         private readonly List<ScrewController> _heldScrews = new();
         private Coroutine _alignCoroutine;
         private Coroutine _fullCheckCoroutine;
+        private Coroutine _clearCoroutine;  // ✅ Track clear coroutine
 
         private bool _isGameActive;
         private bool _hasTriggeredFullEvent;
+        private bool _isClearing;  // ✅ Flag để block enqueue khi clearing
+
         // ─────────────────────────────────────────
         // Injected
         // ─────────────────────────────────────────
@@ -78,6 +81,7 @@ namespace Ingame
         public void Enqueue(IMatchItem item)
         {
             if (item is not ScrewController screw) return;
+            if (_isClearing) return;  // ✅ Reject nếu đang clear
             if (!screw.TryLockForMove()) return;
 
             var result = _router.TryRoute(item, out var container);
@@ -136,9 +140,27 @@ namespace Ingame
 
         public IEnumerator ClearToHidden(Action<bool> isClear)
         {
+            // ✅ Stop nếu đã đang clear
+            if (_isClearing)
+            {
+                isClear?.Invoke(false);
+                yield break;
+            }
+
+            _isClearing = true;  // ✅ Set flag
+            if (_clearCoroutine != null)
+                StopCoroutine(_clearCoroutine);
+            
+            _clearCoroutine = StartCoroutine(ClearToHiddenInternal(isClear));
+            yield return _clearCoroutine;
+        }
+
+        private IEnumerator ClearToHiddenInternal(Action<bool> isClear)
+        {
             var copy = HeldScrews.ToList();
             if (copy.Count == 0)
             {
+                _isClearing = false;  // ✅ Reset flag
                 isClear?.Invoke(false);
                 yield break;
             }
@@ -147,9 +169,9 @@ namespace Ingame
             {
                 if (screw == null) continue;
                 screw.SetActive(false);
-                screw.ResetHoldState();     // Tránh lỗi đè khay khi reload level
-                screw.ReleaseLockForMove(); // Mở khoá trạng thái bắt đinh
-                yield return null; // tạo độ trễ nhẹ cho cảm giác UI clear
+                screw.ResetHoldState();
+                screw.ReleaseLockForMove();
+                yield return null;
             }
 
             var lm = LevelManager.ins.layerManager;
@@ -167,11 +189,8 @@ namespace Ingame
                 }
                 else
                 {
-                    // Thử tìm Box phù hợp đang trống
                     var box = BoxQueue.ins.FindSuitableBox(screw.GetColor());
                     
-                    // BoxQueue sau này lấy hidden screw từ `ScrewManager.PopHiddenScrew`
-                    // Do đó, nếu không có hộp, ta ADD HẲN VÀO ScrewManager:
                     if (box != null && box.TryAddScrew(screw))
                     {
                         continue;
@@ -179,12 +198,11 @@ namespace Ingame
                     else
                     {
                         screw.MarkDetachedFromBoard();
-                        hiddenScrewsToSM.Add(screw); // Lưu lại để đẩy vào bộ nhớ Hidden
+                        hiddenScrewsToSM.Add(screw);
                     }
                 }
             }
 
-            // Đồng bộ hoá giấu vít vào chung khu vực mà Game đang quản lý Hidden Screw lấy ra
             if (hiddenScrewsToSM.Count > 0)
             {
                 sm.AddHiddenScrews(hiddenScrewsToSM);
@@ -202,6 +220,7 @@ namespace Ingame
             ResetFullEventFlag();
             RequestEvaluateFullState();
 
+            _isClearing = false;  // ✅ Reset flag
             isClear?.Invoke(true);
         }
 

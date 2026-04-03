@@ -23,18 +23,40 @@ public class ViewManager : MonoBehaviour
 
     public IEnumerator Init()
     {
+        // Quick init with minimal delay - defer view loading
         yield return new WaitForSeconds(0.1f);
-        foreach (ViewIndex viewIndex in ViewConfig.viewArray)
+
+        // Only log that Init started, actual view loading is now lazy-loaded on demand
+        Debug.Log("[ViewManager] Init completed. Views will be lazy-loaded on first use.");
+    }
+
+    /// <summary>
+    /// Lazy-load a view on first access. Called internally before switching to a view.
+    /// </summary>
+    private IEnumerator EnsureViewLoaded(ViewIndex viewIndex)
+    {
+        if (dicView.ContainsKey(viewIndex))
+            yield break; // Already loaded
+
+        Debug.Log($"[ViewManager] Lazy-loading view: {viewIndex}");
+        float startTime = Time.realtimeSinceStartup;
+
+        string viewName = viewIndex.ToString();
+        GameObject view = Instantiate(Resources.Load("Prefabs/UIPrefab/Views/" + viewName,
+            typeof(GameObject))) as GameObject;
+
+        if (view == null)
         {
-            if (dicView.ContainsKey(viewIndex)) continue;
-            string viewName = viewIndex.ToString();
-            GameObject view = Instantiate(Resources.Load("Prefabs/UIPrefab/Views/" + viewName,
-                typeof(GameObject))) as GameObject;
-            view.transform.SetParent(anchorView, false);
-            view.GetComponent<BaseView>().Init();
-            dicView.Add(viewIndex, view.GetComponent<BaseView>());
-            yield return new WaitForSeconds(0.5f);
+            Debug.LogError($"[ViewManager] Failed to load view prefab: {viewName}");
+            yield break;
         }
+
+        view.transform.SetParent(anchorView, false);
+        view.GetComponent<BaseView>().Init();
+        dicView.Add(viewIndex, view.GetComponent<BaseView>());
+
+        float duration = Time.realtimeSinceStartup - startTime;
+        Debug.Log($"[ViewManager] Lazy-loaded view {viewIndex} in {duration:F2}s");
     }
 
     /// <summary>
@@ -57,6 +79,15 @@ public class ViewManager : MonoBehaviour
     {
         Debug.Log("SwitchView to " + newView + " from " +
                   (currentView != null ? currentView.viewIndex.ToString() : "null"));
+
+        // Ensure the target view is loaded (lazy-load if needed)
+        StartCoroutine(SwitchViewAsync(newView, viewParam, callback));
+    }
+
+    private IEnumerator SwitchViewAsync(ViewIndex newView, ViewParam viewParam = null, Action callback = null)
+    {
+        // Ensure view is loaded
+        yield return StartCoroutine(EnsureViewLoaded(newView));
 
         if (currentView != null)
         {

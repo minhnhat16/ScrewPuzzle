@@ -1,6 +1,8 @@
 ﻿using Core.Match;
 using Gameplay.StateMachine;
 using Ingame;
+using Managers;
+using System.Collections;
 using UIScript.UI.UI;
 using UnityEngine;
 
@@ -80,16 +82,26 @@ public class GameFlowService : IGameFlowService
                 _dialogService.HideAllDialog();
                 _player.UnlockInput();
                 _boxQueue.UnlockNext();
-                _stateMachine.TransitionTo(GameplayState.Playing);
+                
+                // ✅ Delay state transition to allow spawn animation to complete
+                // This prevents TriggerQueueFull() from firing too early
+                IngameController.ins.StartCoroutine(
+                    DelayedTransition(GameplayState.Playing, 0.5f)
+                );
             }
         };
 
-        // onDeclined: player từ chối → về Lose → HandleGameOver sẽ show LoseDialog
         _dialogService.ShowReviveDialog(param, onDeclined: () =>
         {
             _dialogService.HideAllDialog();
             _stateMachine.TransitionTo(GameplayState.Lose);
         });
+    }
+
+    private IEnumerator DelayedTransition(GameplayState targetState, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        _stateMachine.TransitionTo(targetState);
     }
 
     #endregion
@@ -135,7 +147,7 @@ public class GameFlowService : IGameFlowService
     public void PauseGame()
     {
         _player.LockInput();
-
+        _player.UnlockInput();
         var param = new SettingParam
         {
             isMainScreen = ViewManager.Instance.currentView is MainScreenView,
@@ -144,15 +156,16 @@ public class GameFlowService : IGameFlowService
             title = "PAUSE",
             music_enable = SoundHelper.IsMusicEnabled(),
             sfx_enable = SoundHelper.IsSFXEnabled(),
+            onResumed = () =>
+            {
+                _dialogService.HideAllDialog();
+                _player.UnlockInput();
+                _stateMachine.TransitionTo(GameplayState.Playing);
+            }
         };
 
-        // onResumed: player bấm close/resume → unlock input, về Playing
-        _dialogService.ShowPause(param, onResumed: () =>
-        {
-            _dialogService.HideAllDialog();
-            _player.UnlockInput();
-            _stateMachine.TransitionTo(GameplayState.Playing);
-        });
+        // Pass null as callback to ShowPause - the dialog will handle the onResumed callback internally
+        _dialogService.ShowPause(param, onResumed: null);
     }
 
     #endregion

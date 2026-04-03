@@ -44,6 +44,8 @@ public class SettingDialog : BaseDialog
         tg_soundSfx.m_Toggle.onValueChanged.RemoveListener(SettingSFX);
         DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
         DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
+
+        Debug.Log("On disable setting dialog");
     }
     private void SettingSFX(bool value)
     {
@@ -95,20 +97,21 @@ public class SettingDialog : BaseDialog
     public override void OnEndShowDialog()
     {
         base.OnEndShowDialog();
-        ZenSDK.instance.ShowFullScreen(GameConstants.SETTING_KEY, DataAPIController.instance.GetPlayerLevel().ToString());
 
     }
     public override void OnEndHideDialog()
     {
         base.OnEndHideDialog();
         IngameController.ins.Resume();
+        ZenSDK.instance.ShowFullScreen(GameConstants.SETTING_KEY, DataAPIController.instance.GetPlayerLevel().ToString());
+
     }
     public void PlayButton()
     {
         SoundHelper.PlaySFX(SoundManager.SFX.ButtonClick);
         DialogManager.ins.HideDialog(dialogIndex, () =>
         {
-
+            param?.onResumed?.Invoke();
         });
 
     }
@@ -126,11 +129,9 @@ public class SettingDialog : BaseDialog
 
     public void CloseBtn()
     {
-        // SoundManager.instance.PlaySFX(SoundManager.SFX.UIClickSFX);
-        //Debug.Log("Close button on " + this.dialogIndex);
         DialogManager.ins.HideDialog(dialogIndex, () =>
         {
-
+            param?.onResumed?.Invoke();
         });
     }
 

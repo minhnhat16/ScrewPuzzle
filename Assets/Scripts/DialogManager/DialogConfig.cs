@@ -70,6 +70,7 @@ public class SettingParam : DialogParam
     public string title;
     internal bool music_enable;
     internal bool sfx_enable;
+    internal Action onResumed;
 }
 
 public class DailyParam : DialogParam

@@ -33,6 +33,8 @@ namespace UIScript.UI.UI
         {
             DataTrigger.UnRegisterValueChange(DataPath.TICKET, OnTicketChanged);
             DataTrigger.UnRegisterValueChange(DataPath.GOLDINVENT, OnGoldChanged);
+
+            Debug.Log("Unregistered shop view from data triggers");
         }
         public override void OnInit(Action callback)
         {
@@ -78,8 +80,6 @@ namespace UIScript.UI.UI
                   itemUI => shopController.Register(itemUI)
               );
             Debug.Log("coins instantiated " + ticketRectTransform.childCount);
-
-            callback?.Invoke();
         }
         private void OnTicketChanged(object arg0)
         {

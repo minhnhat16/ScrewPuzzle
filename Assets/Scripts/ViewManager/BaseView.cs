@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections;
 using UnityEngine;
@@ -30,7 +29,6 @@ public class BaseView : MonoBehaviour
         callback?.Invoke();
     }
 
-
     public void ShowViewAnimation(Action callback)
     {
         baseViewAnim.ShowViewAnimation(() =>
@@ -38,9 +36,9 @@ public class BaseView : MonoBehaviour
             OnStartShowView();
             callback?.Invoke();
             OnEndShowView();
-            HideView();
         });
     }
+
     public void HideViewAnimation(Action callback)
     {
         baseViewAnim.HideViewAnimation(() => 
@@ -49,7 +47,6 @@ public class BaseView : MonoBehaviour
             OnStartHideView();
             callback?.Invoke();
             OnEndHideView();
-            ShowView();
         });
     }
 

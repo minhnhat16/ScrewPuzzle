@@ -25,13 +25,56 @@ public class DialogManager : SingletonMono<DialogManager>, IDialogService
 
     public IEnumerator Init()
     {
-        yield return new WaitForSeconds(0.4f);
+        // Quick init - defer individual dialog initialization
+        yield return new WaitForSeconds(0.1f);
 
-        for (int i = 0; i < dialogList.Count; i++)
+        // Pre-initialize only critical dialogs (those needed at game start)
+        // Other dialogs will be lazy-initialized on first use
+        foreach (var dialog in dialogList)
         {
-            BaseDialog dialog = dialogList[i].GetComponent<BaseDialog>();
-            yield return dialog.Init();
-            dicDialog.Add(dialogList[i].dialogIndex, dialogList[i]);
+            if (IsCriticalDialog(dialog.dialogIndex))
+            {
+                BaseDialog baseDialog = dialog.GetComponent<BaseDialog>();
+                if (baseDialog != null)
+                {
+                    yield return baseDialog.Init();
+                    dicDialog.Add(dialog.dialogIndex, dialog);
+                }
+            }
+        }
+
+        Debug.Log($"[DialogManager] Init completed. {dicDialog.Count} critical dialogs pre-initialized. Others will lazy-load.");
+    }
+
+    /// <summary>
+    /// Determine if a dialog should be pre-loaded at boot or lazy-loaded on demand.
+    /// </summary>
+    private bool IsCriticalDialog(DialogIndex dialogIndex)
+    {
+        // Only pre-load dialogs that might be shown during initial gameplay
+        // Adjust this list based on your game's flow
+        return false; // For now, all dialogs are lazy-loaded. Modify if needed.
+    }
+
+    /// <summary>
+    /// Lazy-initialize a dialog if not already initialized.
+    /// </summary>
+    private IEnumerator EnsureDialogInitialized(DialogIndex dialogIndex)
+    {
+        if (dicDialog.ContainsKey(dialogIndex))
+            yield break; // Already initialized
+
+        // Find the dialog in dialogList
+        var dialog = dialogList.FirstOrDefault(d => d.dialogIndex == dialogIndex);
+        if (dialog != null && !dicDialog.ContainsKey(dialogIndex))
+        {
+            Debug.Log($"[DialogManager] Lazy-initializing dialog: {dialogIndex}");
+            BaseDialog baseDialog = dialog.GetComponent<BaseDialog>();
+            if (baseDialog != null)
+            {
+                yield return baseDialog.Init();
+                dicDialog.Add(dialogIndex, dialog);
+            }
         }
     }
 
@@ -41,7 +84,21 @@ public class DialogManager : SingletonMono<DialogManager>, IDialogService
 
     public void ShowDialog(DialogIndex newDialog, DialogParam dialogParam = null, Action callback = null)
     {
-        BaseDialog dialog = dicDialog[newDialog];
+        StartCoroutine(ShowDialogAsync(newDialog, dialogParam, callback));
+    }
+
+    private IEnumerator ShowDialogAsync(DialogIndex newDialog, DialogParam dialogParam = null, Action callback = null)
+    {
+        // Ensure dialog is initialized before showing
+        yield return StartCoroutine(EnsureDialogInitialized(newDialog));
+
+        if (!dicDialog.TryGetValue(newDialog, out var dialog))
+        {
+            Debug.LogError($"[DialogManager] Dialog {newDialog} not found after lazy-init");
+            callback?.Invoke();
+            yield break;
+        }
+
         if (!dialogShowed.Contains(dialog))
             dialogShowed.Add(dialog);
 

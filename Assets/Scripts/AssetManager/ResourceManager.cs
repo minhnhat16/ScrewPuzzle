@@ -54,37 +54,79 @@ public class ResourceManager : SingletonMono<ResourceManager>
     }
 
     /// <summary>
-    /// Load assets by their keys and cache them
+    /// Load assets by their keys and cache them - with parallel loading for better performance
     /// </summary>
     public async Task LoadAssetsAsync(List<string> keys)
     {
-        foreach (string key in keys)
+        if (keys == null || keys.Count == 0)
+            return;
+
+        // Split keys into batches and load in parallel for better performance
+        // This is more efficient than loading one-by-one
+        const int batchSize = 5; // Load up to 5 assets in parallel
+        var tasks = new List<Task>();
+
+        for (int i = 0; i < keys.Count; i += batchSize)
         {
-            if (!assetCache.ContainsKey(key))
+            var batch = keys.GetRange(i, Math.Min(batchSize, keys.Count - i));
+            tasks.Add(LoadAssetBatchAsync(batch));
+        }
+
+        try
+        {
+            await Task.WhenAll(tasks);
+            Debug.Log($"[ResourceManager] Loaded {keys.Count} assets in parallel batches");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[ResourceManager] Error loading asset batch: {ex.Message}");
+        }
+    }
+
+    private async Task LoadAssetBatchAsync(List<string> batch)
+    {
+        var batchTasks = new List<Task>();
+
+        foreach (string key in batch)
+        {
+            if (assetCache.ContainsKey(key))
+                continue;
+
+            batchTasks.Add(LoadSingleAssetAsync(key));
+        }
+
+        if (batchTasks.Count > 0)
+            await Task.WhenAll(batchTasks);
+    }
+
+    private async Task LoadSingleAssetAsync(string key)
+    {
+        try
+        {
+            if (key.Contains("/HINH1/"))
             {
-                if (key.Contains("/HINH1/"))
+                AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(key);
+                await handle.Task;
+
+                if (handle.Status == AsyncOperationStatus.Succeeded)
                 {
-                    Debug.Log($"[ResourceManager] Loading asset with key '{key}'");
-                    AsyncOperationHandle<Sprite> handle = Addressables.LoadAssetAsync<Sprite>(key);
-                    await handle.Task;
-
-                    if (handle.Status == AsyncOperationStatus.Succeeded)
-                    {
-                        assetCache[key] = handle.Result;
-                    }
+                    assetCache[key] = handle.Result;
                 }
-                else
-                {
-                    AsyncOperationHandle<Object> handle = Addressables.LoadAssetAsync<Object>(key);
-                    await handle.Task;
-
-                    if (handle.Status == AsyncOperationStatus.Succeeded)
-                    {
-                        assetCache[key] = handle.Result;
-                    }
-                }
-
             }
+            else
+            {
+                AsyncOperationHandle<Object> handle = Addressables.LoadAssetAsync<Object>(key);
+                await handle.Task;
+
+                if (handle.Status == AsyncOperationStatus.Succeeded)
+                {
+                    assetCache[key] = handle.Result;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[ResourceManager] Failed to load asset '{key}': {ex.Message}");
         }
     }
     public IEnumerator YieldUntilLoaded<T>(string key, System.Action<T> onDone) where T : UnityEngine.Object

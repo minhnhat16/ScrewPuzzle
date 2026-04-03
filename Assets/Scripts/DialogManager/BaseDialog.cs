@@ -21,7 +21,6 @@ public class BaseDialog : MonoBehaviour
         OnInit(() =>
         {
             isInitDone = true;
-            gameObject.SetActive(!isInitDone);
         });
         yield return new WaitUntil(()=> isInitDone);
     }
