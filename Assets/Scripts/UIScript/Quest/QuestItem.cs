@@ -1,4 +1,6 @@
 using System.DataBase;
+using Managers;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -16,6 +18,7 @@ public class QuestItem : MonoBehaviour
 
     private MissionConfigRecord missionData;
     private UnityAction cachedClick;
+    private ILevelStartService _levelStartService;
     public int MissionID { get; set; }
 
     // =======================================================
@@ -57,6 +60,12 @@ public class QuestItem : MonoBehaviour
         if (data.Description != null)
             titleText.text = data.Description;
         RefreshState(state);
+
+        // Initialize service for level start
+        if (_levelStartService == null)
+        {
+            _levelStartService = new LevelStartService(LoadSceneManager.ins);
+        }
     }
 
     private void OnMissionProgressChanged(MissionConfigRecord mission, MissionProgress progress)
@@ -160,10 +169,18 @@ public class QuestItem : MonoBehaviour
         {
             Debug.Log("[QuestItem] Play mission: " + missionData.Description);
 
+            SoundHelper.PlaySFX(SoundManager.SFX.UI_Normal);
+
+            int levelId = DataAPIController.instance.GetPlayerLevel();
+
+            // Ẩn dialog trước, rồi bắt đầu level giống MainScreenView
             DialogManager.ins.HideDialog(DialogIndex.QuestDialog, () =>
             {
-                int lv = DataAPIController.instance.GetPlayerLevel();
-                LevelManager.ins.LoadLevel(lv);
+                _levelStartService?.StartLevel(
+                    levelId,
+                    onLevelStarted: () => Debug.Log($"[QuestItem] Level {levelId} started from mission."),
+                    onError: (error) => Debug.LogError($"[QuestItem] {error}")
+                );
             });
         }
     }
