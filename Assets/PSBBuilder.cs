@@ -2,7 +2,7 @@
 
 using Ingame;
 using Ingame.Board;
-using Unity.VisualScripting;
+
 using UnityEditor;
 using UnityEngine;
 
@@ -33,7 +33,7 @@ namespace PSB
         public void SpawnScrewManager()
         {
             var screwManagerPrefab = Resources.Load("Prefabs/ScrewManager");
-            var screwManagerObj = Instantiate(screwManagerPrefab, Vector3.zero, Quaternion.identity, this.transform);
+            var screwManagerObj = Instantiate(screwManagerPrefab, Vector3.zero, Quaternion.identity, this.transform) as GameObject;
             screwManager = screwManagerObj.GetComponent<ScrewManager>();
             levelObj.ScrewManager = screwManager;
         }

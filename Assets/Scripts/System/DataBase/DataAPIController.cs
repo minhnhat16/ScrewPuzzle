@@ -2,7 +2,7 @@
 using Managers;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+
 using UnityEngine;
 
 namespace System.DataBase
@@ -644,7 +644,7 @@ namespace System.DataBase
 
         private void SaveChestState(ChestStageData state)
         {
-            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, state.chestId.ToSafeString(), state);
+            dataModel.UpdateDataDictionary(DataPath.CHESTSTAGE, state.chestId.ToString(), state);
         }
 
         public void AddStage(StageProgress progress, Action<bool> isDone = null)
@@ -684,7 +684,7 @@ namespace System.DataBase
         }
         public StageProgress GetStageProgress(int stageId)
         {
-            var progressData = dataModel.ReadDictionary<StageProgress>(DataPath.STAGEPATH, stageId.ToSafeString());
+            var progressData = dataModel.ReadDictionary<StageProgress>(DataPath.STAGEPATH, stageId.ToString());
             if (progressData == null)
             {
                 progressData = new StageProgress
@@ -927,7 +927,7 @@ namespace System.DataBase
 
             var chosen = list[UnityEngine.Random.Range(0, list.Count)];
 
-            // try common property/field names for id
+            // try common property/field namc   es for id
             var idProp = chosen.GetType().GetProperty("Id") ?? chosen.GetType().GetProperty("ID");
             if (idProp != null)
             {
