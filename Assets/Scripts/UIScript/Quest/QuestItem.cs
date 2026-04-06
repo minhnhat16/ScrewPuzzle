@@ -150,7 +150,7 @@ public class QuestItem : MonoBehaviour
 
             // Delegate animation to central RewardAnimationService if present.
             // RewardAnimationService listens to RewardEvents.OnRewardGranted and will play animation.
-            var rewardAnim = FindAnyObjectByType<RewardAnimationService>();
+            var rewardAnim =  FindAnyObjectByType<RewardAnimationService>();
             // Set origin so service can spawn fly icons from this button (best-effort)
             if (rewardAnim != null)
             {
